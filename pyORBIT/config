@@ -1,2 +1,0 @@
-source ${ORBIT_ROOT}/modules/config
-source ${ORBIT_ROOT}/py/config

@@ -1,0 +1,18 @@
+% PARTICLE_ATTRIBUTES_CONTROLLERS_NAMES 
+% BUNCH_ATTRIBUTE_INT aaa   111 
+% BUNCH_ATTRIBUTE_INT bbb   444 
+% BUNCH_ATTRIBUTE_DOUBLE aaa   222 
+% BUNCH_ATTRIBUTE_DOUBLE bbb   333 
+% BUNCH_ATTRIBUTE_DOUBLE charge   10.5555 
+% BUNCH_ATTRIBUTE_DOUBLE classical_radius   222.222 
+% BUNCH_ATTRIBUTE_DOUBLE macro_size   6666.67 
+% BUNCH_ATTRIBUTE_DOUBLE mass   222.333 
+%  SYNC_PART_COORDS 0 0 0  x, y, z positions in [m]
+%  SYNC_PART_MOMENTUM 0 0 0  px, py, pz momentum component in MeV/c
+%  info only: energy of the synchronous particle [MeV] = 0 
+%  info only: momentum of the synchronous particle [MeV/c] = 0 
+%  info only: beta=v/c of the synchronous particle = 0 
+%  info only: gamma=1/sqrt(1-(v/c)**2) of the synchronous particle = 1 
+%  SYNC_PART_TIME 0  time in [sec]
+%  SYNC_PART_RF_FREQUENCY 0  rf frequency in [Hz]
+% x[m] px[rad] y[m] py[rad] (z_or_phi or pz_or_dE) 

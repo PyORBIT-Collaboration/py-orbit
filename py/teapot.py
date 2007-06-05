@@ -697,7 +697,6 @@ class BendTEAPOT(NodeTEAPOT):
 			bunch = paramsDict["bunch"]
 			nParts = paramsDict["parentNode"].getnParts()
 			if(e != 0.):
-				bunch = paramsDict["bunch"]
 				inout = 0
 				TPB.wedgedrift(bunch,e,inout)
 				if(usageIN):

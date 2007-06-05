@@ -626,6 +626,38 @@ namespace wrap_orbit_bunch{
     return Py_None;
   }
 
+	//Wraps long. coords in the bunch
+	//ringwrap(ring_length)
+  static PyObject* Bunch_ringwrap(PyObject *self, PyObject *args) {
+
+    int nVars = PyTuple_Size(args);
+
+    PyObject* pyBunch;
+    double ring_length = 0.;
+
+    if(nVars == 2){
+			//NO NEW OBJECT CREATED BY PyArg_ParseTuple!
+			//NO NEED OF Py_DECREF()
+			if(!PyArg_ParseTuple(	args,"Od:py",&pyBunch,&ring_length)){
+				error("PyBunch - ringwrap(ring_length) - pyBunch object needed");
+			}
+
+			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
+			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+			cpp_bunch->ringwrap(ring_length);
+
+			//clear the reference created by
+			//PyObject_GetAttrString( pyBunch ,"cpp_ptr")
+			Py_DECREF(py_bunch_ref);
+    }
+    else{
+      error("PyBunch. You should call py(index) or py(index,value)");
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
   //---------------------------------------------------------------
   //
   // related to the bunch predefined attributes
@@ -1782,7 +1814,6 @@ namespace wrap_orbit_bunch{
     { "x",                              Bunch_x                             ,METH_VARARGS,"Set x(index,value) or get x(index) coordinate"},
     { "y",                              Bunch_y                             ,METH_VARARGS,"Set y(index,value) or get y(index) coordinate"},
     { "z",                              Bunch_z                             ,METH_VARARGS,"Set z(index,value) or get z(index) coordinate"},
-    { "phi",                            Bunch_z                             ,METH_VARARGS,"Set phi(index,value) or get phi(index) coordinate"},
     { "px",                             Bunch_px                            ,METH_VARARGS,"Set px(index,value) or get px(index) coordinate"},
     { "py",                             Bunch_py                            ,METH_VARARGS,"Set py(index,value) or get py(index) coordinate"},
     { "pz",                             Bunch_pz                            ,METH_VARARGS,"Set pz(index,value) or get pz(index) coordinate"},
@@ -1790,6 +1821,7 @@ namespace wrap_orbit_bunch{
     { "xp",                             Bunch_px                            ,METH_VARARGS,"Set xp(index,value) or get xp(index) coordinate"},
     { "yp",                             Bunch_py                            ,METH_VARARGS,"Set yp(index,value) or get yp(index) coordinate"},
     { "flag",                           Bunch_flag                          ,METH_VARARGS,"Set flag(index,value) or get flag(index) coordinate"},
+    { "ringwrap",                       Bunch_ringwrap                      ,METH_VARARGS,"Perform the ring wrap. Usage: ringwrap(ring_length)"},
     { "mass",                           Bunch_mass                          ,METH_VARARGS,"Set mass(value) or get mass() the mass of particle in MeV"},
     { "classicalRadius",                Bunch_classicalRadius               ,METH_VARARGS,"Set and get a classical radius of particle in [m]"},
     { "charge",                         Bunch_charge                        ,METH_VARARGS,"Set charge(value) or get charge() the charge of particle in e-charge"},

@@ -55,14 +55,25 @@ class  SyncPart
 	void setPyWrapper(PyObject* py_wrapper_In);
 	PyObject* getPyWrapper();
 
-	double getEnergy();                  // Kinetic energy in MeV
+	/**
+	  Kinetic energy in GeV
+	*/
+	double getEnergy();
 
+	/**
+	  Rest mass in GeV
+	*/
+	double getMass();
+
+	/**
+	  time in seconds
+	*/
 	void setTime(double time);
 	double getTime();
 
-	void setFrequency(double freq);
-	double getFrequency();
-
+	/**
+	   positions in meters
+	*/
 	void setXYZ(const double* xyz);
 	void setXYZ(double x, double y, double z);
 	void setX(double x);
@@ -72,6 +83,9 @@ class  SyncPart
 	double getY();
 	double getZ();
 
+	/**
+	   momentum in GeV/c
+	*/
 	void setPXYZ(const double* pxyz);
 	void setPXYZ(double px, double py, double pz);
 	void setPX(double px);
@@ -80,11 +94,10 @@ class  SyncPart
 	double getPX();
 	double getPY();
 	double getPZ();
-
 	double getMomentum();
+
 	double getBeta();
 	double getGamma();
-	double getMass();
 
 	double momentumToEnergy(double p);
 	double energyToMomentum(double ek);
@@ -119,7 +132,7 @@ private:
 	//parameters
 	//--------------------------------------------
 
-	//energy in MeV and momentum in MeV/c
+	//energy in GeV and momentum in GeV/c
 	double energy;
 	double p_abs;
 	double beta;
@@ -128,10 +141,7 @@ private:
 	//time in sec
 	double time;
 
-	//rf frequency
-	double freq;
-
-	//position and momentum
+	//position [m] and momentum [GeV/c]
 	double xyz[3];
 	double pxyz[3];
 };

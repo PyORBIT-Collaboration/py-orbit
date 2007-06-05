@@ -56,7 +56,7 @@ namespace wrap_orbit_syncpart{
 
  //Sets or returns the kinEnergy for the SyncPart object
   //  the action is depended on the number of arguments
-  //  kinEnergy() - returns kinEnergy MeV
+  //  kinEnergy() - returns kinEnergy GeV
   //  kinEnergy(value) - sets the new value for pz and px=0,py=0
   static PyObject* SyncPart_kinEnergy(PyObject *self, PyObject *args){
     //if nVars == 1 this is get kinEnergy
@@ -150,7 +150,7 @@ namespace wrap_orbit_syncpart{
 		return Py_BuildValue("d",val);
   }
 
-  //  mass() - returns mass
+  //  mass() - returns mass in GeV
   static PyObject* SyncPart_mass(PyObject *self, PyObject *args){
     PyObject* pySyncPart;
     double val = 0.;
@@ -229,8 +229,8 @@ namespace wrap_orbit_syncpart{
 
  //Sets or returns the time in seconds for the SyncPart object
   //  the action is depended on the number of arguments
-  //  time() - returns time
-  //  time(value) - sets the new value
+  //  time() - returns time in seconds
+  //  time(value) - sets the new value in seconds
   static PyObject* SyncPart_time(PyObject *self, PyObject *args){
     //if nVars == 1 this is get time
     //if nVars == 2 this is set time
@@ -277,62 +277,6 @@ namespace wrap_orbit_syncpart{
     }
     else{
       error("PySyncPart. You should call time() or time(value)");
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
- //Sets or returns the rfFrequency in 1/second for the SyncPart object
-  //  the action is depended on the number of arguments
-  //  rfFrequency() - returns rfFrequency
-  //  rfFrequency(value) - sets the new value
-  static PyObject* SyncPart_rfFrequency(PyObject *self, PyObject *args){
-    //if nVars == 1 this is get rfFrequency
-    //if nVars == 2 this is set rfFrequency
-    int nVars = PyTuple_Size(args);
-
-    PyObject* pySyncPart;
-    double val = 0.;
-
-    if(nVars == 1 ||  nVars == 2){
-
-      if(nVars == 1){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"O:rfFrequency",&pySyncPart)){
-          error("PySyncPart - rfFrequency() - pySyncPart object is needed");
-        }
-
-        PyObject* py_SyncPart_ref = PyObject_GetAttrString( pySyncPart ,"cpp_ptr");
-        SyncPart* cpp_SyncPart = (SyncPart*) PyCObject_AsVoidPtr(py_SyncPart_ref);
-        val = cpp_SyncPart->getFrequency();
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pySyncPart ,"cpp_ptr")
-        Py_DECREF(py_SyncPart_ref);
-
-        return Py_BuildValue("d",val);
-      }
-      else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Od:rfFrequency",&pySyncPart,&val)){
-          error("PySyncPart - rfFrequency(value) - pySyncPart object and new value are needed");
-        }
-
-        PyObject* py_SyncPart_ref = PyObject_GetAttrString( pySyncPart ,"cpp_ptr");
-        SyncPart* cpp_SyncPart = (SyncPart*) PyCObject_AsVoidPtr(py_SyncPart_ref);
-        cpp_SyncPart->setFrequency(val);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pySyncPart ,"cpp_ptr")
-        Py_DECREF(py_SyncPart_ref);
-      }
-
-    }
-    else{
-      error("PySyncPart. You should call rfFrequency() or rfFrequency(value)");
     }
 
     Py_INCREF(Py_None);
@@ -748,12 +692,11 @@ namespace wrap_orbit_syncpart{
     // class SyncParticle wrapper                        START
     //--------------------------------------------------------
     { "__init__",         SyncPart_init         ,METH_VARARGS,"Constructor of SyncParticle class"},
-    { "mass",             SyncPart_mass         ,METH_VARARGS,"Returns mass in MeV"},
-    { "momentum",         SyncPart_momentum     ,METH_VARARGS,"Returns or sets momentum in MeV/c. If setting px=0,py=0,pz=val."},
+    { "mass",             SyncPart_mass         ,METH_VARARGS,"Returns mass in GeV"},
+    { "momentum",         SyncPart_momentum     ,METH_VARARGS,"Returns or sets momentum in GeV/c. If setting px=0,py=0,pz=val."},
     { "beta",             SyncPart_beta         ,METH_VARARGS,"Returns beta=v/c"},
 		{ "gamma",            SyncPart_gamma        ,METH_VARARGS,"Returns gamma=1/sqrt(1-(v/c)**2)"},
 		{ "kinEnergy",        SyncPart_kinEnergy    ,METH_VARARGS,"Returns or sets kinetic energy of the synchronous particle in MeV"},
-		{ "rfFrequency",      SyncPart_rfFrequency  ,METH_VARARGS,"Returns or sets the rf frequency in Hz"},
 		{ "time",		          SyncPart_time         ,METH_VARARGS,"Sets or returns time in sec"},
 		{ "x",		            SyncPart_x            ,METH_VARARGS,"Sets or returns the x-coordinate"},
 		{ "y",		            SyncPart_y            ,METH_VARARGS,"Sets or returns the y-coordinate"},

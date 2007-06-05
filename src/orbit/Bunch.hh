@@ -60,7 +60,6 @@ public:
   double& x(int index);
   double& y(int index);
   double& z(int index);
-  double& phi(int index);
 
   double& px(int index);
   double& py(int index);
@@ -83,10 +82,13 @@ public:
 	//This can speed up operations with coordinates
   double** coordArr();
 
+	//wrap longitudinal coordinates assuming the certain ring length
+	void ringwrap(double ring_length);
+
   //adds macro-particle
   //returns index of the new particle in the bunch
   int addParticle(double x, double px, double y, double py,
-                  double z_or_phi, double pz_or_dE);
+                  double z, double pz_or_dE);
 
   //removes a macro-particle from a bunch
   //you need to compress the bunch after one or +several delete operations
@@ -99,12 +101,12 @@ public:
 
   void compress();
 
-  double getMass();                // MeV
+  double getMass();                // GeV
   double getClassicalRadius();     // m
   double getCharge();              // sign and value in abs(e-charge) only
   double getMacroSize();
 
-  double setMass(double mass);                // MeV
+  double setMass(double mass);                // GeV
   double setClassicalRadius(double clR);      // m
   double setCharge(double chrg);              // sign and value in abs(e-charge) only
   double setMacroSize(double mcrsz);
@@ -212,7 +214,7 @@ protected:
   double charge;
   double classicalRadius;
 
-  //kinetic energy of the particle in MeV
+  //kinetic energy of the particle in GeV
   double energy;
 
   double macroSizeForAll;

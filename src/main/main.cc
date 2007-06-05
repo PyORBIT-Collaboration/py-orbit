@@ -41,7 +41,6 @@ int main (int argc, char **argv)
 	wrap_teapotbase::initteapotbase();
 
 
-
 	//the python interpreter
 	//It will call Py_Initialize() again, but there is no harm
   Py_Main(argc,argv);

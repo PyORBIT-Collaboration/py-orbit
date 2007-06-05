@@ -293,7 +293,6 @@ void Bunch::copyEmptyBunchTo(Bunch* bunch){
 	SyncPart* source = this->getSyncPart();
 	SyncPart* target = bunch->getSyncPart();
 	target->setTime(source->getTime());
-	target->setFrequency(source->getFrequency());
 	target->setXYZ(source->getX(),source->getY(),source->getZ());
 	target->setPXYZ(source->getPX(),source->getPY(),source->getPZ());
 
@@ -381,7 +380,7 @@ void Bunch::addParticlesTo(Bunch* bunch){
 void Bunch::init(){
   bunchAttr = new AttributesBucket();
 
-  //mass in [MeV/c^2]
+  //mass in [GeV]
   //charge of in the charge of electron
   //classical radius in m
   mass            = OrbitConst::mass_proton;
@@ -402,7 +401,7 @@ void Bunch::init(){
 //
 // NAME
 //   Bunch::macroSize, Bunch::x, Bunch::y, Bunch::z,
-//   Bunch::px, Bunch::py, Bunch::pz, Bunch::pp, Bunch::pt,
+//   Bunch::px, Bunch::py, Bunch::pz
 //   Bunch::flag
 //
 // DESCRIPTION
@@ -411,7 +410,6 @@ void Bunch::init(){
 //   getMacroSize:  returns MacroSize of each macroparticle
 //   x: y: z:       returns coordinates of each macroparticle
 //   px: py: pz:    returns momentum of non-drifting macroparticle
-//   pp: pt:        returns momentum of drifting  macroparticle
 //   flag:          returns the status of macroparticle; dead or alive
 //                  flag(index)=0 means index-th macroparticle is dead
 //                  flag(index)=1 means index-th macroparticle is alive
@@ -422,23 +420,49 @@ void Bunch::init(){
 ///////////////////////////////////////////////////////////////////////////
 double& Bunch::x(int index){    return arrCoord[index][0];}
 double& Bunch::px(int index){   return arrCoord[index][1];}
+double& Bunch::xp(int index){   return arrCoord[index][1];}
 
 double& Bunch::y(int index){    return arrCoord[index][2];}
 double& Bunch::py(int index){   return arrCoord[index][3];}
+double& Bunch::yp(int index){   return arrCoord[index][3];}
 
 double& Bunch::z(int index){    return arrCoord[index][4];}
 double& Bunch::pz(int index){   return arrCoord[index][5];}
-
-double& Bunch::phi(int index){  return arrCoord[index][4];}
 double& Bunch::dE(int index){   return arrCoord[index][5];}
-
-double& Bunch::xp(int index){   return arrCoord[index][1];}
-double& Bunch::yp(int index){   return arrCoord[index][3];}
 
 int & Bunch::flag(int index){   return arrFlag[index];}
 
 double* Bunch::coordPartArr(int index){ return arrCoord[index];}
 double** Bunch::coordArr(){ return arrCoord;}
+
+///////////////////////////////////////////////////////////////////////////
+// NAME
+//  phasewrap
+//
+// DESCRIPTION
+//  redefine the longitudinal coordinate of a particles if they move
+//  in the ring
+//
+// PARAMETERS
+//  bunch = reference to the macro-particle bunch
+//  ring_length = the length of the ring
+//
+// RETURNS
+//    Nothing
+//
+///////////////////////////////////////////////////////////////////////////
+
+void Bunch::ringwrap(double ring_length){
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
+  double ring_length2 = ring_length/2.0;
+	for(int i = 0, n = nSize; i < n; i++){
+		if(fabs(arrCoord[i][4]) > ring_length2)
+		{
+			double sign = -arrCoord[i][4] / fabs(arrCoord[i][4]);
+			arrCoord[i][4] = ring_length2 * sign + fmod(arrCoord[i][4],ring_length2);
+		}
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -551,7 +575,7 @@ void Bunch::resize()
 
 int Bunch::addParticle(double x, double px,
 	double y, double py,
-	double z_phi, double pz_dE)
+	double z, double pz_dE)
 {
   int n = nNew;
   resize();
@@ -562,7 +586,7 @@ int Bunch::addParticle(double x, double px,
   arrCoord[n][2] = y;
   arrCoord[n][3] = py;
 
-  arrCoord[n][4] = z_phi;
+  arrCoord[n][4] = z;
   arrCoord[n][5] = pz_dE;
 
   arrFlag[n] = 1; //alive
@@ -710,7 +734,7 @@ void Bunch::compress()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// getMass - mass of a particle in MeV
+// getMass - mass of a particle in GeV
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -851,7 +875,7 @@ void Bunch::print(std::ostream& Out)
 		//print synchronous particle parameters to the stream
 	  syncPart->print(Out);
 
-    Out << "% x[m] px[rad] y[m] py[rad] (z_or_phi or pz_or_dE) ";
+    Out << "% x[m] px[rad] y[m] py[rad] z[m]  (pz or dE [GeV]) ";
 
     for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
       ParticleAttributes* attrCntr = pos->second;
@@ -1161,8 +1185,7 @@ int Bunch::readBunch(const char* fileName, int nParts)
 //
 // DESCRIPTION
 //    reads every components of the given number of macroparticles
-//    with assignning them to the concerned processes almost
-//    (for the remindar) impartially.
+//    with assigning them to CPUs almost evenly.
 //
 // RETURNS
 //    Nothing
@@ -1519,6 +1542,10 @@ MPI_Comm  Bunch::getMPI_Comm_Local(){
 
 void  Bunch::setMPI_Comm_Local(MPI_Comm MPI_COMM_Local){
 	this->MPI_COMM_Local = MPI_COMM_Local;
+  if(iMPIini > 0){
+    ORBIT_MPI_Comm_size(MPI_COMM_Local, &size_MPI);
+    ORBIT_MPI_Comm_rank(MPI_COMM_Local, &rank_MPI);
+  }
 }
 
 int Bunch::getMPI_Size(){

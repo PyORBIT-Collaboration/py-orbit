@@ -55,52 +55,6 @@ namespace teapot_base{
 
 ///////////////////////////////////////////////////////////////////////////
 // NAME
-//  phasewrap
-//
-// DESCRIPTION
-//  redefine the phase coordinate of a particle if it moved
-//  outside the RF bucket
-//
-// PARAMETERS
-//  bunch = reference to the macro-particle bunch
-//
-// RETURNS
-//    Nothing
-//
-///////////////////////////////////////////////////////////////////////////
-
-void phasewrap(Bunch* bunch){
-
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
-	double** arr = bunch->coordArr();
-
-	//this procedure should be reevaluated. The signature could be
-	//changed from phasewrap(Bunch* bunch) to
-	//phasewrap(Bunch* bunch, double ring_length)
-
-	std::cout
-	<<"++++++++++++++++teapotbase.cc++++++++++++++++++++"
-	<<std::endl
-	<<"+++++++++++++++++phasewrap(Bunch* bunch)+++++++++++++++++"
-	<<std::endl
-	<<"this procedure should be reevaluated"
-	<<std::endl
-	<<"STOP"
-	<<std::endl;
-	std::exit(1);
-
-
-	for(int i = 0, n = bunch->getSize(); i < n; i++){
-		if(fabs(arr[i][4]) > OrbitConst::PI)
-		{
-			double sign = -arr[i][4] / fabs(arr[i][4]);
-			arr[i][4] = OrbitConst::PI * sign + fmod(arr[i][4],OrbitConst::PI);
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////
-// NAME
 //
 //  rotatexy
 //
@@ -121,7 +75,7 @@ void rotatexy(Bunch* bunch, double anglexy){
 	double cs = cos(anglexy);
 	double sn = sin(anglexy);
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
 	for(int i = 0, n = bunch->getSize(); i < n; i++)
@@ -131,9 +85,9 @@ void rotatexy(Bunch* bunch, double anglexy){
 		ytemp  = arr[i][2];
 		pytemp = arr[i][3];
 
-		arr[i][0]  =  cs * xtemp  - sn * ytemp;
+		arr[i][0] =  cs * xtemp  - sn * ytemp;
 		arr[i][1] =  cs * pxtemp - sn * pytemp;
-		arr[i][2]  =  sn * xtemp  + cs * ytemp;
+		arr[i][2] =  sn * xtemp  + cs * ytemp;
 		arr[i][3] =  sn * pxtemp + cs * pytemp;
 	}
 }
@@ -159,14 +113,13 @@ void drifti(Bunch* bunch, int i, double length){
 
 	if(length <= 0.) return;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
 	double KNL, px, py, phifac;
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p = (arr[i][5] / syncPart->getMomentum()) * syncPart->getGamma();
 
@@ -178,7 +131,7 @@ void drifti(Bunch* bunch, int i, double length){
 	arr[i][2] += KNL * length * py;
 	phifac = (px * px +  py * py + dp_p * dp_p * gamma2i ) / 2.0;
 	phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
-	arr[i][4] += Factor * length * phifac;
+	arr[i][4] += length * phifac;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -210,11 +163,10 @@ void drift(Bunch* bunch, double length){
 	   syncPart->setTime( syncPart->getTime() + length/v);
 	}
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(v);
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
 	for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++){
@@ -224,7 +176,7 @@ void drift(Bunch* bunch, double length){
 		arr[i][2] += KNL * length * arr[i][3];
 		phifac = (arr[i][1]*arr[i][1] + arr[i][3]*arr[i][3] + dp_p * dp_p * gamma2i) / 2.0;
 		phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
-		arr[i][4] += Factor * length * phifac;
+		arr[i][4] += length * phifac;
 	}
 }
 
@@ -249,7 +201,7 @@ void drift(Bunch* bunch, double length){
 
 void kick(Bunch* bunch, double kx, double ky, double kE)
 {
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
 	if(kx != 0.) {
@@ -295,7 +247,7 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew){
 	double zn_re0, zn_im0;
   double kl1;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   kl1 = kl / factorial[pole];
@@ -352,7 +304,7 @@ void multp(Bunch* bunch, int pole, double kl, int skew){
 	double zn_re0, zn_im0;
   double kl1;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   kl1 = kl / factorial[pole];
@@ -419,7 +371,6 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-  double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
   nm2 = pole - 1;
@@ -429,7 +380,7 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
   np2 = pole + 3;
   kl1 = kl / (4.0 * factorial[np1]);
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   // MAD Conventions on signs of multipole terms
@@ -522,7 +473,7 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
     arr[i][1] -= kl1 * std::real(pxfac) / (1.0 + dp_p);
     arr[i][2] += kl1 * std::real(yfac) / (1.0 + dp_p);
     arr[i][3] -= kl1 * std::real(pyfac) / (1.0 + dp_p);
-    arr[i][4] += Factor * kl1 * std::real(yfac) /((1.0 + dp_p) * (1.0 + dp_p));
+    arr[i][4] += kl1 * std::real(yfac) /((1.0 + dp_p) * (1.0 + dp_p));
   }
 }
 
@@ -558,7 +509,6 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl,int skew)
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-  double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
   nm2 = pole - 1;
@@ -568,7 +518,7 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl,int skew)
   np2 = pole + 3;
   kl1 = kl / (4.0 * factorial[np1]);
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   // MAD Conventions on signs of multipole terms
@@ -661,7 +611,7 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl,int skew)
     arr[i][1] += kl1 * std::real(pxfac) / (1.0 + dp_p);
     arr[i][2] -= kl1 * std::real(yfac) / (1.0 + dp_p);
     arr[i][3] += kl1 * std::real(pyfac) / (1.0 + dp_p);
-    arr[i][4] -= Factor * kl1 * std::real(yfac)/((1.0 + dp_p) * (1.0 + dp_p));
+    arr[i][4] -= kl1 * std::real(yfac)/((1.0 + dp_p) * (1.0 + dp_p));
   }
 }
 
@@ -686,7 +636,7 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl,int skew)
 
 void quad1(Bunch* bunch, double length, double kq)
 {
-  double x_init, xp_init, y_init, yp_init, phi_init;
+  double x_init, xp_init, y_init, yp_init, z_init;
   double sqrt_kq, kqlength;
   double cx, sx, cy, sy, m11 = 0., m12 = 0., m21 = 0., m22 = 0.;
 	double m33 = 0., m34 = 0., m43 = 0., m44 = 0.;
@@ -697,7 +647,6 @@ void quad1(Bunch* bunch, double length, double kq)
 	   syncPart->setTime( syncPart->getTime() + length/v);
 	}
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(v);
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
@@ -738,7 +687,7 @@ void quad1(Bunch* bunch, double length, double kq)
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
 	for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++){
@@ -747,13 +696,13 @@ void quad1(Bunch* bunch, double length, double kq)
     xp_init = arr[i][1];
     y_init = arr[i][2];
     yp_init = arr[i][3];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
 
     arr[i][0] = x_init * m11 + xp_init * m12;
     arr[i][1] = x_init * m21 + xp_init * m22;
     arr[i][2] = y_init * m33 + yp_init * m34;
     arr[i][3] = y_init * m43 + yp_init * m44;
-    arr[i][4] = phi_init - Factor * dp_p * gamma2i * length;
+    arr[i][4] = z_init - dp_p * gamma2i * length;
   }
 }
 
@@ -777,26 +726,24 @@ void quad1(Bunch* bunch, double length, double kq)
 
 void quad2(Bunch* bunch, double length)
 {
-  double x_init, y_init, phi_init;
+  double x_init, y_init, z_init;
   double KNL, px, py, phifac;
 
 	SyncPart* syncPart = bunch->getSyncPart();
-	double v = OrbitConst::c * syncPart->getBeta();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(v);
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
 	for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++){
 		dp_p = arr[i][5] * dp_p_coeff;
     x_init = arr[i][0];
     y_init = arr[i][2];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     KNL = 1.0 / (1.0 + dp_p);
     px = arr[i][1];
     py = arr[i][3];
@@ -806,7 +753,7 @@ void quad2(Bunch* bunch, double length)
     phifac = (px * px +
               py * py + dp_p * dp_p * gamma2i) / 2.0;
     phifac = (phifac * KNL + dp_p * dp_p * gamma2i) * KNL;
-    arr[i][4] = phi_init + Factor * length * phifac;
+    arr[i][4] = z_init + length * phifac;
   }
 }
 
@@ -829,16 +776,15 @@ void quad2(Bunch* bunch, double length)
 
 void quadfringeIN(Bunch* bunch, double kq)
 {
-  double x_init, xp_init, y_init, yp_init, phi_init, dp_init;
+  double x_init, xp_init, y_init, yp_init, z_init, dp_init;
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -848,7 +794,7 @@ void quadfringeIN(Bunch* bunch, double kq)
     xp_init = arr[i][1];
     y_init = arr[i][2];
     yp_init = arr[i][3];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     dp_init = dp_p;
 
     arr[i][0] = (x_init +
@@ -869,8 +815,8 @@ void quadfringeIN(Bunch* bunch, double kq)
                          * (-yp_init * (x_init * x_init + y_init * y_init)
 	                    + 2. * xp_init * x_init * y_init));
 
-    arr[i][4] = phi_init +
-                 Factor * kq / (12. * (1. + dp_init) * (1. + dp_init))
+    arr[i][4] = z_init +
+                        kq / (12. * (1. + dp_init) * (1. + dp_init))
                         * (xp_init * x_init *
                            (x_init * x_init + 3. * y_init * y_init) -
                            yp_init * y_init *
@@ -898,16 +844,15 @@ void quadfringeIN(Bunch* bunch, double kq)
 void quadfringeOUT(Bunch* bunch, double kq)
 {
 
-  double x_init, xp_init, y_init, yp_init, phi_init, dp_init;
+  double x_init, xp_init, y_init, yp_init, z_init, dp_init;
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -917,7 +862,7 @@ void quadfringeOUT(Bunch* bunch, double kq)
     xp_init = arr[i][1];
     y_init = arr[i][2];
     yp_init = arr[i][3];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     dp_init = dp_p;
 
     arr[i][0] = (x_init -
@@ -938,8 +883,8 @@ void quadfringeOUT(Bunch* bunch, double kq)
                          * (-yp_init * (x_init * x_init + y_init * y_init)
 	                    + 2. * xp_init * x_init * y_init));
 
-    arr[i][4] = phi_init -
-                 Factor * kq / (12. * (1. + dp_init) * (1. + dp_init))
+    arr[i][4] = z_init -
+                        kq / (12. * (1. + dp_init) * (1. + dp_init))
                         * (xp_init * x_init *
                            (x_init * x_init + 3. * y_init * y_init) -
                            yp_init * y_init *
@@ -968,36 +913,38 @@ void quadfringeOUT(Bunch* bunch, double kq)
 void wedgerotate(Bunch* bunch, double e, int frinout)
 {
   double cs, sn;
-  double x_init, xp_init,  phi_init, p0_init, p0;
+  double x_init, xp_init,  z_init, p0_init, p0;
 
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
   cs = cos(e);
   sn = sin(e);
-  double coefxphi = sn * Factor;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
+
+	int info = 1;
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
   {
+		info = 1;
+		if(arr[i][5] == 0.) info = 0;
 		dp_p = arr[i][5] * dp_p_coeff;
     x_init = arr[i][0];
     xp_init = arr[i][1];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     p0_init = (1.0 + dp_p);
 
     if(frinout == 0)
     {
       arr[i][0] = x_init / cs;
       arr[i][1] = xp_init * cs + p0_init * sn;
-      arr[i][4] = cs * phi_init + coefxphi * arr[i][0];
+      arr[i][4] = cs * z_init + sn * arr[i][0];
       p0 = -xp_init * sn + p0_init * cs;
       dp_p = p0 - 1.0;
     }
@@ -1005,11 +952,12 @@ void wedgerotate(Bunch* bunch, double e, int frinout)
     {
       arr[i][0] = x_init * cs;
       arr[i][1] = xp_init * cs - p0_init * sn;
-      arr[i][4] = (phi_init - coefxphi * arr[i][0]) / cs;
+      arr[i][4] = (z_init - sn * arr[i][0]) / cs;
       p0 = xp_init * sn + p0_init * cs;
       dp_p = p0 - 1.0;
     }
 		arr[i][5] = dp_p/dp_p_coeff;
+		if(info == 0) arr[i][5] = 0.;
   }
 }
 
@@ -1044,7 +992,7 @@ void wedgedrift(Bunch* bunch, double e, int inout)
   sn = sin(e);
   ct = cs / sn;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1104,7 +1052,7 @@ void wedgebend(Bunch* bunch, double e, int inout, double rho, int nsteps)
   sn = sin(e);
   ct = cs / sn;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1157,7 +1105,7 @@ void wedgebend(Bunch* bunch, double e, int inout, double rho, int nsteps)
 
 void bend1(Bunch* bunch, double length, double th)
 {
-  double x_init, xp_init, y_init, yp_init, phi_init;
+  double x_init, xp_init, y_init, yp_init, z_init;
   double cx, sx, rho;
   double m11, m12, m16, m21, m22, m26,
        m33, m34, m43, m44,
@@ -1169,7 +1117,6 @@ void bend1(Bunch* bunch, double length, double th)
 	   syncPart->setTime( syncPart->getTime() + length/v);
 	}
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/v;
 	double betasq = syncPart->getBeta() * syncPart->getBeta();
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
@@ -1188,11 +1135,11 @@ void bend1(Bunch* bunch, double length, double th)
   m34 = length;
   m43 = 0.0;
   m44 = 1.0;
-  m51 = sx * Factor;
-  m52 = rho * (1.0 - cx) * Factor;
-  m56 = (betasq * length - rho * sx) * Factor;
+  m51 = sx;
+  m52 = rho * (1.0 - cx);
+  m56 = (betasq * length - rho * sx);
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1202,13 +1149,13 @@ void bend1(Bunch* bunch, double length, double th)
     xp_init = arr[i][1];
     y_init = arr[i][2];
     yp_init = arr[i][3];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
 
     arr[i][0] = x_init * m11 + xp_init * m12 + dp_p * m16;
     arr[i][1] =x_init * m21 + xp_init * m22 + dp_p * m26;
     arr[i][2] = y_init + length * arr[i][3];
 
-    arr[i][4] = phi_init + x_init * m51 + xp_init * m52 + dp_p * m56;
+    arr[i][4] = z_init + x_init * m51 + xp_init * m52 + dp_p * m56;
   }
 }
 
@@ -1231,19 +1178,17 @@ void bend1(Bunch* bunch, double length, double th)
 
 void bend2(Bunch* bunch, double length)
 {
-  double x_init, y_init, phi_init;
+  double x_init, y_init, z_init;
   double KNL, px, py, phifac;
 
 	SyncPart* syncPart = bunch->getSyncPart();
-	double v = OrbitConst::c * syncPart->getBeta();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/v;
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1251,7 +1196,7 @@ void bend2(Bunch* bunch, double length)
 		dp_p = arr[i][5] * dp_p_coeff;
     x_init = arr[i][0];
     y_init = arr[i][2];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     KNL = 1.0 / (1.0 + dp_p);
     px = arr[i][1];
     py = arr[i][3];
@@ -1260,7 +1205,7 @@ void bend2(Bunch* bunch, double length)
     arr[i][2] = y_init - KNL * length * dp_p * arr[i][3];
     phifac = (px * px + py * py + dp_p * dp_p * gamma2i) / 2.0;
     phifac = (phifac * KNL + dp_p * dp_p * gamma2i) * KNL;
-    arr[i][4] = phi_init + Factor * length * phifac;
+    arr[i][4] = z_init + length * phifac;
   }
 }
 
@@ -1284,18 +1229,17 @@ void bend2(Bunch* bunch, double length)
 
 void bend3(Bunch* bunch, double th)
 {
-  double xp_init, y_init, phi_init;
+  double xp_init, y_init, z_init;
   double KNL, py, phifac;
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1303,7 +1247,7 @@ void bend3(Bunch* bunch, double th)
 		dp_p = arr[i][5] * dp_p_coeff;
     xp_init = arr[i][1];
     y_init = arr[i][2];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     KNL = 1.0 / (1.0 + dp_p);
     py = arr[i][3];
 
@@ -1313,7 +1257,7 @@ void bend3(Bunch* bunch, double th)
     arr[i][1] = xp_init - phifac * KNL * th;
     arr[i][2] = y_init + KNL * py * arr[i][0] * th;
     phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
-    arr[i][4] = phi_init + Factor * th * phifac * arr[i][0];
+    arr[i][4] = z_init + th * phifac * arr[i][0];
   }
 }
 
@@ -1337,17 +1281,16 @@ void bend3(Bunch* bunch, double th)
 
 void bend4(Bunch* bunch, double th)
 {
-  double x_init, xp_init, phi_init;
+  double x_init, xp_init, z_init;
   double KNL, px, phifac, xfac;
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1355,7 +1298,7 @@ void bend4(Bunch* bunch, double th)
 		dp_p = arr[i][5] * dp_p_coeff;
     x_init = arr[i][0];
     xp_init = arr[i][1];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     KNL = 1.0 / (1.0 + dp_p);
     px = arr[i][1];
 
@@ -1363,7 +1306,7 @@ void bend4(Bunch* bunch, double th)
     phifac = (KNL * KNL * px * px) / 2.0;
     arr[i][0] = x_init * xfac * xfac;
     arr[i][1] = xp_init / xfac;
-    arr[i][4] = phi_init + Factor * th * phifac * arr[i][0];
+    arr[i][4] = z_init + th * phifac * arr[i][0];
   }
 }
 
@@ -1387,18 +1330,17 @@ void bend4(Bunch* bunch, double th)
 void bendfringeIN(Bunch* bunch, double rho)
 {
 
-  double x_init, xp_init, y_init, yp_init, phi_init, dp_init, kappa;
+  double x_init, xp_init, y_init, yp_init, z_init, dp_init, kappa;
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
   kappa = 1.0 / rho;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1408,14 +1350,14 @@ void bendfringeIN(Bunch* bunch, double rho)
     xp_init = arr[i][1];
     y_init = arr[i][2];
     yp_init = arr[i][3];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     dp_init = dp_p;
 
     arr[i][0] = (x_init
                + (kappa * y_init * y_init) / (2. * (1. + dp_init)));
     arr[i][3] = (yp_init
                 - (kappa * xp_init * y_init) / (1. + dp_init));
-    arr[i][4] = phi_init + Factor * kappa * xp_init * y_init * y_init
+    arr[i][4] = z_init + kappa * xp_init * y_init * y_init
                  / (2. * (1. + dp_init) * (1. + dp_init));
   }
 }
@@ -1440,18 +1382,17 @@ void bendfringeIN(Bunch* bunch, double rho)
 void bendfringeOUT(Bunch* bunch, double rho)
 {
 
-  double x_init, xp_init, y_init, yp_init, phi_init, dp_init, kappa;
+  double x_init, xp_init, y_init, yp_init, z_init, dp_init, kappa;
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/(OrbitConst::c * syncPart->getBeta());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
   kappa = 1.0 / rho;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1461,14 +1402,14 @@ void bendfringeOUT(Bunch* bunch, double rho)
     xp_init = arr[i][1];
     y_init = arr[i][2];
     yp_init = arr[i][3];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     dp_init = dp_p;
 
     arr[i][0] = (x_init
                - (kappa * y_init * y_init) / (2. * (1. + dp_init)));
     arr[i][3] = (yp_init
                 + (kappa * xp_init * y_init) / (1. + dp_init));
-    arr[i][4] = phi_init - Factor * kappa * xp_init * y_init * y_init
+    arr[i][4] = z_init - kappa * xp_init * y_init * y_init
                  / (2. * (1. + dp_init) * (1. + dp_init));
   }
 }
@@ -1494,7 +1435,7 @@ void bendfringeOUT(Bunch* bunch, double rho)
 void soln(Bunch* bunch, double length, double B)
 {
 
-  double x_init, px_init, y_init, py_init, phi_init;
+  double x_init, px_init, y_init, py_init, z_init;
   double KNL, phase, cs, sn;
   double cu, cpu, u_init, pu_init, u, pu, phifac;
 
@@ -1504,13 +1445,12 @@ void soln(Bunch* bunch, double length, double B)
 	   syncPart->setTime( syncPart->getTime() + length/v);
 	}
 
-	double Factor = 2.0 * OrbitConst::PI * syncPart->getFrequency()/v;
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
 	double dp_p;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1520,7 +1460,7 @@ void soln(Bunch* bunch, double length, double B)
     px_init = arr[i][1];
     y_init = arr[i][2];
     py_init = arr[i][3];
-    phi_init = arr[i][4];
+    z_init = arr[i][4];
     KNL = 1.0 / (1.0 + dp_p);
 
     cu = y_init / 2. - px_init / B;
@@ -1544,7 +1484,7 @@ void soln(Bunch* bunch, double length, double B)
               dp_p * dp_p * gamma2i
              ) / 2.0;
     phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
-    arr[i][4] = phi_init + Factor * length * phifac;
+    arr[i][4] = z_init + length * phifac;
   }
 }
 
@@ -1637,7 +1577,7 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
   sn = sin(e);
   ct = cs / sn;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
@@ -1693,7 +1633,7 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
 // PARAMETERS
 //  bunch =  reference to the macro-particle bunch
 //  harmonic_numb = harmonics number
-//  voltage = voltage in Mega Volts
+//  voltage = voltage in Giga Volts
 //  phase_s = synchronous phase in Rad
 //
 // RETURNS
@@ -1701,37 +1641,31 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void ringRF(Bunch* bunch, int harmonic_numb, double voltage, double phase_s)
+void ringRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s)
 {
 	double deltaV = 0.;
 	double charge = bunch->getCharge();
 	double coeff =  charge;
 
-	//coordinate array [part. index][x,xp,y,yp,phi,dE]
+	double Factor = 2.0*OrbitConst::PI/ring_length;
+
+	SyncPart* syncPart = bunch->getSyncPart();
+	if(phase_s != 0.){
+		double kin_e = syncPart->getEnergy();
+		kin_e = kin_e + coeff * voltage * sin(phase_s);
+		syncPart->setPX(0.);
+		syncPart->setPY(0.);
+		syncPart->setPZ(syncPart->energyToMomentum(kin_e));
+	}
+
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
   {
-		deltaV = voltage * ( sin(harmonic_numb*arr[i][4] + phase_s));
+		deltaV = voltage * ( sin(harmonic_numb*Factor*arr[i][4] + phase_s));
 		arr[i][5] += coeff * deltaV;
 	}
-
-	//changes in coordinates should be added in the case of acceleration or
-	//deceleration including x',y', frequency in syncPart and phases of all
-	//macro-particles
-	if(phase_s != 0.){
-		std::cout
-		<<"++++++++++++++++teapotbase.cc++++++++++++++++++++"
-		<<std::endl
-		<<"+++++++++++++++++ringRF function+++++++++++++++++"
-		<<std::endl
-		<<"acceleration or deceleration are not ready yet"
-		<<std::endl
-		<<"STOP"
-		<<std::endl;
-		std::exit(1);
-	}
-
 }
 
 

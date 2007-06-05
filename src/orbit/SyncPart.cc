@@ -32,6 +32,9 @@
 #include <iomanip>
 #include <string>
 
+//the limit p/m when we will use non/relativistic formulas
+#define P_OVER_M_LIMIT 1.0e-5
+
 ///////////////////////////////////////////////////////////////////////////
 //   Constructor and Desctructor
 ///////////////////////////////////////////////////////////////////////////
@@ -42,7 +45,7 @@ SyncPart::SyncPart(Bunch* bunchIn)
 	 bunch = bunchIn;
 
   //initialization all necessary variables and attributes
-  //such as energy, time, RF frequency etc.
+  //such as energy, time etc.
   init();
 
 }
@@ -67,7 +70,6 @@ void SyncPart::init()
 
 	energy = 0.;
 	time = 0.;
-	freq = 0.;
 
   p_abs = 0.;
 	beta = 0.;
@@ -82,7 +84,7 @@ void SyncPart::init()
 	pxyz[2] = 0.;
 }
 
-// Kinetic energy in MeV
+// Kinetic energy in GeV
 double SyncPart::getEnergy(){
 	return energy;
 }
@@ -93,14 +95,6 @@ void SyncPart::setTime(double time){
 
 double SyncPart::getTime(){
 	return time;
-}
-
-void SyncPart::setFrequency(double freq){
-	this->freq = freq;
-}
-
-double SyncPart::getFrequency(){
-	return freq;
 }
 
 void SyncPart::setXYZ(const double* xyz){
@@ -200,7 +194,7 @@ void SyncPart::updateKinematics(){
 	double w2 = m2+p2;
 	double w = sqrt(w2);
 	//relativistic or non-relativistic approach
-	if(p_abs/m < 1.0e-4){
+	if(p_abs/m < P_OVER_M_LIMIT){
 		energy = p2/(2.0*m);
 	}
 	else{
@@ -214,7 +208,7 @@ double SyncPart::momentumToEnergy(double p){
 	double m = bunch->getMass();
 	double ek = 0.;
 	//relativistic or non-relativistic approach
-	if(p/m < 1.0e-4){
+	if(p/m < P_OVER_M_LIMIT){
 		ek = p*p/(2.0*m);
 	}
 	else{
@@ -293,9 +287,6 @@ void SyncPart::readSyncPart(const char* fileName){
           if(nT > 3 && v_str[1] == "SYNC_PART_TIME"){
             def_found_ind = 1;
           }
-          if(nT > 3 && v_str[1] == "SYNC_PART_RF_FREQUENCY"){
-            def_found_ind = 1;
-          }
         }
         else{
           stop_ind = 1;
@@ -347,13 +338,6 @@ void SyncPart::readSyncPart(const char* fileName){
         sscanf( v_str[3].c_str(),"%lf",&val);
         setTime(val);
       }
-
-			//set frequency
-      if(v_str.size() > 3 && v_str[1] == "SYNC_PART_RF_FREQUENCY"){
-        double val;
-        sscanf( v_str[3].c_str(),"%lf",&val);
-        setFrequency(val);
-      }
     }
 
   }
@@ -396,16 +380,16 @@ void SyncPart::print(std::ostream& Out)
 		Out << getPX()  <<" ";
 		Out << getPY()  <<" ";
 		Out << getPZ()  <<" ";
-		Out <<" px, py, pz momentum component in MeV/c";
+		Out <<" px, py, pz momentum component in GeV/c";
     Out << std::endl;
 
     //print energy
-    Out << "%  info only: energy of the synchronous particle [MeV] = ";
+    Out << "%  info only: energy of the synchronous particle [GeV] = ";
 		Out << getEnergy()  <<" ";
     Out << std::endl;
 
     //print momentum
-    Out << "%  info only: momentum of the synchronous particle [MeV/c] = ";
+    Out << "%  info only: momentum of the synchronous particle [GeV/c] = ";
 		Out << getMomentum()  <<" ";
     Out << std::endl;
 
@@ -424,13 +408,6 @@ void SyncPart::print(std::ostream& Out)
 		Out << getTime()  <<" ";
 		Out <<" time in [sec]";
     Out << std::endl;
-
-    //print time
-    Out << "%  SYNC_PART_RF_FREQUENCY ";
-		Out << getFrequency()  <<" ";
-		Out <<" rf frequency in [Hz]";
-    Out << std::endl;
-
   }
 
   if(rank_MPI == 0){Out.flush();}

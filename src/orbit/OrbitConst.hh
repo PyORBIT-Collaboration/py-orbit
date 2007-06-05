@@ -57,7 +57,7 @@ public:
   //electron parameters
   //------------------------------------------------------------
 
-  //electron mass in MeV
+  //electron mass in GeV
   const static double mass_electron;
 
   //electron classical radius in m
@@ -70,7 +70,7 @@ public:
   //proton parameters
   //------------------------------------------------------------
 
-  //proton mass in MeV
+  //proton mass in GeV
    const static double mass_proton;
 
   //proton classical radius in m

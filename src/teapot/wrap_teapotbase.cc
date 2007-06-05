@@ -18,26 +18,6 @@ namespace wrap_teapotbase{
 		//teapotbase methods wrappers
 		//---------------------------------------------------------
 
-		//wrap phases in the bunch
-    static PyObject* wrap_phasewrap(PyObject *self, PyObject *args) {
-			PyObject* pyBunch;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
-			if(!PyArg_ParseTuple(	args,"O:phasewrap",&pyBunch)){
-				error("teapotbase - phasewrap - cannot parse arguments!");
-			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::phasewrap(cpp_bunch);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
-			Py_INCREF(Py_None);
-			return Py_None;
-    }
-
 		//Rotate bunch around z axis
     static PyObject* wrap_rotatexy(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
@@ -582,17 +562,17 @@ namespace wrap_teapotbase{
 		//Integration through a very simple ring type RF cavity
     static PyObject* wrap_ringRF(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
-			double voltage, phase_s;
+			double voltage, phase_s, ring_length;
 			int harmonics_numb;
 			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
-			if(!PyArg_ParseTuple(	args,"Oidd:ringRF",&pyBunch,&harmonics_numb,&voltage,&phase_s)){
+			if(!PyArg_ParseTuple(	args,"Odidd:ringRF",&pyBunch,&ring_length,&harmonics_numb,&voltage,&phase_s)){
 				error("teapotbase - ringRF - cannot parse arguments!");
 			}
 
 			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
 			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
 
-			teapot_base::ringRF(cpp_bunch,harmonics_numb,voltage,phase_s);
+			teapot_base::ringRF(cpp_bunch,ring_length,harmonics_numb,voltage,phase_s);
 
 			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
 			Py_DECREF(py_bunch_ref);
@@ -604,7 +584,6 @@ namespace wrap_teapotbase{
   } //end of namespace
 
   static PyMethodDef teapotbaseMethods[] = {
-    {"phasewrap",       wrap_teapotbase::wrap_phasewrap,      METH_VARARGS, "Wraps particles' phases in -pi to +pi interval"},
     {"rotatexy",        wrap_teapotbase::wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
     {"drift",           wrap_teapotbase::wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
     {"multp",           wrap_teapotbase::wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},

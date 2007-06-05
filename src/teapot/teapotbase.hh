@@ -25,8 +25,6 @@ namespace teapot_base{
 
 	void delete_factorial();
 
-	void phasewrap(Bunch* bunch);
-
   void rotatexy(Bunch* bunch, double anglexy);
   void drifti(Bunch* bunch, int i, double length);
 	void drift(Bunch* bunch, double length);
@@ -70,7 +68,7 @@ namespace teapot_base{
                  std::vector<int>& skew,
                  int nsteps);
 
- void ringRF(Bunch* bunch, int harmonic_numb, double voltage, double phase_s);
+ void ringRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s);
 
 }
 

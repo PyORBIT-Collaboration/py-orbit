@@ -5,14 +5,13 @@
 
 #include "wrap_teapotbase.hh"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 namespace wrap_teapotbase{
 
      void error(const char* msg){ ORBIT_MPI_Finalize(msg); }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 		//---------------------------------------------------------
 		//teapotbase methods wrappers
@@ -581,38 +580,36 @@ namespace wrap_teapotbase{
 			return Py_None;
 		}
 
-  } //end of namespace
-
   static PyMethodDef teapotbaseMethods[] = {
-    {"rotatexy",        wrap_teapotbase::wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
-    {"drift",           wrap_teapotbase::wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
-    {"multp",           wrap_teapotbase::wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},
-    {"multpfringeIN",   wrap_teapotbase::wrap_multpfringeIN,  METH_VARARGS, "Tracking a bunch through an IN edge of a multipole "},
-    {"multpfringeOUT",  wrap_teapotbase::wrap_multpfringeOUT, METH_VARARGS, "Tracking a bunch through an OUT edge of a multipole"},
-    {"kick",            wrap_teapotbase::wrap_kick,           METH_VARARGS, "Kicker element: chnges in x-prime, y-prime and dE"},
-    {"quad1",           wrap_teapotbase::wrap_quad1,          METH_VARARGS, "Quadrupole element one: linear transport matrix "},
-    {"quad2",           wrap_teapotbase::wrap_quad2,          METH_VARARGS, "Quadrupole element two: drift in quadrupole "},
-    {"quadfringeIN",    wrap_teapotbase::wrap_quadfringeIN,   METH_VARARGS, "Quadrupole element IN edge"},
-    {"quadfringeOUT",   wrap_teapotbase::wrap_quadfringeOUT,  METH_VARARGS, "Quadrupole element OUT edge"},
-    {"wedgerotate",     wrap_teapotbase::wrap_wedgerotate,    METH_VARARGS, "Rotates coordinates by e for fringe fields at non-SBEND "},
-    {"wedgedrift",      wrap_teapotbase::wrap_wedgedrift,     METH_VARARGS, "Drifts particles through wedge for non-SBEND "},
-    {"wedgebend",       wrap_teapotbase::wrap_wedgebend,      METH_VARARGS, "Straight bends particles through wedge for non-SBEND "},
-    {"bend1",           wrap_teapotbase::wrap_bend1,          METH_VARARGS, "Linear bend transport "},
-    {"bend2",           wrap_teapotbase::wrap_bend2,          METH_VARARGS, "Kinetic bend transport (same as nonlinear quad transport - quad2) "},
-    {"bend3",           wrap_teapotbase::wrap_bend3,          METH_VARARGS, "Nonlinear curvature bend transport depending on py and dE in Hamiltonian "},
-    {"bend4",           wrap_teapotbase::wrap_bend4,          METH_VARARGS, "Nonlinear curvature bend transport depending on px in Hamiltonian "},
-    {"bendfringeIN",    wrap_teapotbase::wrap_bendfringeIN,   METH_VARARGS, "Hard edge fringe field for a bend IN"},
-    {"bendfringeOUT",   wrap_teapotbase::wrap_bendfringeOUT,  METH_VARARGS, "Hard edge fringe field for a bend OUT"},
-    {"soln",            wrap_teapotbase::wrap_soln,           METH_VARARGS, "Integration through a solenoid "},
-    {"solnfringeIN",    wrap_teapotbase::wrap_solnfringeIN,   METH_VARARGS, "Hard edge fringe field for a solenoid IN "},
-    {"solnfringeOUT",   wrap_teapotbase::wrap_solnfringeOUT,  METH_VARARGS, "Hard edge fringe field for a solenoid OUT "},
-    {"wedgebendCF",     wrap_teapotbase::wrap_wedgebendCF,    METH_VARARGS, "Straight bends particles through wedge for Combined Function non-SBEND "},
-    {"ringRF",          wrap_teapotbase::wrap_ringRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
+    {"rotatexy",         wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
+    {"drift",            wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
+    {"multp",            wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},
+    {"multpfringeIN",    wrap_multpfringeIN,  METH_VARARGS, "Tracking a bunch through an IN edge of a multipole "},
+    {"multpfringeOUT",   wrap_multpfringeOUT, METH_VARARGS, "Tracking a bunch through an OUT edge of a multipole"},
+    {"kick",             wrap_kick,           METH_VARARGS, "Kicker element: chnges in x-prime, y-prime and dE"},
+    {"quad1",            wrap_quad1,          METH_VARARGS, "Quadrupole element one: linear transport matrix "},
+    {"quad2",            wrap_quad2,          METH_VARARGS, "Quadrupole element two: drift in quadrupole "},
+    {"quadfringeIN",     wrap_quadfringeIN,   METH_VARARGS, "Quadrupole element IN edge"},
+    {"quadfringeOUT",    wrap_quadfringeOUT,  METH_VARARGS, "Quadrupole element OUT edge"},
+    {"wedgerotate",      wrap_wedgerotate,    METH_VARARGS, "Rotates coordinates by e for fringe fields at non-SBEND "},
+    {"wedgedrift",       wrap_wedgedrift,     METH_VARARGS, "Drifts particles through wedge for non-SBEND "},
+    {"wedgebend",        wrap_wedgebend,      METH_VARARGS, "Straight bends particles through wedge for non-SBEND "},
+    {"bend1",            wrap_bend1,          METH_VARARGS, "Linear bend transport "},
+    {"bend2",            wrap_bend2,          METH_VARARGS, "Kinetic bend transport (same as nonlinear quad transport - quad2) "},
+    {"bend3",            wrap_bend3,          METH_VARARGS, "Nonlinear curvature bend transport depending on py and dE in Hamiltonian "},
+    {"bend4",            wrap_bend4,          METH_VARARGS, "Nonlinear curvature bend transport depending on px in Hamiltonian "},
+    {"bendfringeIN",     wrap_bendfringeIN,   METH_VARARGS, "Hard edge fringe field for a bend IN"},
+    {"bendfringeOUT",    wrap_bendfringeOUT,  METH_VARARGS, "Hard edge fringe field for a bend OUT"},
+    {"soln",             wrap_soln,           METH_VARARGS, "Integration through a solenoid "},
+    {"solnfringeIN",     wrap_solnfringeIN,   METH_VARARGS, "Hard edge fringe field for a solenoid IN "},
+    {"solnfringeOUT",    wrap_solnfringeOUT,  METH_VARARGS, "Hard edge fringe field for a solenoid OUT "},
+    {"wedgebendCF",      wrap_wedgebendCF,    METH_VARARGS, "Straight bends particles through wedge for Combined Function non-SBEND "},
+    {"ringRF",           wrap_ringRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
     { NULL, NULL }
   };
 
 
-  void wrap_teapotbase::initteapotbase(void) {
+  void initteapotbase(void) {
     PyObject *m, *d;
     m = Py_InitModule((char*)"teapot_base",teapotbaseMethods);
     d = PyModule_GetDict(m);
@@ -624,3 +621,5 @@ namespace wrap_teapotbase{
 #ifdef __cplusplus
 }
 #endif
+
+} //end of namespace

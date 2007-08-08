@@ -61,7 +61,7 @@ namespace wrap_orbit_bunch{
 
     //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
     //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:coordinates",&pyBunch)){
+    if(!PyArg_ParseTuple(	args,"O:getSyncParticle",&pyBunch)){
       error("PyBunch - Bunch_getSyncParticle - cannot parse arguments!");
     }
 

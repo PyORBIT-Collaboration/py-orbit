@@ -62,6 +62,10 @@ class MAD_LattElement:
 		""" Returns type of the element """
 		return self.__type
 
+	def setType(self,tp):
+		""" Sets the type of the element without checking"""
+		self.__type = tp
+
 	def addParameter(self,nameOfPar,parVal):
 		self.__par[nameOfPar] = parVal
 

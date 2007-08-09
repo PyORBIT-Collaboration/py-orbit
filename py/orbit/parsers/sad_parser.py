@@ -52,6 +52,10 @@ class SAD_LattElement:
 		""" Returns type of the element """
 		return self.__type
 
+	def setType(self,tp):
+		""" Sets the type of the element without checking """
+		self.__type = tp
+
 	def addParameter(self,nameOfPar,parVal):
 		self.__par[nameOfPar] = parVal
 
@@ -70,6 +74,7 @@ class SAD_LattElement:
 		return self.__par.has_key(nameOfPar)
 
 	def getParameters(self):
+		""" Returns the dictionary with (key=name, val) pairs """
 		return self.__par
 
 	def getElements(self):
@@ -370,6 +375,7 @@ class StringFunctions:
 		"""
 		#replace .e by .0e
 		str_out = re.sub("\.e",".0e",str_in)
+		str_out = str_out.strip()
 		#check the math operatons
 		str_out = re.sub("sin\(","math.sin(",str_out)
 		str_out = re.sub("SIN\(","math.sin(",str_out)
@@ -390,10 +396,18 @@ class StringFunctions:
 		str_out = re.sub("sqrt\(","math.sqrt(",str_out)
 		str_out = re.sub("SQRT\(","math.sqrt(",str_out)
 		#in SAD file we can have GEV and DEG
-		str_out = re.sub("\s+GEV\s*","   ",str_out)
-		str_out = re.sub("\s+DEG\s*","   ",str_out)
-		str_out = re.sub("\s+gev\s*","   ",str_out)
-		str_out = re.sub("\s+deg\s*","   ",str_out)
+		res = re.compile(r'(.*)\s+GEV\s*').findall(str_out)
+		if(len(res) == 1):
+			str_out = res[0]
+		res = re.compile(r'(.*)\s+gev\s*').findall(str_out)
+		if(len(res) == 1):
+			str_out = res[0]
+		res = re.compile(r'(.*)\s+DEG\s*').findall(str_out)
+		if(len(res) == 1):
+			str_out = "("+res[0]+")*math.pi/180."
+		res = re.compile(r'(.*)\s+deg\s*').findall(str_out)
+		if(len(res) == 1):
+			str_out = "("+res[0]+")*math.pi/180."
 		return str_out
 
 	replaceMath = classmethod(replaceMath)

@@ -97,27 +97,39 @@ class MAD_LattLine:
 	def __init__(self,name):
 		""" Create instance with list of lines or elements """
 		self.__name = name
-		self.__line = []
-		self.__nItems = 0
+		self.__items = []
 
 	def __del__(self):
 		del self.__name
-		del self.__line
-		del self.__nItems
+		del self.__items
 
 	def getName(self):
 		""" Returns name of the line """
 		return self.__name
 
+	def getType(self):
+		return "LINE"
+
 	def addItem(self,item):
 		""" Adds a line or element to this line"""
-		self.__line.append(item)
-		self.__nItems = len(self.__line)
+		self.__items.append(item)
+
+	def getItems(self):
+		""" Returns list with elements and lines """
+		return self.__items
+
+	def getLinesDic(self):
+		""" Returns the dictionary with all lattice lines inside, recursive. """
+		dic = {}
+		for item in self.__items:
+			if(item.getType() == self.getType() or item.getType() == self.getType().lower()):
+				dic[item.getName()] = item
+		return dic
 
 	def getElements(self):
 		""" Returns list of elements """
 		elements = []
-		for item in self.__line:
+		for item in self.__items:
 			elems = item.getElements()
 			for el in elems:
 				elements.append(el)
@@ -562,7 +574,7 @@ class MAD_Parser:
 					del accVarDict[name]
 				else:
 					doNotStop = True
-			if(len(accVarDictInner) == len(accVarDict)):
+			if(len(accVarDictInner) == len(accVarDict) and len(accVarDict) > 0):
 				print "=========== Unresolved Variables============"
 				for name,var in accVarDictInner.iteritems():
 					print "name=",name,"  str=",var.getExpression()

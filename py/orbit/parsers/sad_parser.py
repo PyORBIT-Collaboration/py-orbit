@@ -86,7 +86,10 @@ class SAD_LattElement:
 #====================================================================
 
 class SAD_LattLine:
-	""" An Arbitrary Line in the Lattice """
+	"""
+	An Arbitrary Line in the Lattice.
+	It includes SAD Lattice Lines and Elements
+	"""
 
 	def __init__(self,name):
 		""" Create instance with list of lines or elements """
@@ -117,6 +120,14 @@ class SAD_LattLine:
 	def getItems(self):
 		""" Returns list with elements and lines """
 		return self.__items
+
+	def getLinesDic(self):
+		""" Returns the dictionary with all lattice lines inside, recursive. """
+		dic = {}
+		for item in self.__items:
+			if(item.getType() == self.getType()):
+				dic[item.getName()] = item
+		return dic
 
 	def getElements(self):
 		""" Returns list of elements """
@@ -344,6 +355,7 @@ class _accLine:
 			if len(n_name) > 0:
 				n_rep = int(n_name[0][0])
 				it_new = n_name[0][1]
+				#print "debug n=",n_rep," name=",name," rep_name=",it_new
 				for i in range(1,n_rep+1):
 					line_names_new.append((it_new,sign))
 			else:
@@ -506,6 +518,24 @@ class SAD_Parser:
 		#print "debug size values=",len(self.__accValues)
 		#print "debug size elements=",len(self.__accElements)
 		#print "debug size accLines=",len(self.__accLines)
+		#----------------------------------------------------------
+		# Check if there is a redefinition of elements or variables
+		#----------------------------------------------------------
+		dic = {}
+		for var in self.__accValues:
+			if(dic.has_key(var.getName())):
+				print "Warning the variable:",var.getName(), " was redefined. Are you are sure?"
+			dic[var.getName()] = var
+		dic = {}
+		for elem in self.__accElements:
+			if(dic.has_key(elem.getName())):
+				print "Warning the element:",elem.getName(), " was redefined. Are you are sure?"
+			dic[elem.getName()] = elem
+		dic = {}
+		for line in self.__accLines:
+			if(dic.has_key(line.getName())):
+				print "Warning the line:",line.getName(), " was redefined. Are you are sure?"
+			dic[line.getName()] = line
 		#-------------------------------------------------------
 		#Then let's calculate numerical values.
 		#They can be defined recursivelly, so we need iterations

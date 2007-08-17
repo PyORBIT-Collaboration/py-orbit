@@ -17,7 +17,7 @@ from orbit.utils import orbitFinalize
 from orbit.lattice import AccLattice, AccElement, AccLine
 
 #import the MAD parser. It will be used only for TEAPOT class
-from orbit.parsers import MADparser, MAD_LattElement
+from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement
 
 """
 Drift
@@ -43,9 +43,9 @@ class TEAPOT:
 		instance of AccLattice class from lattice.py package.
 		"""
 		lattice = AccLattice()
-		parser = MADparser()
+		parser = MAD_Parser()
 		parser.parse(mad_file_name)
-		accLines = parser.getMADLines()
+		accLines = parser.getMAD_LinesDic()
 		if(not accLines.has_key(lineName)):
 			print "==============================="
 			print "MAD file:",mad_file_name

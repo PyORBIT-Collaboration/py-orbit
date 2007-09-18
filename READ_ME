@@ -1,41 +1,44 @@
-./src - source code for the core ORBIT c++ classes with wrappers etc.
+./src		- source code for the core ORBIT c++ classes, including
+		  wrappers, etc.
 
-./py - place for python modules and wrapper classes for
-       the core ORBIT classes
+./py		- python modules and wrapper classes for the core ORBIT
+		  classes.
 
-./ext - external modules source code. After compilation they
-        should be placed into the ./modules directory.
+./ext		- source code for external modules. Compilations of this
+		  code should be placed into ./modules.
 
-./modules - place for .so shared libraries that will be used
-        under python interpreter pyORBIT
+./modules	- .so shared libraries to be used under python interpreter,
+		  pyORBIT.
 
-./examples - examples for pyORBIT
+./examples	- sample pyORBIT scripts.
 
-./doc - documentation
+./doc		- pyORBIT documentation.
 
-./conf - configuration information
+./conf		- configuration information.
 
-./bin - place for pyORBIT executable
+./bin		- directory containing pyORBIT executable.
 
 
 ============SETTING THE ENVIRONMENT VARIABELES=============
+
 User should define:
 
-ORBIT_ROOT - the full path to the directory pyORBIT
+ORBIT_ROOT	- the full path to the directory pyORBIT.
 
-MPI_ROOT - MPI library with bin/ and /lib
+MPI_ROOT	- MPI library with bin/ and lib/ directories.
 
-PYTHON_VERSION   - python version, an example is>export PYTHON_VERSION=2.4
+PYTHON_VERSION	- python version, for example: export PYTHON_VERSION = 2.4
 
-PYTHON_ROOT_LIB  - should specify the name of the python library with a full path.
-                   It is usually
-		   /usr/lib/python$(PYTHON_VERSION)/config/libpython$(PYTHON_VERSION).a
+PYTHON_ROOT_LIB	- the name of the python library including the full path.
+                  It is usually
+		  /usr/lib/python$(PYTHON_VERSION)/config/libpython$(PYTHON_VERSION).a
 
-PYTHON_ROOT_INC  - should specify the location of the python header files.
-                   It is usually
-		   /usr/include/python$(PYTHON_VERSION)
+PYTHON_ROOT_INC	- location of the python header files.
+                  It is usually
+		  /usr/include/python$(PYTHON_VERSION)
 
-PYTHONPATH - should be modified to provide access to the ORBIT python modules:
-             export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py
+PYTHONPATH	- should be modified to include access to the ORBIT
+		  python modules:
+		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py
 
-ORBIT_ARCH - architecture of the system. Right now it is LINUX only.
+ORBIT_ARCH	- architecture of the system. At present it is LINUX only.

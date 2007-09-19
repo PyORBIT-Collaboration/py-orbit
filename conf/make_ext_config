@@ -1,13 +1,14 @@
 ######################################################################
-# Defines common variables for ORBIT extentions creation
+# Defines common variables for ORBIT extentions
 ######################################################################
 
-#libraries locations and names
+#library locations and names
+
 LIBS  =
 LIBS +=
 
+#include file locations
 
-#includes files locations
 INCLUDES  =
 INCLUDES +=
 

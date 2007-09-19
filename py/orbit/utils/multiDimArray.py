@@ -1,11 +1,12 @@
 """
-This function creates multi-dimensional arrays like a[i][k][j].
-The examples of using this function:
+This function creates multi-dimensional arrays, such as a[i][k][j].
+Some examples of using this function:
 a = multiDimArray(5,10,2)
 a = multiDimArray(*[5,10,2])
 a[1][2][1] = 0
-By default all elements are initialized by 0.
+By default all elements are initialized to 0.
 """
+
 def multiDimArray(*dims):
 	res = []
 	if len(dims) == 1:

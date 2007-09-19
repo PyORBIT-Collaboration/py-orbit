@@ -10,7 +10,7 @@ class AccLattice:
 		"""
 		Method. It creates an empty accelerator lattice.
 		"""
-		self.AccActionsConatainer = orbit.lattice.AccActionsConatainer
+		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement  = orbit.lattice.AccElement
 		self.AccLine = orbit.lattice.AccLine
 		self.	AccLattice = 	orbit.lattice.AccLattice
@@ -25,7 +25,7 @@ class AccLattice:
 		Method. It initializes the necessary structures of the lattice and child nodes.
 		"""
 		if(actions == None):
-			actions = self.AccActionsConatainer()
+			actions = self.AccActionsContainer()
 		d = {"position":0,"position_start_line":0}
 		d["position"] = 0.
 		d["position_start_line"] = []
@@ -131,7 +131,7 @@ class AccLattice:
 		"""
 		Method. Sets an initialization status.
 		"""
-		actions = self.AccActionsConatainer()
+		actions = self.AccActionsContainer()
 
 		def accElemExit(paramsDict):
 			node = paramsDict["node"]
@@ -147,7 +147,7 @@ class AccLattice:
 		"""
 		paramsDict["bunch"] = bunch
 		if(actions == None):
-			actions = self.AccActionsConatainer()
+			actions = self.AccActionsContainer()
 
 		def track(paramsDict):
 			node = paramsDict["node"]

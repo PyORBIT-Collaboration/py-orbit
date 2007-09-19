@@ -16,7 +16,7 @@ class AccLine:
 		# there is no position parameter,
 		# because AccLine could be in different lattices
 		#------------------------------------------------
-		self.AccActionsConatainer = orbit.lattice.AccActionsConatainer
+		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement  = orbit.lattice.AccElement
 		self.AccLine = orbit.lattice.AccLine
 		self.	AccLattice = 	orbit.lattice.AccLattice

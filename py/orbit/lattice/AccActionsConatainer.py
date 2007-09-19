@@ -4,13 +4,15 @@ import os
 from orbit.utils import orbitFinalize
 import orbit
 
-class AccActionsConatainer:
+class AccActionsContainer:
+	
 	""" The class of the container of accelerator actions. """
+	
 	def __init__(self, name = "no name container" ):
 		"""
 		Creates an empty accelerator actions container.
 		"""
-		self.AccActionsConatainer = orbit.lattice.AccActionsConatainer
+		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement  = orbit.lattice.AccElement
 		self.AccLine = orbit.lattice.AccLine
 		self.	AccLattice = 	orbit.lattice.AccLattice

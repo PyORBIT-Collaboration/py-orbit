@@ -5,55 +5,68 @@ from orbit.utils import orbitFinalize
 import orbit
 
 class AccElement:
-	""" The base class of the accelerator elements hierarchy. """
+	"""
+	Class. Base class of the accelerator elements hierarchy.
+	"""
+	
 	def __init__(self, name = "no name"):
 		"""
-		nParts - number of parts to which this elements is devided.
+		Method. Constructor of an empty accelerator element.
 		"""
 		self.AccActionsContainer = orbit.lattice.AccActionsContainer
-		self.AccElement  = orbit.lattice.AccElement
+		self.AccElement = orbit.lattice.AccElement
 		self.AccLine = orbit.lattice.AccLine
-		self.	AccLattice = 	orbit.lattice.AccLattice
+		self.AccLattice = orbit.lattice.AccLattice
 		#------------------------------------------------
 		# there is no position parameter,
-		# because element could be in different lattices
+		# because the element may be in more than one lattice
 		#------------------------------------------------
 		self.__name = name
 		self.__type = "generic"
+		#------------------------------------------------
+		# nParts - number of parts into which 
+		#          this element is divided.
+		#------------------------------------------------
 		self.__nParts = 1
 		self.__lengthArr = [0.]
 		self.__length = 0.
 		self.__activePartIndex = 0
 		self.__isInitialized = False
 		self.__params = {}
-		# the elements that should be used at the start,
-		#     inside, and at the finish of this element
-		#     __insideChildNodesDic - dictinary with indexes
-		#             as keys and lists of nodes as elements
-		self.__startChildNodes = []
-		self.__insideChildNodesDic = {0:[]}
-		self.__finishChildNodes = []
+		#------------------------------------------------
+		# sub-elements that constitute the entrance,
+		# inside, and exit of this element
+		# __bodyChildNodesDic - dictionary with
+		#                         indexes as keys and
+		#                         lists of nodes as elements
+		#------------------------------------------------
+		self.__entranceChildNodes = []
+		self.__bodyChildNodesDic = {0:[]}
+		self.__exitChildNodes = []
 
-	def initialize(self, paramDict):
+	def initialize(self, paramsDict):
 		"""
-		Method. It initializes the necessary structures of the node.
-		This method will call  _initialize(probe) method of the subclass before all
-		children initialization. The subclasses should implement __initialize(probe)
-		method.
+		Method. Initializes the essential structure of the node.
+		Calls the _initialize(probe) method of the appropriate
+		subclass before initializing all children. The subclasses
+		must implement the _initialize(probe) method.
 		"""
-		#----initialization self---------
-		self._initialize(paramDict)
+		#------------------------------------------------		
+		# initialization of self
+		#------------------------------------------------
+		self._initialize(paramsDict)
 		self.setInitialized(True)
 
-	def _initialize(self, paramDict):
+	def _initialize(self, paramsDict):
 		"""
-		Abstract Method. The subclasses should implement _initialize(probe) method.
+		Abstract Method. The subclasses must implement 
+		_initialize(probe) method.
 		"""
 		pass
 
 	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""
-		Method. It is tracking the actions through the accelerator element.
+		Method. Track the actions through the accelerator element.
 		"""
 		paramsDict["node"] = self
 		parentNode = paramsDict["parentNode"]
@@ -67,7 +80,7 @@ class AccElement:
 		if(actionsContainer.getShouldStop()):
 			return
 
-		for node in self.__startChildNodes:
+		for node in self.__entranceChildNodes:
 			paramsDict["node"] = node
 			paramsDict["parentNode"] = self
 
@@ -84,9 +97,9 @@ class AccElement:
 			if(actionsContainer.getShouldStop()):
 				return
 
-			actionsContainer.performActions(paramsDict)
+			actionsContainer.performBodyActions(paramsDict)
 
-			nodes = self.__insideChildNodesDic[i]
+			nodes = self.__bodyChildNodesDic[i]
 			for node in nodes:
 					paramsDict["node"] = node
 					paramsDict["parentNode"] = self
@@ -96,7 +109,7 @@ class AccElement:
 
 					node.trackActions(actionsContainer, paramsDict)
 
-		for node in self.__finishChildNodes:
+		for node in self.__exitChildNodes:
 			paramsDict["node"] = node
 			paramsDict["parentNode"] = self
 
@@ -106,7 +119,7 @@ class AccElement:
 			node.trackActions(actionsContainer, paramsDict)
 
 		paramsDict["node"] = self
-		paramsDict["parentNode"] = 	parentNode
+		paramsDict["parentNode"] = parentNode
 
 		if(actionsContainer.getShouldStop()):
 			return
@@ -114,257 +127,265 @@ class AccElement:
 		actionsContainer.performExitActions(paramsDict)
 		self.__activePartIndex = 0
 
-	def track(self, paramDict):
+	def track(self, paramsDict):
 		"""
-		Abstract Method. It is tracking the dictionary with parameters through
-		the node. The subclasses should implement this method.
+		Abstract Method. Track the dictionary parameters through
+		the node. The subclasses must implement this method.
 		"""
 		pass
 
-	def addChildNodeAtStart(self, node, index = -1):
+	def insertChildNodeAtEntrance(self, node, index = -1):
 		"""
-		Method. It adds the child node to the beginning of the this node.
-		The third parameter is an index of node among the child nodes
-		at the start of the node.
+		Method. Inserts a child node into the entrance to this node.
+		The third parameter is the child node index.
 		"""
-		if(isinstance(node,self.AccElement) != True):
-			msg = "The child of AccElemen can be its subclass only!"
-			msg = msg + "method addChildNodeAtStart(self, node)"
+		if(isinstance(node, self.AccElement) != True):
+			msg = "A child of AccElement must be a subclass!"
 			msg = msg + os.linesep
-			msg = msg + "Name of element=" + self.getName()
+			msg = msg + "method insertChildNodeAtEntrance(self, node)"
 			msg = msg + os.linesep
-			msg = msg + "Type of element=" + self.getType()
+			msg = msg + "Name of element = " + self.getName()
 			msg = msg + os.linesep
-			msg = msg + "Child node=" + str(node)
+			msg = msg + "Type of element = " + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "Child node = " + str(node)
 			orbitFinalize(msg)
 		if(index <= 0):
-			self.__startChildNodes.insert(0,node)
+			self.__entranceChildNodes.insert(0, node)
 		else:
-			if(index < len(self.__startChildNodes)):
-				self.__startChildNodes.insert(index,node)
+			if(index < len(self.__entranceChildNodes)):
+				self.__entranceChildNodes.insert(index, node)
 			else:
-				self.__startChildNodes.append(node)
+				self.__entranceChildNodes.append(node)
 
-	def addChildNodeAtFinish(self, node, index = -1):
+	def insertChildNodeInBody(self, node, index = 0):
 		"""
-		Method. It adds the child node to the end of the this node.
-		The third parameter is an index of node among the child nodes
-		at the end of the node.
+		Method. Inserts a child node into the body of this node.
+		The third parameter is the child node index.
 		"""
-		if(isinstance(node,self.AccElement) != True):
-			msg = "The child of AccElemen can be its subclass only!"
-			msg = msg + "method addChildNodeAtFinish(self, node):"
+		if(isinstance(node, self.AccElement) != True):
+			msg = "The child of AccElement must be a subclass!"
 			msg = msg + os.linesep
-			msg = msg + "Name of element=" + self.getName()
+			msg = msg + "method insertChildNodeInBody(self, node, index = 0)"
 			msg = msg + os.linesep
-			msg = msg + "Type of element=" + self.getType()
+			msg = msg + "Name of element = " + self.getName()
 			msg = msg + os.linesep
-			msg = msg + "Child node=" + str(node)
+			msg = msg + "Type of element = " + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "Child node = " + str(node)
+			orbitFinalize(msg)
+		chArr = self.__bodyChildNodesDic[index]
+		chArr.insert(0, node)
+
+	def insertChildNodeAtExit(self, node, index = -1):
+		"""
+		Method. Inserts a child node into the exit from this node.
+		The third parameter is the child node index.
+		"""
+		if(isinstance(node, self.AccElement) != True):
+			msg = "The child of AccElement must be a subclass!"
+			msg = msg + os.linesep
+			msg = msg + "method insertChildNodeAtExit(self, node)"
+			msg = msg + os.linesep
+			msg = msg + "Name of element = " + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element = " + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "Child node = " + str(node)
 			orbitFinalize(msg)
 		if(index <= 0):
-			self.__finishChildNodes.insert(0,node)
+			self.__exitChildNodes.insert(0, node)
 		else:
-			if(index < len(self.__finishChildNodes)):
-				self.__finishChildNodes.insert(index,node)
+			if(index < len(self.__exitChildNodes)):
+				self.__exitChildNodes.insert(index, node)
 			else:
-				self.__finishChildNodes.append(node)
+				self.__exitChildNodes.append(node)
 
-	def addChildNode(self, node, index = 0):
+	def getChildNodesAtEntrance(self):
 		"""
-		Method. It adds the child node to the sub-element
-		with a certain index.
-		"""
-		if(isinstance(node,self.AccElement) != True):
-			msg = "The child of AccElemen can be its subclass only!"
-			msg = msg + "method addChildNode(self, node, index = 0)"
-			msg = msg + os.linesep
-			msg = msg + "Name of element=" + self.getName()
-			msg = msg + os.linesep
-			msg = msg + "Type of element=" + self.getType()
-			msg = msg + os.linesep
-			msg = msg + "Child node=" + str(node)
-			orbitFinalize(msg)
-		chArr = self.__insideChildNodesDic[index]
-		chArr.insert(0,node)
-
-	def getChildrenNodesAll(self):
-		"""
-		Method. It returns all children of this node as a list.
+		Method. Returns all children at Entrance of this node
+		as a list.
 		"""
 		res = []
-		for node in self.__startChildNodes:
-			res.append(node)
-		for i in xrange(self.__nParts):
-			nodes = self.__insideChildNodesDic[i]
-			for node in nodes:
-				res.append(node)
-		for node in self.__finishChildNodes:
+		for node in self.__entranceChildNodes:
 			res.append(node)
 		return res
 
-	def getChildrenNodesAtStart(self):
+	def getChildNodesInBody(self):
 		"""
-		Method. It returns all children of this node at START of the node.
-		"""
-		res = []
-		for node in self.__startChildNodes:
-			res.append(node)
-		return res
-
-	def getChildrenNodesAtFinish(self):
-		"""
-		Method. It returns all children of this node at FINISH of the node.
-		"""
-		res = []
-		for node in self.__finishChildNodes:
-			res.append(node)
-		return res
-
-	def getChildrenNodesInMiddle(self):
-		"""
-		Method. It returns all children of this node that are in the middle.
+		Method. Returns all children in Body of this node
+		as a list.
 		"""
 		res = []
 		for i in xrange(self.__nParts):
-			nodes = self.__insideChildNodesDic[i]
+			nodes = self.__bodyChildNodesDic[i]
 			for node in nodes:
 				res.append(node)
 		return res
 
-	def setName(self,name = "no_name"):
+	def getChildNodesAtExit(self):
 		"""
-		Method. It sets a name of the node.
+		Method. Returns all children at Exit of this node
+		as a list.
+		"""
+		res = []
+		for node in self.__exitChildNodes:
+			res.append(node)
+		return res
+
+	def getChildNodesAll(self):
+		"""
+		Method. Returns all children of this node
+		as a list.
+		"""
+		res = []
+		for node in self.__entranceChildNodes:
+			res.append(node)
+		for i in xrange(self.__nParts):
+			nodes = self.__bodyChildNodesDic[i]
+			for node in nodes:
+				res.append(node)
+		for node in self.__exitChildNodes:
+			res.append(node)
+		return res
+
+	def setName(self, name = "no_name"):
+		"""
+		Method. Sets the name of the node.
 		"""
 		self.__name = name
 
 	def getName(self):
 		"""
-		Method. It returns a name of the node.
+		Method. Returns the name of the node.
 		"""
 		return self.__name
 
 	def setType(self, tp = "generic"):
 		"""
-		Method. It sets a type of the node.
+		Method. Sets the type of the node.
 		"""
 		self.__type = tp
 
 	def getType(self):
 		"""
-		Method. It returns a type of the node.
+		Method. Returns the type of the node.
 		"""
 		return self.__type
 
 	def setnParts(self, n = 1):
 		"""
-		Method. It sets a number of inner parts of the node.
-		This method does not call the initilize() method.
+		Method. Sets the number of Body parts of the node.
+		This method does not call the initialize() method.
 		"""
 		self.__nParts = n
 		self.__lengthArr = []
-		self.__insideChildNodesDic = {}
+		self.__bodyChildNodesDic = {}
 		for i in xrange(self.__nParts):
 			self.__lengthArr.append(0.)
-			self.__insideChildNodesDic[i] = []
+			self.__bodyChildNodesDic[i] = []
 
 	def getnParts(self):
 		"""
-		Method. It returns a number of inner parts of the node.
+		Method. Returns the number of body parts of the node.
 		"""
 		return self.__nParts
 
 	def getActivePartIndex(self):
 		"""
-		Method. It returns an active part index of the node.
+		Method. Returns the active part index of the node.
 		"""
 		return self.__activePartIndex
 
 	def setLength(self, L = 0.):
 		"""
-		Method. It sets a physical length of the node.
+		Method. Sets the physical length of the node.
 		"""
 		if(abs(L) < 1.0e-9): L = 0.
 		self.__length = L
 
 	def getLength(self):
 		"""
-		Method. It returns a physical length of the node.
+		Method. Returns the physical length of the node.
 		"""
 		return self.__length
 
 	def setPartLength(self, index, L = 0.):
 		"""
-		Method. It sets a physical length of the part
-		of the node with particular index.
+		Method. Sets the physical length of the part
+		of the node with given index.
 		"""
 		self.__lengthArr[index] = L
 
 	def getPartLength(self, index):
 		"""
-		Method. It returns a physical length of the part
-		of the node with particular index.
+		Method. Returns the physical length of the part
+		of the node with given index.
 		"""
 		return self.__lengthArr[index]
 
 	def addParam(self, key, value):
 		"""
-		Sets the parameter of the node
+		Method. Sets the parameter of the node
 		"""
 		self.__params[key] = value
 
 	def addParams(self, params):
 		"""
-		Adds the parameters from the external
+		Method. Adds the parameters from an external
 		dictionary to the parameters of the node.
-		The existing keys' values will be replaced
-		by the new ones from the external dictionary.
+		The values of the existing keys' will be replaced
+		by new ones from the external dictionary.
 		"""
 		self.__params.update(params)
 
 	def setParams(self, params):
 		"""
-		Sets the external dictionary as a parameters dictionary for this element.
+		Method. Sets an external dictionary as a parameter
+		dictionary for this element.
 		"""
 		self.__params = params
 
 	def getParam(self, key):
 		"""
-		Returns the parameter of the node
+		Method. Returns the parameters of the node
 		"""
 		if(not self.hasParam(key)):
-			msg = "The node does not have a prameter for the key you asked for!"
+			msg = "The node does not have a prameter for the key you requested!"
+			msg = msg + os.linesep
 			msg = msg + "method getParam(self, key)"
 			msg = msg + os.linesep
-			msg = msg + "Name of element=" + self.getName()
+			msg = msg + "Name of element = " + self.getName()
 			msg = msg + os.linesep
-			msg = msg + "Type of element=" + self.getType()
+			msg = msg + "Type of element = " + self.getType()
 			msg = msg + os.linesep
-			msg = msg + "key=" + str(key)
+			msg = msg + "key = " + str(key)
 			orbitFinalize(msg)
 		return self.__params[key]
 
 	def hasParam(self, key):
 		"""
-		Returns true if the node has a parameter for this key.
+		Method. Returns True if the node has a parameter for this key.
+		Returns False otherwise.
 		"""
 		return self.__params.has_key(key)
 
 	def getParams(self):
 		"""
-		Returns the whole parameters dictionary.
+		Method. Returns the whole parameters dictionary.
 		"""
 		return self.__params
 
 	def isInitialized(self):
 		"""
-		Method. It returns true or false about an initialization status.
+		Method. Returns the initialization status (True or False).
 		"""
 		return self.__isInitialized
 
 	def setInitialized(self, status):
 		"""
-		Method. It sets true or false about an initialization status.
+		Method. Sets the initialization status (True or False).
 		"""
 		if(type(status) != type(True)):
-			orbitFinalize("setInitialized(boolean) needs boolean")
+			orbitFinalize("setInitialized(boolean) needs boolean argument")
 		self.__isInitialized = status

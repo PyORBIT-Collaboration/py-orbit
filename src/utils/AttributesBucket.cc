@@ -45,12 +45,12 @@ double& AttributesBucket::doubleVal(const std::string attName){
    return doubleAttrMap[attName];
 }
 
-//returns true if it has int attribute with this key
+//returns True if it has int attribute with this key
 int AttributesBucket::hasIntAttribute(const std::string attName){
   return intAttrMap.count(attName);
 }
 
-//returns true if it has double attribute with this key
+//returns True if it has double attribute with this key
 int AttributesBucket::hasDoubleAttribute(const std::string attName){
   return doubleAttrMap.count(attName);
 }

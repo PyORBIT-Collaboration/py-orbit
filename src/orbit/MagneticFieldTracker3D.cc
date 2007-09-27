@@ -511,7 +511,7 @@ double MagneticFieldTracker3D:: getStepSize() const
 // Function: bool isUnitVector( double n1, double n2, double n3 )
 // Purpose: tests to see if input is a unit vector (i.e. n1^2 + n2^2 + n3^2 = 1)
 // Precondition: none
-// Postcondition: returns true if it is a unit vector and false if it isn't
+// Postcondition: returns True if it is a unit vector and False if it isn't
 //*********************************************************************************
 bool MagneticFieldTracker3D::isUnitVector (double n1, double n2, double n3)
 {

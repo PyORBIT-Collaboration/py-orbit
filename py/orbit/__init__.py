@@ -1,5 +1,5 @@
 """
-This module includes classes for an accelerator
-lattice, symplectic teapot elements, and parsers.
+This module includes classes for an accelerator lattice,
+symplectic teapot elements, parsers, and utilities.
 """
 

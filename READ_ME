@@ -19,9 +19,9 @@
 ./bin		- directory containing pyORBIT executable.
 
 
-============SETTING THE ENVIRONMENT VARIABELES=============
+============SETTING THE ENVIRONMENT VARIABLES=============
 
-User should define:
+The user should define:
 
 ORBIT_ROOT	- the full path to the directory pyORBIT.
 

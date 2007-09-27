@@ -60,7 +60,7 @@ class TEAPOT:
 		# element factory
 		for madElm in accMADElements:
 			elm = _teapotFactory.getElement(madElm)
-			lattice.addChildNode(elm)
+			lattice.insertChildNode(elm)
 		lattice.initialize()
 		return lattice
 
@@ -217,8 +217,8 @@ class _teapotFactory:
 				drft_2 = DriftTEAPOT(madElm.getName()+"_drift")
 				drft_1.setLength(length/2.0)
 				drft_2.setLength(length/2.0)
-				elm.addChildNodeAtStart(drft_1)
-				elm.addChildNodeAtFinish(drft_2)
+				elm.insertChildNodeAtEntrance(drft_1)
+				elm.insertChildNodeAtExit(drft_2)
 			"""
 			volt = 0.
 			if(params.has_key("volt")):
@@ -301,10 +301,10 @@ class NodeTEAPOT(BaseTEAPOT):
 		self.__tiltNodeOUT = TiltTEAPOT()
 		self.__fringeFieldIN = FringeFieldTEAPOT(self)
 		self.__fringeFieldOUT = FringeFieldTEAPOT(self)
-		self.addChildNodeAtStart(self.__tiltNodeIN)
-		self.addChildNodeAtStart(self.__fringeFieldIN)
-		self.addChildNodeAtFinish(self.__fringeFieldOUT)
-		self.addChildNodeAtFinish(self.__tiltNodeOUT)
+		self.insertChildNodeAtEntrance(self.__tiltNodeIN)
+		self.insertChildNodeAtEntrance(self.__fringeFieldIN)
+		self.insertChildNodeAtExit(self.__fringeFieldOUT)
+		self.insertChildNodeAtExit(self.__tiltNodeOUT)
 		self.addParam("tilt",self.__tiltNodeIN.getTiltAngle())
 		self.setType("node teapot")
 

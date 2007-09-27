@@ -1,5 +1,5 @@
 """
-This module includes classes for an accelerator lattice.
+This module includes utilitiy classes for an accelerator lattice.
 """
 
 from orbit.utils.multiDimArray import multiDimArray

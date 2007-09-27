@@ -1,6 +1,6 @@
 """
 This function creates multi-dimensional arrays, such as a[i][k][j].
-Some examples of using this function:
+Some examples of the use of this function:
 a = multiDimArray(5,10,2)
 a = multiDimArray(*[5,10,2])
 a[1][2][1] = 0

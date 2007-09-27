@@ -1,5 +1,5 @@
 """
-This package includes parsers of different types of
+This package includes parsers for different types of
 accelerator description files. At this moment we have only one parser: MAD.
 """
 

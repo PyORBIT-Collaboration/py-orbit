@@ -8,10 +8,9 @@ class AccLattice:
 	"""
 	The accelerator lattice class.
 	"""
-	
 	def __init__(self, name = "no name"):
 		"""
-		Method. Creates an empty accelerator lattice.
+		Constructor. Creates an empty accelerator lattice.
 		"""
 		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement  = orbit.lattice.AccElement

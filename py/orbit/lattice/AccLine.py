@@ -10,7 +10,7 @@ class AccLine:
 	"""
 	def __init__(self, name = "no name"):
 		"""
-		Method. Constructor of an accelerator line class instance.
+		Constructor. Creates an accelerator line class instance.
 		"""
 		#------------------------------------------------
 		# There is no position parameter:

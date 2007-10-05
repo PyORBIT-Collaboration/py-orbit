@@ -11,7 +11,7 @@ class AccElement:
 	
 	def __init__(self, name = "no name"):
 		"""
-		Method. Constructor of an empty accelerator element.
+		Constructor. Creates an empty accelerator element.
 		"""
 		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement = orbit.lattice.AccElement

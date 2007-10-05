@@ -1,9 +1,9 @@
 """
-This package includes parsers for different types of
-accelerator description files. At this moment we have only one parser: MAD.
+Module. Includes parsers for different types of
+accelerator description files. At this moment we have
+parsers for the following codes: MAD8 and SAD.
 """
 
-#IMPORT Operations:
 from mad_parser import MAD_Parser
 from mad_parser import MAD_LattElement
 from mad_parser import MAD_LattLine

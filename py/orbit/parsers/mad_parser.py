@@ -3,38 +3,50 @@ import sys
 import re
 import math
 
-class _possibleElementType:
-	""" This class keeps all possible element's types """
+#===============================================================
 
+class _possibleElementType:
+	"""
+	Class. Specifies all possible element types
+	"""
 	def __init__(self):
+		"""
+		Constructor of list of element types.
+		"""
 		self.__names_type = []
 		self.__names_type.append("drift")
-		self.__names_type.append("quad")
 		self.__names_type.append("sbend")
+		self.__names_type.append("rbend")
+		self.__names_type.append("quad")
+		self.__names_type.append("quadrupole")
+		self.__names_type.append("sextupole")
+		self.__names_type.append("octupole")
+		self.__names_type.append("multipole")
+		self.__names_type.append("solenoid")
+		self.__names_type.append("kicker")
 		self.__names_type.append("hkicker")
 		self.__names_type.append("vkicker")
 		self.__names_type.append("hkick")
 		self.__names_type.append("vkick")
-		self.__names_type.append("marker")
-		self.__names_type.append("sextupole")
-		self.__names_type.append("monitor")
-		self.__names_type.append("octupole")
-		self.__names_type.append("quadrupole")
 		self.__names_type.append("rfcavity")
-		self.__names_type.append("solenoid")
-		self.__names_type.append("multipole")
-		self.__names_type.append("rbend")
 		self.__names_type.append("rcollimator")
-		self.__names_type.append("kicker")
+		self.__names_type.append("marker")
+		self.__names_type.append("monitor")
 
 	def __del__(self):
+		"""
+		Method. Deletes element.
+		"""
 		del self.__names_type
 
-	def checkType(self,name_in):
+	def checkType(self, name_in):
+		"""
+		Method. Confirms validity of element type.
+		"""
 		name = name_in.lower()
 		if self.__names_type.count(name) == 0:
-			print "Error of creating lattice element."
-			print "There can not be an element with type:",name
+			print "Error creating lattice element:"
+			print "There is no element with type: ", name
 			print "Stop."
 			sys.exit (0)
 		return name_in
@@ -42,49 +54,74 @@ class _possibleElementType:
 #===============================================================
 
 class MAD_LattElement:
-	""" An Arbitrary Element in the Lattice """
+	"""
+	Class. Represents an arbitrary element in the lattice
+	"""
 	_typeChecker = _possibleElementType()
 
-	def __init__(self,name,Tname):
-		""" Create instance with name, typeName and type """
+	def __init__(self, name, Tname):
+		"""
+		Constructor of element with name, type,
+		and parameter dictionary.
+		"""
 		self.__name = name
 		self.__type = self._typeChecker.checkType(Tname)
 		self.__par = {}
 
 	def __del__(self):
+		"""
+		Method. Deletes parameters.
+		"""
 		del self.__par
 
 	def getName(self):
-		""" Returns name of the element """
+		"""
+		Method. Returns name of element
+		"""
 		return self.__name
 
 	def getType(self):
-		""" Returns type of the element """
+		"""
+		Method. Returns type of element
+		"""
 		return self.__type
 
-	def setType(self,tp):
-		""" Sets the type of the element without checking"""
+	def setType(self, tp):
+		"""
+		Method. Sets the type of element without checking.
+		"""
 		self.__type = tp
 
-	def addParameter(self,nameOfPar,parVal):
+	def addParameter(self, nameOfPar, parVal):
+		"""
+		Method. Adds parameter and value to element.
+		"""
 		self.__par[nameOfPar] = parVal
 
-	def getParameter(self,nameOfPar):
+	def getParameter(self, nameOfPar):
+		"""
+		Method. Returns name of parameter.
+		"""
 		if self.__par.has_key(nameOfPar) == 0:
 			print "class MAD_LattElement, method getParameter"
-			print "The name of Element =",self.__name
-			print "The type of Element =",self.__type
-			print "The Element's key-val =",self.__par
-			print "This Element does not have Parameter=", nameOfPar
+			print "The name of Element = ", self.__name
+			print "The type of Element = ", self.__type
+			print "The Element's key-val = ", self.__par
+			print "This Element does not have Parameter = ", nameOfPar
 			print "Stop."
 			sys.exit (0)
 		return self.__par[nameOfPar]
 
 	def getParameters(self):
+		"""
+		Method. Returns parameter dictionary.
+		"""
 		return self.__par
 
 	def getElements(self):
-		""" Returns list of elements (only one here) """
+		"""
+		Method. Returns list of elements (only one here)
+		"""
 		elements = []
 		elements.append(self)
 		return elements
@@ -92,34 +129,52 @@ class MAD_LattElement:
 #====================================================================
 
 class MAD_LattLine:
-	""" An Arbitrary Line in the Lattice """
-
-	def __init__(self,name):
-		""" Create instance with list of lines or elements """
+	"""
+	Class. Represents an arbitrary line in the lattice.
+	"""
+	def __init__(self, name):
+		"""
+		Constructor of instance with list of lines and/or elements.
+		"""
 		self.__name = name
 		self.__items = []
-
+		
 	def __del__(self):
+		"""
+		Method. Deletes instance with list of lines and/or elements.
+		"""
 		del self.__name
 		del self.__items
 
 	def getName(self):
-		""" Returns name of the line """
+		"""
+		Method. Returns name of the line.
+		"""
 		return self.__name
 
 	def getType(self):
+		"""
+		Method. Returns type: "LINE".
+		"""
 		return "LINE"
 
-	def addItem(self,item):
-		""" Adds a line or element to this line"""
+	def addItem(self, item):
+		"""
+		Method. Adds a line or element to this line.
+		"""
 		self.__items.append(item)
 
 	def getItems(self):
-		""" Returns list with elements and lines """
+		"""
+		Method. Returns list with elements and lines.
+		"""
 		return self.__items
 
 	def getLinesDic(self):
-		""" Returns the dictionary with all lattice lines inside, recursive. """
+		"""
+		Method. Returns the dictionary
+		containing all lattice lines, recursive.
+		"""
 		dic = {}
 		for item in self.__items:
 			if(item.getType() == self.getType() or item.getType() == self.getType().lower()):
@@ -127,7 +182,9 @@ class MAD_LattLine:
 		return dic
 
 	def getElements(self):
-		""" Returns list of elements """
+		"""
+		Method. Returns list of elements.
+		"""
 		elements = []
 		for item in self.__items:
 			elems = item.getElements()
@@ -135,20 +192,21 @@ class MAD_LattLine:
 				elements.append(el)
 		return elements
 
+#====================================================================
+
 class _madLine:
 	"""
-	The line of a MAD file. It could be one of three types:
+	Class: A line of a MAD file. It can be one of three types:
 	variable, accelerator line, or accelerator element.
 	"""
-
 	def __init__(self):
 		"""
-		Constructor of the MAD file line class instance.
+		Constructor of a MAD file line class instance.
 		"""
 		self.__line = ""
 		self.__type = None
 
-	def setLine(self,line):
+	def setLine(self, line):
 		self.__line = line
 
 	def getLine(self):
@@ -159,6 +217,8 @@ class _madLine:
 
 	def getType(self):
 		return self.__type
+
+#====================================================================
 
 class _variable:
 	"""

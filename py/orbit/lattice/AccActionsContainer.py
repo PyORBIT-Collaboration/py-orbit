@@ -8,10 +8,9 @@ class AccActionsContainer:
 	"""
 	Class. Contains the accelerator actions.
 	"""
-	
 	def __init__(self, name = "no name container" ):
 		"""
-		Method. Constructor of an empty accelerator actions container.
+		Constructor. Creates empty accelerator actions container.
 		"""
 		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement  = orbit.lattice.AccElement

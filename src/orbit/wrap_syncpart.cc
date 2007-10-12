@@ -80,7 +80,7 @@ extern "C" {
 		self->ob_type->tp_free((PyObject*)self);
   }
 
- //Sets or returns the kinEnergy for the SyncPart object
+	//Sets or returns the kinEnergy for the SyncPart object
   //  the action is depended on the number of arguments
   //  kinEnergy() - returns kinEnergy GeV
   //  kinEnergy(value) - sets the new value for pz and px=0,py=0
@@ -455,8 +455,8 @@ extern "C" {
 		{ (char *)"px",		            (PyCFunction) SyncPart_px           ,METH_VARARGS,"Sets or returns the x-momentum"},
 		{ (char *)"py",		            (PyCFunction) SyncPart_py           ,METH_VARARGS,"Sets or returns the y-momentum"},
 		{ (char *)"pz",		            (PyCFunction) SyncPart_pz           ,METH_VARARGS,"Sets or returns the z-momentum"},
-		{ (char *)"energyToMomentum", (PyCFunction) SyncPart_eToP         ,METH_VARARGS,"Transforms the energy to momentum"},
-		{ (char *)"momentumToEnergy", (PyCFunction) SyncPart_pToE         ,METH_VARARGS,"Transforms the momentum to energy"},
+		{ (char *)"energyToMomentum", (PyCFunction) SyncPart_eToP         ,METH_VARARGS,"Transforms the kinetic energy to momentum"},
+		{ (char *)"momentumToEnergy", (PyCFunction) SyncPart_pToE         ,METH_VARARGS,"Transforms the momentum to kinetic energy"},
     {NULL,NULL}
   };
 

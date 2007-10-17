@@ -11,7 +11,7 @@ class _possibleElementType:
 	"""
 	def __init__(self):
 		"""
-		Constructor of list of element types.
+		Constructor. Creates list of element types.
 		"""
 		self.__names_type = []
 		self.__names_type.append("drift")
@@ -61,7 +61,7 @@ class MAD_LattElement:
 
 	def __init__(self, name, Tname):
 		"""
-		Constructor of element with name, type,
+		Constructor. Creates element with name, type,
 		and parameter dictionary.
 		"""
 		self.__name = name
@@ -134,7 +134,7 @@ class MAD_LattLine:
 	"""
 	def __init__(self, name):
 		"""
-		Constructor of instance with list of lines and/or elements.
+		Constructor. Creates line with list of lines and/or elements.
 		"""
 		self.__name = name
 		self.__items = []
@@ -201,39 +201,53 @@ class _madLine:
 	"""
 	def __init__(self):
 		"""
-		Constructor of a MAD file line class instance.
+		Constructor. Creates a blank MAD file line class instance.
 		"""
 		self.__line = ""
 		self.__type = None
 
 	def setLine(self, line):
+		"""
+		Method. Sets a MAD file line class instance.
+		"""
 		self.__line = line
 
 	def getLine(self):
+		"""
+		Method. Returns a MAD file line class instance.
+		"""
 		return self.__line
 
-	def setType(self,type):
+	def setType(self, type):
+		"""
+		Method. Sets a MAD file line type.
+		"""
 		self.__type = type
 
 	def getType(self):
+		"""
+		Method. Returns a MAD file line type.
+		"""
 		return self.__type
 
 #====================================================================
 
 class _variable:
 	"""
-	The MAD variable class. It keeps initial string (line) from MAD file.
+	Class. Holds MAD variables.
 	"""
-
 	def __init__(self):
+		"""
+		Constructor. Creates empty MAD variable.
+		"""
 		self._name = None
 		self._expression = ""
 		self._value = None
 
 	def getType():
 		"""
-		Method. It is static method of this class.
-		It returns the name of the type.
+		Method. Static method of this class.
+		Returns the name of the type.
 		"""
 		return "variable"
 
@@ -286,6 +300,8 @@ class _variable:
 			s_name = s_name[0]
 		self.setName(s_name)
 		self.setExpression(s_val)
+
+#====================================================================
 
 class _element:
 	"""

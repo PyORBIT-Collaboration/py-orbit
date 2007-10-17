@@ -45,7 +45,7 @@ class TEAPOT:
 		lattice = AccLattice()
 		parser = MAD_Parser()
 		parser.parse(mad_file_name)
-		accLines = parser.getMAD_LinesDic()
+		accLines = parser.getMAD_LinesDict()
 		if(not accLines.has_key(lineName)):
 			print "==============================="
 			print "MAD file:",mad_file_name
@@ -275,7 +275,7 @@ class BaseTEAPOT(AccElement):
 	""" The base class of the TEAPOT accelerator elements hierarchy. """
 	def __init__(self, name = "no name"):
 		"""
-		Constructor of the base TEAPOT element. This is a superclass for all TEAPOT elements.
+		Constructor. Creates the base TEAPOT element. This is a superclass for all TEAPOT elements.
 		"""
 		AccElement.__init__(self,name)
 		self.setType("base teapot")
@@ -292,7 +292,7 @@ class BaseTEAPOT(AccElement):
 class NodeTEAPOT(BaseTEAPOT):
 	def __init__(self, name = "no name"):
 		"""
-		Constructor of the real TEAPOT element. This is a superclass for all real TEAPOT elements.
+		Constructor. Creates the real TEAPOT element. This is a superclass for all real TEAPOT elements.
 		The term real means that element is included in TEAPOT list of elements.
 		For instance TILT is not included.
 		"""
@@ -385,7 +385,7 @@ class DriftTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "drift no name"):
 		"""
-		Constructor of the Drift TEAPOT element.
+		Constructor. Creates the Drift TEAPOT element.
 		"""
 		NodeTEAPOT.__init__(self,name)
 		self.setType("drift teapot")
@@ -404,7 +404,7 @@ class SolenoidTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "solenoid no name"):
 		"""
-		Constructor of the Solenoid TEAPOT element .
+		Constructor. Creates the Solenoid TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
 		self.setnParts(1)
@@ -441,7 +441,7 @@ class MultipoleTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "multipole no name"):
 		"""
-		Constructor of the Multipole Combined Function TEAPOT element.
+		Constructor. Creates the Multipole Combined Function TEAPOT element.
 		"""
 		NodeTEAPOT.__init__(self,name)
 		self.setnParts(2)
@@ -552,7 +552,7 @@ class QuadTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "quad no name"):
 		"""
-		Constructor of the Quad Combined Function TEAPOT element .
+		Constructor. Creates the Quad Combined Function TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
 		self.setnParts(2)
@@ -672,7 +672,7 @@ class BendTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "bend no name"):
 		"""
-		Constructor of the Bend Combined Functions TEAPOT element .
+		Constructor. Creates the Bend Combined Functions TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
 		self.setnParts(2)
@@ -841,7 +841,7 @@ class RingRFTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "ringRF no name"):
 		"""
-		Constructor of the Ring RF TEAPOT element.
+		Constructor. Creates the Ring RF TEAPOT element.
 		Harmonics numbers are 1,2,3, ...
 		Voltages are in Volts.
 		Phases are in radians.
@@ -901,7 +901,7 @@ class KickTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "kick no name"):
 		"""
-		Constructor of the Kick TEAPOT element .
+		Constructor. Creates the Kick TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
 		self.setnParts(2)
@@ -965,7 +965,7 @@ class TiltTEAPOT(BaseTEAPOT):
 	"""
 	def __init__(self, name = "tilt no name", angle = 0.):
 		"""
-		Constructor of the Tilt TEAPOT element.
+		Constructor. Creates the Tilt TEAPOT element.
 		"""
 		AccElement.__init__(self,name)
 		self.__angle = angle
@@ -998,7 +998,7 @@ class FringeFieldTEAPOT(BaseTEAPOT):
 	"""
 	def __init__(self,  parentNode,  trackFunction = None , name = "fringe field no name"):
 		"""
-		Constructor of the Fringe Field TEAPOT element.
+		Constructor. Creates the Fringe Field TEAPOT element.
 		"""
 		AccElement.__init__(self,name)
 		self.setParams(parentNode.getParams())

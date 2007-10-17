@@ -1804,7 +1804,7 @@ namespace wrap_orbit_bunch{
     //--------------------------------------------------------
     // class Bunch wrapper                        START
     //--------------------------------------------------------
-    { "__init__",                       Bunch_init                          ,METH_VARARGS,"Constructor of Bunch class"},
+    { "__init__",                       Bunch_init                          ,METH_VARARGS,"Constructor. Creates Bunch class"},
     { "getSyncParticle",                Bunch_getSyncParticle               ,METH_VARARGS,"Returns syncParticle class instance"},
     { "addParticle",                    Bunch_addParticle                   ,METH_VARARGS,"Adds a macro-particle to the bunch"},
     { "deleteParticle",                 Bunch_deleteParticle                ,METH_VARARGS,"Removes macro-particle from the bunch and call compress inside"},

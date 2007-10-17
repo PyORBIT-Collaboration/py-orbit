@@ -15,4 +15,3 @@ clean:
 		(cd $$dir; if [ -f ./Makefile ]; then $(MAKE) clean; fi;); \
 	done
 
-

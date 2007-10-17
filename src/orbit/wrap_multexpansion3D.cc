@@ -118,7 +118,7 @@ namespace wrap_orbit_multexpansion3D{
     //--------------------------------------------------------
     // class MultipoleExpansion3D wrapper                        START
     //--------------------------------------------------------
-    { "__init__",              MultExp3D_init           ,METH_VARARGS,"Constructor of MultipoleExpansion3D class"},
+    { "__init__",              MultExp3D_init           ,METH_VARARGS,"Constructor. Creates MultipoleExpansion3D class"},
     { "getMagneticField",      MultExp3D_getMagnField   ,METH_VARARGS,"Returns the tuple of 3 components of the magnetic field"},
     { "__del__",               MultExp3D_del            ,METH_VARARGS,"Destructor of MultipoleExpansion3D class"},
     {NULL,NULL}

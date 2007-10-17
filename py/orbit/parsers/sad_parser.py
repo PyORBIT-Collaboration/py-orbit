@@ -95,7 +95,7 @@ class SAD_LattLine:
 		""" Create instance with list of lines or elements """
 		self.__name = name
 		self.__items = []
-		self.__signDic = {}
+		self.__signDict = {}
 
 	def __del__(self):
 		del self.__name
@@ -110,18 +110,18 @@ class SAD_LattLine:
 
 	def getDirection(self,item):
 		""" Returns direction for particular Item. """
-		return self.__signDic[item.getName()]
+		return self.__signDict[item.getName()]
 
 	def addItem(self,item,sign = +1):
 		""" Adds a line or element to this line with cetain direction."""
 		self.__items.append(item)
-		self.__signDic[item.getName()] = sign
+		self.__signDict[item.getName()] = sign
 
 	def getItems(self):
 		""" Returns list with elements and lines """
 		return self.__items
 
-	def getLinesDic(self):
+	def getLinesDict(self):
 		""" Returns the dictionary with all lattice lines inside, recursive. """
 		dic = {}
 		for item in self.__items:
@@ -133,7 +133,7 @@ class SAD_LattLine:
 		""" Returns list of elements """
 		elements = []
 		for item in self.__items:
-			sign = self.__signDic[item.getName()]
+			sign = self.__signDict[item.getName()]
 			elems = item.getElements()
 			if(sign == -1): elems.reverse()
 			for el in elems:
@@ -148,7 +148,7 @@ class _SAD_String:
 
 	def __init__(self):
 		"""
-		Constructor of the SAD file line class instance.
+		Constructor. Creates the SAD file line class instance.
 		"""
 		self.__line = ""
 		self.__type = None
@@ -755,7 +755,7 @@ class SAD_Parser:
 		"""
 		return self.__accValues
 
-	def getSAD_LinesDic(self):
+	def getSAD_LinesDict(self):
 		"""
 		Method. It returns the dictionary of the lattice lines
 		that are defined in the SAD file.
@@ -765,7 +765,7 @@ class SAD_Parser:
 			dic[lattLine.getName()] = lattLine
 		return dic
 
-	def getSAD_ElementsDic(self):
+	def getSAD_ElementsDict(self):
 		"""
 		Method. It returns the dictionary of the lattice elements
 		that are defined in the SAD file.
@@ -775,7 +775,7 @@ class SAD_Parser:
 			dic[lattElem.getName()] = lattElem
 		return dic
 
-	def getSAD_VariablesDic(self):
+	def getSAD_VariablesDict(self):
 		"""
 		Method. It returns the dictionary of the variables
 		that are defined in the SAD file.

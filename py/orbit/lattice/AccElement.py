@@ -8,7 +8,6 @@ class AccElement:
 	"""
 	Class. Base class of the accelerator elements hierarchy.
 	"""
-	
 	def __init__(self, name = "no name"):
 		"""
 		Constructor. Creates an empty accelerator element.
@@ -36,12 +35,12 @@ class AccElement:
 		#------------------------------------------------
 		# sub-elements that constitute the entrance,
 		# inside, and exit of this element
-		# __bodyChildNodesDic - dictionary with
-		#                         indexes as keys and
-		#                         lists of nodes as elements
+		# __bodyChildNodesDict - dictionary with
+		#                       indexes as keys and
+		#                       lists of nodes as elements
 		#------------------------------------------------
 		self.__entranceChildNodes = []
-		self.__bodyChildNodesDic = {0:[]}
+		self.__bodyChildNodesDict = {0:[]}
 		self.__exitChildNodes = []
 
 	def initialize(self, paramsDict):
@@ -99,7 +98,7 @@ class AccElement:
 
 			actionsContainer.performBodyActions(paramsDict)
 
-			nodes = self.__bodyChildNodesDic[i]
+			nodes = self.__bodyChildNodesDict[i]
 			for node in nodes:
 					paramsDict["node"] = node
 					paramsDict["parentNode"] = self
@@ -174,7 +173,7 @@ class AccElement:
 			msg = msg + os.linesep
 			msg = msg + "Child node = " + str(node)
 			orbitFinalize(msg)
-		chArr = self.__bodyChildNodesDic[index]
+		chArr = self.__bodyChildNodesDict[index]
 		chArr.insert(0, node)
 
 	def insertChildNodeAtExit(self, node, index = -1):
@@ -218,7 +217,7 @@ class AccElement:
 		"""
 		res = []
 		for i in xrange(self.__nParts):
-			nodes = self.__bodyChildNodesDic[i]
+			nodes = self.__bodyChildNodesDict[i]
 			for node in nodes:
 				res.append(node)
 		return res
@@ -242,7 +241,7 @@ class AccElement:
 		for node in self.__entranceChildNodes:
 			res.append(node)
 		for i in xrange(self.__nParts):
-			nodes = self.__bodyChildNodesDic[i]
+			nodes = self.__bodyChildNodesDict[i]
 			for node in nodes:
 				res.append(node)
 		for node in self.__exitChildNodes:
@@ -280,10 +279,10 @@ class AccElement:
 		"""
 		self.__nParts = n
 		self.__lengthArr = []
-		self.__bodyChildNodesDic = {}
+		self.__bodyChildNodesDict = {}
 		for i in xrange(self.__nParts):
 			self.__lengthArr.append(0.)
-			self.__bodyChildNodesDic[i] = []
+			self.__bodyChildNodesDict[i] = []
 
 	def getnParts(self):
 		"""

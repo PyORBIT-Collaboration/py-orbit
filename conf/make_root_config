@@ -2,11 +2,15 @@
 # Defines common variables for ORBIT executable creation
 ######################################################################
 
+#-------------------------------------------------------------------------------
 # orbit executable name
+#-------------------------------------------------------------------------------
 
 orbit_main = $(ORBIT_ROOT)/bin/pyORBIT
 
+#-------------------------------------------------------------------------------
 # library locations and names
+#-------------------------------------------------------------------------------
 
 LIBS  =
 
@@ -20,13 +24,16 @@ LIBS += $(PYTHON_ROOT_LIB)
 LIBS += -ldl -lreadline -ltermcap -lpthread -lutil -lm -Xlinker -export-dynamic
 LIBS += -L$(MPI_ROOT)/lib -lmpich
 
-#include file locations
+#-------------------------------------------------------------------------------
+# include file locations
+#-------------------------------------------------------------------------------
 
 INCLUDES  =
 
 #-------------------------------------------------------------------------------
-#PYTHON_ROOT_INC  - specify the location of the python header files.
-#It is usually /usr/include/python$(PYTHON_VERSION)
+# PYTHON_ROOT_INC - specify the location of the python header files.
+#   It is usually
+#   /usr/include/python$(PYTHON_VERSION)
 #-------------------------------------------------------------------------------
 
 INCLUDES += -I$(PYTHON_ROOT_INC)

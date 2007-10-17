@@ -170,7 +170,7 @@ class MAD_LattLine:
 		"""
 		return self.__items
 
-	def getLinesDic(self):
+	def getLinesDict(self):
 		"""
 		Method. Returns the dictionary
 		containing all lattice lines, recursive.
@@ -581,31 +581,31 @@ class MAD_Parser:
 		#replace all elem[key] substrings in elements by
 		#variables
 		#-----------------------------------------------
-		accElmDic = {}
+		accElmDict = {}
 		for accElm in self.__accElements:
-			accElmDic[accElm.getName()] = accElm
-		accElmDicInit = accElmDic.copy()
+			accElmDict[accElm.getName()] = accElm
+		accElmDictInit = accElmDict.copy()
 		doNotStop = True
 		while(doNotStop):
 			doNotStop = False
-			accElmDicCp = accElmDic.copy()
-			#print "debug dic size=",len(accElmDicCp)
-			for name,accElm in accElmDicCp.iteritems():
+			accElmDictCp = accElmDict.copy()
+			#print "debug dic size=",len(accElmDictCp)
+			for name,accElm in accElmDictCp.iteritems():
 				kvs = accElm.getParameters()
 				for key,val in kvs.iteritems():
 					if val != None:
 						resArr = StringFunctions.getElementKeys(val)
-						if(len(resArr) == 0 and accElmDic.has_key(name)):
-							del accElmDic[name]
+						if(len(resArr) == 0 and accElmDict.has_key(name)):
+							del accElmDict[name]
 						for [el,k] in resArr:
 							doNotStop = True
-							accElmInside = accElmDicInit[el]
+							accElmInside = accElmDictInit[el]
 							replVal = accElmInside.getParameters()[k]
 							val = StringFunctions.replaceElementKeys(val,el,k,replVal)
 					kvs[key] = val
-			if(len(accElmDicCp) == len(accElmDic)):
+			if(len(accElmDictCp) == len(accElmDict)):
 				print "=========== Unresolved AccElements============"
-				for name,accElm in accElmDicCp.iteritems():
+				for name,accElm in accElmDictCp.iteritems():
 					print "name=",name,"  params=",accElm.getParameters()
 				print "=========== MAD File Problem ==============="
 				print "=================STOP======================="
@@ -618,7 +618,7 @@ class MAD_Parser:
 			val = var.getExpression()
 			resArr = StringFunctions.getElementKeys(val)
 			for [el,k] in resArr:
-				accElmInside = accElmDicInit[el]
+				accElmInside = accElmDictInit[el]
 				replVal = accElmInside.getParameters()[k]
 				val = StringFunctions.replaceElementKeys(val,el,k,replVal)
 			var.setExpression(val)
@@ -871,7 +871,7 @@ class MAD_Parser:
 		"""
 		return self.__accValues
 
-	def getMAD_LinesDic(self):
+	def getMAD_LinesDict(self):
 		"""
 		Method. It returns the dictionary of the lattice lines
 		that are defined in the MAD file.
@@ -881,7 +881,7 @@ class MAD_Parser:
 			dic[lattLine.getName()] = lattLine
 		return dic
 
-	def getMAD_ElementsDic(self):
+	def getMAD_ElementsDict(self):
 		"""
 		Method. It returns the dictionary of the lattice elements
 		that are defined in the MAD file.
@@ -891,7 +891,7 @@ class MAD_Parser:
 			dic[lattElem.getName()] = lattElem
 		return dic
 
-	def getMAD_VariablesDic(self):
+	def getMAD_VariablesDict(self):
 		"""
 		Method. It returns the dictionary of the variables
 		that are defined in the MAD file.

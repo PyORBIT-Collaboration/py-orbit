@@ -182,7 +182,7 @@ static PyObject* 	MagFieldTracker3D_setStepSize(PyObject *self, PyObject *args)
     //--------------------------------------------------------
     // class MagneticFieldTracker3D wrapper                        START
     //--------------------------------------------------------
-    { "__init__",              MagFieldTracker3D_init           ,METH_VARARGS,"Constructor of MagneticFieldTracker3D class"},
+    { "__init__",              MagFieldTracker3D_init           ,METH_VARARGS,"Constructor. Creates MagneticFieldTracker3D class"},
     { "track",                 MagFieldTracker3D_track          ,METH_VARARGS,"Tracks bunch through given magnetic field returning tuple of new alpha,beta,and gamma"},
     { "getStepSize",           MagFieldTracker3D_getStepSize    ,METH_VARARGS,"Returns the step size used by the tracker"},
     { "setStepSize",           MagFieldTracker3D_setStepSize    ,METH_VARARGS,"Sets the step size to be used during track"},

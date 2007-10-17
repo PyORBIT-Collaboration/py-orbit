@@ -18,7 +18,6 @@
 
 ./bin		- directory containing pyORBIT executable.
 
-
 ============SETTING THE ENVIRONMENT VARIABLES=============
 
 The user should define:
@@ -42,3 +41,4 @@ PYTHONPATH	- should be modified to include access to the ORBIT
 		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py
 
 ORBIT_ARCH	- architecture of the system. At present it is LINUX only.
+

@@ -9,3 +9,4 @@ def orbitFinalize(message = None):
 		print "ORBIT message: ", message
 		traceback.print_stack()
 	sys.exit(1)
+	

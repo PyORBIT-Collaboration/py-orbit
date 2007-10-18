@@ -23,36 +23,18 @@ class AccActionsContainer:
 		self.__exitActions = []
 		self.__shouldStop = False
 
-	def performEntranceActions(self, paramsDict):
+	def setName(self, name = "no_name"):
 		"""
-		Method. Perform the required actions at the entrance
-		of the accelerator node.
+		Method. Sets the name of the actions container.
 		"""
-		for action in self.__entranceActions:
-			if(self.__shouldStop):
-				return
-			action(paramsDict)
-			
-	def performBodyActions(self, paramsDict):
-		"""
-		Method. Perform the required actions in the body
-		of the accelerator node.
-		"""
-		for action in self.__bodyActions:
-			if(self.__shouldStop):
-				return
-			action(paramsDict)
+		self.__name = name
 
-	def performExitActions(self, paramsDict):
+	def getName(self):
 		"""
-		Method. Perform the required actions at the exit
-		of the accelerator node.
+		Method. Returns the name of the actions container.
 		"""
-		for action in self.__exitActions:
-			if(self.__shouldStop):
-				return
-			action(paramsDict)
-
+		return self.__name
+		
 	def insertEntranceAction(self, action):
 		"""
 		Method. Insert an action into the entrance
@@ -60,6 +42,13 @@ class AccActionsContainer:
 		"""
 		if(self.__entranceActions.count(action) == 0):
 			self.__entranceActions.insert(0, action)
+
+	def removeEntranceAction(self, action):
+		"""
+		Method. Remove an action from the entrance
+		of the accelerator node.
+		"""
+		return self.__entranceActions.remove(action)
 
 	def getNumbOfEntranceActions(self):
 		"""
@@ -75,12 +64,15 @@ class AccActionsContainer:
 		"""
 		return self.__entranceActions
 
-	def removeEntranceAction(self, action):
+	def performEntranceActions(self, paramsDict):
 		"""
-		Method. Remove an action from the entrance
+		Method. Perform the required actions at the entrance
 		of the accelerator node.
 		"""
-		return self.__entranceActions.remove(action)
+		for action in self.__entranceActions:
+			if(self.__shouldStop):
+				return
+			action(paramsDict)
 
 	def insertBodyAction(self, action):
 		"""
@@ -89,6 +81,13 @@ class AccActionsContainer:
 		"""
 		if(self.__bodyActions.count(action) == 0):
 			self.__bodyActions.insert(0, action)
+
+	def removeBodyAction(self, action):
+		"""
+		Method. Remove an action from the body
+		of the accelerator node.
+		"""
+		return self.__bodyActions.remove(action)
 
 	def getNumbOfBodyActions(self):
 		"""
@@ -104,12 +103,15 @@ class AccActionsContainer:
 		"""
 		return self.__bodyActions
 
-	def removeBodyAction(self, action):
+	def performBodyActions(self, paramsDict):
 		"""
-		Method. Remove an action from the body
+		Method. Perform the required actions in the body
 		of the accelerator node.
 		"""
-		return self.__bodyActions.remove(action)
+		for action in self.__bodyActions:
+			if(self.__shouldStop):
+				return
+			action(paramsDict)
 
 	def insertExitAction(self, action):
 		"""
@@ -118,6 +120,13 @@ class AccActionsContainer:
 		"""
 		if(self.__exitActions.count(action) == 0):
 			self.__exitActions.insert(0, action)
+
+	def removeExitAction(self, action):
+		"""
+		Method. Remove an action from the exit
+		of the accelerator node.
+		"""
+		return self.__exitActions.remove(action)
 
 	def getNumbOfExitActions(self):
 		"""
@@ -133,12 +142,15 @@ class AccActionsContainer:
 		"""
 		return self.__exitActions
 
-	def removeExitAction(self, action):
+	def performExitActions(self, paramsDict):
 		"""
-		Method. Remove an action from the exit
+		Method. Perform the required actions at the exit
 		of the accelerator node.
 		"""
-		return self.__exitActions.remove(action)
+		for action in self.__exitActions:
+			if(self.__shouldStop):
+				return
+			action(paramsDict)
 
 	def setShouldStop(self, shouldStop = True):
 		"""
@@ -154,14 +166,3 @@ class AccActionsContainer:
 		"""
 		return self.__shouldStop
 
-	def setName(self, name = "no_name"):
-		"""
-		Method. Sets the name of the actions container.
-		"""
-		self.__name = name
-
-	def getName(self):
-		"""
-		Method. Returns the name of the actions container.
-		"""
-		return self.__name

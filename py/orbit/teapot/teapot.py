@@ -217,8 +217,8 @@ class _teapotFactory:
 				drft_2 = DriftTEAPOT(madElm.getName()+"_drift")
 				drft_1.setLength(length/2.0)
 				drft_2.setLength(length/2.0)
-				elm.insertChildNodeAtEntrance(drft_1)
-				elm.insertChildNodeAtExit(drft_2)
+				elm.insertEntranceChildNode(drft_1)
+				elm.insertExitChildNode(drft_2)
 			"""
 			volt = 0.
 			if(params.has_key("volt")):
@@ -301,10 +301,10 @@ class NodeTEAPOT(BaseTEAPOT):
 		self.__tiltNodeOUT = TiltTEAPOT()
 		self.__fringeFieldIN = FringeFieldTEAPOT(self)
 		self.__fringeFieldOUT = FringeFieldTEAPOT(self)
-		self.insertChildNodeAtEntrance(self.__tiltNodeIN)
-		self.insertChildNodeAtEntrance(self.__fringeFieldIN)
-		self.insertChildNodeAtExit(self.__fringeFieldOUT)
-		self.insertChildNodeAtExit(self.__tiltNodeOUT)
+		self.insertEntranceChildNode(self.__tiltNodeIN)
+		self.insertEntranceChildNode(self.__fringeFieldIN)
+		self.insertExitChildNode(self.__fringeFieldOUT)
+		self.insertExitChildNode(self.__tiltNodeOUT)
 		self.addParam("tilt",self.__tiltNodeIN.getTiltAngle())
 		self.setType("node teapot")
 
@@ -1001,7 +1001,7 @@ class FringeFieldTEAPOT(BaseTEAPOT):
 		Constructor. Creates the Fringe Field TEAPOT element.
 		"""
 		AccElement.__init__(self,name)
-		self.setParams(parentNode.getParams())
+		self.setParamsDict(parentNode.getParamsDict())
 		self.__trackFunc = trackFunction
 		self.__usage = True
 		self.setType("fringeField teapot")

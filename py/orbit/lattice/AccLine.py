@@ -104,17 +104,17 @@ class AccLine:
 			msg = msg + os.linesep
 			msg = msg + "index = " + str(index)
 			msg = msg + os.linesep
-			msg = msg + "number of children = " + str(self.getChildNodesAllCount())
+			msg = msg + "number of children = " + str(self.getAllChildNodesCount())
 			orbitFinalize(msg)
 		del self.__children[index:(index+1)]
 
-	def removeChildNodesAll(self):
+	def removeAllChildNodes(self):
 		"""
 		Method. Removes all children from the line.
 		"""
 		self.__children = []
 
-	def getChildNodesAll(self):
+	def getAllChildNodes(self):
 		"""
 		Method. Returns all children of the line as a list.
 		"""

@@ -26,50 +26,48 @@ class AccLine:
 		self.__isInitialized = False
 		self.__children = []
 
-	def trackActions(self, actionsContainer, paramsDict = {}):
+	def setName(self,name = "no_name"):
 		"""
-		Method. Tracks the actions through the accelerator line.
+		Method. Sets the name of the line.
 		"""
-		paramsDict["node"] = self
-		parentNode = paramsDict["parentNode"]
+		self.__name = name
 
-		if(actionsContainer.getShouldStop()):
-			return
-
-		actionsContainer.performEntranceActions(paramsDict)
-
-		for node in self.__children:
-			paramsDict["node"] = node
-			paramsDict["parentNode"] = self
-
-			if(actionsContainer.getShouldStop()):
-				return
-
-			node.trackActions(actionsContainer, paramsDict)
-
-		paramsDict["node"] = self
-		paramsDict["parentNode"] = parentNode
-
-		if(actionsContainer.getShouldStop()):
-			return
-		actionsContainer.performExitActions(paramsDict)
-
-	def appendChildNode(self, node):
+	def getName(self):
 		"""
-		Method. Appends a child node to the end of the line.
+		Method. Returns the name of the line.
 		"""
-		if(isinstance(node,self.AccElement) != True and isinstance(node,self.AccLine) != True ):
-			msg = "A child of AccLine must be an AccElement or AccLine!"
-			msg = msg + os.linesep
-			msg = msg + "method appendChildNode(self, node)"
-			msg = msg + os.linesep
-			msg = msg + "Name of element = " + self.getName()
-			msg = msg + os.linesep
-			msg = msg + "Type of element = " + self.getType()
-			msg = msg + os.linesep
-			msg = msg + "Child node = " + str(node)
-			orbitFinalize(msg)
-		self.__children.append(node)
+		return self.__name
+
+	def getType(self):
+		"""
+		Method. Returns the type of the line.
+		"""
+		return self.__type
+
+	def setLength(self, L = 0.):
+		"""
+		Method. Sets the physical length of the line.
+		"""
+		if(abs(L) < 1.0e-9): L = 0.
+		self.__length = L
+
+	def getLength(self):
+		"""
+		Method. Returns the physical length of the line.
+		"""
+		return self.__length
+
+	def setInitialized(self, initialized = True):
+		"""
+		Method. Sets the initialization status (True or False).
+		"""
+		self.__isInitialized = initialized
+	
+	def isInitialized(self):
+		"""
+		Method. Returns the initialization status (True or False).
+		"""
+		return self.__isInitialized
 
 	def insertChildNode(self, node, index = 0):
 		"""
@@ -88,6 +86,23 @@ class AccLine:
 			msg = msg + "Child node = " + str(node)
 			orbitFinalize(msg)
 		self.__children.insert(index, node)
+
+	def appendChildNode(self, node):
+		"""
+		Method. Appends a child node to the end of the line.
+		"""
+		if(isinstance(node,self.AccElement) != True and isinstance(node,self.AccLine) != True ):
+			msg = "A child of AccLine must be an AccElement or AccLine!"
+			msg = msg + os.linesep
+			msg = msg + "method appendChildNode(self, node)"
+			msg = msg + os.linesep
+			msg = msg + "Name of element = " + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element = " + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "Child node = " + str(node)
+			orbitFinalize(msg)
+		self.__children.append(node)
 
 	def removeChildNode(self, index = 0):
 		"""
@@ -120,45 +135,31 @@ class AccLine:
 		"""
 		return self.__children
 
-	def setName(self,name = "no_name"):
+	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""
-		Method. Sets the name of the line.
+		Method. Tracks the actions through the accelerator line.
 		"""
-		self.__name = name
+		paramsDict["node"] = self
+		parentNode = paramsDict["parentNode"]
 
-	def getName(self):
-		"""
-		Method. Returns the name of the line.
-		"""
-		return self.__name
+		if(actionsContainer.getShouldStop()):
+			return
 
-	def getType(self):
-		"""
-		Method. Returns the type of the line.
-		"""
-		return self.__type
+		actionsContainer.performEntranceActions(paramsDict)
 
-	def setLength(self, L = 0.):
-		"""
-		Method. Sets the physical length of the line.
-		"""
-		if(abs(L) < 1.0e-9): L = 0.
-		self.__length = L
+		for node in self.__children:
+			paramsDict["node"] = node
+			paramsDict["parentNode"] = self
 
-	def getLength(self):
-		"""
-		Method. Returns the physical length of the line.
-		"""
-		return self.__length
+			if(actionsContainer.getShouldStop()):
+				return
 
-	def isInitialized(self):
-		"""
-		Method. Returns the initialization status (True or False).
-		"""
-		return self.__isInitialized
+			node.trackActions(actionsContainer, paramsDict)
 
-	def setInitialized(self, initialized = True):
-		"""
-		Method. Sets the initialization status (True or False).
-		"""
-		self.__isInitialized = initialized
+		paramsDict["node"] = self
+		paramsDict["parentNode"] = parentNode
+
+		if(actionsContainer.getShouldStop()):
+			return
+		actionsContainer.performExitActions(paramsDict)
+

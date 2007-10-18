@@ -22,6 +22,50 @@ class AccLattice:
 		self.__isInitialized = False
 		self.__children = []
 
+	def setName(self, name = "no_name"):
+		"""
+		Method. Sets the name of the lattice.
+		"""
+		self.__name = name
+
+	def getName(self):
+		"""
+		Method. Returns the name of the lattice.
+		"""
+		return self.__name
+
+	def getType(self):
+		"""
+		Method. Returns the type of the lattice.
+		"""
+		return self.__type
+
+	def getLength(self):
+		"""
+		Method. Returns the physical length of the lattice.
+		"""
+		return self.__length
+
+	def setInitialized(self, initialized = True):
+		"""
+		Method. Sets the initialization status (True or False).
+		"""
+		actions = self.AccActionsContainer()
+
+		def accElemExit(paramsDict):
+			node = paramsDict["node"]
+			node.setInitialized(initialized)
+
+		actions.insertExitAction(accElemExit)
+		self.trackActions(actions,paramsDict)
+		self.__isInitialized = initialized
+
+	def isInitialized(self):
+		"""
+		Method. Returns the initialization status (True or False).
+		"""
+		return self.__isInitialized
+
 	def initialize(self, actions = None, paramsDict = {}):
 		"""
 		Method. Initializes the lattice and child node structures.
@@ -56,6 +100,23 @@ class AccLattice:
 		self.__length = d["position"]
 		self.__isInitialized = True
 
+	def insertChildNode(self, node):
+		"""
+		Method. Appends a child node to this node.
+		"""
+		if(isinstance(node, self.AccElement) != True and isinstance(node, self.AccLine) != True):
+			msg = "A child of an AccLattice must be an AccElement or AccLine!"
+			msg = msg + os.linesep
+			msg = msg + "method insertChildNode(self, node)"
+			msg = msg + os.linesep
+			msg = msg + "Name of lattice = " + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element = " + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "Child node = " + str(node)
+			orbitFinalize(msg)
+		self.__children.append(node)
+
 	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""
 		Method. Tracks the actions through all nodes in the lattice.
@@ -82,67 +143,6 @@ class AccLattice:
 		paramsDict["node"] = self
 		paramsDict["parentNode"] = None
 		actionsContainer.performExitActions(paramsDict)
-
-	def insertChildNode(self, node):
-		"""
-		Method. Appends a child node to this node.
-		"""
-		if(isinstance(node, self.AccElement) != True and isinstance(node, self.AccLine) != True):
-			msg = "A child of an AccLattice must be an AccElement or AccLine!"
-			msg = msg + os.linesep
-			msg = msg + "method insertChildNode(self, node)"
-			msg = msg + os.linesep
-			msg = msg + "Name of lattice = " + self.getName()
-			msg = msg + os.linesep
-			msg = msg + "Type of element = " + self.getType()
-			msg = msg + os.linesep
-			msg = msg + "Child node = " + str(node)
-			orbitFinalize(msg)
-		self.__children.append(node)
-
-	def setName(self, name = "no_name"):
-		"""
-		Method. Sets the name of the lattice.
-		"""
-		self.__name = name
-
-	def getName(self):
-		"""
-		Method. Returns the name of the lattice.
-		"""
-		return self.__name
-
-	def getType(self):
-		"""
-		Method. Returns the type of the lattice.
-		"""
-		return self.__type
-
-	def getLength(self):
-		"""
-		Method. Returns the physical length of the lattice.
-		"""
-		return self.__length
-
-	def isInitialized(self):
-		"""
-		Method. Returns the initialization status (True or False).
-		"""
-		return self.__isInitialized
-
-	def setInitialized(self, initialized = True):
-		"""
-		Method. Sets the initialization status (True or False).
-		"""
-		actions = self.AccActionsContainer()
-
-		def accElemExit(paramsDict):
-			node = paramsDict["node"]
-			node.setInitialized(initialized)
-
-		actions.insertExitAction(accElemExit)
-		self.trackActions(actions,paramsDict)
-		self.__isInitialized = initialized
 
 	def trackBunch(self, bunch, actions = None, paramsDict = {}):
 		"""

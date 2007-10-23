@@ -23,7 +23,7 @@ class AccElement:
 		self.__name = name
 		self.__type = "generic"
 		#------------------------------------------------
-		# nParts - number of parts into which 
+		# nParts - number of parts into which the body of
 		#          this element is divided.
 		#------------------------------------------------
 		self.__nParts = 1
@@ -33,14 +33,18 @@ class AccElement:
 		self.__params = {}
 		self.__isInitialized = False
 		#------------------------------------------------
-		# sub-elements that constitute the entrance,
-		# inside, and exit of this element
-		# __bodyChildNodesDict - dictionary with
-		#                        indexes as keys and
-		#                        lists of nodes as elements
+		# sub-elements placed at the entrance, inside,
+		# and exit of this element. These may be diagnostics,
+		# collective effects, apertures, etc. which are 
+		# outside the scope of this basic element.
+		# __bodyChildNodes - list containing lists of nodes
+		#                    as entries. Other nodes or
+		#                    actions can be inserted when
+		#                    desired.
 		#------------------------------------------------
 		self.__entranceChildNodes = []
-		self.__bodyChildNodesDict = {0:[]}
+		self.__bodyChildNodes = []
+		self.__bodyChildNodes.append([])
 		self.__exitChildNodes = []
 
 	def initialize(self, paramsDict):
@@ -89,15 +93,15 @@ class AccElement:
 
 	def setnParts(self, n = 1):
 		"""
-		Method. Sets the number of Body parts of the node.
+		Method. Sets the number of body parts of the node.
 		This method does not call the initialize() method.
 		"""
 		self.__nParts = n
 		self.__lengthArr = []
-		self.__bodyChildNodesDict = {}
+		self.__bodyChildNodes = []
 		for i in xrange(self.__nParts):
 			self.__lengthArr.append(0.)
-			self.__bodyChildNodesDict[i] = []
+			self.__bodyChildNodes.append([])
 
 	def getnParts(self):
 		"""
@@ -110,6 +114,7 @@ class AccElement:
 		Method. Sets the physical length of the part
 		of the node with given index.
 		"""
+		if(abs(L) < 1.0e-9): L = 0.
 		self.__lengthArr[index] = L
 
 	def getPartLength(self, index):
@@ -155,7 +160,7 @@ class AccElement:
 		"""
 		Method. Adds the parameters from an external
 		dictionary to the parameters of the node.
-		The values of the existing keys' will be replaced
+		The values of the existing keys will be replaced
 		by new ones from the external dictionary.
 		"""
 		self.__params.update(params)
@@ -204,15 +209,16 @@ class AccElement:
 		"""
 		return self.__isInitialized
 
-	def insertEntranceChildNode(self, node, index = -1):
+	def appendEntranceChildNode(self, node):
 		"""
-		Method. Inserts a child node into the entrance to this node.
-		The third parameter is the child node index.
+		Method. Appends a child node at the entrance of this node.
+		The action of the child occurs after the action of the
+		parent at the entrance.
 		"""
 		if(isinstance(node, self.AccElement) != True):
 			msg = "A child of AccElement must be a subclass!"
 			msg = msg + os.linesep
-			msg = msg + "method insertEntranceChildNode(self, node)"
+			msg = msg + "method appendEntranceChildNode(self, node)"
 			msg = msg + os.linesep
 			msg = msg + "Name of element = " + self.getName()
 			msg = msg + os.linesep
@@ -220,33 +226,26 @@ class AccElement:
 			msg = msg + os.linesep
 			msg = msg + "Child node = " + str(node)
 			orbitFinalize(msg)
-		if(index <= 0):
-			self.__entranceChildNodes.insert(0, node)
-		else:
-			if(index < len(self.__entranceChildNodes)):
-				self.__entranceChildNodes.insert(index, node)
-			else:
-				self.__entranceChildNodes.append(node)
+		self.__entranceChildNodes.append(node)
 
 	def getEntranceChildNodes(self):
 		"""
-		Method. Returns all children at Entrance of this node
-		as a list.
+		Method. Returns a list of all children at entrance of this node
 		"""
-		res = []
+		result = []
 		for node in self.__entranceChildNodes:
-			res.append(node)
-		return res
+			result.append(node)
+		return result
 
-	def insertBodyChildNode(self, node, index = 0):
+	def appendBodyChildNode(self, node, index = 0):
 		"""
-		Method. Inserts a child node into the body of this node.
-		The third parameter is the child node index.
+		Method. Appends a child node in the body of this node.
+		The third parameter is the body node index.
 		"""
 		if(isinstance(node, self.AccElement) != True):
-			msg = "The child of AccElement must be a subclass!"
+			msg = "A child of AccElement must be a subclass!"
 			msg = msg + os.linesep
-			msg = msg + "method insertBodyChildNode(self, node, index = 0)"
+			msg = msg + "method appendBodyChildNode(self, node, index = 0)"
 			msg = msg + os.linesep
 			msg = msg + "Name of element = " + self.getName()
 			msg = msg + os.linesep
@@ -254,30 +253,42 @@ class AccElement:
 			msg = msg + os.linesep
 			msg = msg + "Child node = " + str(node)
 			orbitFinalize(msg)
-		chArr = self.__bodyChildNodesDict[index]
-		chArr.insert(0, node)
+		if((index < 0) or (index >= self.__nParts)):
+			msg = "Body node index is out of range!"
+			msg = msg + os.linesep
+			msg = "__nParts, index = " + str(self.__nParts) + ", " + str(index)
+			msg = msg + os.linesep			
+			msg = msg + "method appendBodyChildNode(self, node, index = 0)"
+			msg = msg + os.linesep
+			msg = msg + "Name of element = " + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element = " + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "Child node = " + str(node)
+			orbitFinalize(msg)
+		self.__bodyChildNodes[index].append(node)
 
 	def getBodyChildNodes(self):
 		"""
-		Method. Returns all children in Body of this node
-		as a list.
+		Method. Returns a list of all children in body of this node
 		"""
-		res = []
+		result = []
 		for i in xrange(self.__nParts):
-			nodes = self.__bodyChildNodesDict[i]
+			nodes = self.__bodyChildNodes[i]
 			for node in nodes:
-				res.append(node)
-		return res
+				result.append(node)
+		return result
 
-	def insertExitChildNode(self, node, index = -1):
+	def appendExitChildNode(self, node):
 		"""
-		Method. Inserts a child node into the exit from this node.
-		The third parameter is the child node index.
+		Method. Appends a child node at the exit of this node.
+		The action of the child occurs before the action of the
+		parent at the exit.
 		"""
 		if(isinstance(node, self.AccElement) != True):
-			msg = "The child of AccElement must be a subclass!"
+			msg = "A child of AccElement must be a subclass!"
 			msg = msg + os.linesep
-			msg = msg + "method insertExitChildNode(self, node)"
+			msg = msg + "method appendExitChildNode(self, node)"
 			msg = msg + os.linesep
 			msg = msg + "Name of element = " + self.getName()
 			msg = msg + os.linesep
@@ -285,39 +296,31 @@ class AccElement:
 			msg = msg + os.linesep
 			msg = msg + "Child node = " + str(node)
 			orbitFinalize(msg)
-		if(index <= 0):
-			self.__exitChildNodes.insert(0, node)
-		else:
-			if(index < len(self.__exitChildNodes)):
-				self.__exitChildNodes.insert(index, node)
-			else:
-				self.__exitChildNodes.append(node)
+		self.__exitChildNodes.append(node)
 
 	def getExitChildNodes(self):
 		"""
-		Method. Returns all children at Exit of this node
-		as a list.
+		Method. Returns a list of all children at exit of this node
 		"""
-		res = []
+		result = []
 		for node in self.__exitChildNodes:
-			res.append(node)
-		return res
+			result.append(node)
+		return result
 
 	def getAllChildNodes(self):
 		"""
-		Method. Returns all children of this node
-		as a list.
+		Method. Returns a list of all children of this node
 		"""
-		res = []
+		result = []
 		for node in self.__entranceChildNodes:
-			res.append(node)
+			result.append(node)
 		for i in xrange(self.__nParts):
-			nodes = self.__bodyChildNodesDict[i]
+			nodes = self.__bodyChildNodes[i]
 			for node in nodes:
-				res.append(node)
+				result.append(node)
 		for node in self.__exitChildNodes:
-			res.append(node)
-		return res
+			result.append(node)
+		return result
 
 	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""
@@ -326,61 +329,43 @@ class AccElement:
 		paramsDict["node"] = self
 		parentNode = paramsDict["parentNode"]
 		self.__activePartIndex = 0
-
 		if(actionsContainer.getShouldStop()):
 			return
-
 		actionsContainer.performEntranceActions(paramsDict)
-
 		if(actionsContainer.getShouldStop()):
 			return
-
 		for node in self.__entranceChildNodes:
 			paramsDict["node"] = node
 			paramsDict["parentNode"] = self
-
 			if(actionsContainer.getShouldStop()):
 				return
-
 			node.trackActions(actionsContainer, paramsDict)
-
 		for i in xrange(self.__nParts):
 			paramsDict["node"] = self
 			paramsDict["parentNode"] = parentNode
 			self.__activePartIndex = i
-
 			if(actionsContainer.getShouldStop()):
 				return
-
 			actionsContainer.performBodyActions(paramsDict)
-
-			nodes = self.__bodyChildNodesDict[i]
+			nodes = self.__bodyChildNodes[i]
 			for node in nodes:
-					paramsDict["node"] = node
-					paramsDict["parentNode"] = self
-
-					if(actionsContainer.getShouldStop()):
-						return
-
-					node.trackActions(actionsContainer, paramsDict)
-
+				paramsDict["node"] = node
+				paramsDict["parentNode"] = self
+				if(actionsContainer.getShouldStop()):
+					return
+				node.trackActions(actionsContainer, paramsDict)
+		self.__activePartIndex = 0
 		for node in self.__exitChildNodes:
 			paramsDict["node"] = node
 			paramsDict["parentNode"] = self
-
 			if(actionsContainer.getShouldStop()):
 				return
-
 			node.trackActions(actionsContainer, paramsDict)
-
 		paramsDict["node"] = self
 		paramsDict["parentNode"] = parentNode
-
 		if(actionsContainer.getShouldStop()):
 			return
-
 		actionsContainer.performExitActions(paramsDict)
-		self.__activePartIndex = 0
 
 	def track(self, paramsDict):
 		"""

@@ -56,7 +56,7 @@ class AccLattice:
 			node = paramsDict["node"]
 			node.setInitialized(initialized)
 
-		actions.insertExitAction(accElemExit)
+		actions.appendExitAction(accElemExit)
 		self.trackActions(actions,paramsDict)
 		self.__isInitialized = initialized
 
@@ -93,8 +93,8 @@ class AccLattice:
 				del d["position_start_line"][line_ind]
 				node.setLength(d["position"] - start_pos)
 
-		actions.insertEntranceAction(accElemEntrance)
-		actions.insertExitAction(accElemExit)
+		actions.appendEntranceAction(accElemEntrance)
+		actions.appendExitAction(accElemExit)
 
 		self.trackActions(actions, paramsDict)
 		self.__length = d["position"]
@@ -157,5 +157,5 @@ class AccLattice:
 			if(isinstance(node, self.AccElement)):
 				node.track(paramsDict)
 
-		actions.insertBodyAction(track)
+		actions.appendBodyAction(track)
 		self.trackActions(actions, paramsDict)

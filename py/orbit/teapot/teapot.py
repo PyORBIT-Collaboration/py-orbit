@@ -217,8 +217,8 @@ class _teapotFactory:
 				drft_2 = DriftTEAPOT(madElm.getName()+"_drift")
 				drft_1.setLength(length/2.0)
 				drft_2.setLength(length/2.0)
-				elm.insertEntranceChildNode(drft_1)
-				elm.insertExitChildNode(drft_2)
+				elm.appendEntranceChildNode(drft_1)
+				elm.appendExitChildNode(drft_2)
 			"""
 			volt = 0.
 			if(params.has_key("volt")):
@@ -301,10 +301,10 @@ class NodeTEAPOT(BaseTEAPOT):
 		self.__tiltNodeOUT = TiltTEAPOT()
 		self.__fringeFieldIN = FringeFieldTEAPOT(self)
 		self.__fringeFieldOUT = FringeFieldTEAPOT(self)
-		self.insertEntranceChildNode(self.__tiltNodeIN)
-		self.insertEntranceChildNode(self.__fringeFieldIN)
-		self.insertExitChildNode(self.__fringeFieldOUT)
-		self.insertExitChildNode(self.__tiltNodeOUT)
+		self.appendEntranceChildNode(self.__tiltNodeIN)
+		self.appendEntranceChildNode(self.__fringeFieldIN)
+		self.appendExitChildNode(self.__fringeFieldOUT)
+		self.appendExitChildNode(self.__tiltNodeOUT)
 		self.addParam("tilt",self.__tiltNodeIN.getTiltAngle())
 		self.setType("node teapot")
 

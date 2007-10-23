@@ -34,14 +34,14 @@ class AccActionsContainer:
 		Method. Returns the name of the actions container.
 		"""
 		return self.__name
-		
-	def insertEntranceAction(self, action):
+
+	def appendEntranceAction(self, action):
 		"""
-		Method. Insert an action into the entrance
+		Method. Append an action at the entrance
 		of the accelerator node.
 		"""
 		if(self.__entranceActions.count(action) == 0):
-			self.__entranceActions.insert(0, action)
+			self.__entranceActions.append(action)
 
 	def removeEntranceAction(self, action):
 		"""
@@ -59,8 +59,8 @@ class AccActionsContainer:
 
 	def getEntranceActions(self):
 		"""
-		Method. Return the actions at the entrance
-		of the accelerator node as a list.
+		Method. Returns a list of the actions at the entrance
+		of the accelerator node
 		"""
 		return self.__entranceActions
 
@@ -74,13 +74,13 @@ class AccActionsContainer:
 				return
 			action(paramsDict)
 
-	def insertBodyAction(self, action):
+	def appendBodyAction(self, action):
 		"""
-		Method. Insert an action into the body
+		Method. Append an action in the body
 		of the accelerator node.
 		"""
 		if(self.__bodyActions.count(action) == 0):
-			self.__bodyActions.insert(0, action)
+			self.__bodyActions.append(action)
 
 	def removeBodyAction(self, action):
 		"""
@@ -98,8 +98,8 @@ class AccActionsContainer:
 
 	def getBodyActions(self):
 		"""
-		Method. Return the actions in the body
-		of the accelerator node as a list.
+		Method. Returns a list of the actions in the body
+		of the accelerator node
 		"""
 		return self.__bodyActions
 
@@ -113,13 +113,13 @@ class AccActionsContainer:
 				return
 			action(paramsDict)
 
-	def insertExitAction(self, action):
+	def appendExitAction(self, action):
 		"""
-		Method. Insert an action into the exit
+		Method. Append an action at the exit
 		of the accelerator node.
 		"""
 		if(self.__exitActions.count(action) == 0):
-			self.__exitActions.insert(0, action)
+			self.__exitActions.append(action)
 
 	def removeExitAction(self, action):
 		"""
@@ -137,8 +137,8 @@ class AccActionsContainer:
 
 	def getExitActions(self):
 		"""
-		Method. Method. Return the actions at the exit
-		of the accelerator node as a list.
+		Method. Returns a list of the actions at the exit
+		of the accelerator node
 		"""
 		return self.__exitActions
 
@@ -154,14 +154,14 @@ class AccActionsContainer:
 
 	def setShouldStop(self, shouldStop = True):
 		"""
-		Method. Sets should_stop to True in
+		Method. Sets shouldStop to True in
 		the actions container.
 		"""
 		self.__shouldStop = shouldStop
 
 	def getShouldStop(self):
 		"""
-		Method. Returns the value of should_stop in
+		Method. Returns the value of shouldStop in
 		the actions container.
 		"""
 		return self.__shouldStop

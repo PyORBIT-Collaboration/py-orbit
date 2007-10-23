@@ -23,7 +23,7 @@ class AccActionsContainer:
 		self.__exitActions = []
 		self.__shouldStop = False
 
-	def setName(self, name = "no_name"):
+	def setName(self, name = "no name"):
 		"""
 		Method. Sets the name of the actions container.
 		"""

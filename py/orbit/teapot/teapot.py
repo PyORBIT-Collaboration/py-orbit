@@ -60,7 +60,7 @@ class TEAPOT:
 		# element factory
 		for madElm in accMADElements:
 			elm = _teapotFactory.getElement(madElm)
-			lattice.insertChildNode(elm)
+			lattice.appendChildNode(elm)
 		lattice.initialize()
 		return lattice
 

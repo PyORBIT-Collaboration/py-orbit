@@ -67,7 +67,7 @@ class AccElement:
 		"""
 		pass
 
-	def setName(self, name = "no_name"):
+	def setName(self, name = "no name"):
 		"""
 		Method. Sets the name of the node.
 		"""
@@ -170,7 +170,7 @@ class AccElement:
 		Method. Returns the parameters of the node
 		"""
 		if(not self.hasParam(key)):
-			msg = "The node does not have a prameter for the key you requested!"
+			msg = "The node does not have a parameter for the key you requested!"
 			msg = msg + os.linesep
 			msg = msg + "method getParam(self, key)"
 			msg = msg + os.linesep

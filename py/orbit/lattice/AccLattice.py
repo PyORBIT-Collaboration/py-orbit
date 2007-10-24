@@ -15,7 +15,6 @@ class AccLattice:
 		"""
 		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement  = orbit.lattice.AccElement
-		self.AccLine = orbit.lattice.AccLine
 		self.AccLattice = orbit.lattice.AccLattice
 		self.__name = name
 		self.__type = "lattice"

@@ -14,7 +14,7 @@ from orbit.teapot_base import TPB
 from orbit.utils import orbitFinalize
 
 #import the general accelerator elements and lattice
-from orbit.lattice import AccLattice, AccElement, AccLine
+from orbit.lattice import AccLattice, AccElement
 
 #import the MAD parser. It will be used only for TEAPOT class
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement

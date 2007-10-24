@@ -14,7 +14,6 @@ class AccElement:
 		"""
 		self.AccActionsContainer = orbit.lattice.AccActionsContainer
 		self.AccElement = orbit.lattice.AccElement
-		self.AccLine = orbit.lattice.AccLine
 		self.AccLattice = orbit.lattice.AccLattice
 		#------------------------------------------------
 		# there is no position parameter,

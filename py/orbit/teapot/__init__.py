@@ -1,8 +1,8 @@
 """
-The module includes teapot Python classes.
-These classes are using teapot_base C-wrappers functions.
+Module. Includes teapot Python classes.
+These classes use teapot_base C++ wrappers.
 """
-#IMPORT Operations:
+
 from teapot import TEAPOT
 from teapot import BaseTEAPOT
 from teapot import BendTEAPOT
@@ -30,5 +30,4 @@ __all__.append("RingRFTEAPOT")
 __all__.append("SolenoidTEAPOT")
 __all__.append("TiltTEAPOT")
 __all__.append("TPB")
-
 

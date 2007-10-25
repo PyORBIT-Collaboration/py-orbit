@@ -1,7 +1,9 @@
 """
-The module includes teapot c-functions wrappers.
+Module. Includes wrappers for teapot C++ functions.
 """
-#IMPORT Operations:
+
 from TEAPOT_BASE import TPB
 
-__all__ = ["TPB"]
+__all__ = []
+__all__.append("TPB")
+

@@ -1,5 +1,5 @@
 """
-The module includes classes for all TEAPOT elements. The approach is based
+Module. Includes classes for all TEAPOT elements. The approach is based
 on the original ORBIT approach developed by J. Holmes.
 """
 
@@ -7,40 +7,41 @@ import sys
 import os
 import math
 
-#import teapot base functions from wrapper around c++ functions
+# import teapot base functions from wrapper around C++ functions
 from orbit.teapot_base import TPB
 
-#import the function that creates multidimensional arrays
+# import the function that creates multidimensional arrays
 from orbit.utils import orbitFinalize
 
-#import the general accelerator elements and lattice
+# import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccElement
 
-#import the MAD parser. It will be used only for TEAPOT class
+# import the MAD parser to construct lattices of TEAPOT elements.
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement
 
 """
 Drift
-Multipole
-Quad
 Bend
+Quad
+Multipole
 Solenoid
-ringRF
 Kicker
+ringRF
 """
 
 class TEAPOT:
 	"""
-	The shell class for the TEAPOT tracker class collection.
-	It calls a MAD parser and the TEAPOT accelerator element factory.
+	Class. Shell class for the TEAPOT tracker class collection.
+	TEAPOT calls the MAD parser and the TEAPOT accelerator
+	element factory.
 	"""
 	def __init__(self):
 		pass
 
 	def getLattice(self, mad_file_name, lineName):
 		"""
-		Method. It returns the teapot lattice as an
-		instance of AccLattice class from lattice.py package.
+		Method. Returns the teapot lattice as an instance
+		of AccLattice class from lattice.py package.
 		"""
 		lattice = AccLattice()
 		parser = MAD_Parser()
@@ -48,58 +49,58 @@ class TEAPOT:
 		accLines = parser.getMAD_LinesDict()
 		if(not accLines.has_key(lineName)):
 			print "==============================="
-			print "MAD file:",mad_file_name
-			print "Can not find accelerator line:",lineName
+			print "MAD file: ", mad_file_name
+			print "Can not find accelerator line: ", lineName
 			print "STOP."
 			sys.exit(1)
-		#accelerator lines and elements from mad_parser package
+		# accelerator lines and elements from mad_parser package
 		accMAD_Line = accLines[lineName]
 		lattice.setName(lineName)
 		accMADElements = accMAD_Line.getElements()
-		#make TEAPOT lattice elements by using TEAPOT
+		# make TEAPOT lattice elements by using TEAPOT
 		# element factory
-		for madElm in accMADElements:
-			elm = _teapotFactory.getElement(madElm)
-			lattice.appendChildNode(elm)
+		for madElem in accMADElements:
+			elem = _teapotFactory.getElement(madElem)
+			lattice.appendChildNode(elem)
 		lattice.initialize()
 		return lattice
 
 class _teapotFactory:
 	"""
-	The factory class to produce TEAPOT accelerator elements.
+	Class. Factory to produce TEAPOT accelerator elements.
 	"""
 	def __init__(self):
 		pass
 
-	def getElement(self, madElm):
+	def getElement(self, madElem):
 		"""
 		Method. It produces the TEAPOT accelerator elements.
 		"""
-		#madElm = MAD_LattElement(" "," ")
-		params_ini = madElm.getParameters()
+		# madElem = MAD_LattElement(" "," ")
+		params_ini = madElem.getParameters()
 		params = {}
 		for par_key in params_ini.iterkeys():
 			params[par_key.lower()] = params_ini[par_key]
-		#Length parameter
+		# Length parameter
 		length = 0.
 		if(params.has_key("l")):
 			length = params["l"]
-		#TILT parameter - if it is there tilt = True,
-		#and if it has value tiltAngle = value
+		# TILT parameter - if it is there tilt = True,
+		# and if it has value tiltAngle = value
 		tilt = False
 		tiltAngle = None
 		if(params.has_key("tilt")):
 			tilt = True
 			if(params["tilt"] != None):
 				tiltAngle = params["tilt"]
-		#============DRIFT Element ==================================
-		elm = None
-		if(madElm.getType().lower() == "drift"):
-			elm = DriftTEAPOT(madElm.getName())
-		#============Dipole Element SBEND or RBEND ===================
-		if(madElm.getType().lower()  == "sbend" or \
-			 madElm.getType().lower()  == "rbend"):
-			elm = BendTEAPOT(madElm.getName())
+		# ============DRIFT Element ==================================
+		elem = None
+		if(madElem.getType().lower() == "drift"):
+			elem = DriftTEAPOT(madElem.getName())
+		# ============Dipole Element SBEND or RBEND ===================
+		if(madElem.getType().lower()  == "sbend" or \
+			 madElem.getType().lower()  == "rbend"):
+			elem = BendTEAPOT(madElem.getName())
 
 			theta = 0.
 			if(params.has_key("angle")):
@@ -113,14 +114,14 @@ class _teapotFactory:
 			if(params.has_key("e2")):
 				ea2 = params["e2"]
 
-			if(madElm.getType().lower() == "rbend" ):
+			if(madElem.getType().lower() == "rbend" ):
 				length = length*(theta/2.0)/math.sin(theta/2.0)
 				ea1 = ea1 + theta/2.0
 				ea2 = ea2 + theta/2.0
 
-			elm.addParam("theta",theta)
-			elm.addParam("ea1",ea1)
-			elm.addParam("ea2",ea2)
+			elem.addParam("theta",theta)
+			elem.addParam("ea1",ea1)
+			elem.addParam("ea2",ea2)
 			if(tilt):
 				if(tiltAngle == None):
 					tiltAngle = math.math.pi/2.0
@@ -138,20 +139,20 @@ class _teapotFactory:
 			if(params.has_key("k3")):
 				k3 = params["k3"]
 				params["k3l"] = k3*length
-		#===========QUAD quadrupole element =====================
-		if(madElm.getType().lower()  == "quad" or \
-			 madElm.getType().lower()  == "quadrupole"):
-			elm = QuadTEAPOT(madElm.getName())
+		# ===========QUAD quadrupole element =====================
+		if(madElem.getType().lower()  == "quad" or \
+			 madElem.getType().lower()  == "quadrupole"):
+			elem = QuadTEAPOT(madElem.getName())
 			kq = 0.
 			if(params.has_key("k1")):
 				kq = params["k1"]
-			elm.addParam("kq",kq)
+			elem.addParam("kq",kq)
 			if(tilt):
 				if(tiltAngle == None):
 					tiltAngle = math.math.pi/4.0
-		#===========Sextupole element =====================
-		if(madElm.getType().lower()  == "sextupole"):
-			elm = MultipoleTEAPOT(madElm.getName())
+		# ===========Sextupole element =====================
+		if(madElem.getType().lower()  == "sextupole"):
+			elem = MultipoleTEAPOT(madElem.getName())
 			k2 = 0.
 			if(params.has_key("k2")):
 				k2 = params["k2"]
@@ -159,9 +160,9 @@ class _teapotFactory:
 			if(tilt):
 				if(tiltAngle == None):
 					tiltAngle = math.math.pi/6.0
-		#===========Octupole element =====================
-		if(madElm.getType().lower()  == "octupole"):
-			elm = MultipoleTEAPOT(madElm.getName())
+		# ===========Octupole element =====================
+		if(madElem.getType().lower()  == "octupole"):
+			elem = MultipoleTEAPOT(madElem.getName())
 			k3 = 0.
 			if(params.has_key("k3")):
 				k3 = params["k3"]
@@ -169,56 +170,56 @@ class _teapotFactory:
 			if(tilt):
 				if(tiltAngle == None):
 					tiltAngle = math.math.pi/8.0
-		#===========Multipole element =====================
-		if(madElm.getType().lower()  == "multipole"):
-			elm = MultipoleTEAPOT(madElm.getName())
-		#===========Solenoid element ======================
-		if(madElm.getType().lower()  == "solenoid"):
-			elm = SolenoidTEAPOT(madElm.getName())
+		# ===========Multipole element =====================
+		if(madElem.getType().lower()  == "multipole"):
+			elem = MultipoleTEAPOT(madElem.getName())
+		# ===========Solenoid element ======================
+		if(madElem.getType().lower()  == "solenoid"):
+			elem = SolenoidTEAPOT(madElem.getName())
 			ks = 0.
 			if(params.has_key("ks")):
 				ks = params["ks"]
-			elm.addParam("B",ks)
-		#===========Kicker element ======================
-		if(madElm.getType().lower()  == "kicker"):
-			elm = KickTEAPOT(madElm.getName())
+			elem.addParam("B",ks)
+		# ===========Kicker element ======================
+		if(madElem.getType().lower()  == "kicker"):
+			elem = KickTEAPOT(madElem.getName())
 			hkick = 0.
 			if(params.has_key("hkick")):
 				hkick = params["hkick"]
 			vkick = 0.
 			if(params.has_key("vkick")):
 				hkick = params["vkick"]
-			elm.addParam("kx",hkick)
-			elm.addParam("ky",vkick)
-		#===========HKicker element ======================
-		if(madElm.getType().lower()  == "hkicker" or \
-			 madElm.getType() .lower() == "hkick"):
-			elm = KickTEAPOT(madElm.getName())
+			elem.addParam("kx",hkick)
+			elem.addParam("ky",vkick)
+		# ===========HKicker element ======================
+		if(madElem.getType().lower()  == "hkicker" or \
+			 madElem.getType() .lower() == "hkick"):
+			elem = KickTEAPOT(madElem.getName())
 			hkick = 0.
 			if(params.has_key("hkick")):
 				hkick = params["hkick"]
-			elm.addParam("kx",hkick)
-		#===========VKicker element ======================
-		if(madElm.getType().lower()  == "vkicker" or \
-			 madElm.getType().lower()  == "vkick"):
-			elm = KickTEAPOT(madElm.getName())
+			elem.addParam("kx",hkick)
+		# ===========VKicker element ======================
+		if(madElem.getType().lower()  == "vkicker" or \
+			 madElem.getType().lower()  == "vkick"):
+			elem = KickTEAPOT(madElem.getName())
 			vkick = 0.
 			if(params.has_key("vkick")):
 				hkick = params["vkick"]
-			elm.addParam("ky",vkick)
-		#===========RF Cavity element ======================
-		if(madElm.getType().lower() == "rfcavity"):
-			elm = RingRFTEAPOT(madElm.getName())
-			#the MAD RF element has a L parameter,
-			#but it does not contribute in the ring length!
+			elem.addParam("ky",vkick)
+		# ===========RF Cavity element ======================
+		if(madElem.getType().lower() == "rfcavity"):
+			elem = RingRFTEAPOT(madElem.getName())
+			# the MAD RF element has a L parameter,
+			# but it does not contribute in the ring length!
 			"""
 			if(length != 0.):
-				drft_1 = DriftTEAPOT(madElm.getName()+"_drift")
-				drft_2 = DriftTEAPOT(madElm.getName()+"_drift")
+				drft_1 = DriftTEAPOT(madElem.getName()+"_drift")
+				drft_2 = DriftTEAPOT(madElem.getName()+"_drift")
 				drft_1.setLength(length/2.0)
 				drft_2.setLength(length/2.0)
-				elm.appendEntranceChildNode(drft_1)
-				elm.appendExitChildNode(drft_2)
+				elem.appendEntranceChildNode(drft_1)
+				elem.appendExitChildNode(drft_2)
 			"""
 			volt = 0.
 			if(params.has_key("volt")):
@@ -229,26 +230,26 @@ class _teapotFactory:
 			phase_s = 0.
 			if(params.has_key("lag")):
 				phase_s = (-1.0) * params["lag"]*2.0*math.pi
-			elm.addRF(harmon,volt,phase_s)
-		#==========Others elements such as markers,monitor,rcollimator
-		if(madElm.getType().lower() == "marker" or \
-			 madElm.getType().lower() == "monitor" or \
-			 madElm.getType().lower() == "rcolimator"):
-			elm = NodeTEAPOT(madElm.getName())
-		#------------------------------------------------
-		#ready to finish
-		#------------------------------------------------
-		if(elm == None):
-			print "======== Can not create elementwith type:",madElm.getType()
+			elem.addRF(harmon,volt,phase_s)
+		# ==========Others elements such as markers,monitor,rcollimator
+		if(madElem.getType().lower() == "marker" or \
+			 madElem.getType().lower() == "monitor" or \
+			 madElem.getType().lower() == "rcolimator"):
+			elem = NodeTEAPOT(madElem.getName())
+		# ------------------------------------------------
+		# ready to finish
+		# ------------------------------------------------
+		if(elem == None):
+			print "======== Can not create elementwith type:",madElem.getType()
 			print "You have to fix the _teapotFactory class."
 			print "Stop."
 			sys.exit(1)
-		#set length
-		elm.setLength(length)
-		#set tilt angle
+		# set length
+		elem.setLength(length)
+		# set tilt angle
 		if(tilt == True and tiltAngle != None):
-			elm.setTiltAngle(tiltAngle)
-		#set K1L,K2L,K3L,... and  T1L,T2L,T3L,...
+			elem.setTiltAngle(tiltAngle)
+		# set K1L,K2L,K3L,... and  T1L,T2L,T3L,...
 		poles = []
 		kls = []
 		skews = []
@@ -265,8 +266,8 @@ class _teapotFactory:
 				kls.append(kl_param)
 				skews.append(skew)
 		if(len(poles) > 0):
-			elm.addParams({"poles":poles,"kls":kls,"skews":skews})
-		return elm
+			elem.addParams({"poles":poles,"kls":kls,"skews":skews})
+		return elem
 
 	getElement = classmethod(getElement)
 

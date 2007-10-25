@@ -1,4 +1,4 @@
-./src		- source code for the core ORBIT c++ classes, including
+./src		- source code for the core ORBIT C++ classes, including
 		  wrappers, etc.
 
 ./py		- python modules and wrapper classes for the core ORBIT

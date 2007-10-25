@@ -574,17 +574,17 @@ class SAD_Parser:
 		# Now calculate all parameters in key,string_value
 		# for accelerator elements
 		#--------------------------------------------
-		for accElm in self.__accElements:
-			kvs = accElm.getParameters()
-			kvNums = accElm.getNumParameters()
+		for accElem in self.__accElements:
+			kvs = accElem.getParameters()
+			kvNums = accElem.getNumParameters()
 			for key,val in kvs.iteritems():
 				val_out = None
 				if val != None:
 					res,val_out = StringFunctions.calculateString(val.lower(),localValDict)
 					if(not res):
 						print "=============SAD File problem ==============",
-						print "Problem with acc. element:",accElm.getName()
-						print "SAD file line:",accElm.getExpression()
+						print "Problem with acc. element:",accElem.getName()
+						print "SAD file line:",accElem.getExpression()
 						print "Parameter name:",key
 						print "Can not calculate string:",val
 						print "============ STOP =========================="
@@ -593,10 +593,10 @@ class SAD_Parser:
 		"""
 		#debug printing
 		i = 0
-		for accElm in self.__accElements:
+		for accElem in self.__accElements:
 			i = i + 1
-			print "i=",i,"type=",accElm.getElementType()," name=",accElm.getName(),
-			for key,val in accElm.getNumParameters().iteritems():
+			print "i=",i,"type=",accElem.getElementType()," name=",accElem.getName(),
+			for key,val in accElem.getNumParameters().iteritems():
 				print " ",key,":",val," ",
 			print " "
 		sys.exit(1)
@@ -604,18 +604,18 @@ class SAD_Parser:
 		#---------------------------------------------
 		#Let's create all lattice elements (old style)
 		#---------------------------------------------
-		for accElm in self.__accElements:
-			lattElm = SAD_LattElement(accElm.getName(),accElm.getElementType())
-			self.__lattElems.append(lattElm)
-			kvs = accElm.getNumParameters()
+		for accElem in self.__accElements:
+			lattElem = SAD_LattElement(accElem.getName(),accElem.getElementType())
+			self.__lattElems.append(lattElem)
+			kvs = accElem.getNumParameters()
 			for key,val in kvs.iteritems():
-				lattElm.addParameter(key,val)
+				lattElem.addParameter(key,val)
 		#----------------------------------------------
 		#Let's create lattice lines (old style)
 		#----------------------------------------------
 		lattElemDict = {}
-		for elm in self.__lattElems:
-			lattElemDict[elm.getName()] = elm
+		for elem in self.__lattElems:
+			lattElemDict[elem.getName()] = elem
 		accLineDict = {}
 		for accLine in self.__accLines:
 			accLineDict[accLine.getName()] = accLine

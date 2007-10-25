@@ -10,7 +10,7 @@
 //    06/08/2007
 //
 // DESCRIPTION
-//    The wrapper around any pointer to the ORBIT c++ class instance.
+//    The wrapper around any pointer to the ORBIT C++ class instance.
 //
 ///////////////////////////////////////////////////////////////////////////
 

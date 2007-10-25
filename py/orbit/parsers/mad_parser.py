@@ -581,32 +581,32 @@ class MAD_Parser:
 		#replace all elem[key] substrings in elements by
 		#variables
 		#-----------------------------------------------
-		accElmDict = {}
-		for accElm in self.__accElements:
-			accElmDict[accElm.getName()] = accElm
-		accElmDictInit = accElmDict.copy()
+		accElemDict = {}
+		for accElem in self.__accElements:
+			accElemDict[accElem.getName()] = accElem
+		accElemDictInit = accElemDict.copy()
 		doNotStop = True
 		while(doNotStop):
 			doNotStop = False
-			accElmDictCp = accElmDict.copy()
-			#print "debug dic size=",len(accElmDictCp)
-			for name,accElm in accElmDictCp.iteritems():
-				kvs = accElm.getParameters()
+			accElemDictCp = accElemDict.copy()
+			#print "debug dic size=",len(accElemDictCp)
+			for name,accElem in accElemDictCp.iteritems():
+				kvs = accElem.getParameters()
 				for key,val in kvs.iteritems():
 					if val != None:
 						resArr = StringFunctions.getElementKeys(val)
-						if(len(resArr) == 0 and accElmDict.has_key(name)):
-							del accElmDict[name]
+						if(len(resArr) == 0 and accElemDict.has_key(name)):
+							del accElemDict[name]
 						for [el,k] in resArr:
 							doNotStop = True
-							accElmInside = accElmDictInit[el]
-							replVal = accElmInside.getParameters()[k]
+							accElemInside = accElemDictInit[el]
+							replVal = accElemInside.getParameters()[k]
 							val = StringFunctions.replaceElementKeys(val,el,k,replVal)
 					kvs[key] = val
-			if(len(accElmDictCp) == len(accElmDict)):
+			if(len(accElemDictCp) == len(accElemDict)):
 				print "=========== Unresolved AccElements============"
-				for name,accElm in accElmDictCp.iteritems():
-					print "name=",name,"  params=",accElm.getParameters()
+				for name,accElem in accElemDictCp.iteritems():
+					print "name=",name,"  params=",accElem.getParameters()
 				print "=========== MAD File Problem ==============="
 				print "=================STOP======================="
 				sys.exit(1)
@@ -618,8 +618,8 @@ class MAD_Parser:
 			val = var.getExpression()
 			resArr = StringFunctions.getElementKeys(val)
 			for [el,k] in resArr:
-				accElmInside = accElmDictInit[el]
-				replVal = accElmInside.getParameters()[k]
+				accElemInside = accElemDictInit[el]
+				replVal = accElemInside.getParameters()[k]
 				val = StringFunctions.replaceElementKeys(val,el,k,replVal)
 			var.setExpression(val)
 		#-----------------------------------------------
@@ -661,16 +661,16 @@ class MAD_Parser:
 		# Now calculate all parameters in key,string_value
 		# for accelerator elements
 		#--------------------------------------------
-		for accElm in self.__accElements:
-			kvs = accElm.getParameters()
-			kvNums = accElm.getNumParameters()
+		for accElem in self.__accElements:
+			kvs = accElem.getParameters()
+			kvNums = accElem.getNumParameters()
 			for key,val in kvs.iteritems():
 				val_out = None
 				if val != None:
 					res,val_out = StringFunctions.calculateString(val.lower(),localValDict)
 					if(not res):
 						print "=============MAD File problem ==============",
-						print "Problem with acc. element:",accElm.getName()
+						print "Problem with acc. element:",accElem.getName()
 						print "Parameter name:",key
 						print "Can not calculate string:",val
 						print "============ STOP =========================="
@@ -679,18 +679,18 @@ class MAD_Parser:
 		#---------------------------------------------
 		#Let's create all lattice elements (old style)
 		#---------------------------------------------
-		for accElm in self.__accElements:
-			lattElm = MAD_LattElement(accElm.getName(),accElm.getElementType())
-			self.__lattElems.append(lattElm)
-			kvs = accElm.getNumParameters()
+		for accElem in self.__accElements:
+			lattElem = MAD_LattElement(accElem.getName(),accElem.getElementType())
+			self.__lattElems.append(lattElem)
+			kvs = accElem.getNumParameters()
 			for key,val in kvs.iteritems():
-				lattElm.addParameter(key,val)
+				lattElem.addParameter(key,val)
 		#----------------------------------------------
 		#Let's create lattice lines (old style)
 		#----------------------------------------------
 		lattElemDict = {}
-		for elm in self.__lattElems:
-			lattElemDict[elm.getName()] = elm
+		for elem in self.__lattElems:
+			lattElemDict[elem.getName()] = elem
 		accLineDict = {}
 		for accLine in self.__accLines:
 			accLineDict[accLine.getName()] = accLine

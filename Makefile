@@ -15,6 +15,6 @@ clean:
 	@for dir in $(DIRS); do \
 		(cd $$dir; if [ -f ./Makefile ]; then $(MAKE) clean; fi;); \
 	done
-	rm ./bin/pyORBIT
+	rm -rf ./bin/pyORBIT
     
 

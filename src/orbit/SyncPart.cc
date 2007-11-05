@@ -56,6 +56,8 @@ SyncPart::~SyncPart()
 }
 
 void SyncPart::setPyWrapper(PyObject* py_wrapper_In){
+	if(py_wrapper != NULL) Py_XDECREF(py_wrapper);
+	Py_INCREF(py_wrapper_In);
 	py_wrapper = py_wrapper_In;
 }
 

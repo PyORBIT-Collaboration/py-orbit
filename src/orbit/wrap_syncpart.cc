@@ -34,30 +34,15 @@ extern "C" {
   //initializator for python  SyncParticle class
   //this is implementation of the __init__ method
   static int SyncPart_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
-		/**
-    int nArgs = PyTuple_Size(args);
-    if(nArgs != 1){
-      error("SyncParticle constructor needs pyBunch instance as parameter.");
-    }
-		pyORBIT_Object* pyBunch = (pyORBIT_Object *) PyTuple_GetItem(args,0);
-		Bunch* cpp_bunch = (Bunch*) pyBunch->cpp_obj;
-		if(cpp_bunch->getSyncPart()->getPyWrapper() != NULL){
-			error("You should not create SyncParticle class instance directly!");
-		}
-    self->cpp_obj = (void*) cpp_bunch->getSyncPart();
-		cpp_bunch->getSyncPart()->setPyWrapper((PyObject *) self);
-		Py_INCREF((PyObject *) self);
-    return 0;
-		*/
 
 	  int nArgs = PyTuple_Size(args);
     if(nArgs != 1){
       error("SyncParticle constructor needs pyBunch instance as parameter.");
     }
-		PyObject* pyBunch = PyTuple_GetItem(args,0);
-		PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-		Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+		
+		pyORBIT_Object* pyBunch = (pyORBIT_Object*) PyTuple_GetItem(args,0);
+		Bunch* cpp_bunch = (Bunch*) pyBunch->cpp_obj;
+		
 		if(cpp_bunch->getSyncPart()->getPyWrapper() != NULL){
 			error("You should not create SyncParticle class instance directly!");
 		}
@@ -65,9 +50,6 @@ extern "C" {
     self->cpp_obj = (void*) cpp_bunch->getSyncPart();
 		cpp_bunch->getSyncPart()->setPyWrapper((PyObject *) self);
 
-		Py_DECREF(py_bunch_ref);
-
-		Py_INCREF((PyObject *) self);
     return 0;
   }
 
@@ -77,6 +59,7 @@ extern "C" {
   //-----------------------------------------------------
   //this is implementation of the __del__ method
   static void SyncPart_del(pyORBIT_Object* self){
+		//std::cerr<<"The SyncPart __del__ has been called!"<<std::endl;
 		self->ob_type->tp_free((PyObject*)self);
   }
 
@@ -443,21 +426,21 @@ extern "C" {
 	// defenition of the methods of the python SyncPart wrapper class
 	// they will be vailable from python level
   static PyMethodDef SyncPartClassMethods[] = {
-    { (char *)"mass",             (PyCFunction) SyncPart_mass         ,METH_VARARGS,"Returns mass in GeV"},
-    { (char *)"momentum",         (PyCFunction) SyncPart_momentum     ,METH_VARARGS,"Returns or sets momentum in GeV/c. If setting px=0,py=0,pz=val."},
-    { (char *)"beta",             (PyCFunction) SyncPart_beta         ,METH_VARARGS,"Returns beta=v/c"},
-		{ (char *)"gamma",            (PyCFunction) SyncPart_gamma        ,METH_VARARGS,"Returns gamma=1/sqrt(1-(v/c)**2)"},
-		{ (char *)"kinEnergy",        (PyCFunction) SyncPart_kinEnergy    ,METH_VARARGS,"Returns or sets kinetic energy of the synchronous particle in MeV"},
-		{ (char *)"time",		          (PyCFunction) SyncPart_time         ,METH_VARARGS,"Sets or returns time in sec"},
-		{ (char *)"x",		            (PyCFunction) SyncPart_x            ,METH_VARARGS,"Sets or returns the x-coordinate"},
-		{ (char *)"y",		            (PyCFunction) SyncPart_y            ,METH_VARARGS,"Sets or returns the y-coordinate"},
-		{ (char *)"z",		            (PyCFunction) SyncPart_z            ,METH_VARARGS,"Sets or returns the z-coordinate"},
-		{ (char *)"px",		            (PyCFunction) SyncPart_px           ,METH_VARARGS,"Sets or returns the x-momentum"},
-		{ (char *)"py",		            (PyCFunction) SyncPart_py           ,METH_VARARGS,"Sets or returns the y-momentum"},
-		{ (char *)"pz",		            (PyCFunction) SyncPart_pz           ,METH_VARARGS,"Sets or returns the z-momentum"},
-		{ (char *)"energyToMomentum", (PyCFunction) SyncPart_eToP         ,METH_VARARGS,"Transforms the kinetic energy to momentum"},
-		{ (char *)"momentumToEnergy", (PyCFunction) SyncPart_pToE         ,METH_VARARGS,"Transforms the momentum to kinetic energy"},
-    {NULL,NULL}
+    { "mass",       SyncPart_mass      ,METH_VARARGS,"Returns mass in GeV"},
+    { "momentum",   SyncPart_momentum  ,METH_VARARGS,"Returns or sets momentum in GeV/c. If setting px=0,py=0,pz=val."},
+    { "beta",       SyncPart_beta      ,METH_VARARGS,"Returns beta=v/c"},
+		{ "gamma",      SyncPart_gamma     ,METH_VARARGS,"Returns gamma=1/sqrt(1-(v/c)**2)"},
+		{ "kinEnergy",  SyncPart_kinEnergy ,METH_VARARGS,"Returns or sets kinetic energy of the synchronous particle in MeV"},
+		{ "time",		    SyncPart_time      ,METH_VARARGS,"Sets or returns time in sec"},
+		{ "x",		      SyncPart_x         ,METH_VARARGS,"Sets or returns the x-coordinate"},
+		{ "y",		      SyncPart_y         ,METH_VARARGS,"Sets or returns the y-coordinate"},
+		{ "z",		      SyncPart_z         ,METH_VARARGS,"Sets or returns the z-coordinate"},
+		{ "px",		      SyncPart_px        ,METH_VARARGS,"Sets or returns the x-momentum"},
+		{ "py",		      SyncPart_py        ,METH_VARARGS,"Sets or returns the y-momentum"},
+		{ "pz",		      SyncPart_pz        ,METH_VARARGS,"Sets or returns the z-momentum"},
+		{ "energyToMomentum",  SyncPart_eToP  ,METH_VARARGS,"Transforms the kinetic energy to momentum"},
+		{ "momentumToEnergy",  SyncPart_pToE  ,METH_VARARGS,"Transforms the momentum to kinetic energy"},
+    {NULL}
   };
 
 	// defenition of the memebers of the python SyncPart wrapper class

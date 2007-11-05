@@ -37,12 +37,28 @@ AttributesBucket::~AttributesBucket()
 
 }
 
-int& AttributesBucket::intVal(const std::string attName){
-  return intAttrMap[attName];
+int AttributesBucket::intVal(const std::string attName){
+	if(hasIntAttribute(attName) == 0){
+		return 0;
+	}
+	return intAttrMap[attName];
 }
 
-double& AttributesBucket::doubleVal(const std::string attName){
+int AttributesBucket::intVal(const std::string attName, int val){
+	intAttrMap[attName] = val;
+	return val;
+}
+
+double AttributesBucket::doubleVal(const std::string attName){
+	if(hasDoubleAttribute(attName) == 0){
+		return 0.;
+	}
    return doubleAttrMap[attName];
+}
+
+double AttributesBucket::doubleVal(const std::string attName, double val){
+	 doubleAttrMap[attName] = val;
+   return val;
 }
 
 //returns True if it has int attribute with this key
@@ -80,13 +96,13 @@ void AttributesBucket::add(AttributesBucket* bckt){
 	std::vector<std::string> names;
 	 bckt->getIntAttributeNames(names);
 	 for(int i = 0, n = names.size(); i < n; i++){
-		 intVal(names[i]) = bckt->intVal(names[i]);
+		 bckt->intVal(names[i],intVal(names[i]));
 	 }
 
 	 names.clear();
 	 bckt->getDoubleAttributeNames(names);
 	 for(int i = 0, n = names.size(); i < n; i++){
-		 doubleVal(names[i]) = bckt->doubleVal(names[i]);
+		 bckt->doubleVal(names[i],doubleVal(names[i]));
 	 }
 }
 

@@ -141,8 +141,8 @@ int Bunch::getBunchAttributeInt(const std::string att_name){
   return att_val;
 }
 
-void Bunch::setBunchAttribute(const std::string att_name, double att_val){
-  bunchAttr->doubleVal(att_name) = att_val;
+void Bunch::setBunchAttribute(const std::string att_name, double att_val){	
+  bunchAttr->doubleVal(att_name, att_val);
   if(att_name == "mass"){
     mass = att_val;
   }
@@ -158,7 +158,7 @@ void Bunch::setBunchAttribute(const std::string att_name, double att_val){
 }
 
 void Bunch::setBunchAttribute(const std::string att_name, int att_val){
-  bunchAttr->intVal(att_name) = att_val;
+  bunchAttr->intVal(att_name,att_val);
 }
 
 void Bunch::getIntBunchAttributeNames(std::vector<std::string>& names){
@@ -266,7 +266,6 @@ void Bunch::initBunchAttributes(const char* fileName){
 
 void Bunch::copyEmptyBunchTo(Bunch* bunch){
 	bunch->setMPI_Comm_Local(this->getMPI_Comm_Local());
-
 	bunch->deleteAllParticles();
 
 	//copy bunch attributes
@@ -276,12 +275,10 @@ void Bunch::copyEmptyBunchTo(Bunch* bunch){
 	//data also
 
 	std::vector<std::string> names;
-
 	this->getIntBunchAttributeNames(names);
 	for(int i = 0, n = names.size(); i < n; i++){
 		bunch->setBunchAttribute(names[i],this->getBunchAttributeInt(names[i]));
 	}
-
 	names.clear();
 
 	this->getDoubleBunchAttributeNames(names);
@@ -296,12 +293,9 @@ void Bunch::copyEmptyBunchTo(Bunch* bunch){
 	target->setXYZ(source->getX(),source->getY(),source->getZ());
 	target->setPXYZ(source->getPX(),source->getPY(),source->getPZ());
 
-
 	//copy particles attributes
 	bunch->removeAllParticleAttributes();
-
 	names.clear();
-
 	this->getParticleAttributesNames(names);
 	for(int i = 0, n = names.size(); i < n; i++){
 		bunch->addParticleAttributes(names[i]);
@@ -389,10 +383,10 @@ void Bunch::init(){
 
   macroSizeForAll = 0.;
 
-  bunchAttr->doubleVal("mass") = mass;
-  bunchAttr->doubleVal("charge") = charge;
-  bunchAttr->doubleVal("classical_radius") = classicalRadius;
-  bunchAttr->doubleVal("macro_size") = macroSizeForAll;
+  bunchAttr->doubleVal("mass",mass);
+  bunchAttr->doubleVal("charge",charge);
+  bunchAttr->doubleVal("classical_radius",classicalRadius);
+  bunchAttr->doubleVal("macro_size",macroSizeForAll);
 
 	syncPart = new SyncPart(this);
 }
@@ -745,25 +739,25 @@ double  Bunch::getMacroSize(){ return macroSizeForAll;}
 
 double Bunch::setMass(double val){
   mass = val;
-  bunchAttr->doubleVal("mass") = val;
+  bunchAttr->doubleVal("mass",val);
   return mass;
 }
 
 double Bunch::setCharge(double val){
   charge = val;
-  bunchAttr->doubleVal("charge") = val;
+  bunchAttr->doubleVal("charge",val);
   return charge;
 }
 
 double Bunch::setClassicalRadius(double val){
   classicalRadius = val;
-  bunchAttr->doubleVal("classical_radius") = val;
+  bunchAttr->doubleVal("classical_radius",val);
   return classicalRadius;
 }
 
 double  Bunch::setMacroSize(double val){
   macroSizeForAll = val;
-  bunchAttr->doubleVal("macro_size") = val;
+  bunchAttr->doubleVal("macro_size",val);
   return macroSizeForAll;
 }
 ///////////////////////////////////////////////////////////////////////////

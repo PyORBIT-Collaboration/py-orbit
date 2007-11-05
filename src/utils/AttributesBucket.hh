@@ -54,8 +54,11 @@ public:
   AttributesBucket();
   ~AttributesBucket();
 
-  int& intVal(const std::string attName);
-  double& doubleVal(const std::string attName);
+  int intVal(const std::string attName);
+  double doubleVal(const std::string attName);
+	
+  int intVal(const std::string attName, int val);
+  double doubleVal(const std::string attName, double val);
 
   //returns 0 if there is no attribute associated with this name
   int hasIntAttribute(const std::string attName);

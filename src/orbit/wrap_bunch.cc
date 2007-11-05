@@ -11,6 +11,8 @@
 #include "wrap_bunch.hh"
 #include "wrap_syncpart.hh"
 
+#include "pyORBIT_Object.hh"
+
 #include "Bunch.hh"
 #include "ParticleAttributesFactory.hh"
 
@@ -22,31 +24,33 @@ namespace wrap_orbit_bunch{
 	//Python Bunch class definition
 	//---------------------------------------------------------
 
-  //constructor for python Bunch class
+	//constructor for python class wrapping Bunch instance
+	//It never will be called directly
+	static PyObject* Bunch_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
+		pyORBIT_Object* self;
+		self = (pyORBIT_Object *) type->tp_alloc(type, 0);
+		self->cpp_obj = NULL;
+		return (PyObject *) self;
+	}
+
+  //initializator for python Bunch class
   //this is implementation of the __init__ method
-  static PyObject* Bunch_init(PyObject *self, PyObject *args){
+  static int Bunch_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
     //std::cerr<<"The Bunch __init__ has been called!"<<std::endl;
 
-    PyObject* pyBunch = PyTuple_GetItem(args,0);
-    Bunch* cpp_bunch = new Bunch();
-    PyObject* py_bunch_ref = PyCObject_FromVoidPtr((void *) cpp_bunch, NULL);
-    if(PyObject_SetAttrString(pyBunch	, "cpp_ptr", py_bunch_ref) < 0){
-      error("Bunch wrapper. Can not set c-bunch reference.");
-    }
-    Py_DECREF(py_bunch_ref);
-
+		//instantiation of a new c++ Bunch
+		self->cpp_obj = (void*) new Bunch();
 		//This is the way to create new class instance from the C-level
 		// Template: PyObject* PyObject_CallMethod(	PyObject *o, char *method, char *format, ...)
 		//see Python/C API documentation
+		//It will create a SyncParticle object and set the reference to it from pyBunch
 		PyObject* mod = PyImport_ImportModule("bunch");
-		PyObject* pySyncPart = PyObject_CallMethod(mod,"SyncParticle","O",pyBunch);
+		PyObject* pySyncPart = PyObject_CallMethod(mod,"SyncParticle","O",self);
 
 		//the references should be decreased because they were created as "new reference"
 		Py_DECREF(pySyncPart);
 		Py_DECREF(mod);
-
-    Py_INCREF(Py_None);
-    return Py_None;
+    return 0;		
   }
 
   //---------------------------------------------------------------
@@ -56,23 +60,9 @@ namespace wrap_orbit_bunch{
   //----------------------------------------------------------------
 
   //returns the SyncPart python class wrapper instance
-  static PyObject* Bunch_getSyncParticle(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:getSyncParticle",&pyBunch)){
-      error("PyBunch - Bunch_getSyncParticle - cannot parse arguments!");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
+	static PyObject* Bunch_getSyncParticle(PyObject *self, PyObject *args){
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
 		PyObject* pySyncPart = cpp_bunch->getSyncPart()->getPyWrapper();
-
 		Py_INCREF(pySyncPart);
     return pySyncPart;
   }
@@ -86,33 +76,16 @@ namespace wrap_orbit_bunch{
   //adds a particle to the Bunch object
   //this is implementation of the  addParticle(...) method
   static PyObject* Bunch_addParticle(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
-    double x = 0.;
-    double xp = 0.;
-    double y = 0.;
-    double yp = 0.;
-    double z = 0.;
-    double zp = 0.;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
 
-    int nArgs = PyTuple_Size(args);
-    if(nArgs != 1 && nArgs != 7){
-      error("PyBunch - addParticle - needs 6 coordinates (x,px,y,py,z,pz) or nothing!");
+    double x = 0.;  double xp = 0.; double y = 0.;
+    double yp = 0.; double z = 0.;  double zp = 0.;
+
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"dddddd:coordinates",&x,&xp,&y,&yp,&z,&zp)){
+      error("PyBunch - addParticle - cannot parse arguments! It should be (x,xp,y,yp,z,zp)");
     }
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O|dddddd:coordinates",&pyBunch,&x,&xp,&y,&yp,&z,&zp)){
-      error("PyBunch - addParticle - cannot parse arguments!");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     int ind = cpp_bunch->addParticle(x,xp,y,yp,z,zp);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     return Py_BuildValue("i",ind);
   }
 
@@ -121,24 +94,17 @@ namespace wrap_orbit_bunch{
   //returns the number of particles in the bunch
   //this is implementation of the deleteParticle(int index)  method
   static PyObject* Bunch_deleteParticle(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     int ind;
 
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Oi:deleteParticle",&pyBunch,&ind)){
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"i:deleteParticle",&ind)){
       error("PyBunch - deleteParticle - needs index of particle for deleting");
     }
 
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->deleteParticle(ind);
     int size = cpp_bunch->getSize();
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
+		
     return Py_BuildValue("i",size);
   }
 
@@ -146,45 +112,23 @@ namespace wrap_orbit_bunch{
   //returns the index of removed macro-particle
   //this is implementation of the deleteParticleFast(int index)  method
   static PyObject* Bunch_deleteParticleFast(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     int ind;
 
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Oi:deleteParticleFast",&pyBunch,&ind)){
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"i:deleteParticleFast",&ind)){
       error("PyBunch - deleteParticleFast - needs index of particle for deleting");
     }
 
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->deleteParticleFast(ind);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     return Py_BuildValue("i",ind);
   }
 
   //removes all particles from the Bunch object
   //this is implementation of the deleteAllParticles()  method
   static PyObject* Bunch_deleteAllParticles(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:deleteAllParticles",&pyBunch)){
-      error("PyBunch - deleteAllParticles- needs index pyBunch object");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     cpp_bunch->deleteAllParticles();
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -193,22 +137,8 @@ namespace wrap_orbit_bunch{
   //  or more macro-particles
   //this is implementation of the compress()  method
   static PyObject* Bunch_compress(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:compress",&pyBunch)){
-      error("PyBunch - compress - pyBunch object needed");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     cpp_bunch->compress();
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -225,49 +155,30 @@ namespace wrap_orbit_bunch{
   //  (index, value) - sets the new value to the x-coordinate
   //this is implementation of the x(int index)  method
   static PyObject* Bunch_x(PyObject *self, PyObject *args){
-    //if nVars == 2 this is get coordinate
-    //if nVars == 3 this is set coordinate
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 1 get coordinate
+    //if nVars == 2 set coordinate
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     int index = 0;
     double val = 0.;
 
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oi:x",&pyBunch,&index)){
-          error("PyBunch - x(index) - pyBunch object needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"i:x",&index)){
+          error("PyBunch - x(index) - index is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->x(index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oid:x",&pyBunch,&index,&val)){
-          error("PyBunch - x(index, value) - pyBunch object needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"id:x",&index,&val)){
+          error("PyBunch - x(index, value) - index and value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->x(index) = val;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call x(index) or x(index,value)");
@@ -283,49 +194,30 @@ namespace wrap_orbit_bunch{
   //  (index, value) - sets the new value to the y-coordinate
   //this is implementation of the y(int index)  method
   static PyObject* Bunch_y(PyObject *self, PyObject *args){
-    //if nVars == 2 this is get coordinate
-    //if nVars == 3 this is set coordinate
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 1 get coordinate
+    //if nVars == 2 set coordinate
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     int index = 0;
     double val = 0.;
 
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oi:y",&pyBunch,&index)){
-          error("PyBunch - y(index) - pyBunch object needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"i:y",&index)){
+          error("PyBunch - y(index) - index is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->y(index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oid:y",&pyBunch,&index,&val)){
-          error("PyBunch - y(index, value) - pyBunch object needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"id:y",&index,&val)){
+          error("PyBunch - y(index, value) - index and value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->y(index) = val;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call y(index) or y(index,value)");
@@ -341,52 +233,33 @@ namespace wrap_orbit_bunch{
   //  (index, value) - sets the new value to the z(phi)-coordinate
   //this is implementation of the (z or phi)(int index)  method
   static PyObject* Bunch_z(PyObject *self, PyObject *args){
-    //if nVars == 2 this is get coordinate
-    //if nVars == 3 this is set coordinate
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 1 get coordinate
+    //if nVars == 2 set coordinate
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     int index = 0;
     double val = 0.;
 
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oi:z",&pyBunch,&index)){
-          error("PyBunch - z or phi(index) - pyBunch object needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"i:z",&index)){
+          error("PyBunch - z(index) - index is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->z(index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oid:z",&pyBunch,&index,&val)){
-          error("PyBunch - z or phi (index, value) - pyBunch object needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"id:z",&index,&val)){
+          error("PyBunch - z(index, value) - index and value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->z(index) = val;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
-      error("PyBunch. You should call z or phi(index) or z or phi(index,value)");
+      error("PyBunch. You should call z(index) or z(index,value)");
     }
 
     Py_INCREF(Py_None);
@@ -400,49 +273,30 @@ namespace wrap_orbit_bunch{
   //  (index, value) - sets the new value to the px-coordinate
   //this is implementation of the px(int index)  method
   static PyObject* Bunch_px(PyObject *self, PyObject *args){
-    //if nVars == 2 this is get coordinate
-    //if nVars == 3 this is set coordinate
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 1 get coordinate
+    //if nVars == 2 set coordinate
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     int index = 0;
     double val = 0.;
 
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oi:px",&pyBunch,&index)){
-          error("PyBunch - px(index) - pyBunch object needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"i:px",&index)){
+          error("PyBunch - px(index) - index is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->px(index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oid:px",&pyBunch,&index,&val)){
-          error("PyBunch - px(index, value) - pyBunch object needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"id:px",&index,&val)){
+          error("PyBunch - px(index, value) - index and value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->px(index) = val;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call px(index) or px(index,value)");
@@ -458,49 +312,30 @@ namespace wrap_orbit_bunch{
   //  (index, value) - sets the new value to the py-coordinate
   //this is implementation of the py(int index)  method
   static PyObject* Bunch_py(PyObject *self, PyObject *args){
-    //if nVars == 2 this is get coordinate
-    //if nVars == 3 this is set coordinate
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 1 get coordinate
+    //if nVars == 2 set coordinate
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     int index = 0;
     double val = 0.;
 
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oi:py",&pyBunch,&index)){
-          error("PyBunch - py(index) - pyBunch object needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"i:py",&index)){
+          error("PyBunch - py(index) - index is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->py(index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oid:py",&pyBunch,&index,&val)){
-          error("PyBunch - py(index, value) - pyBunch object needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"id:py",&index,&val)){
+          error("PyBunch - py(index, value) - index and value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->py(index) = val;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call py(index) or py(index,value)");
@@ -516,52 +351,33 @@ namespace wrap_orbit_bunch{
   //  (index, value) - sets the new value to the pz(dE)-coordinate
   //this is implementation of the (pz or dE)(int index)  method
   static PyObject* Bunch_pz(PyObject *self, PyObject *args){
-    //if nVars == 2 this is get coordinate
-    //if nVars == 3 this is set coordinate
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 1 get coordinate
+    //if nVars == 2 set coordinate
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     int index = 0;
     double val = 0.;
 
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oi:pz",&pyBunch,&index)){
-          error("PyBunch - pz or dE(index) - pyBunch object needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"i:pz",&index)){
+          error("PyBunch - pz(index) - index is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->pz(index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oid:pz",&pyBunch,&index,&val)){
-          error("PyBunch - pz or dE (index, value) - pyBunch object needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"id:pz",&index,&val)){
+          error("PyBunch - pz(index, value) - index and value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->pz(index) = val;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
-      error("PyBunch. You should call pz or dE(index) or pz or dE(index,value)");
+      error("PyBunch. You should call pz(index) or pz(index,value)");
     }
 
     Py_INCREF(Py_None);
@@ -574,86 +390,51 @@ namespace wrap_orbit_bunch{
   //  (index, value) - sets the new flag
   //this is implementation of the flag(int index)  method
   static PyObject* Bunch_flag(PyObject *self, PyObject *args){
-    //if nVars == 2 this is get flag
-    //if nVars == 3 this is set flag
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 1 get flag
+    //if nVars == 2 set flag
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     int index = 0;
     int flag = 0;
 
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oi:flag",&pyBunch,&index)){
-          error("PyBunch - flag(index) - pyBunch object and index are needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"i:flag",&index)){
+          error("PyBunch - flag(index) - index is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         flag = cpp_bunch->flag(index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("i",flag);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Oii:flag",&pyBunch,&index,&flag)){
-          error("PyBunch - flag(index, value) - pyBunch object,index and new value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"ii:flag",&index,&flag)){
+          error("PyBunch - flag(index, flag) - index and value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->flag(index) = flag;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("i",flag);
     }
     else{
-      error("PyBunch. You should call flag(index) or flag(index,value)");
+      error("PyBunch. You should call flag(index) or flag(index,flag)");
     }
 
     Py_INCREF(Py_None);
-    return Py_None;
+    return Py_None;		
   }
 
 	//Wraps long. coords in the bunch
 	//ringwrap(ring_length)
   static PyObject* Bunch_ringwrap(PyObject *self, PyObject *args) {
-
-    int nVars = PyTuple_Size(args);
-
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;	
     double ring_length = 0.;
-
-    if(nVars == 2){
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-			//NO NEED OF Py_DECREF()
-			if(!PyArg_ParseTuple(	args,"Od:py",&pyBunch,&ring_length)){
-				error("PyBunch - ringwrap(ring_length) - pyBunch object needed");
-			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-			cpp_bunch->ringwrap(ring_length);
-
-			//clear the reference created by
-			//PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-    }
-    else{
-      error("PyBunch. You should call py(index) or py(index,value)");
-    }
-
+		
+		//NO NEW OBJECT CREATED BY PyArg_ParseTuple! //NO NEED OF Py_DECREF()
+		if(!PyArg_ParseTuple(	args,"d:py",&ring_length)){
+			error("PyBunch - ringwrap(ring_length) - pyBunch object needed");
+		}
+		
+		cpp_bunch->ringwrap(ring_length);
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -670,55 +451,32 @@ namespace wrap_orbit_bunch{
   //  mass(value) - sets the new value
   //this is implementation of the getMass() and setMass  methods of the Bunch class
   static PyObject* Bunch_mass(PyObject *self, PyObject *args){
-    //if nVars == 1 this is get mass
-    //if nVars == 2 this is set mass
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 0 get mass
+    //if nVars == 1 set mass
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
-    double val = 0;
+    double val = 0.;
 
-    if(nVars == 1 ||  nVars == 2){
-
-      if(nVars == 1){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"O:mass",&pyBunch)){
-          error("PyBunch - mass() - pyBunch object is needed");
-        }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+    if(nVars == 0 ||  nVars == 1){
+      if(nVars == 0){
         val = cpp_bunch->getMass();
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Od:mass",&pyBunch,&val)){
-          error("PyBunch - mass(value) - pyBunch object and new value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"d:mass",&val)){
+          error("PyBunch - mass(value) - value is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->setMass(val);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call mass() or mass(value)");
     }
 
     Py_INCREF(Py_None);
-    return Py_None;
+    return Py_None;		
   }
 
   //Sets or returns classicalRadius of the macro-particle in MeV
@@ -727,56 +485,33 @@ namespace wrap_orbit_bunch{
   //  classicalRadius(value) - sets the new value
   //this is implementation of the getClassicalRadius() and
   //setClassicalRadius() methods of the Bunch class
-  static PyObject* Bunch_classicalRadius(PyObject *self, PyObject *args){
-    //if nVars == 1 this is get classicalRadius
-    //if nVars == 2 this is set classicalRadius
+  static PyObject* Bunch_classicalRadius(PyObject *self, PyObject *args){	
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 0 this is get classicalRadius
+    //if nVars == 1 this is set classicalRadius
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
-    double val = 0;
+    double val = 0.;
 
-    if(nVars == 1 ||  nVars == 2){
-
-      if(nVars == 1){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"O:classicalRadius",&pyBunch)){
-          error("PyBunch - classicalRadius() - pyBunch object is needed");
-        }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+    if(nVars == 0 ||  nVars == 1){
+      if(nVars == 0){
         val = cpp_bunch->getClassicalRadius();
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Od:classicalRadius",&pyBunch,&val)){
-          error("PyBunch - classicalRadius(value) - pyBunch object and new value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"d:classicalRadius",&val)){
+          error("PyBunch - classicalRadius(value) - value is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->setClassicalRadius(val);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call classicalRadius() or classicalRadius(value)");
     }
 
     Py_INCREF(Py_None);
-    return Py_None;
+    return Py_None;		
   }
 
   //Sets or returns charge of the macro-particle in e-charge
@@ -785,56 +520,33 @@ namespace wrap_orbit_bunch{
   //  charge(value) - sets the new value
   //this is implementation of the getCharge() and setCharge  methods of the Bunch class
   static PyObject* Bunch_charge(PyObject *self, PyObject *args){
-    //if nVars == 1 this is get charge
-    //if nVars == 2 this is set charge
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 0 get charge
+    //if nVars == 1 set charge
     int nVars = PyTuple_Size(args);
-
-    PyObject* pyBunch;
-    double val = 0;
-
-    if(nVars == 1 ||  nVars == 2){
-
-      if(nVars == 1){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"O:charge",&pyBunch)){
-          error("PyBunch - charge() - pyBunch object is needed");
-        }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+		
+    double val = 0.;
+		
+    if(nVars == 0 ||  nVars == 1){
+      if(nVars == 0){
         val = cpp_bunch->getCharge();
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Od:charge",&pyBunch,&val)){
-          error("PyBunch - charge(value) - pyBunch object and new value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"d:charge",&val)){
+          error("PyBunch - charge(value) - value is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->setCharge(val);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call charge() or charge(value)");
     }
-
+		
     Py_INCREF(Py_None);
-    return Py_None;
-  }
+    return Py_None;			
+	}
 
   //Sets or returns macroSize of the macro-particle
   //  the action is depended on the number of arguments
@@ -842,55 +554,32 @@ namespace wrap_orbit_bunch{
   //  macroSize(value) - sets the new value
   //this is implementation of the getMacroSize() and setMacroSize  methods of the Bunch class
   static PyObject* Bunch_macroSize(PyObject *self, PyObject *args){
-    //if nVars == 1 this is get macroSize
-    //if nVars == 2 this is set macroSize
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    //if nVars == 0 get macroSize
+    //if nVars == 1 set macroSize
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
-    double val = 0;
+    double val = 0.;
 
-    if(nVars == 1 ||  nVars == 2){
-
-      if(nVars == 1){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"O:macroSize",&pyBunch)){
-          error("PyBunch - macroSize() - pyBunch object is needed");
-        }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+    if(nVars == 0 ||  nVars == 1){
+      if(nVars == 0){
         val = cpp_bunch->getMacroSize();
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
-        return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Od:macroSize",&pyBunch,&val)){
-          error("PyBunch - macroSize(value) - pyBunch object and new value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"d:macroSize",&val)){
+          error("PyBunch - macroSize(value) - value is needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->setMacroSize(val);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
+			return Py_BuildValue("d",val);
     }
     else{
       error("PyBunch. You should call macroSize() or macroSize(value)");
     }
 
     Py_INCREF(Py_None);
-    return Py_None;
+    return Py_None;			
   }
 
   //---------------------------------------------------------------
@@ -901,23 +590,13 @@ namespace wrap_orbit_bunch{
 
   //initilizes bunch attributes from the bunch file
   static PyObject* Bunch_initBunchAttr(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* file_name = NULL;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:initBunchAttr",&pyBunch,&file_name)){
-      error("PyBunch - initBunchAttr - pyBunch object and file name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:initBunchAttr",&file_name)){
+      error("PyBunch - initBunchAttr(fileName) - the file name are needed");
     }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->initBunchAttributes(file_name);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -930,53 +609,34 @@ namespace wrap_orbit_bunch{
   // getBunchAttributeDouble(name)
   // setBunchAttributeDouble(name,value) Bunch methods
   static PyObject* Bunch_bunchAttrDouble(PyObject *self, PyObject *args){
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
     //if nVars == 2 this is get attribute
     //if nVars == 3 this is set attribute
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     const char* attr_name = NULL;
     double val = 0.;
 
     if(nVars == 2 ||  nVars == 3){
-
       if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Os:bunchAttrDouble",&pyBunch,&attr_name)){
-          error("PyBunch - bunchAttrDouble - pyBunch object and name are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"s:bunchAttrDouble",&attr_name)){
+          error("PyBunch - bunchAttrDouble(name) - name are needed");
         }
-
         std::string attr_name_str(attr_name);
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->getBunchAttributeDouble(attr_name_str);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
         return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Osd:bunchAttrDouble",&pyBunch,&attr_name,&val)){
-          error("PyBunch - bunchAttrDouble - pyBunch object, name, and double value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"sd:bunchAttrDouble",&attr_name,&val)){
+          error("PyBunch - bunchAttrDouble(name,value) - name and double value are needed");
         }
 
         std::string attr_name_str(attr_name);
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->setBunchAttribute( attr_name_str, val);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
+				return Py_BuildValue("d",val);
       }
-
     }
     else{
       error("PyBunch. You should call bunchAttrDouble(name) or bunchAttrDouble(name,value)");
@@ -994,53 +654,34 @@ namespace wrap_orbit_bunch{
   // getBunchAttributeInt(name)
   // setBunchAttributeInt(name,value) Bunch methods
   static PyObject* Bunch_bunchAttrInt(PyObject *self, PyObject *args){
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     //if nVars == 2 this is get attribute
     //if nVars == 3 this is set attribute
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     const char* attr_name = NULL;
     int val = 0;
 
     if(nVars == 2 ||  nVars == 3){
-
       if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Os:bunchAttrInt",&pyBunch,&attr_name)){
-          error("PyBunch - bunchAttrInt - pyBunch object and name are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"s:bunchAttrInt",&attr_name)){
+          error("PyBunch - bunchAttrInt(name) - pyBunch object and name are needed");
         }
-
         std::string attr_name_str(attr_name);
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->getBunchAttributeInt(attr_name_str);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
         return Py_BuildValue("i",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Osi:bunchAttrInt",&pyBunch,&attr_name,&val)){
-          error("PyBunch - bunchAttrInt - pyBunch object, name, and double value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"si:bunchAttrInt",&attr_name,&val)){
+          error("PyBunch - bunchAttrInt(name,value) - name, and double value are needed");
         }
 
         std::string attr_name_str(attr_name);
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->setBunchAttribute( attr_name_str, val);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
+				return Py_BuildValue("i",val);
       }
-
     }
     else{
       error("PyBunch. You should call bunchAttrInt(name) or bunchAttrInt(name,value)");
@@ -1052,115 +693,59 @@ namespace wrap_orbit_bunch{
 
   //Returns a list (tuple) of  ther double bunch attribute names
   static PyObject* Bunch_bunchAttrDoubleNames(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
     std::vector<std::string> names;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:bunchAttrDoubleNames",&pyBunch)){
-      error("PyBunch - bunchAttrDoubleNames - pyBunch object needed");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->getDoubleBunchAttributeNames(names);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-   //create tuple with names
-   PyObject* resTuple = PyTuple_New(names.size());
-
-   for(int i = 0, n = names.size(); i < n; i++){
-     PyObject* py_nm = PyString_FromString(names[i].c_str());
-     if(PyTuple_SetItem(resTuple,i,py_nm)){
-       error("PyBunch - bunchAttrDoubleNames - cannot create tuple with bunch attr names");
-     }
-   }
-
+		//create tuple with names
+		PyObject* resTuple = PyTuple_New(names.size());
+		for(int i = 0, n = names.size(); i < n; i++){
+			PyObject* py_nm = PyString_FromString(names[i].c_str());
+			if(PyTuple_SetItem(resTuple,i,py_nm)){
+				error("PyBunch - bunchAttrDoubleNames - cannot create tuple with bunch attr names");
+			}
+		}
     return resTuple;
   }
 
   //Returns a list (tuple) of  ther integer bunch attribute names
   static PyObject* Bunch_bunchAttrIntNames(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
     std::vector<std::string> names;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:bunchAttrIntNames",&pyBunch)){
-      error("PyBunch - bunchAttrIntNames - pyBunch object needed");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->getIntBunchAttributeNames(names);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-   //create tuple with names
-   PyObject* resTuple = PyTuple_New(names.size());
-
-   for(int i = 0, n = names.size(); i < n; i++){
-     PyObject* py_nm = PyString_FromString(names[i].c_str());
-     if(PyTuple_SetItem(resTuple,i,py_nm)){
-       error("PyBunch - bunchAttrIntNames - cannot create tuple with bunch attr names");
-     }
-   }
-
-    return resTuple;
+		//create tuple with names
+		PyObject* resTuple = PyTuple_New(names.size());
+		for(int i = 0, n = names.size(); i < n; i++){
+			PyObject* py_nm = PyString_FromString(names[i].c_str());
+			if(PyTuple_SetItem(resTuple,i,py_nm)){
+				error("PyBunch - bunchAttrIntNames() - cannot create tuple with bunch attr names");
+			}
+		}
+    return resTuple;		
   }
 
   //Returns 0 or 1. The result is 1 if the bunch has an attribute with a particular name
   static PyObject* Bunch_hasBunchAttrDouble(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* attr_name = NULL;
-    int res = 0;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:hasBunchAttrDouble",&pyBunch,&attr_name)){
-      error("PyBunch - hasBunchAttrDouble - pyBunch object and a bunch attr. name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:hasBunchAttrDouble",&attr_name)){
+      error("PyBunch - hasBunchAttrDouble(name) - a bunch attr. name are needed");
     }
-
     std::string attr_name_str(attr_name);
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    res = cpp_bunch->getBunchAttributes()->hasDoubleAttribute(attr_name_str);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
+    int res = cpp_bunch->getBunchAttributes()->hasDoubleAttribute(attr_name_str);
     return Py_BuildValue("i",res);
   }
 
   //Returns 0 or 1. The result is 1 if the bunch has an attribute with a particular name
   static PyObject* Bunch_hasBunchAttrInt(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* attr_name = NULL;
-    int res = 0;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:hasBunchAttrInt",&pyBunch,&attr_name)){
-      error("PyBunch - hasBunchAttrInt - pyBunch object and a bunch attr. name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:hasBunchAttrInt",&attr_name)){
+      error("PyBunch - hasBunchAttrInt(name) - a bunch attr. name are needed");
     }
-
     std::string attr_name_str(attr_name);
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    res = cpp_bunch->getBunchAttributes()->hasIntAttribute(attr_name_str);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
+    int res = cpp_bunch->getBunchAttributes()->hasIntAttribute(attr_name_str);
     return Py_BuildValue("i",res);
   }
 
@@ -1172,272 +757,144 @@ namespace wrap_orbit_bunch{
 
   //Adds a particles' attributes with a particular name to the bunch
   static PyObject* Bunch_addPartAttr(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* attr_name = NULL;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:addPartAttr",&pyBunch,&attr_name)){
-      error("PyBunch - addPartAttr - pyBunch object and a particle attr. name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:addPartAttr",&attr_name)){
+      error("PyBunch - addPartAttr(name) - a particle attr. name are needed");
     }
-
     std::string attr_name_str(attr_name);
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->addParticleAttributes(attr_name_str);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
 
   //Removes a particles' attributes with a particular name from the bunch
   static PyObject* Bunch_removePartAttr(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* attr_name = NULL;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:removePartAttr",&pyBunch,&attr_name)){
-      error("PyBunch - removePartAttr - pyBunch object and a particle attr. name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:removePartAttr",&attr_name)){
+      error("PyBunch - removePartAttr(name) - pyBunch object and a particle attr. name are needed");
     }
-
     std::string attr_name_str(attr_name);
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->removeParticleAttributes(attr_name_str);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
 
   //Removes all particles' attributes from the bunch
   static PyObject* Bunch_removeAllPartAttr(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:removeAllPartAttr",&pyBunch)){
-      error("PyBunch - removeAllPartAttr - pyBunch object needed");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     cpp_bunch->removeAllParticleAttributes();
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
 
   //Returns a list (tuple) of  the particles' attributes names
   static PyObject* Bunch_getPartAttrNames(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     std::vector<std::string> names;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:getPartAttrNames",&pyBunch)){
-      error("PyBunch -getPartAttrNames- pyBunch object needed");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->getParticleAttributesNames(names);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
    //create tuple with names
    PyObject* resTuple = PyTuple_New(names.size());
-
    for(int i = 0, n = names.size(); i < n; i++){
      PyObject* py_nm = PyString_FromString(names[i].c_str());
      if(PyTuple_SetItem(resTuple,i,py_nm)){
-       error("PyBunch - getPartAttrNames - cannot create tuple with bunch attr names");
+       error("PyBunch - getPartAttrNames() - cannot create tuple with bunch attr names");
      }
    }
-
     return resTuple;
   }
 
    //Returns a list (tuple) of the possible particles' attributes names
-  static PyObject* Bunch_getPossiblePartAttrNames(PyObject *self, PyObject *args){
-    std::vector<std::string> names;
-    ParticleAttributesFactory::getParticleAttributesNames(names);
-
-    //create tuple with names
-   PyObject* resTuple = PyTuple_New(names.size());
-
-   for(int i = 0, n = names.size(); i < n; i++){
-     PyObject* py_nm = PyString_FromString(names[i].c_str());
-     if(PyTuple_SetItem(resTuple,i,py_nm)){
-       error("PyBunch - getPossiblePartAttrNames - cannot create tuple with bunch attr names");
-     }
-   }
-    return resTuple;
-  }
+	 static PyObject* Bunch_getPossiblePartAttrNames(PyObject *self, PyObject *args){
+		 std::vector<std::string> names;
+		 ParticleAttributesFactory::getParticleAttributesNames(names);
+		 //create tuple with names
+		 PyObject* resTuple = PyTuple_New(names.size());
+		 for(int i = 0, n = names.size(); i < n; i++){
+			 PyObject* py_nm = PyString_FromString(names[i].c_str());
+			 if(PyTuple_SetItem(resTuple,i,py_nm)){
+				 error("PyBunch - getPossiblePartAttrNames - cannot create tuple with bunch attr names");
+			 }
+		 }
+		 return resTuple;
+	 }
 
   //temporary removes and memorizes all particles' attributes names
   static PyObject* Bunch_clearAllPartAttrAndMemorize(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:clearAllPartAttrAndMemorize",&pyBunch)){
-      error("PyBunch -clearAllPartAttrAndMemorize- pyBunch object needed");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     cpp_bunch->clearAllParticleAttributesAndMemorize();
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
 
   //restores all particles' attributes names from memory
   static PyObject* Bunch_restoreAllPartAttrFromMemory(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"O:restoreAllPartAttrFromMemory",&pyBunch)){
-      error("PyBunch -restoreAllPartAttrFromMemory- pyBunch object needed");
-    }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     cpp_bunch->restoreAllParticleAttributesFromMemory();
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
 
   //Returns 0 or 1. The result is 1 if the bunch has a particles' attributes with a particular name
   static PyObject* Bunch_hasPartAttr(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* attr_name = NULL;
-    int res = 0;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:hasPartAttr",&pyBunch,&attr_name)){
-      error("PyBunch - hasPartAttr - pyBunch object and a particles' attr. name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:hasPartAttr",&attr_name)){
+      error("PyBunch - hasPartAttr(name) - a particles' attr. name are needed");
     }
-
     std::string attr_name_str(attr_name);
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    res = cpp_bunch->hasParticleAttributes(attr_name_str);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
+    int res = cpp_bunch->hasParticleAttributes(attr_name_str);
     return Py_BuildValue("i",res);
   }
 
-  //Returns a list (tuple) of  their bunch particles attribute names
+  //Returns a list (tuple) of  their bunch particles attribute names specified in the bunch file
   static PyObject* Bunch_readPartAttrNames(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* file_name = NULL;
     std::vector<std::string> names;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:readPartAttrNames",&pyBunch,&file_name)){
-      error("PyBunch - readPartAttrNames - pyBunch object and file name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:readPartAttrNames",&file_name)){
+      error("PyBunch - readPartAttrNames(fileName) - a file name are needed");
     }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->readParticleAttributesNames(file_name,names);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-   //create tuple with names
-   PyObject* resTuple = PyTuple_New(names.size());
-
-   for(int i = 0, n = names.size(); i < n; i++){
-     PyObject* py_nm = PyString_FromString(names[i].c_str());
-     if(PyTuple_SetItem(resTuple,i,py_nm)){
-       error("PyBunch - readPartAttrNames - cannot create tuple with particles attr. names");
-     }
-   }
-
+		//create tuple with names
+		PyObject* resTuple = PyTuple_New(names.size());
+		for(int i = 0, n = names.size(); i < n; i++){
+			PyObject* py_nm = PyString_FromString(names[i].c_str());
+			if(PyTuple_SetItem(resTuple,i,py_nm)){
+				error("PyBunch - readPartAttrNames(fileName) - cannot create tuple with particles attr. names");
+			}
+		}
     return resTuple;
   }
 
   //initilizes particles' attributes from the bunch file
   static PyObject* Bunch_initPartAttr(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* file_name = NULL;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:initPartAttr",&pyBunch,&file_name)){
-      error("PyBunch - initPartAttr - pyBunch object and file name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:initPartAttr",&file_name)){
+      error("PyBunch - initPartAttr(fileName) - pyBunch object and file name are needed");
     }
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
     cpp_bunch->initParticleAttributes(file_name);
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
 
   //Returns the number of variables in the particles' attributes with a particular name
   static PyObject* Bunch_getPartAttrSize(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* attr_name = NULL;
-    int size = 0;
-
-    //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-    //NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"Os:getPartAttrSize",&pyBunch,&attr_name)){
-      error("PyBunch - getPartAttrSize - pyBunch object and a particles' attr. name are needed");
+    //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+    if(!PyArg_ParseTuple(	args,"s:getPartAttrSize",&attr_name)){
+      error("PyBunch - getPartAttrSize(name) - a particles' attr. name are needed");
     }
-
     std::string attr_name_str(attr_name);
-
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    size = cpp_bunch->getParticleAttributes(attr_name_str)->getAttSize();
-
-    //clear the reference created by
-    //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
+    int size = cpp_bunch->getParticleAttributes(attr_name_str)->getAttSize();
     return Py_BuildValue("i",size);
   }
 
@@ -1449,55 +906,35 @@ namespace wrap_orbit_bunch{
   //This is slow. In the C++ code you have to get reference to
   //particles' attributes object and operate through it
   static PyObject* Bunch_partAttrValue(PyObject *self, PyObject *args){
-    //if nVars == 4 this is get attribute
-    //if nVars == 5 this is set attribute
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+    //if nVars == 3 this is get attribute
+    //if nVars == 4 this is set attribute
     int nVars = PyTuple_Size(args);
 
-    PyObject* pyBunch;
     const char* attr_name = NULL;
     int part_index = 0;
     int attr_index = 0;
     double val = 0.;
 
     if(nVars == 4 ||  nVars == 5){
-
       if(nVars == 4){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Osii:partAttrValue",&pyBunch,&attr_name,&part_index ,&attr_index)){
-          error("PyBunch - partAttrValue - pyBunch object,name of attr., part. and attr. indexes are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"sii:partAttrValue",&attr_name,&part_index ,&attr_index)){
+          error("PyBunch - partAttrValue(attr_name,part_index,atr_index) - params. are needed");
         }
-
         std::string attr_name_str(attr_name);
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         val = cpp_bunch->getParticleAttributes(attr_name_str)->attValue(part_index,attr_index);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
-
         return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Osiid:",&pyBunch,&attr_name,&part_index ,&attr_index,&val)){
-          error("PyBunch - partAttrValue - pyBunch object,name of attr., part. and attr. indexes, and value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"siid:",&attr_name,&part_index ,&attr_index,&val)){
+          error("PyBunch - partAttrValue(attr_name,part_index,atr_index,value) - params. are needed");
         }
-
         std::string attr_name_str(attr_name);
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->getParticleAttributes(attr_name_str)->attValue(part_index,attr_index) = val;
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
+				return Py_BuildValue("d",val);
       }
-
     }
     else{
       error("PyBunch. You should call partAttrValue(attr_name,part_ind,attr_ind) or partAttrValue(attr_name,part_ind,attr_ind,value)");
@@ -1517,72 +954,37 @@ namespace wrap_orbit_bunch{
   //returns the number of macro-particles in the bunch
   //this is implementation of the "getSize()" method
   static PyObject* Bunch_getSize(PyObject *self, PyObject *args){
-    PyObject* pyBunch = PyTuple_GetItem(args,0);
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    int nMacroParts = cpp_bunch->getSize();
-
-    //clear the reference created by PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-    return Py_BuildValue("i",nMacroParts);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
+    return Py_BuildValue("i",cpp_bunch->getSize());
   }
 
   //returns the number of macro-particles in the bunch in all CPUs
   //this is implementation of the "getSizeGlobal()" method
   static PyObject* Bunch_getSizeGlobal(PyObject *self, PyObject *args){
-    PyObject* pyBunch = PyTuple_GetItem(args,0);
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    int nMacroPartsGlobal = cpp_bunch->getSizeGlobal();
-
-    //clear the reference created by PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-    return Py_BuildValue("i",nMacroPartsGlobal);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;	
+    return Py_BuildValue("i",cpp_bunch->getSizeGlobal());
   }
 
   //returns the number of macro-particles in the bunch in all CPUs
   //    that was calculated in the previous call of getSizeGlobal()
   //this is implementation of the "getSizeGlobalFromMemory()" method
   static PyObject* Bunch_getSizeGlobalFromMemory(PyObject *self, PyObject *args){
-    PyObject* pyBunch = PyTuple_GetItem(args,0);
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    int nMacroPartsGlobalFromMemory = cpp_bunch->getSizeGlobalFromMemory();
-
-    //clear the reference created by PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-    return Py_BuildValue("i",nMacroPartsGlobalFromMemory);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;	
+    return Py_BuildValue("i",cpp_bunch->getSizeGlobalFromMemory());
   }
 
   //returns the number of all macro-particles - alive, dead, new
   //this is implementation of the "getTotalCount()" method
   static PyObject* Bunch_getTotalCount(PyObject *self, PyObject *args){
-    PyObject* pyBunch = PyTuple_GetItem(args,0);
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    int nTotalCount = cpp_bunch->getTotalCount();
-
-    //clear the reference created by PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-    return Py_BuildValue("i",nTotalCount);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+    return Py_BuildValue("i",cpp_bunch->getTotalCount());
   }
 
   //returns the capacity of the bunch-container. It could be changed.
   //this is implementation of the "getCapacity()" method
   static PyObject* Bunch_getCapacity(PyObject *self, PyObject *args){
-    PyObject* pyBunch = PyTuple_GetItem(args,0);
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-    int nCapacity = cpp_bunch->getCapacity();
-
-    //clear the reference created by PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-    Py_DECREF(py_bunch_ref);
-
-    return Py_BuildValue("i",nCapacity);
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+    return Py_BuildValue("i",cpp_bunch->getCapacity());
   }
 
   //---------------------------------------------------------------
@@ -1593,46 +995,22 @@ namespace wrap_orbit_bunch{
 
   //Prints bunch into the std::cout stream
   static PyObject* Bunch_dumpBunch(PyObject *self, PyObject *args){
-    //if nVars == 1 dumpBunchs into std::cout
-    //if nVars == 2 dumpBunchs into the file
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+    //if nVars == 0 dumpBunchs into std::cout
+    //if nVars == 1 dumpBunchs into the file
     int nVars = PyTuple_Size(args);
-
-    PyObject* pyBunch;
     const char* file_name = NULL;
-
-    if(nVars == 1 ||  nVars == 2){
-
-      if(nVars == 1){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"O:dumpBunch",&pyBunch)){
-          error("PyBunch - dumpBunch() - pyBunch object is needed");
-        }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+    if(nVars == 0 ||  nVars == 1){
+      if(nVars == 0){
         cpp_bunch->print(std::cout);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Os:dumpBunch",&pyBunch,&file_name)){
-          error("PyBunch - dumpBunch - pyBunch object and new value are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"s:dumpBunch",&file_name)){
+          error("PyBunch - dumpBunch(fileName) - a new value are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->print(file_name);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
     }
     else{
       error("PyBunch. You should call dumpBunch() or dumpBunch(file_name)");
@@ -1644,137 +1022,75 @@ namespace wrap_orbit_bunch{
 
   //Reads bunch info from the file
   static PyObject* Bunch_readBunch(PyObject *self, PyObject *args){
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     //if nVars == 1 reads all macro-particles
     //if nVars == 2 reads only specified number of macro-particles
     int nVars = PyTuple_Size(args);
-
-    PyObject* pyBunch;
     const char* file_name = NULL;
     int nParts = 0;
-
-    if(nVars == 2 ||  nVars == 3){
-
-      if(nVars == 2){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Os:read",&pyBunch,&file_name)){
-          error("PyBunch - readBunch - pyBunch object and file name are needed");
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"s:read",&file_name)){
+          error("PyBunch - readBunch(fileName) - a file name are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->readBunch(file_name);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-        //NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"Osi:read",&pyBunch,&file_name,&nParts)){
-          error("PyBunch - readBunch - pyBunch object, file name, and number of particles are needed");
+        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+        if(!PyArg_ParseTuple(	args,"si:read",&file_name,&nParts)){
+          error("PyBunch - readBunch(fileName,nParts) - file name, and number of particles are needed");
         }
-
-        PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-        Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
         cpp_bunch->readBunch(file_name,nParts);
-
-        //clear the reference created by
-        //PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-        Py_DECREF(py_bunch_ref);
       }
-
     }
     else{
       error("PyBunch. You should call readBunch(file_name) or readBunch(file_name,nParts)");
     }
-
     Py_INCREF(Py_None);
     return Py_None;
   }
 
   //Copy bunch attrubutes and structure to another bunch
   static PyObject* Bunch_copyEmptyBunchTo(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     PyObject* pyBunch_Target;
-
-		//NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-		//NO NEED OF Py_DECREF()
-		if(!PyArg_ParseTuple(	args,"OO:copyEmptyBunchTo",&pyBunch,&pyBunch_Target)){
-			error("PyBunch - copyEmptyBunchTo - target pyBunch object is needed");
+		//NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+		if(!PyArg_ParseTuple(	args,"O:copyEmptyBunchTo",&pyBunch_Target)){
+			error("PyBunch - copyEmptyBunchTo(pyBunch) - target pyBunch object is needed");
 		}
-
-		PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-		Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-		PyObject* py_bunch_target_ref = PyObject_GetAttrString( pyBunch_Target ,"cpp_ptr");
-		Bunch* cpp_target_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_target_ref);
-
+		Bunch* cpp_target_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch_Target)->cpp_obj;
 		cpp_bunch->copyEmptyBunchTo(cpp_target_bunch);
-
-		//clear the reference created by
-		//PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-		Py_DECREF(py_bunch_ref);
-		Py_DECREF(py_bunch_target_ref);
-
     Py_INCREF(Py_None);
     return Py_None;
   }
-
+	
   //Copy bunch all info including particles coordinates and attributes to another bunch
   static PyObject* Bunch_copyBunchTo(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     PyObject* pyBunch_Target;
-
-		//NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-		//NO NEED OF Py_DECREF()
-		if(!PyArg_ParseTuple(	args,"OO:copyBunchTo",&pyBunch,&pyBunch_Target)){
-			error("PyBunch - copyBunchTo - target pyBunch object is needed");
+		//NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+		if(!PyArg_ParseTuple(	args,"O:copyBunchTo",&pyBunch_Target)){
+			error("PyBunch - copyBunchTo(pyBunch) - target pyBunch object is needed");
 		}
-
-		PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-		Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-		PyObject* py_bunch_target_ref = PyObject_GetAttrString( pyBunch_Target ,"cpp_ptr");
-		Bunch* cpp_target_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_target_ref);
-
+		Bunch* cpp_target_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch_Target)->cpp_obj;
 		cpp_bunch->copyBunchTo(cpp_target_bunch);
-
-		//clear the reference created by
-		//PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-		Py_DECREF(py_bunch_ref);
-		Py_DECREF(py_bunch_target_ref);
-
-    Py_INCREF(Py_None);
+		Py_INCREF(Py_None);
     return Py_None;
   }
 
   //Copy particles coordinates from one bunch to another
   static PyObject* Bunch_addParticlesTo(PyObject *self, PyObject *args){
-    PyObject* pyBunch;
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     PyObject* pyBunch_Target;
-
-		//NO NEW OBJECT CREATED BY PyArg_ParseTuple!
-		//NO NEED OF Py_DECREF()
-		if(!PyArg_ParseTuple(	args,"OO:addParticlesTo",&pyBunch,&pyBunch_Target)){
-			error("PyBunch - addParticlesTo - target pyBunch object is needed");
+		
+		//NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
+		if(!PyArg_ParseTuple(	args,"O:addParticlesTo",&pyBunch_Target)){
+			error("PyBunch - addParticlesTo(pyBunch) - target pyBunch object is needed");
 		}
-
-		PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-		Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-		PyObject* py_bunch_target_ref = PyObject_GetAttrString( pyBunch_Target ,"cpp_ptr");
-		Bunch* cpp_target_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_target_ref);
-
+		Bunch* cpp_target_bunch =(Bunch*) ((pyORBIT_Object *) pyBunch_Target)->cpp_obj ;
 		cpp_bunch->addParticlesTo(cpp_target_bunch);
-
-		//clear the reference created by
-		//PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-		Py_DECREF(py_bunch_ref);
-		Py_DECREF(py_bunch_target_ref);
-
-    Py_INCREF(Py_None);
+		Py_INCREF(Py_None);
     return Py_None;
   }
 
@@ -1782,29 +1098,16 @@ namespace wrap_orbit_bunch{
   //destructor for python Bunch class
   //-----------------------------------------------------
   //this is implementation of the __del__ method
-  static PyObject* Bunch_del(PyObject *self, PyObject *args){
-    //std::cerr<<"The Bunch __del__ has been called!"<<std::endl;
-
-    PyObject* pyBunch = PyTuple_GetItem(args,0);
-    PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-    Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-		PyObject* pySyncPart = cpp_bunch->getSyncPart()->getPyWrapper();
-
-    delete cpp_bunch;
-		Py_DECREF(pySyncPart);
-    Py_DECREF(py_bunch_ref);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
+  static void Bunch_del(pyORBIT_Object* self){
+		Bunch* cpp_bunch = (Bunch*) self->cpp_obj;
+		delete cpp_bunch;
+		self->ob_type->tp_free((PyObject*)self);
+  }	
 
   static PyMethodDef BunchClassMethods[] = {
     //--------------------------------------------------------
     // class Bunch wrapper                        START
     //--------------------------------------------------------
-    { "__init__",                       Bunch_init                          ,METH_VARARGS,"Constructor. Creates Bunch class"},
     { "getSyncParticle",                Bunch_getSyncParticle               ,METH_VARARGS,"Returns syncParticle class instance"},
     { "addParticle",                    Bunch_addParticle                   ,METH_VARARGS,"Adds a macro-particle to the bunch"},
     { "deleteParticle",                 Bunch_deleteParticle                ,METH_VARARGS,"Removes macro-particle from the bunch and call compress inside"},
@@ -1855,13 +1158,61 @@ namespace wrap_orbit_bunch{
     { "copyEmptyBunchTo",               Bunch_copyEmptyBunchTo              ,METH_VARARGS,"Copy bunch attrubutes and structure to another bunch"},
     { "copyBunchTo",                    Bunch_copyBunchTo                   ,METH_VARARGS,"Copy bunch all info including particles coordinates and attributes to another bunch"},
     { "addParticlesTo",                 Bunch_addParticlesTo                ,METH_VARARGS,"Copy particles coordinates from one bunch to another"},
-    { "__del__",                        Bunch_del                           ,METH_VARARGS,"Destructor of Bunch class"},
     {NULL,NULL}
     //--------------------------------------------------------
     // class Bunch wrapper                        STOP
     //--------------------------------------------------------
   };
-
+	
+	// defenition of the memebers of the python Bunch wrapper class
+	// they will be vailable from python level
+	static PyMemberDef BunchClassMembers [] = {
+		{NULL}
+	};
+	
+	//new python Bunch wrapper type definition
+	static PyTypeObject pyORBIT_Bunch_Type = {
+		PyObject_HEAD_INIT(NULL)
+		0, /*ob_size*/
+		"Bunch", /*tp_name*/
+		sizeof(pyORBIT_Object), /*tp_basicsize*/
+		0, /*tp_itemsize*/
+		(destructor) Bunch_del , /*tp_dealloc*/
+		0, /*tp_print*/
+		0, /*tp_getattr*/
+		0, /*tp_setattr*/
+		0, /*tp_compare*/
+		0, /*tp_repr*/
+		0, /*tp_as_number*/
+		0, /*tp_as_sequence*/
+		0, /*tp_as_mapping*/
+		0, /*tp_hash */
+		0, /*tp_call*/
+		0, /*tp_str*/
+		0, /*tp_getattro*/
+		0, /*tp_setattro*/
+		0, /*tp_as_buffer*/
+		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+		"The Bunch python wrapper", /* tp_doc */
+		0, /* tp_traverse */
+		0, /* tp_clear */
+		0, /* tp_richcompare */
+		0, /* tp_weaklistoffset */
+		0, /* tp_iter */
+		0, /* tp_iternext */
+		BunchClassMethods, /* tp_methods */
+		BunchClassMembers, /* tp_members */
+		0, /* tp_getset */
+		0, /* tp_base */
+		0, /* tp_dict */
+		0, /* tp_descr_get */
+		0, /* tp_descr_set */
+		0, /* tp_dictoffset */
+		(initproc) Bunch_init, /* tp_init */
+		0, /* tp_alloc */
+		Bunch_new, /* tp_new */
+	};	
+	
   static PyMethodDef BunchModuleMethods[] = { {NULL,NULL} };
 
 
@@ -1870,34 +1221,12 @@ extern "C" {
 #endif
 
   void initbunch(){
+		//check that the Bunch wrapper is ready
+		if (PyType_Ready(&pyORBIT_Bunch_Type) < 0) return;
+		Py_INCREF(&pyORBIT_Bunch_Type);
     //create new module
     PyObject* module = Py_InitModule("bunch",BunchModuleMethods);
-    PyObject* moduleDict = PyModule_GetDict(module);
-
-    //create Bunch class object
-    PyObject* bunchClassDict = PyDict_New();
-    PyObject* bunchClassName = PyString_FromString("Bunch");
-    PyObject* bunchClass = PyClass_New(NULL,bunchClassDict,bunchClassName);
-
-    //add Bunch class to the bunch module
-    PyDict_SetItemString(moduleDict,"Bunch",bunchClass);
-
-    //clear unnecessary references
-    Py_DECREF(bunchClassDict);
-    Py_DECREF(bunchClassName);
-    Py_DECREF(bunchClass);
-
-
-    //adds methods to the Bunch class
-    PyMethodDef* def;
-    for( def = BunchClassMethods; def->ml_name != NULL; def++){
-      PyObject* func = PyCFunction_New(def,NULL);
-      PyObject* method = PyMethod_New(func,NULL,bunchClass);
-      PyDict_SetItemString(bunchClassDict,def->ml_name,method);
-      Py_DECREF(func);
-      Py_DECREF(method);
-    }
-
+		PyModule_AddObject(module, "Bunch", (PyObject *)&pyORBIT_Bunch_Type);			
 		//add the SyncParticle python class
 		wrap_orbit_syncpart::initsyncpart(module);
   }

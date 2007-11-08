@@ -145,6 +145,10 @@ extern "C" {
   int ORBIT_MPI_Comm_size(MPI_Comm comm, int * size);
   int ORBIT_MPI_Comm_rank(MPI_Comm comm, int * rank);
 
+	int ORBIT_MPI_Comm_free(MPI_Comm* comm);
+	
+	int ORBIT_MPI_Group_free(MPI_Group* group);
+	
   double ORBIT_MPI_Wtime(void);
 
   int ORBIT_MPI_Allreduce(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm);

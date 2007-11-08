@@ -57,6 +57,10 @@ extern "C" {
   //this is implementation of the __del__ method
   static void MPI_Comm_del(pyORBIT_MPI_Comm* self){
 		//std::cerr<<"The MPI_Comm __del__ has been called!"<<std::endl;
+		MPI_Comm comm = self->comm;
+		if(comm != MPI_COMM_NULL && comm != MPI_COMM_WORLD && comm != MPI_COMM_SELF){
+			ORBIT_MPI_Comm_free(&comm);
+		}
 		self->ob_type->tp_free((PyObject*)self);
   }
 	
@@ -135,13 +139,32 @@ extern "C" {
 		pyORBIT_MPI_Comm* pyMPI_Comm_SELF = PyObject_New(pyORBIT_MPI_Comm,&pyORBIT_MPI_Comm_Type);
 		pyMPI_Comm_SELF->comm = MPI_COMM_SELF;
 		Py_INCREF((PyObject *) pyMPI_Comm_SELF); 
+		
+		pyORBIT_MPI_Comm* pyMPI_Comm_NULL = PyObject_New(pyORBIT_MPI_Comm,&pyORBIT_MPI_Comm_Type);
+		pyMPI_Comm_NULL->comm = MPI_COMM_NULL;
+		Py_INCREF((PyObject *) pyMPI_Comm_NULL); 
 
     PyModule_AddObject(comm_module, "MPI_COMM_WORLD", (PyObject *) pyMPI_Comm_WORLD);
     PyModule_AddObject(comm_module, "MPI_COMM_SELF", (PyObject *) pyMPI_Comm_SELF);
+    PyModule_AddObject(comm_module, "MPI_COMM_NULL", (PyObject *) pyMPI_Comm_NULL);
 		
 		PyModule_AddObject(module, "mpi_comm", comm_module);
 	}
-
+	
+	//-----------------------------------------------------------
+	//The function that will be exposed as C/C++ API for MPI_Comm
+	//-----------------------------------------------------------
+	pyORBIT_MPI_Comm* newMPI_Comm(){
+		pyORBIT_MPI_Comm* pyMPI_Comm = PyObject_New(pyORBIT_MPI_Comm,&pyORBIT_MPI_Comm_Type);
+		pyMPI_Comm->comm = MPI_COMM_WORLD;
+		Py_INCREF((PyObject *) pyMPI_Comm);
+    return pyMPI_Comm;
+	}
+	
+	void freeMPI_Comm(pyORBIT_MPI_Comm* pyMPI_Comm){
+		Py_DECREF(pyMPI_Comm);
+	}	
+	
 #ifdef __cplusplus
 }
 #endif

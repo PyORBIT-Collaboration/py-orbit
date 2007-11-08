@@ -114,6 +114,26 @@ int ORBIT_MPI_Comm_rank(MPI_Comm comm, int * rank){
   return res;
 }
 
+int ORBIT_MPI_Comm_free(MPI_Comm* comm){
+	int res = 0;
+#ifdef USE_MPI
+  res = MPI_Comm_free(comm);
+#else
+  res  = 1;
+#endif		
+	return res;	
+}
+
+int ORBIT_MPI_Group_free(MPI_Group* group){
+	int res = 0;
+#ifdef USE_MPI
+  res = MPI_Group_free(group);
+#else
+  res  = 1;
+#endif		
+	return res;	
+}
+
 double ORBIT_MPI_Wtime(void){
   double time = 0;
 

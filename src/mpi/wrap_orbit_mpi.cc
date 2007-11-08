@@ -8,6 +8,11 @@
 
 //wrappers of mpi objects
 #include "wrap_mpi_comm.hh"
+#include "wrap_mpi_group.hh"
+#include "wrap_mpi_status.hh"
+#include "wrap_mpi_request.hh"
+#include "wrap_mpi_datatype.hh"
+#include "wrap_mpi_op.hh"
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,6 +105,21 @@ extern "C" {
 		
 		//add MPI_Comm class and fields
 		wrap_orbit_mpi_comm::init_orbit_mpi_comm(m);
+		
+		//add MPI_Group class and fields
+		wrap_orbit_mpi_group::init_orbit_mpi_group(m);
+		
+		//add MPI_Status class and fields
+		wrap_orbit_mpi_status::init_orbit_mpi_status(m);
+		
+		//add MPI_Request class and fields
+		wrap_orbit_mpi_request::init_orbit_mpi_request(m);
+		
+		//add MPI_Datatype class and fields
+		wrap_orbit_mpi_datatype::init_orbit_mpi_datatype(m);
+		
+		//add MPI_Op class and fields
+		wrap_orbit_mpi_op::init_orbit_mpi_op(m);
   }
 
 

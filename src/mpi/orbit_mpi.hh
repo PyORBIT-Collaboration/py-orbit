@@ -6,12 +6,17 @@
 #ifdef USE_MPI
  #include "mpi.h"
 #else
+//-------------------------------------------------------------
+//START  #ifdef USE_MPI
+//Defenition of the MPI realted types for the case when there 
+//is no MPI library
+//--------------------------------------------------------------
 
-//Communicators
+//Communicators ( handler)
  typedef int MPI_Comm;
  #define MPI_COMM_WORLD 91
  #define MPI_COMM_SELF  92
- #define MPI_MAX_PROCESSOR_NAME 256
+
 
  //data type
  typedef int MPI_Datatype;
@@ -55,7 +60,9 @@ typedef int MPI_Group;
     int MPI_ERROR;
  } MPI_Status;
 
-
+// Request ( handler)
+typedef int MPI_Request; 
+ 
 /* Define some null objects */
 #define MPI_COMM_NULL      ((MPI_Comm)0)
 #define MPI_OP_NULL        ((MPI_Op)0)
@@ -66,12 +73,69 @@ typedef int MPI_Group;
 #define MPI_GRAPH  1
 #define MPI_CART   2
 
+/* Results of the compare operations */   
+#define MPI_IDENT     0  
+#define MPI_CONGRUENT 1  
+#define MPI_SIMILAR   2  
+#define MPI_UNEQUAL   3 
+
 /* Names' lengths */
 #define MPI_MAX_PROCESSOR_NAME 256
 #define MPI_MAX_ERROR_STRING   512
 #define MPI_MAX_NAME_STRING     63
 
-#endif   //end of   ----ifdef USE_MPI----
+#endif
+//-------------------------------------------------------------
+//END of  #ifdef USE_MPI
+//Defenition of the MPI realted types for the case when there 
+//is no MPI library
+//--------------------------------------------------------------
+
+
+//--------------------------------------------------------------
+//     The PyORBIT MPI classes definitions         START
+//--------------------------------------------------------------
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+ typedef struct {
+   PyObject_HEAD
+   MPI_Comm comm;
+ } pyORBIT_MPI_Comm;
+ 
+ typedef struct {
+   PyObject_HEAD
+   MPI_Group group;
+ } pyORBIT_MPI_Group; 
+ 
+ typedef struct {
+   PyObject_HEAD
+   MPI_Status status;
+ } pyORBIT_MPI_Status;
+ 
+ typedef struct {
+   PyObject_HEAD
+   MPI_Request request;
+ } pyORBIT_MPI_Request;  
+ 
+ typedef struct {
+   PyObject_HEAD
+   MPI_Datatype datatype;
+ } pyORBIT_MPI_Datatype;
+ 
+ typedef struct {
+   PyObject_HEAD
+   MPI_Op op;
+ } pyORBIT_MPI_Op; 
+ 
+#ifdef __cplusplus
+}
+#endif
+//--------------------------------------------------------------
+//     The PyORBIT MPI classes definitions         STOP
+//--------------------------------------------------------------
+
 
   int ORBIT_MPI_Init(int *len, char ***ch);
   int ORBIT_MPI_Initialized(int *init);

@@ -6,10 +6,12 @@
 
 #include "wrap_orbit_mpi.hh"
 
+//wrappers of mpi objects
+#include "wrap_mpi_comm.hh"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
  namespace wrap_orbit_mpi{
 
@@ -95,6 +97,9 @@ extern "C" {
     PyObject *m, *d;
     m = Py_InitModule((char*)"orbit_mpi",orbit_mpiMethods);
     d = PyModule_GetDict(m);
+		
+		//add MPI_Comm class and fields
+		wrap_orbit_mpi_comm::init_orbit_mpi_comm(m);
   }
 
 

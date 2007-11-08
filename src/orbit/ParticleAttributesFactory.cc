@@ -23,7 +23,6 @@
 #include "ParticleAttributesFactory.hh"
 
 #include "ParticleMacroSize.hh"
-#include "ParticleMassCharge.hh"
 ///////////////////////////////////////////////////////////////////////////
 //   Constructor and Desctructor
 ///////////////////////////////////////////////////////////////////////////
@@ -44,9 +43,6 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(con
   }
   if(name == "macrosize"){
     part_atrs = new ParticleMacroSize(bunch);
-  }
-  if(name == "masscharge"){
-    part_atrs = new ParticleMassCharge(bunch);
   }
   
   if(part_atrs == NULL) {
@@ -81,7 +77,6 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(con
 void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& names){
   names.clear();
   names.push_back("macrosize");
-  names.push_back("masscharge");
 }
 
 

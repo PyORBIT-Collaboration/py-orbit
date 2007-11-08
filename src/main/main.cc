@@ -7,7 +7,6 @@
 #include "wrap_orbit_mpi.hh"
 #include "wrap_bunch.hh"
 #include "wrap_teapotbase.hh"
-#include "wrap_fieldtracker.hh"
 
 int main (int argc, char **argv)
 {
@@ -36,7 +35,6 @@ int main (int argc, char **argv)
   //ORBIT modules initializations
   wrap_orbit_mpi::initorbit_mpi();
   wrap_orbit_bunch::initbunch();
-	wrap_orbit_fieldtracker::initfieldtracker();
 
 	wrap_teapotbase::initteapotbase();
 

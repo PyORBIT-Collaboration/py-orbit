@@ -26,7 +26,7 @@ extern "C" {
 
 	//constructor for python class wrapping MPI_Comm instance
 	//It never will be called directly
-	static PyObject* MPI_Comm_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+	static PyObject* mpi_comm_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	{
 		pyORBIT_MPI_Comm* self;
 		self = (pyORBIT_MPI_Comm *) type->tp_alloc(type, 0);
@@ -36,7 +36,7 @@ extern "C" {
 
   //initializator for python MPI_Comm  class
   //this is implementation of the __init__ method
-  static int MPI_Comm_init(pyORBIT_MPI_Comm *self, PyObject *args, PyObject *kwds){
+  static int mpi_comm_init(pyORBIT_MPI_Comm *self, PyObject *args, PyObject *kwds){
     pyORBIT_MPI_Comm* pyMPI_Comm = (pyORBIT_MPI_Comm*) self;
 	  int nArgs = PyTuple_Size(args);
 		
@@ -51,11 +51,22 @@ extern "C" {
     return 0;
   }
 
+  //feeing the mpi comm in the python MPI_Comm  class
+	static PyObject* mpi_comm_free(PyObject *self, PyObject *args){
+    pyORBIT_MPI_Comm* pyMPI_Comm = (pyORBIT_MPI_Comm*) self;
+		if(pyMPI_Comm->comm != MPI_COMM_WORLD && pyMPI_Comm->comm != MPI_COMM_SELF){
+			ORBIT_MPI_Comm_free(&pyMPI_Comm->comm);
+		}
+		pyMPI_Comm->comm = MPI_COMM_WORLD;
+    Py_INCREF(Py_None);
+    return Py_None;		
+  }		
+	
   //-----------------------------------------------------
   //destructor for python MPI_Comm class.
   //-----------------------------------------------------
   //this is implementation of the __del__ method
-  static void MPI_Comm_del(pyORBIT_MPI_Comm* self){
+  static void mpi_comm_del(pyORBIT_MPI_Comm* self){
 		//std::cerr<<"The MPI_Comm __del__ has been called!"<<std::endl;
 		MPI_Comm comm = self->comm;
 		if(comm != MPI_COMM_NULL && comm != MPI_COMM_WORLD && comm != MPI_COMM_SELF){
@@ -68,6 +79,7 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef MPI_CommClassMethods[] = {
     //{ "test",       MPI_Comm_test      ,METH_VARARGS,"document string"},
+		{ "free",       mpi_comm_free ,METH_VARARGS,"Free MPI communicator."},
     {NULL}
   };
 
@@ -84,7 +96,7 @@ extern "C" {
 		"MPI_Comm", /*tp_name*/
 		sizeof(pyORBIT_MPI_Comm), /*tp_basicsize*/
 		0, /*tp_itemsize*/
-		(destructor) MPI_Comm_del , /*tp_dealloc*/
+		(destructor) mpi_comm_del , /*tp_dealloc*/
 		0, /*tp_print*/
 		0, /*tp_getattr*/
 		0, /*tp_setattr*/
@@ -115,9 +127,9 @@ extern "C" {
 		0, /* tp_descr_get */
 		0, /* tp_descr_set */
 		0, /* tp_dictoffset */
-		(initproc) MPI_Comm_init, /* tp_init */
+		(initproc) mpi_comm_init, /* tp_init */
 		0, /* tp_alloc */
-		MPI_Comm_new, /* tp_new */
+		mpi_comm_new, /* tp_new */
 	};
 
 	//--------------------------------------------------

@@ -142,20 +142,65 @@ extern "C" {
   int ORBIT_MPI_Finalize(void);
   int ORBIT_MPI_Finalize(const char* message);
   int ORBIT_MPI_Get_processor_name(char *name, int* len);
+  double ORBIT_MPI_Wtime(void);
+	double ORBIT_MPI_Wtick();
+	
+	//--------------------------------------------------------
+	// MPI functions related to the MPI_Comm manipulations
+	//--------------------------------------------------------	
+	int ORBIT_MPI_Comm_create(MPI_Comm comm, MPI_Group group, MPI_Comm *comm_out);
+	int ORBIT_MPI_Comm_group(MPI_Comm comm, MPI_Group *group );
+  int ORBIT_MPI_Comm_dup(MPI_Comm comm, MPI_Comm *comm_out);
+	int ORBIT_MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *comm_out);
+  int ORBIT_MPI_Comm_remote_size(MPI_Comm comm, int *size);	
+	int ORBIT_MPI_Comm_remote_group(MPI_Comm comm, MPI_Group *group);
+  int ORBIT_MPI_Comm_test_inter(MPI_Comm comm, int *flag);
+	int ORBIT_MPI_Comm_compare(MPI_Comm  comm1, MPI_Comm  comm2, int *result);
+	int ORBIT_MPI_Comm_set_name(MPI_Comm com, char *name);
+	int ORBIT_MPI_Comm_get_name(MPI_Comm comm, char *namep, int *reslen);
   int ORBIT_MPI_Comm_size(MPI_Comm comm, int * size);
   int ORBIT_MPI_Comm_rank(MPI_Comm comm, int * rank);
-
 	int ORBIT_MPI_Comm_free(MPI_Comm* comm);
 	
+	//--------------------------------------------------------
+	// MPI functions related to the MPI_Group manipulations
+	//--------------------------------------------------------	
+  int ORBIT_MPI_Group_incl(MPI_Group group, int n, int *ranks, MPI_Group *group_out );
+  int ORBIT_MPI_Group_excl(MPI_Group group, int n, int *ranks, MPI_Group *newgroup);
+  int ORBIT_MPI_Group_union(MPI_Group group1, MPI_Group group2, MPI_Group *group_out);	
+  int ORBIT_MPI_Group_difference(MPI_Group group1, MPI_Group group2, MPI_Group *group_out);
+  int ORBIT_MPI_Group_intersection(MPI_Group group1, MPI_Group group2, MPI_Group *group_out);
+  int ORBIT_MPI_Group_compare(MPI_Group group1, MPI_Group group2, int *result);	
+  int ORBIT_MPI_Group_translate_ranks(MPI_Group group_a, int n, int *ranks_a, MPI_Group group_b, int *ranks_b);	
+	int ORBIT_MPI_Group_size(MPI_Group group, int *size);
+	int ORBIT_MPI_Group_rank(MPI_Group group, int *rank);
 	int ORBIT_MPI_Group_free(MPI_Group* group);
 	
-  double ORBIT_MPI_Wtime(void);
-
+	//--------------------------------------------------------
+	// MPI functions related to the MPI_Intercomm manipulations
+	//--------------------------------------------------------		
+	int ORBIT_MPI_Intercomm_create(MPI_Comm local_comm, int local_leader, MPI_Comm peer_comm, 
+		                             int remote_leader, int tag, MPI_Comm *comm_out);	
+	int ORBIT_MPI_Intercomm_merge(MPI_Comm comm, int high, MPI_Comm *comm_out);
+	
+	//--------------------------------------------------------
+	// MPI functions related to the MPI_Graph manipulations
+	//--------------------------------------------------------	
+	int ORBIT_MPI_Graph_create(MPI_Comm comm_old, int nnodes, int *index, int *edges, int reorder, MPI_Comm *comm_graph);
+	int ORBIT_MPI_Graphdims_get(MPI_Comm comm, int *nnodes, int *nedges);
+  int ORBIT_MPI_Graph_get(MPI_Comm comm, int maxindex, int maxedges, int *index, int *edges);
+  int ORBIT_MPI_Graph_map(MPI_Comm comm_old, int nnodes, int *index, int *edges, int *newrank);
+	int ORBIT_MPI_Graph_neighbors_count(MPI_Comm comm, int rank, int *nneighbors);
+	int ORBIT_MPI_Graph_neighbors(MPI_Comm comm, int rank, int maxneighbors, int *neighbors);
+	
+	//--------------------------------------------------------
+	// MPI functions related to the Send-Receive operations
+	//--------------------------------------------------------
+	int ORBIT_MPI_Barrier(MPI_Comm comm);
+	int ORBIT_MPI_Wait(MPI_Request  *request, MPI_Status *status);
   int ORBIT_MPI_Allreduce(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
-
   int ORBIT_MPI_Send(void*, int, MPI_Datatype, int, int, MPI_Comm);
   int ORBIT_MPI_Recv(void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status *);
-
   int ORBIT_MPI_Bcast(void*, int, MPI_Datatype, int, MPI_Comm );
 
 #endif   //end of ---ifndef ORBIT_MPI_INCLUDE---

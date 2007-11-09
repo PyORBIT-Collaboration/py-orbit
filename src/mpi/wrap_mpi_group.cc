@@ -26,7 +26,7 @@ extern "C" {
 
 	//constructor for python class wrapping MPI_Group instance
 	//It never will be called directly
-	static PyObject* MPI_Group_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+	static PyObject* mpi_group_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	{
 		pyORBIT_MPI_Group* self;
 		self = (pyORBIT_MPI_Group *) type->tp_alloc(type, 0);
@@ -36,7 +36,7 @@ extern "C" {
 
   //initializator for python MPI_Group  class
   //this is implementation of the __init__ method
-  static int MPI_Group_init(pyORBIT_MPI_Group *self, PyObject *args, PyObject *kwds){
+  static int mpi_group_init(pyORBIT_MPI_Group *self, PyObject *args, PyObject *kwds){
     pyORBIT_MPI_Group* pyMPI_Group = (pyORBIT_MPI_Group*) self;
 	  int nArgs = PyTuple_Size(args);
 		
@@ -51,6 +51,17 @@ extern "C" {
     return 0;
   }
 
+  //feeing the mpi group in the python MPI_Group  class
+	static PyObject* mpi_group_free(PyObject *self, PyObject *args){
+    pyORBIT_MPI_Group* pyMPI_Group = (pyORBIT_MPI_Group*) self;
+		if(pyMPI_Group->group != MPI_GROUP_NULL && pyMPI_Group->group != MPI_GROUP_EMPTY){
+			ORBIT_MPI_Group_free(&pyMPI_Group->group);
+		}
+		pyMPI_Group->group = MPI_GROUP_EMPTY;
+    Py_INCREF(Py_None);
+    return Py_None;
+  }	
+	
   //-----------------------------------------------------
   //destructor for python MPI_Group class.
   //-----------------------------------------------------
@@ -68,6 +79,7 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef MPI_GroupClassMethods[] = {
     //{ "test",       MPI_Group_test      ,METH_VARARGS,"document string"},
+		{ "free",   mpi_group_free  ,METH_VARARGS,"Free the MPI group."},
     {NULL}
   };
 
@@ -115,9 +127,9 @@ extern "C" {
 		0, /* tp_descr_get */
 		0, /* tp_descr_set */
 		0, /* tp_dictoffset */
-		(initproc) MPI_Group_init, /* tp_init */
+		(initproc) mpi_group_init, /* tp_init */
 		0, /* tp_alloc */
-		MPI_Group_new, /* tp_new */
+		mpi_group_new, /* tp_new */
 	};
 
 	//--------------------------------------------------

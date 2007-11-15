@@ -36,18 +36,10 @@ extern "C" {
 
   //initializator for python MPI_Group  class
   //this is implementation of the __init__ method
-  static int mpi_group_init(pyORBIT_MPI_Group *self, PyObject *args, PyObject *kwds){
-    pyORBIT_MPI_Group* pyMPI_Group = (pyORBIT_MPI_Group*) self;
-	  int nArgs = PyTuple_Size(args);
-		
-    if(nArgs != 0 && nArgs != 1){
-      error("MPI_Group constructor needs nothing or MPI_Group as input parameter.");
+  static int mpi_group_init(pyORBIT_MPI_Group *self, PyObject *args, PyObject *kwds){		
+    if(PyTuple_Size(args) != 0){
+      error("MPI_Group constructor cannot have parameters.");
     }
-		
-		if(nArgs == 1){
-			pyORBIT_MPI_Group* pyMPI_Group_in = (pyORBIT_MPI_Group*) PyTuple_GetItem(args,0);
-			pyMPI_Group->group = pyMPI_Group_in->group;
-		}
     return 0;
   }
 
@@ -164,7 +156,6 @@ extern "C" {
 	pyORBIT_MPI_Group* newMPI_Group(){
 		pyORBIT_MPI_Group* pyMPI_Group = PyObject_New(pyORBIT_MPI_Group,&pyORBIT_MPI_Group_Type);
 		pyMPI_Group->group = MPI_GROUP_EMPTY;
-		Py_INCREF((PyObject *) pyMPI_Group);
     return pyMPI_Group;
 	}
 	

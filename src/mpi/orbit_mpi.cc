@@ -7,13 +7,11 @@
 
 int ORBIT_MPI_Init(int *len, char ***ch){
   int res = 0;
-
 #ifdef USE_MPI
   res = MPI_Init(len,ch);
 #else
   res  = 1;
 #endif
-
   return res;
 }
 
@@ -23,14 +21,13 @@ int ORBIT_MPI_Initialized(int *init){
 #ifdef USE_MPI
   res = MPI_Initialized(init);
 #else
-  init = 0;
+  *init = 0;
 #endif
-
   return res;
 }
 
 
-int ORBIT_MPI_Finalize(void){
+int ORBIT_MPI_Finalize(){
   return ORBIT_MPI_Finalize(NULL);
 }
 
@@ -482,6 +479,16 @@ int ORBIT_MPI_Allreduce(void* ar1, void* ar2, int n, MPI_Datatype data, MPI_Op o
   return res;
 }
 
+int ORBIT_MPI_Bcast(void* ar, int n1, MPI_Datatype data, int n2, MPI_Comm comm ){
+  int res = 0;
+#ifdef USE_MPI
+  res = MPI_Bcast(ar, n1, data, n2, comm ) ;
+#else
+  res  = 1;
+#endif
+  return res;
+}
+
 int ORBIT_MPI_Send(void* ar, int n1, MPI_Datatype data, int n2, int n3, MPI_Comm comm){
   int res = 0;
 #ifdef USE_MPI
@@ -502,12 +509,27 @@ int ORBIT_MPI_Recv(void* ar, int n1, MPI_Datatype data, int n2, int n3, MPI_Comm
   return res;
 }
 
-int ORBIT_MPI_Bcast(void* ar, int n1, MPI_Datatype data, int n2, MPI_Comm comm ){
+int ORBIT_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status){
   int res = 0;
 #ifdef USE_MPI
-  res = MPI_Bcast(ar, n1, data, n2, comm ) ;
+  res = MPI_Probe(source, tag, comm, status);
 #else
   res  = 1;
+	status->count = 0;
+	status->MPI_SOURCE = source;
+	status->TAG = tag;
 #endif
-  return res;
+  return res;	
 }
+
+int ORBIT_MPI_Get_count(MPI_Status *status, MPI_Datatype datatype, int *count){
+  int res = 0;
+#ifdef USE_MPI
+  res = MPI_Get_count(status, datatype, count);
+#else
+  res  = 1;
+	status->count = 0;
+#endif
+  return res;		
+}
+

@@ -17,7 +17,6 @@
  #define MPI_COMM_WORLD 91
  #define MPI_COMM_SELF  92
 
-
  //data type
  typedef int MPI_Datatype;
  #define MPI_CHAR           ((MPI_Datatype)1)
@@ -84,6 +83,13 @@ typedef int MPI_Request;
 #define MPI_MAX_ERROR_STRING   512
 #define MPI_MAX_NAME_STRING     63
 
+/* MPI Constants */
+#define MPI_UNDEFINED      (-32766)
+#define MPI_UNDEFINED_RANK MPI_UNDEFINED
+#define MPI_SUCCESS              0
+#define MPI_ANY_SOURCE         (-2)   
+#define MPI_ANY_TAG            (-1)
+
 #endif
 //-------------------------------------------------------------
 //END of  #ifdef USE_MPI
@@ -139,7 +145,7 @@ extern "C" {
 
   int ORBIT_MPI_Init(int *len, char ***ch);
   int ORBIT_MPI_Initialized(int *init);
-  int ORBIT_MPI_Finalize(void);
+  int ORBIT_MPI_Finalize();
   int ORBIT_MPI_Finalize(const char* message);
   int ORBIT_MPI_Get_processor_name(char *name, int* len);
   double ORBIT_MPI_Wtime(void);
@@ -184,7 +190,7 @@ extern "C" {
 	int ORBIT_MPI_Intercomm_merge(MPI_Comm comm, int high, MPI_Comm *comm_out);
 	
 	//--------------------------------------------------------
-	// MPI functions related to the MPI_Graph manipulations
+	// MPI functions related to the Graph manipulations
 	//--------------------------------------------------------	
 	int ORBIT_MPI_Graph_create(MPI_Comm comm_old, int nnodes, int *index, int *edges, int reorder, MPI_Comm *comm_graph);
 	int ORBIT_MPI_Graphdims_get(MPI_Comm comm, int *nnodes, int *nedges);
@@ -198,9 +204,12 @@ extern "C" {
 	//--------------------------------------------------------
 	int ORBIT_MPI_Barrier(MPI_Comm comm);
 	int ORBIT_MPI_Wait(MPI_Request  *request, MPI_Status *status);
-  int ORBIT_MPI_Allreduce(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
-  int ORBIT_MPI_Send(void*, int, MPI_Datatype, int, int, MPI_Comm);
-  int ORBIT_MPI_Recv(void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status *);
-  int ORBIT_MPI_Bcast(void*, int, MPI_Datatype, int, MPI_Comm );
+  int ORBIT_MPI_Allreduce(void* buf_in, void* buf_out, int count, MPI_Datatype, MPI_Op, MPI_Comm);
+  int ORBIT_MPI_Bcast(void* buf, int count, MPI_Datatype, int rank, MPI_Comm);	
+  int ORBIT_MPI_Send(void* buf, int count, MPI_Datatype, int dest,   int tag, MPI_Comm);
+  int ORBIT_MPI_Recv(void* buf, int count, MPI_Datatype, int source, int tag, MPI_Comm, MPI_Status *);
+	int ORBIT_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status);
+	int ORBIT_MPI_Get_count(MPI_Status *status, MPI_Datatype datatype, int *count);	
+
 
 #endif   //end of ---ifndef ORBIT_MPI_INCLUDE---

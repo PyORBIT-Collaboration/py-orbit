@@ -36,18 +36,10 @@ extern "C" {
 
   //initializator for python MPI_Comm  class
   //this is implementation of the __init__ method
-  static int mpi_comm_init(pyORBIT_MPI_Comm *self, PyObject *args, PyObject *kwds){
-    pyORBIT_MPI_Comm* pyMPI_Comm = (pyORBIT_MPI_Comm*) self;
-	  int nArgs = PyTuple_Size(args);
-		
-    if(nArgs != 0 && nArgs != 1){
-      error("MPI_Comm constructor needs nothing or MPI_Comm as input parameter.");
+  static int mpi_comm_init(pyORBIT_MPI_Comm *self, PyObject *args, PyObject *kwds){		
+    if(PyTuple_Size(args) != 0){
+      error("MPI_Comm constructor cannot have an input parameter.");
     }
-		
-		if(nArgs == 1){
-			pyORBIT_MPI_Comm* pyMPI_Comm_in = (pyORBIT_MPI_Comm*) PyTuple_GetItem(args,0);
-			pyMPI_Comm->comm = pyMPI_Comm_in->comm;
-		}
     return 0;
   }
 
@@ -169,7 +161,6 @@ extern "C" {
 	pyORBIT_MPI_Comm* newMPI_Comm(){
 		pyORBIT_MPI_Comm* pyMPI_Comm = PyObject_New(pyORBIT_MPI_Comm,&pyORBIT_MPI_Comm_Type);
 		pyMPI_Comm->comm = MPI_COMM_WORLD;
-		Py_INCREF((PyObject *) pyMPI_Comm);
     return pyMPI_Comm;
 	}
 	

@@ -18,4 +18,5 @@ clean:
 	rm -rf ./bin/pyORBIT
 	rm -rf ./doc/html
     
-
+docs: 
+	doxygen

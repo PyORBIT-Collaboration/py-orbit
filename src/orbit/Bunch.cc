@@ -195,7 +195,7 @@ void Bunch::initBunchAttributes(const char* fileName){
   }
 
   std::string  str;
-  std::vector<string> v_str;
+  std::vector<std::string> v_str;
 
   int stop_ind = 0;
   int def_found_ind = 0;
@@ -1080,7 +1080,7 @@ int Bunch::readBunch(const char* fileName, int nParts)
 	int indLine = 0;
 
 	std::string  str;
-	std::vector<string> v_str;
+	std::vector<std::string> v_str;
 
 	if(rank_MPI == 0){
 		getline(is,str);
@@ -1209,7 +1209,7 @@ void Bunch::deleteAllParticles()
 
 void Bunch::initParticleAttributes(const char* fileName){
 	removeAllParticleAttributes();
-	std::vector<string> attr_names;
+	std::vector<std::string> attr_names;
 	readParticleAttributesNames(fileName,attr_names);
 	for(int i = 0, n = attr_names.size(); i < n; i++){
 		ParticleAttributes* partAttr = ParticleAttributesFactory::getParticleAttributesInstance(attr_names[i],this);
@@ -1217,7 +1217,7 @@ void Bunch::initParticleAttributes(const char* fileName){
 	}
 }
 
-int Bunch::readParticleAttributesNames(const char* fileName, std::vector<string>& attr_names){
+int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::string>& attr_names){
 
 	attr_names.clear();
 
@@ -1243,7 +1243,7 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<string>
 	}
 
 	std::string  str;
-	std::vector<string> v_str;
+	std::vector<std::string> v_str;
 
 	if(rank_MPI == 0){
 		while(!is.eof()){
@@ -1386,14 +1386,14 @@ void Bunch::addParticleAttributes(ParticleAttributes* attr){
 }
 
 void Bunch::removeAllParticleAttributes(){
-	std::vector<string> names;
+	std::vector<std::string> names;
 	getParticleAttributesNames(names);
 	for(int i = 0, n= names.size(); i < n; i++){
 		removeParticleAttributes(names[i]);
 	}
 }
 
-void Bunch::removeParticleAttributes(const string name){
+void Bunch::removeParticleAttributes(const std::string name){
 	ParticleAttributes* attr = removeParticleAttributesWithoutDelete(name);
 
 	//delete Particle attribute itself
@@ -1402,7 +1402,7 @@ void Bunch::removeParticleAttributes(const string name){
 	}
 }
 
-ParticleAttributes* Bunch::removeParticleAttributesWithoutDelete(const string name){
+ParticleAttributes* Bunch::removeParticleAttributesWithoutDelete(const std::string name){
 	if(attrCntrSizeMap.count(name) == 0) return NULL;
 
 	ParticleAttributes* attr = attrCntrMap[name];
@@ -1473,7 +1473,7 @@ ParticleAttributes* Bunch::removeParticleAttributesWithoutDelete(const string na
 }
 
 
-ParticleAttributes* Bunch::getParticleAttributes(const string name){
+ParticleAttributes* Bunch::getParticleAttributes(const std::string name){
 	if(attrCntrSizeMap.count(name) == 0) {
 		if(rank_MPI == 0){
 			std::cerr << "ParticleAttributes* Bunch::getParticleAttributes(const string name)"<< std::endl;
@@ -1486,11 +1486,11 @@ ParticleAttributes* Bunch::getParticleAttributes(const string name){
 	return attrCntrMap[name];
 }
 
-void Bunch::getParticleAttributesNames(std::vector<string>& names){
+void Bunch::getParticleAttributesNames(std::vector<std::string>& names){
 	names.clear();
 	std::map<std::string,ParticleAttributes*>::iterator pos;
 	for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
-		string name = pos->first;
+		std::string name = pos->first;
 		names.push_back(name);
 	}
 }
@@ -1509,7 +1509,7 @@ void Bunch::clearAllParticleAttributesAndMemorize(){
 	}
 
 	for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
-		string name = pos->first;
+		std::string name = pos->first;
 		removeParticleAttributesWithoutDelete(name);
 	}
 }
@@ -1518,7 +1518,7 @@ void Bunch::restoreAllParticleAttributesFromMemory(){
 
 	std::map<std::string,ParticleAttributes*>::iterator pos;
 	for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
-		string name = pos->first;
+		std::string name = pos->first;
 		removeParticleAttributes(name);
 	}
 

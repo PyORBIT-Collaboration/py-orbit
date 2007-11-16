@@ -147,7 +147,7 @@ public:
   void removeParticleAttributes(const std::string name);
   void removeAllParticleAttributes();
   ParticleAttributes* getParticleAttributes(const std::string name);
-  void getParticleAttributesNames(vector<std::string>& names);
+  void getParticleAttributesNames(std::vector<std::string>& names);
 
   //this can be used for reading and writing the coordinates
   //the attributes will be initialized with default values
@@ -201,7 +201,7 @@ private:
 
   //remove particle attributes without deleting it
   //It is used inside the memorize and restore particle attributes routines
-  ParticleAttributes* removeParticleAttributesWithoutDelete(const string name);
+  ParticleAttributes* removeParticleAttributesWithoutDelete(const std::string name);
 
   //this method provides access to the particles' attributes
   //array from ParticleAttributes class instance.
@@ -240,17 +240,17 @@ protected:
   //----------------------------------------------
   //data members related to the ParticleAttributes
   //-----------------------------------------------
-  std::map<string,ParticleAttributes*> attrCntrMap;
-  std::map<string,int> attrCntrSizeMap;
+  std::map<std::string,ParticleAttributes*> attrCntrMap;
+  std::map<std::string,int> attrCntrSizeMap;
   int attrCntrSize;
   int attributesSize;
 
   //inclusive Low and exclusive Upp indexes
-  std::map<string,int> attrCntrLowIndMap;
-  std::map<string,int> attrCntrUppIndMap;
+  std::map<std::string,int> attrCntrLowIndMap;
+  std::map<std::string,int> attrCntrUppIndMap;
   double** arrAttr;
 
-  std::map<string,ParticleAttributes*> attrCntrMapTemp;
+  std::map<std::string,ParticleAttributes*> attrCntrMapTemp;
   std::set<ParticleAttributes*> attrCntrSet;
 
   //bunch attributes

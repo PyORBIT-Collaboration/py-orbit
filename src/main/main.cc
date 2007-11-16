@@ -8,6 +8,9 @@
 #include "wrap_bunch.hh"
 #include "wrap_teapotbase.hh"
 
+/**
+ * The main function that will call the python interpreter Py_Main(argc,argv).
+ */
 int main (int argc, char **argv)
 {
 

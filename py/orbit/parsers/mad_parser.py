@@ -175,11 +175,11 @@ class MAD_LattLine:
 		Method. Returns the dictionary
 		containing all lattice lines, recursive.
 		"""
-		dic = {}
+		dict = {}
 		for item in self.__items:
 			if(item.getType() == self.getType() or item.getType() == self.getType().lower()):
-				dic[item.getName()] = item
-		return dic
+				dict[item.getName()] = item
+		return dict
 
 	def getElements(self):
 		"""
@@ -589,7 +589,7 @@ class MAD_Parser:
 		while(doNotStop):
 			doNotStop = False
 			accElemDictCp = accElemDict.copy()
-			#print "debug dic size=",len(accElemDictCp)
+			#print "debug dict size=",len(accElemDictCp)
 			for name,accElem in accElemDictCp.iteritems():
 				kvs = accElem.getParameters()
 				for key,val in kvs.iteritems():
@@ -876,27 +876,27 @@ class MAD_Parser:
 		Method. It returns the dictionary of the lattice lines
 		that are defined in the MAD file.
 		"""
-		dic = {}
+		dict = {}
 		for lattLine in self.__lattLines:
-			dic[lattLine.getName()] = lattLine
-		return dic
+			dict[lattLine.getName()] = lattLine
+		return dict
 
 	def getMAD_ElementsDict(self):
 		"""
 		Method. It returns the dictionary of the lattice elements
 		that are defined in the MAD file.
 		"""
-		dic = {}
+		dict = {}
 		for lattElem in self.__lattElems:
-			dic[lattElem.getName()] = lattElem
-		return dic
+			dict[lattElem.getName()] = lattElem
+		return dict
 
 	def getMAD_VariablesDict(self):
 		"""
 		Method. It returns the dictionary of the variables
 		that are defined in the MAD file.
 		"""
-		dic = {}
+		dict = {}
 		for var in self.__accValues:
-			dic[var.getName()] = var.getValue()
-		return dic
+			dict[var.getName()] = var.getValue()
+		return dict

@@ -123,11 +123,11 @@ class SAD_LattLine:
 
 	def getLinesDict(self):
 		""" Returns the dictionary with all lattice lines inside, recursive. """
-		dic = {}
+		dict = {}
 		for item in self.__items:
 			if(item.getType() == self.getType()):
-				dic[item.getName()] = item
-		return dic
+				dict[item.getName()] = item
+		return dict
 
 	def getElements(self):
 		""" Returns list of elements """
@@ -521,21 +521,21 @@ class SAD_Parser:
 		#----------------------------------------------------------
 		# Check if there is a redefinition of elements or variables
 		#----------------------------------------------------------
-		dic = {}
+		dict = {}
 		for var in self.__accValues:
-			if(dic.has_key(var.getName())):
+			if(dict.has_key(var.getName())):
 				print "Warning the variable:",var.getName(), " was redefined. Are you are sure?"
-			dic[var.getName()] = var
-		dic = {}
+			dict[var.getName()] = var
+		dict = {}
 		for elem in self.__accElements:
-			if(dic.has_key(elem.getName())):
+			if(dict.has_key(elem.getName())):
 				print "Warning the element:",elem.getName(), " was redefined. Are you are sure?"
-			dic[elem.getName()] = elem
-		dic = {}
+			dict[elem.getName()] = elem
+		dict = {}
 		for line in self.__accLines:
-			if(dic.has_key(line.getName())):
+			if(dict.has_key(line.getName())):
 				print "Warning the line:",line.getName(), " was redefined. Are you are sure?"
-			dic[line.getName()] = line
+			dict[line.getName()] = line
 		#-------------------------------------------------------
 		#Then let's calculate numerical values.
 		#They can be defined recursivelly, so we need iterations
@@ -760,27 +760,27 @@ class SAD_Parser:
 		Method. It returns the dictionary of the lattice lines
 		that are defined in the SAD file.
 		"""
-		dic = {}
+		dict = {}
 		for lattLine in self.__lattLines:
-			dic[lattLine.getName()] = lattLine
-		return dic
+			dict[lattLine.getName()] = lattLine
+		return dict
 
 	def getSAD_ElementsDict(self):
 		"""
 		Method. It returns the dictionary of the lattice elements
 		that are defined in the SAD file.
 		"""
-		dic = {}
+		dict = {}
 		for lattElem in self.__lattElems:
-			dic[lattElem.getName()] = lattElem
-		return dic
+			dict[lattElem.getName()] = lattElem
+		return dict
 
 	def getSAD_VariablesDict(self):
 		"""
 		Method. It returns the dictionary of the variables
 		that are defined in the SAD file.
 		"""
-		dic = {}
+		dict = {}
 		for var in self.__accValues:
-			dic[var.getName()] = var.getValue()
-		return dic
+			dict[var.getName()] = var.getValue()
+		return dict

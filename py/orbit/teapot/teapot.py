@@ -26,7 +26,7 @@ Quad
 Multipole
 Solenoid
 Kicker
-ringRF
+RingRF
 """
 
 class TEAPOT:
@@ -74,7 +74,7 @@ class _teapotFactory:
 
 	def getElement(self, madElem):
 		"""
-		Method. It produces the TEAPOT accelerator elements.
+		Method. Produces TEAPOT accelerator elements.
 		"""
 		# madElem = MAD_LattElement(" "," ")
 		params_ini = madElem.getParameters()
@@ -840,7 +840,7 @@ class RingRFTEAPOT(NodeTEAPOT):
 	"""
 	Ring RF TEAPOT element.
 	"""
-	def __init__(self, name = "ringRF no name"):
+	def __init__(self, name = "RingRF no name"):
 		"""
 		Constructor. Creates the Ring RF TEAPOT element.
 		Harmonics numbers are 1,2,3, ...
@@ -852,7 +852,7 @@ class RingRFTEAPOT(NodeTEAPOT):
 		self.addParam("harmonics",[])
 		self.addParam("voltages",[])
 		self.addParam("phases",[])
-		self.setType("ringRF teapot")
+		self.setType("RingRF teapot")
 
 	def addRF(self, harmonic, voltage, phase):
 		"""
@@ -894,7 +894,7 @@ class RingRFTEAPOT(NodeTEAPOT):
 		phaseArr = self.getParam("phases")
 		bunch = paramsDict["bunch"]
 		for i in xrange(len(harmArr)):
-			TPB.ringRF(bunch,harmArr[i],voltArr[i],phaseArr[i])
+			TPB.RingRF(bunch,harmArr[i],voltArr[i],phaseArr[i])
 
 class KickTEAPOT(NodeTEAPOT):
 	"""

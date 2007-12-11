@@ -559,19 +559,19 @@ extern "C" {
 		  }
 
 		//Integration through a very simple ring type RF cavity
-    static PyObject* wrap_ringRF(PyObject *self, PyObject *args) {
+    static PyObject* wrap_RingRF(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double voltage, phase_s, ring_length;
 			int harmonics_numb;
 			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
-			if(!PyArg_ParseTuple(	args,"Odidd:ringRF",&pyBunch,&ring_length,&harmonics_numb,&voltage,&phase_s)){
-				error("teapotbase - ringRF - cannot parse arguments!");
+			if(!PyArg_ParseTuple(	args,"Odidd:RingRF",&pyBunch,&ring_length,&harmonics_numb,&voltage,&phase_s)){
+				error("teapotbase - RingRF - cannot parse arguments!");
 			}
 
 			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
 			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
 
-			teapot_base::ringRF(cpp_bunch,ring_length,harmonics_numb,voltage,phase_s);
+			teapot_base::RingRF(cpp_bunch,ring_length,harmonics_numb,voltage,phase_s);
 
 			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
 			Py_DECREF(py_bunch_ref);
@@ -604,7 +604,7 @@ extern "C" {
     {"solnfringeIN",     wrap_solnfringeIN,   METH_VARARGS, "Hard edge fringe field for a solenoid IN "},
     {"solnfringeOUT",    wrap_solnfringeOUT,  METH_VARARGS, "Hard edge fringe field for a solenoid OUT "},
     {"wedgebendCF",      wrap_wedgebendCF,    METH_VARARGS, "Straight bends particles through wedge for Combined Function non-SBEND "},
-    {"ringRF",           wrap_ringRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
+    {"RingRF",           wrap_RingRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
     { NULL, NULL }
   };
 

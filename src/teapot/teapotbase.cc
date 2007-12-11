@@ -1624,7 +1624,7 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
 ///////////////////////////////////////////////////////////////////////////
 // NAME
 //
-//  ringRF
+//  RingRF
 //
 // DESCRIPTION
 //  The ring type of RF cavity. Transition time factor T(k) = const = T(k0).
@@ -1641,7 +1641,7 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void ringRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s)
+void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s)
 {
 	double deltaV = 0.;
 	double charge = bunch->getCharge();

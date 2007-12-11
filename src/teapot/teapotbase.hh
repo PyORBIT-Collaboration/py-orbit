@@ -68,7 +68,7 @@ namespace teapot_base{
                  std::vector<int>& skew,
                  int nsteps);
 
- void ringRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s);
+ void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s);
 
 }
 

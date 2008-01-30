@@ -1,6 +1,6 @@
-"""
-Module. Includes wrappers for teapot C++ functions.
-"""
+## \namespace orbit::teapot_base
+## \brief Python wrappers for teapot C++ functions.
+##
 
 from TEAPOT_BASE import TPB
 

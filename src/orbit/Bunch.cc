@@ -171,6 +171,20 @@ void Bunch::getDoubleBunchAttributeNames(std::vector<std::string>& names){
 
 void Bunch::initBunchAttributes(const char* fileName){
 
+	//clear all old bunch attributes
+	mass = bunchAttr->doubleVal("mass");
+	charge = bunchAttr->doubleVal("charge");
+	classicalRadius = bunchAttr->doubleVal("classical_radius");
+	macroSizeForAll = bunchAttr->doubleVal("macro_size");	
+	
+	bunchAttr->clear();
+
+  bunchAttr->doubleVal("mass",mass);
+  bunchAttr->doubleVal("charge",charge);
+  bunchAttr->doubleVal("classical_radius",classicalRadius);
+  bunchAttr->doubleVal("macro_size",macroSizeForAll);
+	
+	//read and set new ones
   std::vector<std::string> attr_names;
   attr_names.clear();
 
@@ -333,6 +347,7 @@ void Bunch::addParticlesTo(Bunch* bunch){
 				std::cerr << "Particle Attrubute:"<< names_source[i] << std::endl;
 			}
 		}
+		ORBIT_MPI_Finalize();
 	}
 
 	for(int j = 0, jn = names_source.size(); j < jn; j++){
@@ -1023,7 +1038,7 @@ void Bunch::print(const char* fileName)
 ///////////////////////////////////////////////////////////////////////////
 //
 // NAME
-//    Bunch::readBunch(char* fileName, int nPart)
+//    Bunch::readBunchCoords(char* fileName, int nPart)
 //
 // DESCRIPTION
 //    reads every components of the given number of macroparticles
@@ -1038,7 +1053,7 @@ void Bunch::print(const char* fileName)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int Bunch::readBunch(const char* fileName, int nParts)
+int Bunch::readBunchCoords(const char* fileName, int nParts)
 {
 	double x,y,z, px,py,pz;
 
@@ -1049,7 +1064,7 @@ int Bunch::readBunch(const char* fileName, int nParts)
 	if(rank_MPI == 0){
 		is.open(fileName, std::ios::in);
 		if (is.bad()){
-			std::cerr << "The Bunch::readBunch(char* fileName, int nParts)"<< std::endl;
+			std::cerr << "The Bunch::readBunchCoords(char* fileName, int nParts)"<< std::endl;
 			std::cerr << "Can not open file:"<< fileName<< std::endl;
 			error_ind = 1;
 		}
@@ -1098,7 +1113,7 @@ int Bunch::readBunch(const char* fileName, int nParts)
 					//here we have the string with coordinates
 					nT = StringUtils::Tokenize(str,v_str);
 					if(nT != (nDimAndAttr) && nT != 6){
-						std::cerr << "The Bunch::readBunch(char* fileName, int nParts)"<< std::endl;
+						std::cerr << "The Bunch::readBunchCoords(char* fileName, int nParts)"<< std::endl;
 						std::cerr << "File:"<< fileName << std::endl;
 						std::cerr << "Error in data tructure in line :"<< indLine << std::endl;
 						std::cerr << "line="<< str << std::endl;
@@ -1175,7 +1190,7 @@ int Bunch::readBunch(const char* fileName, int nParts)
 ///////////////////////////////////////////////////////////////////////////
 //
 // NAME
-//    Bunch::readBunch(char* fileName)
+//    Bunch::readBunchCoords(char* fileName)
 //
 // DESCRIPTION
 //    reads every components of the given number of macroparticles
@@ -1186,10 +1201,10 @@ int Bunch::readBunch(const char* fileName, int nParts)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-int Bunch::readBunch(const char* fileName)
+int Bunch::readBunchCoords(const char* fileName)
 {
 	int nMax = 2000000000;
-	nMax = readBunch(fileName, nMax);
+	nMax = readBunchCoords(fileName, nMax);
 	return nMax;
 }
 
@@ -1207,7 +1222,7 @@ void Bunch::deleteAllParticles()
 	resize();
 }
 
-void Bunch::initParticleAttributes(const char* fileName){
+void Bunch::readParticleAttributes(const char* fileName){
 	removeAllParticleAttributes();
 	std::vector<std::string> attr_names;
 	readParticleAttributesNames(fileName,attr_names);
@@ -1334,7 +1349,7 @@ void Bunch::addParticleAttributes(ParticleAttributes* attr){
 		if(rank_MPI == 0){
 			std::cerr << "void Bunch::addParticleAttributes(ParticleAttributes* attr)"<< std::endl;
 			std::cerr << "These Attributes already inside the bunch. Name ="<< attr->name() << std::endl;
-			std::cerr << "Or the attributes size equals to = "<< attr->getAttSize() << std::endl;
+			std::cerr << "Or the attribute's size equals to = "<< attr->getAttSize() << std::endl;
 		}
 		ORBIT_MPI_Finalize("Bunch::addParticleAttributes. Stop.");
 		return;

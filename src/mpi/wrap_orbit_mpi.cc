@@ -17,20 +17,23 @@
 #include "wrap_mpi_datatype.hh"
 #include "wrap_mpi_op.hh"
 
-
+/** The namespace for the python wrappers around MPI functions. */
 namespace wrap_orbit_mpi{
 	
+	/** A local error(message) function. */
   void error(const char* msg){ ORBIT_MPI_Finalize(msg); }
 	
 	#ifdef __cplusplus
 	extern "C" {
-		#endif
+	#endif
 		
+		/** A python wrapper around ORBIT_MPI_Initialized function. */
 		static PyObject* mpi_initialized(PyObject *self, PyObject *args) {	
       int result = 0;
       ORBIT_MPI_Initialized(&result);
 			return Py_BuildValue("i",result);		 
 		}
+		
 		
     static PyObject* mpi_get_processor_name(PyObject *self, PyObject *args) {
       char* name = new char[MPI_MAX_PROCESSOR_NAME];
@@ -57,27 +60,27 @@ namespace wrap_orbit_mpi{
 		//------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Comm manipulations
 		//------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_comm_functions.hh"	
+		#include 	"wrap_orbit_mpi_comm_functions.chh"	
 		
 		//------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Group manipulations
 		//------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_group_functions.hh"	
+		#include 	"wrap_orbit_mpi_group_functions.chh"	
 
 		//----------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Intercomm manipulations
 		//----------------------------------------------------------------------
-		#include 	"wrap_orbit_mpi_intercomm_functions.hh"	
+		#include 	"wrap_orbit_mpi_intercomm_functions.chh"	
 	
 		//-------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Graph manipulations
 		//-------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_graph_functions.hh"			
+		#include 	"wrap_orbit_mpi_graph_functions.chh"			
 		
 		//------------------------------------------------------------------
 		// Wrappers for MPI functions related to the Send-Receive operations
 		//------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_send_receive_functions.hh"	
+		#include 	"wrap_orbit_mpi_send_receive_functions.chh"	
 		
 		//Finalizes the execution of program
 		//  the action is depended on the number of arguments

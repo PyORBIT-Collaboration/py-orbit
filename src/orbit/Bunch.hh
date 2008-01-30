@@ -133,10 +133,10 @@ public:
   void print(const char* fileName);
 
   //these methods return the number of actual macro-particles that were read
-  int readBunch(const char* fileName, int nParts);
-  int readBunch(const char* fileName);
+  int readBunchCoords(const char* fileName, int nParts);
+  int readBunchCoords(const char* fileName);
   int readParticleAttributesNames(const char* fileName, std::vector<std::string>& attr_names);
-  void initParticleAttributes(const char* fileName);
+  void readParticleAttributes(const char* fileName);
 
   void deleteAllParticles();
 

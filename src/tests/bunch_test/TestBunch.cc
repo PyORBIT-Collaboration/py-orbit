@@ -83,7 +83,7 @@ int main (int argc, char **argv)
     std::cout<<"==== readParticleAttributesNames i="<<i<<" name="<<nms[i]<<std::endl;
   }
 
-  bunch->readBunch("bunch_test.dat");
+  bunch->readBunchCoords("bunch_test.dat");
 
   bunch->print("bunch_test_new.dat");
 

@@ -319,6 +319,9 @@ void SyncPart::readSyncPart(const char* fileName){
 			//set coordinates
       if(v_str.size() > 5 && v_str[1] == "SYNC_PART_COORDS"){
         double val_arr[3];
+				val_arr[0] = 0.;
+				val_arr[1] = 0.;
+				val_arr[2] = 0.;
         sscanf( v_str[3].c_str(),"%lf",&val_arr[0]);
 				sscanf( v_str[4].c_str(),"%lf",&val_arr[1]);
 				sscanf( v_str[5].c_str(),"%lf",&val_arr[2]);
@@ -328,6 +331,9 @@ void SyncPart::readSyncPart(const char* fileName){
 			//set momentum
       if(v_str.size() > 5 && v_str[1] == "SYNC_PART_MOMENTUM"){
         double val_arr[3];
+				val_arr[0] = 0.;
+				val_arr[1] = 0.;
+				val_arr[2] = 0.;
         sscanf( v_str[3].c_str(),"%lf",&val_arr[0]);
 				sscanf( v_str[4].c_str(),"%lf",&val_arr[1]);
 				sscanf( v_str[5].c_str(),"%lf",&val_arr[2]);
@@ -336,7 +342,7 @@ void SyncPart::readSyncPart(const char* fileName){
 
 			//set time
       if(v_str.size() > 3 && v_str[1] == "SYNC_PART_TIME"){
-        double val;
+        double val = 0.;
         sscanf( v_str[3].c_str(),"%lf",&val);
         setTime(val);
       }

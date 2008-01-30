@@ -1,7 +1,7 @@
-"""
-Module. Includes teapot Python classes.
-These classes use teapot_base C++ wrappers.
-"""
+## \namespace orbit::teapot
+## \brief Python classes for TEAPOT elements.
+##
+## These classes use teapot_base C++ wrappers
 
 from teapot import TEAPOT
 from teapot import BaseTEAPOT

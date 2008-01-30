@@ -1,8 +1,9 @@
-"""
-Module. Includes parsers for different types of
-accelerator description files. At this moment we have
-parsers for the following codes: MAD8 and SAD.
-"""
+## \namespace orbit::parsers
+## \brief Accelerator lattice parsers.
+##
+## Classes:
+## - mad_parser - MAD-8 parser
+## - sad_parser - SAD parser
 
 from mad_parser import MAD_Parser
 from mad_parser import MAD_LattElement

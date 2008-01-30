@@ -610,15 +610,15 @@ namespace wrap_orbit_bunch{
   // setBunchAttributeDouble(name,value) Bunch methods
   static PyObject* Bunch_bunchAttrDouble(PyObject *self, PyObject *args){
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
-    //if nVars == 2 this is get attribute
-    //if nVars == 3 this is set attribute
+    //if nVars == 1 this is get attribute
+    //if nVars == 2 this is set attribute
     int nVars = PyTuple_Size(args);
 
     const char* attr_name = NULL;
     double val = 0.;
 
-    if(nVars == 2 ||  nVars == 3){
-      if(nVars == 2){
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
         //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
         if(!PyArg_ParseTuple(	args,"s:bunchAttrDouble",&attr_name)){
           error("PyBunch - bunchAttrDouble(name) - name are needed");
@@ -655,15 +655,15 @@ namespace wrap_orbit_bunch{
   // setBunchAttributeInt(name,value) Bunch methods
   static PyObject* Bunch_bunchAttrInt(PyObject *self, PyObject *args){
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
-    //if nVars == 2 this is get attribute
-    //if nVars == 3 this is set attribute
+    //if nVars == 1 this is get attribute
+    //if nVars == 2 this is set attribute
     int nVars = PyTuple_Size(args);
 
     const char* attr_name = NULL;
     int val = 0;
 
-    if(nVars == 2 ||  nVars == 3){
-      if(nVars == 2){
+    if(nVars == 1 ||  nVars == 2){
+      if(nVars == 1){
         //NO NEW OBJECT CREATED BY PyArg_ParseTuple!NO NEED OF Py_DECREF()
         if(!PyArg_ParseTuple(	args,"s:bunchAttrInt",&attr_name)){
           error("PyBunch - bunchAttrInt(name) - pyBunch object and name are needed");
@@ -873,14 +873,14 @@ namespace wrap_orbit_bunch{
   }
 
   //initilizes particles' attributes from the bunch file
-  static PyObject* Bunch_initPartAttr(PyObject *self, PyObject *args){
+  static PyObject* Bunch_readPartAttr(PyObject *self, PyObject *args){
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* file_name = NULL;
     //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"s:initPartAttr",&file_name)){
-      error("PyBunch - initPartAttr(fileName) - pyBunch object and file name are needed");
+    if(!PyArg_ParseTuple(	args,"s:readPartAttr",&file_name)){
+      error("PyBunch - readPartAttr(fileName) - pyBunch object and file name are needed");
     }
-    cpp_bunch->initParticleAttributes(file_name);
+    cpp_bunch->readParticleAttributes(file_name);
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -1034,14 +1034,18 @@ namespace wrap_orbit_bunch{
         if(!PyArg_ParseTuple(	args,"s:read",&file_name)){
           error("PyBunch - readBunch(fileName) - a file name are needed");
         }
-        cpp_bunch->readBunch(file_name);
+				cpp_bunch->initBunchAttributes(file_name);
+				cpp_bunch->readParticleAttributes(file_name);
+        cpp_bunch->readBunchCoords(file_name);
       }
       else{
         //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
         if(!PyArg_ParseTuple(	args,"si:read",&file_name,&nParts)){
           error("PyBunch - readBunch(fileName,nParts) - file name, and number of particles are needed");
         }
-        cpp_bunch->readBunch(file_name,nParts);
+				cpp_bunch->initBunchAttributes(file_name);
+				cpp_bunch->readParticleAttributes(file_name);				
+        cpp_bunch->readBunchCoords(file_name,nParts);
       }
     }
     else{
@@ -1145,7 +1149,7 @@ namespace wrap_orbit_bunch{
     { "restoreAllPartAttrFromMemory",   Bunch_restoreAllPartAttrFromMemory  ,METH_VARARGS,"Restores all particles' attributes names from memory"},
     { "hasPartAttr",                    Bunch_hasPartAttr                   ,METH_VARARGS,"Returns 1 if there is a particles' attr. with this name, 0 - otherwis"},
     { "readPartAttrNames",              Bunch_readPartAttrNames             ,METH_VARARGS,"Returns a tuple with particles' attr. names in the bunch file"},
-    { "initPartAttr",                   Bunch_initPartAttr                  ,METH_VARARGS,"Initializes the particles' attr. from the bunch file"},
+    { "readPartAttr",                   Bunch_readPartAttr                  ,METH_VARARGS,"Initializes the particles' attr. from the bunch file"},
     { "getPartAttrSize",                Bunch_getPartAttrSize               ,METH_VARARGS,"Returns the number of variables in the particles' attributes with a particular name"},
     { "partAttrValue",                  Bunch_partAttrValue                 ,METH_VARARGS,"Sets or returns a particles' attribute value"},
     { "getSize",                        Bunch_getSize                       ,METH_VARARGS,"Returns number of macro-particles"},

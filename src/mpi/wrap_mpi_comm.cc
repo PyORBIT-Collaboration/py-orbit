@@ -131,6 +131,8 @@ extern "C" {
   void init_orbit_mpi_comm(PyObject* module){
 		if (PyType_Ready(&pyORBIT_MPI_Comm_Type) < 0) return;
 		Py_INCREF(&pyORBIT_MPI_Comm_Type);
+
+		//we put Py_INCREF(...) because PyModule_AddObject() steal the reference
 		
 		PyObject * comm_module = PyModule_New("mpi_comm");
 		PyModule_AddObject(comm_module, "MPI_Comm", (PyObject *)&pyORBIT_MPI_Comm_Type);

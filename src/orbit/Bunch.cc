@@ -57,15 +57,15 @@ Bunch::Bunch()
   }
 
   //for MPI
-	MPI_COMM_Local = MPI_COMM_WORLD;
+	pyComm_Local = wrap_orbit_mpi_comm::newMPI_Comm();
   rank_MPI = 0;
   size_MPI = 1;
   iMPIini  = 0;
   ORBIT_MPI_Initialized(&iMPIini);
 
   if(iMPIini > 0){
-    ORBIT_MPI_Comm_size(MPI_COMM_Local, &size_MPI);
-    ORBIT_MPI_Comm_rank(MPI_COMM_Local, &rank_MPI);
+    ORBIT_MPI_Comm_size(pyComm_Local->comm, &size_MPI);
+    ORBIT_MPI_Comm_rank(pyComm_Local->comm, &rank_MPI);
   }
 
   //data members related to the ParticleAttributes
@@ -103,6 +103,9 @@ Bunch::~Bunch()
 
 	//delete synchronous particle instance
 	delete syncPart;
+	
+	//delete the python instance of the mpi communicator
+	wrap_orbit_mpi_comm::freeMPI_Comm(this->pyComm_Local);
 }
 
 AttributesBucket* Bunch::getBunchAttributes(){
@@ -201,7 +204,7 @@ void Bunch::initBunchAttributes(const char* fileName){
   }
 
   if(size_MPI > 1){
-    ORBIT_MPI_Bcast (&error_ind,1, MPI_INT,    0, MPI_COMM_Local );
+    ORBIT_MPI_Bcast (&error_ind,1, MPI_INT,    0, pyComm_Local->comm );
   }
 
   if(error_ind > 0){
@@ -241,17 +244,17 @@ void Bunch::initBunchAttributes(const char* fileName){
 
 
     if(size_MPI > 1){
-      ORBIT_MPI_Bcast (&stop_ind,1, MPI_INT,    0, MPI_COMM_Local );
-      ORBIT_MPI_Bcast (&def_found_ind,1, MPI_INT,    0, MPI_COMM_Local );
+      ORBIT_MPI_Bcast (&stop_ind,1, MPI_INT,    0, pyComm_Local->comm );
+      ORBIT_MPI_Bcast (&def_found_ind,1, MPI_INT,    0, pyComm_Local->comm );
     }
 
     if(stop_ind == 0 && def_found_ind == 1){
       if(size_MPI > 1){
         int strLength = strlen(str.c_str());
-        ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, MPI_COMM_Local );
+        ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, pyComm_Local->comm );
         char* char_tmp = BufferStore::getBufferStore()->getCharArr(0,strLength+1);
         strcpy(char_tmp, str.c_str());
-        ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, MPI_COMM_Local );
+        ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, pyComm_Local->comm );
         std::string str_new(char_tmp);
         StringUtils::Tokenize(str_new,v_str);
       }
@@ -815,7 +818,7 @@ int Bunch::getSizeGlobal()
   }
   else{
     ORBIT_MPI_Allreduce(&nSize,&sizeGlobal,1,
-		  MPI_INT,MPI_SUM,MPI_COMM_Local);
+		  MPI_INT,MPI_SUM,pyComm_Local->comm);
     return sizeGlobal;
   }
 }
@@ -932,7 +935,7 @@ void Bunch::print(std::ostream& Out)
     if(i==rank_MPI){nSizeArr[i]=nSize;}
   }
   ORBIT_MPI_Allreduce(nSizeArr,nSizeArr_MPI,size_MPI,
-		MPI_INT,MPI_SUM,MPI_COMM_Local);
+		MPI_INT,MPI_SUM,pyComm_Local->comm);
 
   //at this point all CPUs know about number of macro-particles on each CPU
 
@@ -970,11 +973,11 @@ void Bunch::print(std::ostream& Out)
           j_count++;
         }
         ORBIT_MPI_Send(dump_arr, (nDimAndAttr)*nSizeChank, MPI_DOUBLE, 0,
-					1111, MPI_COMM_Local);
+					1111, pyComm_Local->comm);
       }
       if(rank_MPI == 0){
         ORBIT_MPI_Recv(dump_arr, (nDimAndAttr)*nSizeChank, MPI_DOUBLE, i,
-					1111, MPI_COMM_Local, &statusMPI);
+					1111, pyComm_Local->comm, &statusMPI);
         for( int j = 0; j < (j_stop - j_start); j++){
           int flg = (int) dump_arr[(nDimAndAttr)*j + 6];
           if(flg > 0){
@@ -1071,7 +1074,7 @@ int Bunch::readBunchCoords(const char* fileName, int nParts)
 	}
 
 	if(size_MPI > 1){
-		ORBIT_MPI_Bcast (&error_ind,1, MPI_INT,    0, MPI_COMM_Local );
+		ORBIT_MPI_Bcast (&error_ind,1, MPI_INT,    0, pyComm_Local->comm );
 	}
 
 	if(error_ind > 0){
@@ -1142,10 +1145,10 @@ int Bunch::readBunchCoords(const char* fileName, int nParts)
 		}
 
 		if(size_MPI > 1){
-			ORBIT_MPI_Bcast ( &nT,         1, MPI_INT,    0, MPI_COMM_Local );
-			ORBIT_MPI_Bcast ( &error_ind,  1, MPI_INT,    0, MPI_COMM_Local );
-			ORBIT_MPI_Bcast ( &nn,         1, MPI_INT,    0, MPI_COMM_Local );
-			ORBIT_MPI_Bcast ( arr_0, chunk_size*(nDimAndAttr) , MPI_DOUBLE, 0, MPI_COMM_Local );
+			ORBIT_MPI_Bcast ( &nT,         1, MPI_INT,    0, pyComm_Local->comm );
+			ORBIT_MPI_Bcast ( &error_ind,  1, MPI_INT,    0, pyComm_Local->comm );
+			ORBIT_MPI_Bcast ( &nn,         1, MPI_INT,    0, pyComm_Local->comm );
+			ORBIT_MPI_Bcast ( arr_0, chunk_size*(nDimAndAttr) , MPI_DOUBLE, 0, pyComm_Local->comm );
 		}
 
 		if(error_ind > 0){
@@ -1175,7 +1178,7 @@ int Bunch::readBunchCoords(const char* fileName, int nParts)
 		}
 
 		if(size_MPI > 1){
-			ORBIT_MPI_Bcast ( &info_stop, 1, MPI_INT, 0, MPI_COMM_Local  );
+			ORBIT_MPI_Bcast ( &info_stop, 1, MPI_INT, 0, pyComm_Local->comm  );
 		}
 
 	}
@@ -1250,7 +1253,7 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 	}
 
 	if(size_MPI > 1){
-		ORBIT_MPI_Bcast (&error_ind,1, MPI_INT,    0, MPI_COMM_Local );
+		ORBIT_MPI_Bcast (&error_ind,1, MPI_INT,    0, pyComm_Local->comm );
 	}
 
 	if(error_ind > 0){
@@ -1286,8 +1289,8 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 	int strLength = strlen(str.c_str());
 
 	if(size_MPI > 1){
-		ORBIT_MPI_Bcast ( &nTypes,   1, MPI_INT,    0, MPI_COMM_Local );
-		ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, MPI_COMM_Local );
+		ORBIT_MPI_Bcast ( &nTypes,   1, MPI_INT,    0, pyComm_Local->comm );
+		ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, pyComm_Local->comm );
 	}
 	else{
 		return nTypes;
@@ -1297,7 +1300,7 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 
 	char* char_tmp = BufferStore::getBufferStore()->getCharArr(0,strLength+1);
 	strcpy(char_tmp, str.c_str());
-	ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, MPI_COMM_Local );
+	ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, pyComm_Local->comm );
 	std::string str_new(char_tmp);
 	StringUtils::Tokenize(str_new,v_str);
 
@@ -1545,15 +1548,17 @@ void Bunch::restoreAllParticleAttributesFromMemory(){
 	attrCntrMapTemp.clear();
 }
 
-MPI_Comm  Bunch::getMPI_Comm_Local(){
-	return MPI_COMM_Local;
+pyORBIT_MPI_Comm*  Bunch::getMPI_Comm_Local(){
+	return pyComm_Local;
 }
 
-void  Bunch::setMPI_Comm_Local(MPI_Comm MPI_COMM_Local){
-	this->MPI_COMM_Local = MPI_COMM_Local;
+void  Bunch::setMPI_Comm_Local(pyORBIT_MPI_Comm* pyComm_Local){
+	wrap_orbit_mpi_comm::freeMPI_Comm(this->pyComm_Local);
+	this->pyComm_Local = pyComm_Local;
+	Py_INCREF((PyObject *) this->pyComm_Local); 
   if(iMPIini > 0){
-    ORBIT_MPI_Comm_size(MPI_COMM_Local, &size_MPI);
-    ORBIT_MPI_Comm_rank(MPI_COMM_Local, &rank_MPI);
+    ORBIT_MPI_Comm_size(pyComm_Local->comm, &size_MPI);
+    ORBIT_MPI_Comm_rank(pyComm_Local->comm, &rank_MPI);
   }
 }
 

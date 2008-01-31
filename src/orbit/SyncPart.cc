@@ -234,7 +234,7 @@ void SyncPart::readSyncPart(const char* fileName){
   int rank_MPI = 0;
   int size_MPI = 1;
   int iMPIini  = 0;
-	MPI_Comm MPI_COMM_Local = bunch->getMPI_Comm_Local();
+	MPI_Comm MPI_COMM_Local = bunch->getMPI_Comm_Local()->comm;
   ORBIT_MPI_Initialized(&iMPIini);
 
   if(iMPIini > 0){
@@ -362,7 +362,7 @@ void SyncPart::print(std::ostream& Out)
   int rank_MPI = 0;
   int size_MPI = 1;
   int iMPIini  = 0;
-	MPI_Comm MPI_COMM_Local = bunch->getMPI_Comm_Local();
+	MPI_Comm MPI_COMM_Local = bunch->getMPI_Comm_Local()->comm;
   ORBIT_MPI_Initialized(&iMPIini);
 
   if(iMPIini > 0){

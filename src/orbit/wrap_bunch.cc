@@ -69,6 +69,38 @@ namespace wrap_orbit_bunch{
 
   //---------------------------------------------------------------
   //
+  // set and get MPI Communicators
+  //
+  //----------------------------------------------------------------	
+	
+	//returns the local MPI Comm for this bunch
+	static PyObject* Bunch_getMPIComm(PyObject *self, PyObject *args){
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+		PyObject* pyMPIComm = (PyObject*) cpp_bunch->getMPI_Comm_Local();	
+		Py_INCREF(pyMPIComm);
+    return pyMPIComm;
+  }	
+	
+	//sets a new local MPI Comm for this bunch
+	static PyObject* Bunch_setMPIComm(PyObject *self, PyObject *args){
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+		int nVars = PyTuple_Size(args);
+		PyObject* pyMPIComm;
+		if(nVars == 1){
+			if(!PyArg_ParseTuple(	args,"O:setMPIComm",&pyMPIComm)){
+				error("The Bunch method setMPIComm(mpi_comm) - mpi_comm is needed.");
+			}
+			cpp_bunch->setMPI_Comm_Local( (pyORBIT_MPI_Comm*) pyMPIComm);
+		}
+		else{
+			error("The Bunch method should be setMPIComm(mpi_comm).");
+		}
+		Py_INCREF(Py_None);
+    return Py_None;
+  }	
+	
+  //---------------------------------------------------------------
+  //
   // add and remove particles, compress etc.
   //
   //----------------------------------------------------------------
@@ -1112,6 +1144,8 @@ namespace wrap_orbit_bunch{
     //--------------------------------------------------------
     // class Bunch wrapper                        START
     //--------------------------------------------------------
+    { "getMPIComm",                     Bunch_getMPIComm                    ,METH_VARARGS,"Returns MPI Comm of this bunch"},
+    { "setMPIComm",                     Bunch_setMPIComm                    ,METH_VARARGS,"Sets a new MPI Comm for this bunch"},
     { "getSyncParticle",                Bunch_getSyncParticle               ,METH_VARARGS,"Returns syncParticle class instance"},
     { "addParticle",                    Bunch_addParticle                   ,METH_VARARGS,"Adds a macro-particle to the bunch"},
     { "deleteParticle",                 Bunch_deleteParticle                ,METH_VARARGS,"Removes macro-particle from the bunch and call compress inside"},

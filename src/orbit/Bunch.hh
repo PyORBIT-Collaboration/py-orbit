@@ -21,6 +21,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 #include "orbit_mpi.hh"
+#include "wrap_mpi_comm.hh"
 
 #include <iostream>
 #include <fstream>
@@ -178,8 +179,8 @@ public:
 	void addParticlesTo(Bunch* bunch);
 
 	//Parallel case
-	MPI_Comm getMPI_Comm_Local();
-	void setMPI_Comm_Local(MPI_Comm MPI_COMM_Local);
+	pyORBIT_MPI_Comm* getMPI_Comm_Local();
+	void setMPI_Comm_Local(pyORBIT_MPI_Comm* pyComm_Local);
 	int getMPI_Size();
 	int getMPI_Rank();
 
@@ -265,7 +266,7 @@ protected:
   int rank_MPI;
   int size_MPI;
 
-	MPI_Comm MPI_COMM_Local;
+	pyORBIT_MPI_Comm* pyComm_Local;
 };
 
 ///////////////////////////////////////////////////////////////////////////

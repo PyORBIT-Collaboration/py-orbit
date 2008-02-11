@@ -14,7 +14,7 @@ from orbit.teapot_base import TPB
 from orbit.utils import orbitFinalize
 
 # import general accelerator elements and lattice
-from orbit.lattice import AccLattice, AccElement
+from orbit.lattice import AccLattice, AccNode, AccActionsContainer
 
 # import the MAD parser to construct lattices of TEAPOT elements.
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement
@@ -31,19 +31,27 @@ RingRF
 
 class TEAPOT:
 	"""
-	Class. Shell class for the TEAPOT tracker class collection.
+	Class. Shell class for the TEAPOT nodes collection.
 	TEAPOT calls the MAD parser and the TEAPOT accelerator
-	element factory.
+	elements factory.
 	"""
 	def __init__(self):
-		pass
+		self.lattice = AccLattice()
 
-	def getLattice(self, mad_file_name, lineName):
+
+	def __init__(self, lattice):
+		"""
+		It sets the external lattice as this TEAPOT instance's lattice.
+		"""
+		self.lattice = lattice
+
+	def makeLattice(self, mad_file_name, lineName):
 		"""
 		Method. Returns the teapot lattice as an instance
-		of AccLattice class from lattice.py package.
+		of AccLattice class from lattice.py package. 
+		The lattice is initialized from MAD file.
 		"""
-		lattice = AccLattice()
+		self.lattice = AccLattice()
 		parser = MAD_Parser()
 		parser.parse(mad_file_name)
 		accLines = parser.getMAD_LinesDict()
@@ -55,15 +63,35 @@ class TEAPOT:
 			sys.exit(1)
 		# accelerator lines and elements from mad_parser package
 		accMAD_Line = accLines[lineName]
-		lattice.setName(lineName)
+		self.lattice.setName(lineName)
 		accMADElements = accMAD_Line.getElements()
 		# make TEAPOT lattice elements by using TEAPOT
 		# element factory
 		for madElem in accMADElements:
 			elem = _teapotFactory.getElement(madElem)
-			lattice.appendChildNode(elem)
-		lattice.initialize()
-		return lattice
+			self.lattice.addNode(elem)
+		self.lattice.initialize()
+
+	def getLattice(self):
+		"""
+		It returns the accelerator lattice. 
+		"""
+		return self.lattice
+
+	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
+		"""
+		It tracks the bunch through the lattice.
+		"""
+		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
+		paramsDict["bunch"] = bunch
+		
+		def track(paramsDict):
+			node = paramsDict["node"]
+			node.track(paramsDict)
+			
+		actionContainer.addAction(track, AccActionsContainer.BODY)
+		self.lattice.trackActions(actionContainer,paramsDict)
+		
 
 class _teapotFactory:
 	"""
@@ -83,8 +111,7 @@ class _teapotFactory:
 			params[par_key.lower()] = params_ini[par_key]
 		# Length parameter
 		length = 0.
-		if(params.has_key("l")):
-			length = params["l"]
+		if(params.has_key("l")): length = params["l"]
 		# TILT parameter - if it is there tilt = True,
 		# and if it has value tiltAngle = value
 		tilt = False
@@ -218,8 +245,8 @@ class _teapotFactory:
 				drft_2 = DriftTEAPOT(madElem.getName()+"_drift")
 				drft_1.setLength(length/2.0)
 				drft_2.setLength(length/2.0)
-				elem.appendEntranceChildNode(drft_1)
-				elem.appendExitChildNode(drft_2)
+				elem.addChildNode(drft_1,AccNode.ENTRANCE)
+				elem.addChildNode(drft_2,AccNode.EXIT)
 			"""
 			volt = 0.
 			if(params.has_key("volt")):
@@ -272,23 +299,21 @@ class _teapotFactory:
 	getElement = classmethod(getElement)
 
 
-class BaseTEAPOT(AccElement):
-	""" The base class of the TEAPOT accelerator elements hierarchy. """
+class BaseTEAPOT(AccNode):
+	""" The base abstract class of the TEAPOT accelerator elements hierarchy. """
 	def __init__(self, name = "no name"):
 		"""
 		Constructor. Creates the base TEAPOT element. This is a superclass for all TEAPOT elements.
 		"""
-		AccElement.__init__(self,name)
+		AccNode.__init__(self,name)
 		self.setType("base teapot")
-
-	def _initialize(self, paramsDict):
+		
+	def track(self, paramsDict):
 		"""
-		The drift class implementation of the AccElement class _initialize(probe) method.
+		It is tracking the bunch through the element. Each element 
+		should implement this method.
 		"""
-		nParts = self.getnParts()
-		lengthStep = self.getLength()/nParts
-		for i in xrange(nParts):
-			self.setPartLength(i,lengthStep)
+		pass	
 
 class NodeTEAPOT(BaseTEAPOT):
 	def __init__(self, name = "no name"):
@@ -302,10 +327,10 @@ class NodeTEAPOT(BaseTEAPOT):
 		self.__tiltNodeOUT = TiltTEAPOT()
 		self.__fringeFieldIN = FringeFieldTEAPOT(self)
 		self.__fringeFieldOUT = FringeFieldTEAPOT(self)
-		self.appendEntranceChildNode(self.__tiltNodeIN)
-		self.appendEntranceChildNode(self.__fringeFieldIN)
-		self.appendExitChildNode(self.__fringeFieldOUT)
-		self.appendExitChildNode(self.__tiltNodeOUT)
+		self.addChildNode(self.__tiltNodeIN,AccNode.ENTRANCE)
+		self.addChildNode(self.__fringeFieldIN,AccNode.ENTRANCE)
+		self.addChildNode(self.__fringeFieldOUT,AccNode.EXIT)
+		self.addChildNode(self.__tiltNodeOUT,AccNode.EXIT)
 		self.addParam("tilt",self.__tiltNodeIN.getTiltAngle())
 		self.setType("node teapot")
 
@@ -393,9 +418,9 @@ class DriftTEAPOT(NodeTEAPOT):
 
 	def track(self, paramsDict):
 		"""
-		The drift class implementation of the AccElement class track(probe) method.
+		The drift class implementation of the AccNode class track(probe) method.
 		"""
-		length = self.getPartLength(self.getActivePartIndex())
+		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
 		TPB.drift(bunch, length)
 
@@ -408,7 +433,7 @@ class SolenoidTEAPOT(NodeTEAPOT):
 		Constructor. Creates the Solenoid TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
-		self.setnParts(1)
+		self.setType("solenoid teapot")
 
 		def fringeIN(node,paramsDict):
 			B = node.getParam("B")
@@ -424,14 +449,13 @@ class SolenoidTEAPOT(NodeTEAPOT):
 		self.setFringeFieldFunctionOUT(fringeOUT)
 
 		self.addParam("B",0.)
-		self.setType("solenoid teapot")
 
 	def track(self, paramsDict):
 		"""
-		The Solenoid TEAPOT  class implementation of the AccElement class track(probe) method.
+		The Solenoid TEAPOT  class implementation of the AccNode class track(probe) method.
 		"""
 		index = self.getActivePartIndex()
-		length = self.getPartLength(index)
+		length = self.getLength(index)
 		bunch = paramsDict["bunch"]
 		B = node.getParam("B")
 		TPB.soln(bunch, length, B)
@@ -445,11 +469,12 @@ class MultipoleTEAPOT(NodeTEAPOT):
 		Constructor. Creates the Multipole Combined Function TEAPOT element.
 		"""
 		NodeTEAPOT.__init__(self,name)
-		self.setnParts(2)
 		self.addParam("poles",[])
 		self.addParam("kls",[])
 		self.addParam("skews",[])
-
+		
+		self.setnParts(2)
+		
 		def fringeIN(node,paramsDict):
 			usageIN = node.getUsage()
 			if(not usageIN):
@@ -489,40 +514,39 @@ class MultipoleTEAPOT(NodeTEAPOT):
 
 		self.setType("multipole teapot")
 
-	def _initialize(self, paramsDict):
+	def initialize(self):
 		"""
 		The  Multipole Combined Function TEAPOT class
-		implementation of the AccElement class _initialize(probe) method.
+		implementation of the AccNode class initialize() method.
 		"""
 		nParts = self.getnParts()
 		if(nParts < 2):
 			msg = "The Multipole TEAPOT class instance should have more than 2 parts!"
 			msg = msg + os.linesep
-			msg = msg + "Method _initialize(self, paramsDict):"
+			msg = msg + "Method initialize():"
 			msg = msg + os.linesep
 			msg = msg + "Name of element=" + self.getName()
 			msg = msg + os.linesep
 			msg = msg + "Type of element=" + self.getType()
 			msg = msg + os.linesep
-			msg = msg + "nParts =" + str(nParts)
+			msg = msg + "nParts =" + str(self.getnParts())
 			orbitFinalize(msg)
 		lengthIN = (self.getLength()/(nParts - 1))/2.0
 		lengthOUT = (self.getLength()/(nParts - 1))/2.0
 		lengthStep = lengthIN + lengthOUT
-		self.setPartLength(0,lengthIN)
-		self.setPartLength(nParts - 1,lengthOUT)
+		self.setLength(lengthIN,0)
+		self.setLength(lengthOUT,nParts - 1)
 		for i in xrange(nParts-2):
-			self.setPartLength(i+1,lengthStep)
-
+			self.setLength(lengthStep,i+1)
 
 	def track(self, paramsDict):
 		"""
 		The Multipole Combined Function TEAPOT  class
-		implementation of the AccElement class track(probe) method.
+		implementation of the AccNode class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
-		length = self.getPartLength(index)
+		length = self.getLength(index)
 		bunch = paramsDict["bunch"]
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
@@ -556,11 +580,12 @@ class QuadTEAPOT(NodeTEAPOT):
 		Constructor. Creates the Quad Combined Function TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
-		self.setnParts(2)
+
 		self.addParam("kq",0.)
 		self.addParam("poles",[])
 		self.addParam("kls",[])
 		self.addParam("skews",[])
+		self.setnParts(2)
 
 		def fringeIN(node,paramsDict):
 			usageIN = node.getUsage()
@@ -605,16 +630,16 @@ class QuadTEAPOT(NodeTEAPOT):
 
 		self.setType("quad teapot")
 
-	def _initialize(self, paramsDict):
+	def initialize(self):
 		"""
 		The  Quad Combined Function TEAPOT class implementation
-		of the AccElement class _initialize(probe) method.
+		of the AccNode class initialize() method.
 		"""
 		nParts = self.getnParts()
 		if(nParts < 2):
 			msg = "The Quad Combined Function TEAPOT class instance should have more than 2 parts!"
 			msg = msg + os.linesep
-			msg = msg + "Method _initialize(self, paramsDict):"
+			msg = msg + "Method initialize():"
 			msg = msg + os.linesep
 			msg = msg + "Name of element=" + self.getName()
 			msg = msg + os.linesep
@@ -625,19 +650,20 @@ class QuadTEAPOT(NodeTEAPOT):
 		lengthIN = (self.getLength()/(nParts - 1))/2.0
 		lengthOUT = (self.getLength()/(nParts - 1))/2.0
 		lengthStep = lengthIN + lengthOUT
-		self.setPartLength(0,lengthIN)
-		self.setPartLength(nParts - 1,lengthOUT)
+		self.setLength(lengthIN,0)
+		self.setLength(lengthOUT,nParts - 1)
 		for i in xrange(nParts-2):
-			self.setPartLength(i+1,lengthStep)
+			self.setLength(lengthStep,i+1)
+
 
 	def track(self, paramsDict):
 		"""
 		The Quad Combined Function TEAPOT  class implementation
-		of the AccElement class track(probe) method.
+		of the AccNode class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
-		length = self.getPartLength(index)
+		length = self.getLength(index)
 		kq = self.getParam("kq")
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
@@ -676,8 +702,6 @@ class BendTEAPOT(NodeTEAPOT):
 		Constructor. Creates the Bend Combined Functions TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
-		self.setnParts(2)
-
 		self.addParam("poles",[])
 		self.addParam("kls",[])
 		self.addParam("skews",[])
@@ -686,7 +710,9 @@ class BendTEAPOT(NodeTEAPOT):
 		self.addParam("ea2",0.)
 		self.addParam("rho",0.)
 		self.addParam("theta",1.0e-36)
-
+		
+		self.setnParts(2)
+		
 		def fringeIN(node,paramsDict):
 			usageIN = node.getUsage()
 			e = node.getParam("ea1")
@@ -764,16 +790,16 @@ class BendTEAPOT(NodeTEAPOT):
 
 		self.setType("bend teapot")
 
-	def _initialize(self, paramsDict):
+	def initialize(self):
 		"""
 		The  Bend Combined Functions TEAPOT class implementation of
-		the AccElement class _initialize(probe) method.
+		the AccNode class initialize() method.
 		"""
 		nParts = self.getnParts()
 		if(nParts < 2):
 			msg = "The Bend Combined Functions TEAPOT class instance should have more than 2 parts!"
 			msg = msg + os.linesep
-			msg = msg + "Method _initialize(self, paramsDict):"
+			msg = msg + "Method initialize():"
 			msg = msg + os.linesep
 			msg = msg + "Name of element=" + self.getName()
 			msg = msg + os.linesep
@@ -786,19 +812,19 @@ class BendTEAPOT(NodeTEAPOT):
 		lengthIN = (self.getLength()/(nParts - 1))/2.0
 		lengthOUT = (self.getLength()/(nParts - 1))/2.0
 		lengthStep = lengthIN + lengthOUT
-		self.setPartLength(0,lengthIN)
-		self.setPartLength(nParts - 1,lengthOUT)
+		self.setLength(lengthIN,0)
+		self.setLength(lengthOUT,nParts - 1)
 		for i in xrange(nParts-2):
-			self.setPartLength(i+1,lengthStep)
+			self.setLength(lengthStep,i+1)
 
 	def track(self, paramsDict):
 		"""
 		The Bend Combined Functions TEAPOT  class implementation of
-		the AccElement class track(probe) method.
+		the AccNode class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
-		length = self.getPartLength(index)
+		length = self.getLength(index)
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
@@ -848,11 +874,13 @@ class RingRFTEAPOT(NodeTEAPOT):
 		Phases are in radians.
 		"""
 		NodeTEAPOT.__init__(self,name)
-		self.setnParts(1)
 		self.addParam("harmonics",[])
 		self.addParam("voltages",[])
 		self.addParam("phases",[])
 		self.setType("RingRF teapot")
+		
+		self.setnParts(1)
+		
 
 	def addRF(self, harmonic, voltage, phase):
 		"""
@@ -863,16 +891,16 @@ class RingRFTEAPOT(NodeTEAPOT):
 		self.getParam("voltages").append(voltage)
 		self.getParam("phases").append(phase)
 
-	def _initialize(self, paramsDict):
+	def initialize(self):
 		"""
 		The Ring RF TEAPOT class implementation
-		of the AccElement class _initialize(probe) method.
+		of the AccNode class initialize() method.
 		"""
 		nParts = self.getnParts()
 		if(nParts > 1):
 			msg = "The Ring RF TEAPOT class instance should not have more than 1 part!"
 			msg = msg + os.linesep
-			msg = msg + "Method _initialize(self, paramsDict):"
+			msg = msg + "Method initialize():"
 			msg = msg + os.linesep
 			msg = msg + "Name of element=" + self.getName()
 			msg = msg + os.linesep
@@ -882,12 +910,11 @@ class RingRFTEAPOT(NodeTEAPOT):
 			msg = msg + os.linesep
 			msg = msg + "lenght =" + str(self.getLength())
 			orbitFinalize(msg)
-		self.setPartLength(0,self.getLength())
 
 	def track(self, paramsDict):
 		"""
 		The Ring RF TEAPOT class implementation
-		of the AccElement class track(probe) method.
+		of the AccNode class track(probe) method.
 		"""
 		harmArr = self.getParam("harmonics")
 		voltArr = self.getParam("voltages")
@@ -905,22 +932,23 @@ class KickTEAPOT(NodeTEAPOT):
 		Constructor. Creates the Kick TEAPOT element .
 		"""
 		NodeTEAPOT.__init__(self,name)
-		self.setnParts(2)
 		self.addParam("kx",0.)
 		self.addParam("ky",0.)
 		self.addParam("dE",0.)
 		self.setType("kick teapot")
-
-	def _initialize(self, paramsDict):
+		
+		self.setnParts(2)
+		
+	def initialize(self):
 		"""
 		The  Kicker TEAPOT class implementation of
-		the AccElement class _initialize(probe) method.
+		the AccNode class initialize() method.
 		"""
 		nParts = self.getnParts()
 		if(nParts < 2):
 			msg = "The Kick TEAPOT class instance should have more than 2 parts!"
 			msg = msg + os.linesep
-			msg = msg + "Method _initialize(self, paramsDict):"
+			msg = msg + "Method initialize():"
 			msg = msg + os.linesep
 			msg = msg + "Name of element=" + self.getName()
 			msg = msg + os.linesep
@@ -931,19 +959,19 @@ class KickTEAPOT(NodeTEAPOT):
 		lengthIN = (self.getLength()/(nParts - 1))/2.0
 		lengthOUT = (self.getLength()/(nParts - 1))/2.0
 		lengthStep = lengthIN + lengthOUT
-		self.setPartLength(0,lengthIN)
-		self.setPartLength(nParts - 1,lengthOUT)
+		self.setLength(lengthIN,0)
+		self.setLength(lengthOUT,nParts - 1)
 		for i in xrange(nParts-2):
-			self.setPartLength(i+1,lengthStep)
+			self.setLength(lengthStep,i+1)
 
 	def track(self, paramsDict):
 		"""
 		The Kick TEAPOT  class implementation of
-		the AccElement class track(probe) method.
+		the AccNode class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
-		length = self.getPartLength(index)
+		length = self.getLength(index)
 		kx = self.getParam("kx")/(nParts-1)
 		ky = self.getParam("ky")/(nParts-1)
 		dE = self.getParam("dE")/(nParts-1)
@@ -968,7 +996,7 @@ class TiltTEAPOT(BaseTEAPOT):
 		"""
 		Constructor. Creates the Tilt TEAPOT element.
 		"""
-		AccElement.__init__(self,name)
+		AccNode.__init__(self,name)
 		self.__angle = angle
 		self.setType("tilt teapot")
 
@@ -1001,7 +1029,7 @@ class FringeFieldTEAPOT(BaseTEAPOT):
 		"""
 		Constructor. Creates the Fringe Field TEAPOT element.
 		"""
-		AccElement.__init__(self,name)
+		AccNode.__init__(self,name)
 		self.setParamsDict(parentNode.getParamsDict())
 		self.__trackFunc = trackFunction
 		self.__usage = True

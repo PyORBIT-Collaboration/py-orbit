@@ -5,7 +5,7 @@ def orbitFinalize(message = None):
 	import orbit_mpi
 	import sys
 	import traceback
-	if(orbit_mpi.world_rank() == 0):
+	if(orbit_mpi.MPI_Comm_rank(orbit_mpi.mpi_comm.MPI_COMM_WORLD) == 0):
 		print "ORBIT message: ", message
 		traceback.print_stack()
 	print "STOP"

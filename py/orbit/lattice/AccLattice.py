@@ -2,197 +2,112 @@ import sys
 import os
 
 from orbit.utils import orbitFinalize
+from orbit.utils import NamedObject
+from orbit.utils import TypedObject
+
+from orbit.lattice import AccActionsContainer
+from orbit.lattice import AccNode
+
 import orbit
 
-class AccLattice:
+class AccLattice(NamedObject,TypedObject):
 	"""
-	Class. The accelerator lattice class.
-	A lattice contains elements, or child nodes.
+	The accelerator lattice class contains child nodes.
 	"""
+	
+	ENTRANCE = AccActionsContainer.ENTRANCE
+	BODY = AccActionsContainer.BODY
+	EXIT = AccActionsContainer.EXIT
+		
+	BEFORE = AccActionsContainer.BEFORE 
+	AFTER = AccActionsContainer.AFTER	
+	
 	def __init__(self, name = "no name"):
 		"""
-		Constructor. Creates an empty accelerator lattice.
+		Constructor creates an empty accelerator lattice.
 		"""
-		self.AccActionsContainer = orbit.lattice.AccActionsContainer
-		self.AccElement  = orbit.lattice.AccElement
-		self.AccLattice = orbit.lattice.AccLattice
-		self.__name = name
-		self.__type = "lattice"
+		NamedObject.__init__(self,name)
+		TypedObject.__init__(self,"lattice")				
 		self.__length = 0.
 		self.__isInitialized = False
 		self.__children = []
-
-	def setName(self, name = "no name"):
-		"""
-		Method. Sets the name of the lattice.
-		"""
-		self.__name = name
-
-	def getName(self):
-		"""
-		Method. Returns the name of the lattice.
-		"""
-		return self.__name
-
-	def getType(self):
-		"""
-		Method. Returns the type of the lattice.
-		"""
-		return self.__type
-
-	def setLength(self, L = 0.):
-		"""
-		Method. Sets the physical length of the lattice.
-		"""
-		if(abs(L) < 1.0e-9): L = 0.
-		self.__length = L
+		self.__childPositions = {}
 
 	def getLength(self):
 		"""
-		Method. Returns the physical length of the lattice.
+		It returns the physical length of the lattice.
 		"""
 		return self.__length
 
-	def setInitialized(self, initialized = True):
-		"""
-		Method. Sets the initialization status (True or False).
-		"""
-		actions = self.AccActionsContainer()
-
-		def accElemExit(paramsDict):
-			node = paramsDict["node"]
-			node.setInitialized(initialized)
-
-		actions.appendExitAction(accElemExit)
-		self.trackActions(actions, paramsDict)
-		self.__isInitialized = initialized
-
 	def isInitialized(self):
 		"""
-		Method. Returns the initialization status (True or False).
+		It returns the initialization status (True or False).
 		"""
 		return self.__isInitialized
 
-	def initialize(self, actions = None, paramsDict = {}):
+	def initialize(self):
 		"""
 		Method. Initializes the lattice and child node structures.
 		"""
-		if(actions == None):
-			actions = self.AccActionsContainer()
-		d = {"position":0}
-		d["position"] = 0.
+		for node in self.__children:
+			if(self.__children.count(node) > 1):
+				msg = "The AccLattice class instance should not have duplicate nodes!"
+				msg = msg + os.linesep
+				msg = msg + "Method initialize():"
+				msg = msg + os.linesep
+				msg = msg + "Name of node=" + node.getName()
+				msg = msg + os.linesep
+				msg = msg + "Type of node=" + node.getType()
+				msg = msg + os.linesep
+				orbitFinalize(msg)
 
-		def accElemEntrance(paramsDict):
+		paramsDict = {}
+		actions = AccActionsContainer()
+		d = [0.]
+		poss = {}
+
+		def accNodeExitAction(paramsDict):
 			node = paramsDict["node"]
-			node.initialize(paramsDict)
+			parentNode = paramsDict["parentNode"]
+			if(isinstance(parentNode,AccLattice)):
+				posBefore = d[0]
+				d[0] += node.getLength()
+				posAfter = d[0]
+				poss[node]=(posBefore,posAfter)
 
-		def accElemExit(paramsDict):
-			node = paramsDict["node"]
-			d["position"] += node.getLength()
-
-		actions.appendEntranceAction(accElemEntrance)
-		actions.appendExitAction(accElemExit)
+		actions.addAction(accNodeExitAction,AccNode.EXIT)
 		self.trackActions(actions, paramsDict)
-		self.__length = d["position"]
+		self.__length = d[0]
+		self.__childPositions = poss
 		self.__isInitialized = True
 
-	def insertChildNode(self, node, index = 0):
+	def addNode(self, node):
 		"""
-		Method. Inserts a child node into the lattice.
-		The third parameter is the child node index.
+		A Method adds a child node into the lattice.
 		"""
-		if(isinstance(node,self.AccElement) != True):
-			msg = "A child of an AccLattice must be an AccElement!"
-			msg = msg + os.linesep
-			msg = msg + "method insertChildNode(self, node, index)"
-			msg = msg + os.linesep
-			msg = msg + "Name of element = " + self.getName()
-			msg = msg + os.linesep
-			msg = msg + "Type of element = " + self.getType()
-			msg = msg + os.linesep
-			msg = msg + "Child node = " + str(node)
-			orbitFinalize(msg)
-		self.__children.insert(index, node)
+		if(isinstance(node,AccNode) == True): self.__children.append(node)
 
-	def appendChildNode(self, node):
+	def getNodes(self):
 		"""
-		Method. Appends a child node to the lattice.
-		"""
-		if(isinstance(node, self.AccElement) != True):
-			msg = "A child of an AccLattice must be an AccElement!"
-			msg = msg + os.linesep
-			msg = msg + "method appendChildNode(self, node)"
-			msg = msg + os.linesep
-			msg = msg + "Name of lattice = " + self.getName()
-			msg = msg + os.linesep
-			msg = msg + "Type of element = " + self.getType()
-			msg = msg + os.linesep
-			msg = msg + "Child node = " + str(node)
-			orbitFinalize(msg)
-		self.__children.append(node)
-
-	def removeChildNode(self, index = 0):
-		"""
-		Method. Removes a child node with given index from the lattice.
-		"""
-		if((index < 0) or (index >= (len(self.__children)))):
-			msg = "Child node index is out of range!"
-			msg = msg + os.linesep
-			msg = "Range, index = 0 - " + str(len(self.__children)-1) + ", " + str(index)
-			msg = msg + os.linesep
-			msg = msg + "method removeChildNode(self, index = 0)"
-			msg = msg + os.linesep
-			msg = msg + "Name of element = " + self.getName()
-			msg = msg + os.linesep
-			msg = msg + "Type of element = " + self.getType()
-			orbitFinalize(msg)
-		del self.__children[index:(index+1)]
-
-	def removeAllChildNodes(self):
-		"""
-		Method. Removes all children from the lattice.
-		"""
-		self.__children = []
-
-	def getAllChildNodes(self):
-		"""
-		Method. Returns a list of all children in the lattice.
+		A method returns a list of all children of the first level in the lattice.
 		"""
 		return self.__children
+		
+	def getNodePositionsDict(self):
+		"""
+		A method returns a dictionary of {node:(start position, stop position)} 
+		tuples for all children of the first level in the lattice.
+		"""		
+		return self.__childPositions
 
 	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""
-		Method. Tracks the actions through all nodes in the lattice.
+		A method tracks the actions through all nodes in the lattice.
 		"""
 		paramsDict["lattice"] = self
 		paramsDict["actions"] = actionsContainer
-		paramsDict["node"] = self
-		paramsDict["parentNode"] = None
-		actionsContainer.performEntranceActions(paramsDict)
 		for node in self.__children:
 			paramsDict["node"] = node
 			paramsDict["parentNode"] = self
-			if(actionsContainer.getShouldStop()):
-				return
 			node.trackActions(actionsContainer, paramsDict)
-			if(actionsContainer.getShouldStop()):
-				return
-		paramsDict["node"] = self
-		paramsDict["parentNode"] = None
-		actionsContainer.performExitActions(paramsDict)
 
-	def trackBunch(self, bunch, actions = None, paramsDict = {}):
-		"""
-		Method. Tracks a bunch trough the lattice.
-		"""
-		paramsDict["bunch"] = bunch
-		if(actions == None):
-			actions = self.AccActionsContainer()
-
-		def track(paramsDict):
-			node = paramsDict["node"]
-			if(isinstance(node, self.AccElement)):
-				node.track(paramsDict)
-
-		actions.appendBodyAction(track)
-		self.trackActions(actions, paramsDict)

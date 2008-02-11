@@ -2,166 +2,55 @@ import sys
 import os
 
 from orbit.utils import orbitFinalize
+from orbit.utils import NamedObject
 import orbit
 
-class AccActionsContainer:
+class AccActionsContainer(NamedObject):
 	"""
-	Class. Contains the accelerator actions.
+	Container for accelerator actions.
 	"""
+	
+	ENTRANCE = 0
+	BODY = 1
+	EXIT = 2
+	
+	BEFORE = 0
+	AFTER = 1
+	
 	def __init__(self, name = "no name container" ):
 		"""
-		Constructor. Creates empty accelerator actions container.
+		Constructor creates empty accelerator actions container.
 		"""
-		self.AccActionsContainer = orbit.lattice.AccActionsContainer
-		self.AccElement  = orbit.lattice.AccElement
-		self.AccLattice = orbit.lattice.AccLattice
-		self.__name = name
-		self.__type = "action container"
-		self.__entranceActions = []
-		self.__bodyActions = []
-		self.__exitActions = []
-		self.__shouldStop = False
+		NamedObject.__init__(self,name)
+		#an array with entrance,body, and exit actions
+		self.__actionsArr = ([],[],[])
 
-	def setName(self, name = "no name"):
+	def addAction(self, action, place):
 		"""
-		Method. Sets the name of the actions container.
+		It appends an action at the entrance,body, or exit
+		of the accelerator node. 
 		"""
-		self.__name = name
+		self.__actionsArr[place].append(action)
 
-	def getName(self):
+	def removeAction(self, action, place):
 		"""
-		Method. Returns the name of the actions container.
+		It removes an action from the entrance,body, or exit
+		of the accelerator node. 
 		"""
-		return self.__name
-
-	def appendEntranceAction(self, action):
+		self.__actionsArr[place].remove(action)
+	
+	def getActions(self, place):
 		"""
-		Method. Append an action at the entrance
+		It returns a list of the actions at the entrance,body, or exit
 		of the accelerator node.
 		"""
-		if(self.__entranceActions.count(action) == 0):
-			self.__entranceActions.append(action)
+		return self.__actionsArr[place]
 
-	def removeEntranceAction(self, action):
+	def performActions(self, paramsDict, place):
 		"""
-		Method. Remove an action from the entrance
+		It performs the required actions at the entrance,body, or exit
 		of the accelerator node.
 		"""
-		return self.__entranceActions.remove(action)
-
-	def getNumbOfEntranceActions(self):
-		"""
-		Method. Return the number of actions at the entrance
-		of the accelerator node.
-		"""
-		return len(self.__entranceActions)
-
-	def getEntranceActions(self):
-		"""
-		Method. Returns a list of the actions at the entrance
-		of the accelerator node
-		"""
-		return self.__entranceActions
-
-	def performEntranceActions(self, paramsDict):
-		"""
-		Method. Perform the required actions at the entrance
-		of the accelerator node.
-		"""
-		for action in self.__entranceActions:
-			if(self.__shouldStop):
-				return
+		for action in self.__actionsArr[place]:
 			action(paramsDict)
-
-	def appendBodyAction(self, action):
-		"""
-		Method. Append an action in the body
-		of the accelerator node.
-		"""
-		if(self.__bodyActions.count(action) == 0):
-			self.__bodyActions.append(action)
-
-	def removeBodyAction(self, action):
-		"""
-		Method. Remove an action from the body
-		of the accelerator node.
-		"""
-		return self.__bodyActions.remove(action)
-
-	def getNumbOfBodyActions(self):
-		"""
-		Method. Return the number of actions in the body
-		of the accelerator node.
-		"""
-		return len(self.__bodyActions)
-
-	def getBodyActions(self):
-		"""
-		Method. Returns a list of the actions in the body
-		of the accelerator node
-		"""
-		return self.__bodyActions
-
-	def performBodyActions(self, paramsDict):
-		"""
-		Method. Perform the required actions in the body
-		of the accelerator node.
-		"""
-		for action in self.__bodyActions:
-			if(self.__shouldStop):
-				return
-			action(paramsDict)
-
-	def appendExitAction(self, action):
-		"""
-		Method. Append an action at the exit
-		of the accelerator node.
-		"""
-		if(self.__exitActions.count(action) == 0):
-			self.__exitActions.append(action)
-
-	def removeExitAction(self, action):
-		"""
-		Method. Remove an action from the exit
-		of the accelerator node.
-		"""
-		return self.__exitActions.remove(action)
-
-	def getNumbOfExitActions(self):
-		"""
-		Method. Return the number of actions at the exit
-		of the accelerator node.
-		"""
-		return len(self.__exitActions)
-
-	def getExitActions(self):
-		"""
-		Method. Returns a list of the actions at the exit
-		of the accelerator node
-		"""
-		return self.__exitActions
-
-	def performExitActions(self, paramsDict):
-		"""
-		Method. Perform the required actions at the exit
-		of the accelerator node.
-		"""
-		for action in self.__exitActions:
-			if(self.__shouldStop):
-				return
-			action(paramsDict)
-
-	def setShouldStop(self, shouldStop = True):
-		"""
-		Method. Sets shouldStop to True in
-		the actions container.
-		"""
-		self.__shouldStop = shouldStop
-
-	def getShouldStop(self):
-		"""
-		Method. Returns the value of shouldStop in
-		the actions container.
-		"""
-		return self.__shouldStop
 

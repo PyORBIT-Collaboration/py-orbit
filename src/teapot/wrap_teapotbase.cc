@@ -1,6 +1,8 @@
 #include "Python.h"
 #include "orbit_mpi.hh"
 
+#include "pyORBIT_Object.hh"
+
 #include "teapotbase.hh"
 
 #include "wrap_teapotbase.hh"
@@ -21,19 +23,11 @@ extern "C" {
     static PyObject* wrap_rotatexy(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double anglexy;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:rotatexy",&pyBunch,&anglexy)){
 				error("teapotbase - rotatexy - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::rotatexy(cpp_bunch,anglexy);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -42,19 +36,11 @@ extern "C" {
     static PyObject* wrap_drift(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double length;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:drift",&pyBunch,&length)){
 				error("teapotbase - drift - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::drift(cpp_bunch,length);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -65,19 +51,11 @@ extern "C" {
 			PyObject* pyBunch;
       int pole, skew;
 			double kl;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Oidi:multp",&pyBunch,&pole,&kl,&skew)){
 				error("teapotbase - multp - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::multp(cpp_bunch, pole, kl, skew);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -87,19 +65,11 @@ extern "C" {
 			PyObject* pyBunch;
       int pole, skew;
 			double kl;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Oidi:multpfringeIN",&pyBunch,&pole,&kl,&skew)){
 				error("teapotbase - multpfringeIN - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::multpfringeIN(cpp_bunch, pole, kl, skew);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -109,19 +79,11 @@ extern "C" {
 			PyObject* pyBunch;
       int pole, skew;
 			double kl;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Oidi:multpfringeOUT",&pyBunch,&pole,&kl,&skew)){
 				error("teapotbase - multpfringeOUT - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::multpfringeOUT(cpp_bunch, pole, kl, skew);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -130,19 +92,11 @@ extern "C" {
     static PyObject* wrap_kick(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double kx, ky, kE;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Oddd:kick",&pyBunch,&kx,&ky,&kE)){
 				error("teapotbase - kick - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::kick(cpp_bunch,kx,ky,kE);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -151,19 +105,11 @@ extern "C" {
     static PyObject* wrap_quad1(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double length, kq;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Odd:quad1",&pyBunch,&length,&kq)){
 				error("teapotbase - quad1 - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::quad1(cpp_bunch,length,kq);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::quad1(cpp_bunch,length,kq);			
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -172,19 +118,11 @@ extern "C" {
     static PyObject* wrap_quad2(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double length;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:quad2",&pyBunch,&length)){
 				error("teapotbase - quad2 - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::quad2(cpp_bunch,length);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::quad2(cpp_bunch,length);		
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -193,19 +131,12 @@ extern "C" {
     static PyObject* wrap_quadfringeIN(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double kq;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:quadfringeIN",&pyBunch,&kq)){
 				error("teapotbase - quadfringeIN - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::quadfringeIN(cpp_bunch,kq);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -214,19 +145,11 @@ extern "C" {
     static PyObject* wrap_quadfringeOUT(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double kq;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:quadfringeOUT",&pyBunch,&kq)){
 				error("teapotbase - quadfringeOUT - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::quadfringeOUT(cpp_bunch,kq);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -236,19 +159,12 @@ extern "C" {
 			PyObject* pyBunch;
 			double e;
 			int frinout;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Odi:wedgerotate",&pyBunch,&e,&frinout)){
 				error("teapotbase - wedgerotate - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::wedgerotate(cpp_bunch,e,frinout);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -258,19 +174,11 @@ extern "C" {
 			PyObject* pyBunch;
 			double e;
 			int inout;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Odi:wedgedrift",&pyBunch,&e,&inout)){
 				error("teapotbase - wedgedrift - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::wedgedrift(cpp_bunch,e,inout);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -280,19 +188,11 @@ extern "C" {
 			PyObject* pyBunch;
 			double e, rho;
 			int inout, nsteps;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Odidi:wedgebend",&pyBunch,&e,&inout,&rho,&nsteps)){
 				error("teapotbase - wedgebend - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::wedgebend(cpp_bunch, e, inout, rho, nsteps);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -302,19 +202,11 @@ extern "C" {
 			PyObject* pyBunch;
 			double length;
 			double th;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Odd:bend1",&pyBunch,&length,&th)){
 				error("teapotbase - bend1 - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::bend1(cpp_bunch,length,th);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -323,19 +215,11 @@ extern "C" {
     static PyObject* wrap_bend2(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double length;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:bend2",&pyBunch,&length)){
 				error("teapotbase - bend2 - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::bend2(cpp_bunch,length);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -344,19 +228,11 @@ extern "C" {
     static PyObject* wrap_bend3(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double th;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:bend3",&pyBunch,&th)){
 				error("teapotbase - bend3 - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::bend3(cpp_bunch,th);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::bend3(cpp_bunch,th);			
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -365,19 +241,11 @@ extern "C" {
     static PyObject* wrap_bend4(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double th;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:bend4",&pyBunch,&th)){
 				error("teapotbase - bend4 - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::bend4(cpp_bunch,th);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::bend4(cpp_bunch,th);			
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -386,19 +254,11 @@ extern "C" {
     static PyObject* wrap_bendfringeIN(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double rho;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:bendfringeIN",&pyBunch,&rho)){
 				error("teapotbase - bendfringeIN - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::bendfringeIN(cpp_bunch,rho);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::bendfringeIN(cpp_bunch,rho);		
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -407,19 +267,11 @@ extern "C" {
     static PyObject* wrap_bendfringeOUT(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double rho;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:bendfringeOUT",&pyBunch,&rho)){
 				error("teapotbase - bendfringeOUT - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::bendfringeOUT(cpp_bunch,rho);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::bendfringeOUT(cpp_bunch,rho);			
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -428,19 +280,11 @@ extern "C" {
     static PyObject* wrap_soln(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double length, B;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Odd:soln",&pyBunch,&length,&B)){
 				error("teapotbase - soln - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::soln(cpp_bunch,length,B);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -449,19 +293,11 @@ extern "C" {
     static PyObject* wrap_solnfringeIN(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double B;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:solnfringeIN",&pyBunch,&B)){
 				error("teapotbase - solnfringeIN - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::solnfringeIN(cpp_bunch,B);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::solnfringeIN(cpp_bunch,B);		
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -470,19 +306,11 @@ extern "C" {
     static PyObject* wrap_solnfringeOUT(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
 			double B;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Od:solnfringeOUT",&pyBunch,&B)){
 				error("teapotbase - solnfringeOUT - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 			teapot_base::solnfringeOUT(cpp_bunch,B);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
 			Py_INCREF(Py_None);
 			return Py_None;
 		}
@@ -492,23 +320,18 @@ extern "C" {
 			PyObject* pyBunch;
 			double e, rho;
 			int inout, vecnum, nsteps;
-
 			std::vector<int> poleV;
 			std::vector<double> klV;
 			std::vector<int> skewV;
-
 			PyObject* polePySeq;
 			PyObject* klPySeq;
 			PyObject* skewPySeq;
-
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"OdidiOOOi:wedgebendCF",&pyBunch,
 					&e,&inout,&rho,&vecnum,&polePySeq,&klPySeq,&skewPySeq,&nsteps)){
 				error("teapotbase - wedgebendCF - cannot parse arguments!");
 			}
 
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
 
 			//unpack all sequences
 			if(!PySequence_Check(polePySeq) ||
@@ -550,10 +373,6 @@ extern "C" {
 
 				//the teapotbase function call
 			  teapot_base::wedgebendCF(cpp_bunch,e,inout,rho,vecnum,poleV,klV,skewV,nsteps);
-
-			  //clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			  Py_DECREF(py_bunch_ref);
-
 			  Py_INCREF(Py_None);
 			  return Py_None;
 		  }
@@ -563,19 +382,11 @@ extern "C" {
 			PyObject* pyBunch;
 			double voltage, phase_s, ring_length;
 			int harmonics_numb;
-			//NO NEW OBJECT CREATED BY PyArg_ParseTuple! - NO NEED OF Py_DECREF()
 			if(!PyArg_ParseTuple(	args,"Odidd:RingRF",&pyBunch,&ring_length,&harmonics_numb,&voltage,&phase_s)){
 				error("teapotbase - RingRF - cannot parse arguments!");
 			}
-
-			PyObject* py_bunch_ref = PyObject_GetAttrString( pyBunch ,"cpp_ptr");
-			Bunch* cpp_bunch = (Bunch*) PyCObject_AsVoidPtr(py_bunch_ref);
-
-			teapot_base::RingRF(cpp_bunch,ring_length,harmonics_numb,voltage,phase_s);
-
-			//clear the reference from PyObject_GetAttrString( pyBunch ,"cpp_ptr")
-			Py_DECREF(py_bunch_ref);
-
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+			teapot_base::RingRF(cpp_bunch,ring_length,harmonics_numb,voltage,phase_s);			
 			Py_INCREF(Py_None);
 			return Py_None;
 		}

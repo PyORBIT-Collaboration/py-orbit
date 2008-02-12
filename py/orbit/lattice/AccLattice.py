@@ -60,6 +60,7 @@ class AccLattice(NamedObject,TypedObject):
 				msg = msg + "Type of node=" + node.getType()
 				msg = msg + os.linesep
 				orbitFinalize(msg)
+			node.initialize()
 
 		paramsDict = {}
 		actions = AccActionsContainer()

@@ -29,29 +29,18 @@ Kicker
 RingRF
 """
 
-class TEAPOT:
+class TEAPOT_Lattice(AccLattice):
 	"""
-	Class. Shell class for the TEAPOT nodes collection.
-	TEAPOT calls the MAD parser and the TEAPOT accelerator
-	elements factory.
+	The subclass of the AccLattice class. Shell class for the TEAPOT nodes collection.
+	TEAPOT has the ability to read MAD files.
 	"""
 	def __init__(self):
-		self.lattice = AccLattice()
+		AccLattice.__init__(self)
 
-
-	def __init__(self, lattice):
+	def readMAD(self, mad_file_name, lineName):
 		"""
-		It sets the external lattice as this TEAPOT instance's lattice.
+		It creates the teapot lattice from MAD file.
 		"""
-		self.lattice = lattice
-
-	def makeLattice(self, mad_file_name, lineName):
-		"""
-		Method. Returns the teapot lattice as an instance
-		of AccLattice class from lattice.py package. 
-		The lattice is initialized from MAD file.
-		"""
-		self.lattice = AccLattice()
 		parser = MAD_Parser()
 		parser.parse(mad_file_name)
 		accLines = parser.getMAD_LinesDict()
@@ -63,20 +52,14 @@ class TEAPOT:
 			sys.exit(1)
 		# accelerator lines and elements from mad_parser package
 		accMAD_Line = accLines[lineName]
-		self.lattice.setName(lineName)
+		self.setName(lineName)
 		accMADElements = accMAD_Line.getElements()
 		# make TEAPOT lattice elements by using TEAPOT
 		# element factory
 		for madElem in accMADElements:
 			elem = _teapotFactory.getElement(madElem)
-			self.lattice.addNode(elem)
-		self.lattice.initialize()
-
-	def getLattice(self):
-		"""
-		It returns the accelerator lattice. 
-		"""
-		return self.lattice
+			self.addNode(elem)
+		self.initialize()
 
 	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
 		"""
@@ -90,7 +73,7 @@ class TEAPOT:
 			node.track(paramsDict)
 			
 		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.lattice.trackActions(actionContainer,paramsDict)
+		self.trackActions(actionContainer,paramsDict)
 		
 
 class _teapotFactory:
@@ -293,7 +276,9 @@ class _teapotFactory:
 				kls.append(kl_param)
 				skews.append(skew)
 		if(len(poles) > 0):
-			elem.addParams({"poles":poles,"kls":kls,"skews":skews})
+			elem.addParam("poles",poles)
+			elem.addParam("kls",kls)
+			elem.addParam("skews",skews)
 		return elem
 
 	getElement = classmethod(getElement)

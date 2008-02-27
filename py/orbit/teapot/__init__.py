@@ -3,7 +3,7 @@
 ##
 ## These classes use teapot_base C++ wrappers
 
-from teapot import TEAPOT
+from teapot import TEAPOT_Lattice
 from teapot import BaseTEAPOT
 from teapot import BendTEAPOT
 from teapot import DriftTEAPOT

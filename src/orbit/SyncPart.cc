@@ -309,11 +309,13 @@ void SyncPart::readSyncPart(const char* fileName){
       if(size_MPI > 1){
         int strLength = strlen(str.c_str());
         ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, MPI_COMM_Local );
-        char* char_tmp = BufferStore::getBufferStore()->getCharArr(0,strLength+1);
+				int buff_index = 0;
+        char* char_tmp = BufferStore::getBufferStore()->getFreeCharArr(buff_index,strLength+1);
         strcpy(char_tmp, str.c_str());
         ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, MPI_COMM_Local );
         std::string str_new(char_tmp);
         StringUtils::Tokenize(str_new,v_str);
+				BufferStore::getBufferStore()->setUnusedCharArr(buff_index);
       }
 
 			//set coordinates

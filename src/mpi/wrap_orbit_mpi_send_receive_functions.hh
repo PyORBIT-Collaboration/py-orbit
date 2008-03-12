@@ -66,8 +66,10 @@ static PyObject* mpi_allreduce(PyObject *self, PyObject *args){
 	PyObject* pyRes = PyTuple_New(size);
 	//data is an INT array
 	if(pyDatatype->datatype == MPI_INT){
-		int* arr =  BufferStore::getBufferStore()->getIntArr(0,size);
-		int* arr_out =  BufferStore::getBufferStore()->getIntArr(1,size);
+		int buff_index0 = 0;
+		int buff_index1 = 0;		
+		int* arr =  BufferStore::getBufferStore()->getFreeIntArr(buff_index0,size);
+		int* arr_out =  BufferStore::getBufferStore()->getFreeIntArr(buff_index1,size);
 		for(int i = 0; i < size; i++){
 			arr[i]= (int) PyInt_AsLong(PySequence_Fast_GET_ITEM(pyO_arr, i));
 		}			
@@ -77,11 +79,15 @@ static PyObject* mpi_allreduce(PyObject *self, PyObject *args){
 				error("MPI_Allreduce(...)  cannot create a resulting tuple.");
 			}			
 		}
+		BufferStore::getBufferStore()->setUnusedIntArr(buff_index0);
+		BufferStore::getBufferStore()->setUnusedIntArr(buff_index1);		
 	}
 	//data is an DOUBLE array
 	if(pyDatatype->datatype == MPI_DOUBLE){
-		double* arr =  BufferStore::getBufferStore()->getDoubleArr(0,size);
-		double* arr_out =  BufferStore::getBufferStore()->getDoubleArr(1,size);
+		int buff_index0 = 0;
+		int buff_index1 = 0;		
+		double* arr =  BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,size);
+		double* arr_out =  BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,size);
 		for(int i = 0; i < size; i++){
 			arr[i]= PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyO_arr, i));
 		}			
@@ -91,6 +97,8 @@ static PyObject* mpi_allreduce(PyObject *self, PyObject *args){
 				error("MPI_Allreduce(...)  cannot create a resulting tuple.");
 			}			
 		}		
+		BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+		BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);		
 	}
 	return pyRes;
 }
@@ -141,7 +149,8 @@ static PyObject* mpi_bcast(PyObject *self, PyObject *args){
 	//data is an INT array
 	if(pyDatatype->datatype == MPI_INT){
 		pyRes = PyTuple_New(size);
-		int* arr =  BufferStore::getBufferStore()->getIntArr(0,size);
+		int buff_index = 0;
+		int* arr =  BufferStore::getBufferStore()->getFreeIntArr(buff_index,size);
 		if(rank_local == rank){
 			for(int i = 0; i < size; i++){
 				arr[i]= (int) PyInt_AsLong(PySequence_Fast_GET_ITEM(pyO_arr, i));
@@ -156,11 +165,13 @@ static PyObject* mpi_bcast(PyObject *self, PyObject *args){
 				error("MPI_Bcast(...)  cannot create a resulting tuple.");
 			}			
 		}
+		BufferStore::getBufferStore()->setUnusedIntArr(buff_index);
 	}
 	//data is an DOUBLE array
 	if(pyDatatype->datatype == MPI_DOUBLE){
 		pyRes = PyTuple_New(size);
-		double* arr =  BufferStore::getBufferStore()->getDoubleArr(0,size);
+		int buff_index = 0;
+		double* arr =  BufferStore::getBufferStore()->getFreeDoubleArr(buff_index,size);
 		if(rank_local == rank){
 			for(int i = 0; i < size; i++){
 				arr[i]= PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyO_arr, i));
@@ -171,21 +182,26 @@ static PyObject* mpi_bcast(PyObject *self, PyObject *args){
 			if(PyTuple_SetItem(pyRes,i,Py_BuildValue("d",arr[i])) != 0){
 				error("MPI_Bcast(...)  cannot create a resulting tuple.");
 			}			
-		}		
+		}	
+		BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index);
 	}
 	//data is a pyString
 	if(pyDatatype->datatype == MPI_CHAR){
 		char* arr = NULL;
+		int buff_index = -1;
 		if(rank_local == rank){
 			arr = PyString_AsString(pyO_arr);
 		} else {
-			arr = BufferStore::getBufferStore()->getCharArr(0,size);
+			arr = BufferStore::getBufferStore()->getFreeCharArr(buff_index,size);
 		}
 		if(arr == NULL){
 			error("MPI_Bcast(...)  data type could be INT, DOUBLE, or CHAR(string). STOP.");
 		}
 		ORBIT_MPI_Bcast(arr,size,MPI_CHAR,rank,pyComm->comm);
 		pyRes = Py_BuildValue("s#",arr,size);
+		if(buff_index >= 0){
+			BufferStore::getBufferStore()->setUnusedCharArr(buff_index);
+		}
 	}
 	if(pyRes == Py_None){
 		error("MPI_Bcast(...)  data type could be INT, DOUBLE, or CHAR(string). STOP.");
@@ -230,19 +246,23 @@ static PyObject* mpi_send(PyObject *self, PyObject *args){
   int size = PySequence_Size(pyO_arr);
 	//data is an INT array
 	if(pyDatatype->datatype == MPI_INT){
-		int* arr =  BufferStore::getBufferStore()->getIntArr(0,size);
+		int buff_index = 0;
+		int* arr =  BufferStore::getBufferStore()->getFreeIntArr(buff_index,size);
 		for(int i = 0; i < size; i++){
 			arr[i]= (int) PyInt_AsLong(PySequence_Fast_GET_ITEM(pyO_arr, i));
 		}			
 		res = ORBIT_MPI_Send(arr,size,MPI_INT,dest,tag,pyComm->comm);
+		BufferStore::getBufferStore()->setUnusedIntArr(buff_index);
 	}
 	//data is an DOUBLE array
 	if(pyDatatype->datatype == MPI_DOUBLE){
-		double* arr =  BufferStore::getBufferStore()->getDoubleArr(0,size);
+		int buff_index = 0;
+		double* arr =  BufferStore::getBufferStore()->getFreeDoubleArr(buff_index,size);
 		for(int i = 0; i < size; i++){
 			arr[i]= PyFloat_AsDouble(PySequence_Fast_GET_ITEM(pyO_arr, i));
 		}			
 		res = ORBIT_MPI_Send(arr,size,MPI_DOUBLE,dest,tag,pyComm->comm);
+		BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index);
 	}
 	//data is a pyString
 	if(pyDatatype->datatype == MPI_CHAR){
@@ -305,7 +325,8 @@ static PyObject* mpi_recv(PyObject *self, PyObject *args){
 	PyObject* pyRes =  Py_None;
 	if(pyDatatype->datatype == MPI_INT){
 		pyRes = PyTuple_New(size);
-		int* arr =  BufferStore::getBufferStore()->getIntArr(0,size);
+		int buff_index = 0;
+		int* arr =  BufferStore::getBufferStore()->getFreeIntArr(buff_index,size);
 		res = ORBIT_MPI_Recv(arr,size,MPI_INT,source,tag,pyComm->comm,&status);
 		if(res != MPI_SUCCESS){
 			error("MPI_Recv(...) - fatal error. STOP.");
@@ -315,10 +336,12 @@ static PyObject* mpi_recv(PyObject *self, PyObject *args){
 				error("MPI_Recv(...)  cannot create a resulting tuple.");
 			}	
 		}
+		BufferStore::getBufferStore()->setUnusedIntArr(buff_index);
 	}
 	if(pyDatatype->datatype == MPI_DOUBLE){
 		pyRes = PyTuple_New(size);
-		double* arr =  BufferStore::getBufferStore()->getDoubleArr(0,size);
+		int buff_index = 0;
+		double* arr =  BufferStore::getBufferStore()->getFreeDoubleArr(buff_index,size);
 		res = ORBIT_MPI_Recv(arr,size,MPI_DOUBLE,source,tag,pyComm->comm,&status);
 		if(res != MPI_SUCCESS){
 			error("MPI_Recv(...) - fatal error. STOP.");
@@ -328,14 +351,17 @@ static PyObject* mpi_recv(PyObject *self, PyObject *args){
 				error("MPI_Recv(...)  cannot create a resulting tuple.");
 			}			
 		}
+		BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index);
 	}
 	if(pyDatatype->datatype == MPI_CHAR){
-		char* arr =  BufferStore::getBufferStore()->getCharArr(0,size);
+		int buff_index = 0;
+		char* arr =  BufferStore::getBufferStore()->getFreeCharArr(buff_index,size);
 		res = ORBIT_MPI_Recv(arr,size,MPI_CHAR,source,tag,pyComm->comm,&status);
 		if(res != MPI_SUCCESS){
 			error("MPI_Recv(...) - fatal error. STOP.");
 		}
 		pyRes = Py_BuildValue("s#",arr,size);
+    BufferStore::getBufferStore()->setUnusedCharArr(buff_index);
 	}
 	if(pyRes == Py_None){
 		error("MPI_Recv(...)  data type could be INT, DOUBLE, or CHAR(string). STOP.");

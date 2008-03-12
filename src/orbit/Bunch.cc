@@ -252,10 +252,12 @@ void Bunch::initBunchAttributes(const char* fileName){
       if(size_MPI > 1){
         int strLength = strlen(str.c_str());
         ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, pyComm_Local->comm );
-        char* char_tmp = BufferStore::getBufferStore()->getCharArr(0,strLength+1);
+				int buff_index = 0;
+        char* char_tmp = BufferStore::getBufferStore()->getFreeCharArr(buff_index,strLength+1);
         strcpy(char_tmp, str.c_str());
         ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, pyComm_Local->comm );
         std::string str_new(char_tmp);
+				BufferStore::getBufferStore()->setUnusedCharArr(buff_index);
         StringUtils::Tokenize(str_new,v_str);
       }
       if(v_str.size() > 3 && v_str[1] == "BUNCH_ATTRIBUTE_INT"){
@@ -927,8 +929,10 @@ void Bunch::print(std::ostream& Out)
 
   //parallel case                                   ===== MPI start =====
   MPI_Status statusMPI ;
-  int* nSizeArr     = BufferStore::getBufferStore()->getIntArr(0,size_MPI);
-  int* nSizeArr_MPI = BufferStore::getBufferStore()->getIntArr(1,size_MPI);
+	int buff_index0 = 0;
+	int buff_index1 = 0;	
+  int* nSizeArr     = BufferStore::getBufferStore()->getFreeIntArr(buff_index0,size_MPI);
+  int* nSizeArr_MPI = BufferStore::getBufferStore()->getFreeIntArr(buff_index1,size_MPI);
 
   for(int i=0; i<size_MPI;i++){
     nSizeArr[i]=0;
@@ -944,8 +948,8 @@ void Bunch::print(std::ostream& Out)
 
   int nDimAndAttr = nDim+attributesSize+1;
 
-
-  double* dump_arr = BufferStore::getBufferStore()->getDoubleArr(0,nSizeChank*(nDimAndAttr));
+	int buff_index2 = 0;
+  double* dump_arr = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index2,nSizeChank*(nDimAndAttr));
 
   //sending and receiving coordinates and properties of macroparticles
   for( int i = 1; i < size_MPI; i++){
@@ -1002,6 +1006,9 @@ void Bunch::print(std::ostream& Out)
   }
 
   if(rank_MPI == 0){Out.flush();}
+	BufferStore::getBufferStore()->setUnusedIntArr(buff_index0);
+	BufferStore::getBufferStore()->setUnusedIntArr(buff_index1);	
+	BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index2);	
   // ===== MPI end =====
 }
 
@@ -1090,7 +1097,8 @@ int Bunch::readBunchCoords(const char* fileName, int nParts)
 
 	int nDimAndAttr = nDim+attributesSize;
 
-	double* arr_0 = BufferStore::getBufferStore()->getDoubleArr(0,chunk_size*(nDimAndAttr));;
+	int buff_index = 0;
+	double* arr_0 = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index,chunk_size*(nDimAndAttr));;
 
 	int info_stop = 0;
 	int nP = 0;
@@ -1187,6 +1195,7 @@ int Bunch::readBunchCoords(const char* fileName, int nParts)
 		is.close();
 	}
 
+	BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index);
 	return getSizeGlobal();
 }
 
@@ -1298,7 +1307,8 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 
 	if(nTypes == 0) return 0;
 
-	char* char_tmp = BufferStore::getBufferStore()->getCharArr(0,strLength+1);
+	int buff_index = 0;
+	char* char_tmp = BufferStore::getBufferStore()->getFreeCharArr(buff_index,strLength+1);
 	strcpy(char_tmp, str.c_str());
 	ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, pyComm_Local->comm );
 	std::string str_new(char_tmp);
@@ -1309,7 +1319,7 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 	for(int i = 2, n = v_str.size(); i < n; i++){
 		attr_names.push_back(v_str[i]);
 	}
-
+	BufferStore::getBufferStore()->setUnusedCharArr(buff_index);
 	return attr_names.size();
 }
 

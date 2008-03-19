@@ -13,12 +13,12 @@ using namespace std;
 //int nTokens = StringUtils::Tokenize("....",vector<string>& tokens);
 //=======================================
 
-namespace StringUtils
-{
 
-  int Tokenize(const string& str,vector<string>& tokens,  const string& delimiters = " ");
-
+namespace OrbitUtils{
+	namespace StringUtils
+	{
+		int Tokenize(const string& str,vector<string>& tokens,  const string& delimiters = " ");
+	};
 };
-
 #endif
 

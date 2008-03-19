@@ -2,8 +2,9 @@
 ## \brief Python wrappers for teapot C++ functions.
 ##
 
-from TEAPOT_BASE import TPB
+import teapot_base as TPB
+from teapot_base import MatrixGenerator
 
 __all__ = []
 __all__.append("TPB")
-
+__all__.append("MatrixGenerator")

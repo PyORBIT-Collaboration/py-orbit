@@ -43,47 +43,48 @@
 //    AttributesBucket
 //
 ///////////////////////////////////////////////////////////////////////////
-
-class AttributesBucket
-{
-  //--------------------------------------
-  //the public methods of the AttributesBucket class
-  //--------------------------------------
-public:
-
-  AttributesBucket();
-  ~AttributesBucket();
-
-  int intVal(const std::string attName);
-  double doubleVal(const std::string attName);
+namespace OrbitUtils{
+	class AttributesBucket
+	{
+		//--------------------------------------
+		//the public methods of the AttributesBucket class
+		//--------------------------------------
+	public:
+		
+		AttributesBucket();
+		~AttributesBucket();
+		
+		int intVal(const std::string attName);
+		double doubleVal(const std::string attName);
+		
+		int intVal(const std::string attName, int val);
+		double doubleVal(const std::string attName, double val);
+		
+		//returns 0 if there is no attribute associated with this name
+		int hasIntAttribute(const std::string attName);
+		int hasDoubleAttribute(const std::string attName);
+		
+		void getIntAttributeNames(std::vector<std::string>& names);
+		void getDoubleAttributeNames(std::vector<std::string>& names);
+		
+		//add all atributes from one bucket to another
+		void add(AttributesBucket* bckt);
+		
+		//removes all values
+		void clear();
+		
+		//-----------------------------------
+		//  DATA MEMBERS
+		//-----------------------------------
+		
+	private:
+		
+		std::map<std::string,int> intAttrMap;
+		std::map<std::string,double> doubleAttrMap;
+		
+	};
 	
-  int intVal(const std::string attName, int val);
-  double doubleVal(const std::string attName, double val);
-
-  //returns 0 if there is no attribute associated with this name
-  int hasIntAttribute(const std::string attName);
-  int hasDoubleAttribute(const std::string attName);
-
-  void getIntAttributeNames(std::vector<std::string>& names);
-  void getDoubleAttributeNames(std::vector<std::string>& names);
-
-	//add all atributes from one bucket to another
-	void add(AttributesBucket* bckt);
-
-	//removes all values
-	void clear();
-
-  //-----------------------------------
-  //  DATA MEMBERS
-  //-----------------------------------
-
-private:
-
-  std::map<std::string,int> intAttrMap;
-  std::map<std::string,double> doubleAttrMap;
-
 };
-
 ///////////////////////////////////////////////////////////////////////////
 //
 // END OF FILE

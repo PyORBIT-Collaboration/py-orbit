@@ -160,7 +160,7 @@ public:
 
   //methods for the bunch attributes
   //user will get the reference and can use it
-  AttributesBucket* getBunchAttributes();
+  OrbitUtils::AttributesBucket* getBunchAttributes();
   double getBunchAttributeDouble(const std::string att_name);
   int getBunchAttributeInt(const std::string att_name);
   void setBunchAttribute(const std::string att_name, double att_val);
@@ -255,7 +255,7 @@ protected:
   std::set<ParticleAttributes*> attrCntrSet;
 
   //bunch attributes
-  AttributesBucket* bunchAttr;
+  OrbitUtils::AttributesBucket* bunchAttr;
 
 
 	//synch. particle

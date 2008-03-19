@@ -120,8 +120,9 @@ void drifti(Bunch* bunch, int i, double length){
 
 	SyncPart* syncPart = bunch->getSyncPart();
 
-	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
-	double dp_p = (arr[i][5] / syncPart->getMomentum()) * syncPart->getGamma();
+	double gamma = syncPart->getGamma();
+	double gamma2i = 1.0 / (gamma*gamma);
+	double dp_p = (arr[i][5] / syncPart->getMomentum()) * gamma;
 
 	KNL = 1.0 / (1.0 + dp_p);
 	px = arr[i][1];

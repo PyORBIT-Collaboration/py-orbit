@@ -17,6 +17,8 @@
 #include "wrap_mpi_datatype.hh"
 #include "wrap_mpi_op.hh"
 
+using namespace OrbitUtils;
+
 /** The namespace for the python wrappers around MPI functions. */
 namespace wrap_orbit_mpi{
 	

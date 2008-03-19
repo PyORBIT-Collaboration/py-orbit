@@ -24,6 +24,7 @@ extern "C" {
 
   namespace wrap_orbit_bunch{
     void initbunch(void);
+		PyObject* getBunchType(char* name);
   }
 
 #ifdef __cplusplus

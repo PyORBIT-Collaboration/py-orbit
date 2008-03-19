@@ -1,8 +1,11 @@
+#include "orbit_mpi.hh"
+
 #include "MatrixOperations.hh"
+#include "BufferStore.hh"
 
 #include <cmath>
 
-#include "BufferStore.hh"
+using namespace OrbitUtils;
 
 int MatrixOperations::invert(double **a, int n){
 	
@@ -73,5 +76,77 @@ int MatrixOperations::invert(double **a, int n){
 	BufferStore::getBufferStore()->setUnusedIntArr(buff_index1);
 	BufferStore::getBufferStore()->setUnusedIntArr(buff_index2);
 	return 1;
+}
+
+int MatrixOperations::invert(Matrix* matrix){
+	if(matrix->rows() != matrix->columns()){
+		return 0;
+	}
+	return MatrixOperations::invert(matrix->getArray(),matrix->rows());
+}
+
+int MatrixOperations::mult(PhaseVector* v, Matrix* mtrx, PhaseVector* v_res){
+	int n = mtrx->rows();
+	int m = mtrx->columns();	
+	if(v->size() != n || v_res->size() != m){
+		ORBIT_MPI_Finalize("MatrixOperations:You try to multiply PhaseVector by Matrix with wrong size.");
+		return 0;
+	}
+	double* vArr = v->getArray();
+	double** arr = mtrx->getArray();
+	double* vArr_res = v_res->getArray();	
+	for(int i = 0; i < m; i++){
+		vArr_res[i] = 0.;
+		for(int j = 0; j < n; j++){
+			vArr_res[i] += vArr[j]*arr[j][i];
+		}
+	}
+	return 1;;
+}
+
+int MatrixOperations::mult(Matrix* mtrx, PhaseVector* v, PhaseVector* v_res){
+	int n = mtrx->rows();
+	int m = mtrx->columns();
+	if(v->size() != m || v_res->size() != n){
+		ORBIT_MPI_Finalize("MatrixOperations:You try to multiply Matrix by PhaseVector with wrong size.");
+		return 0;
+	}
+	double* vArr = v->getArray();
+	double** arr = mtrx->getArray();
+	double* vArr_res = v_res->getArray();	
+	for(int i = 0; i < n; i++){
+		vArr_res[i] = 0.;
+		for(int j = 0; j < m; j++){
+			vArr_res[i] += arr[i][j]*vArr[j];
+		}
+	}
+	return 1;
+}
+
+void MatrixOperations::track(Bunch* bunch,Matrix* mtrx){
+	int n = mtrx->rows();
+	int m = mtrx->columns();
+	if( n != m || (m != 6 && m != 7)){
+		ORBIT_MPI_Finalize("MatrixOperations:track(Bunch,Matrix) - Matrix has a wrong size.");
+	}
+	double tmp[5];
+	double** bunch_arr = bunch->coordArr();
+	double** arr = mtrx->getArray();
+	for(int ip = 0, nParts = bunch->getSize(); ip < nParts; ip++){
+		for(int i = 0; i < 6; i++){
+			tmp[i] = 0.;
+			for(int j = 0; j < 6; j++){
+				tmp[i] += arr[i][j]*bunch_arr[ip][j];
+			}
+		}
+		for(int i = 0; i < 6; i++){
+			bunch_arr[ip][i] = tmp[i];
+		}
+		if(n == 7){
+			for(int i = 0; i < 6; i++){
+				bunch_arr[ip][i] += arr[i][6];
+			}
+		}
+	}
 }
 

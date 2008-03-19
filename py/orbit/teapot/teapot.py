@@ -34,8 +34,8 @@ class TEAPOT_Lattice(AccLattice):
 	The subclass of the AccLattice class. Shell class for the TEAPOT nodes collection.
 	TEAPOT has the ability to read MAD files.
 	"""
-	def __init__(self):
-		AccLattice.__init__(self)
+	def __init__(self, name = "no name"):
+		AccLattice.__init__(self,name)
 
 	def readMAD(self, mad_file_name, lineName):
 		"""

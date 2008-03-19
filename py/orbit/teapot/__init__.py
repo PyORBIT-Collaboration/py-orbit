@@ -18,7 +18,7 @@ from teapot import TiltTEAPOT
 from teapot import TPB
 
 __all__ = []
-__all__.append("TEAPOT")
+__all__.append("TEAPOT_Lattice")
 __all__.append("BaseTEAPOT")
 __all__.append("DriftTEAPOT")
 __all__.append("BendTEAPOT")

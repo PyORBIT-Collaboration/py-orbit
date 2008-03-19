@@ -25,6 +25,8 @@
 
 #include "BufferStore.hh"
 
+using namespace OrbitUtils;
+
 BufferStore* BufferStore::bStore = NULL;
 
 BufferStore::BufferStore()

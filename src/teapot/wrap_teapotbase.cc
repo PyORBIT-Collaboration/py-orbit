@@ -6,6 +6,7 @@
 #include "teapotbase.hh"
 
 #include "wrap_teapotbase.hh"
+#include "wrap_matrix_generator.hh"
 
 namespace wrap_teapotbase{
 
@@ -426,9 +427,17 @@ extern "C" {
     d = PyModule_GetDict(m);
 
 		teapot_base::init_factorial();
+		wrap_teapotbase_matrix_generator::initMatrixGenerator(m);
   }
 
-
+	PyObject* getBaseTEAPOTType(char* name){
+		PyObject* mod = PyImport_ImportModule("teapot_base");
+		PyObject* pyType = PyObject_GetAttrString(mod,name);
+		Py_DECREF(mod);
+		Py_DECREF(pyType);
+		return pyType;
+	}
+	
 #ifdef __cplusplus
 }
 #endif

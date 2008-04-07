@@ -9,6 +9,7 @@ class _possibleElementType:
 	def __init__(self):
 		self.__names_type = []
 		self.__names_type.append("MARK")
+		self.__names_type.append("MONI")
 		self.__names_type.append("DRIFT")
 		self.__names_type.append("APERT")
 		self.__names_type.append("BEND")
@@ -426,27 +427,23 @@ class StringFunctions:
 
 	def findLastBracketPos(self,line,nPos,nOpen):
 		""" The method will find a last closing bracket. """
-		nPos = nPos + 1
-		if(line[(nPos-1):nPos] == "("):
+		for ip in xrange(nPos,len(line)):
+			if(line[ip] == "("):
 				nOpen = nOpen + 1
-		if(line[(nPos-1):nPos] == ")"):
+			if(line[ip] == ")"):
 				nOpen = nOpen - 1
-		if(nOpen == 0):
-				return (nPos-1)
-		if(len(line) == nPos):
-				return -1
-		return 	self.findLastBracketPos(line,nPos,nOpen)
+			if(nOpen == 0):
+				return ip
+		return -1
 
 	findLastBracketPos = classmethod(findLastBracketPos)
 
 	def findFirstBracketPos(self,line,nPos):
-		""" The method will find a last openning bracket. """
-		nPos = nPos + 1
-		if(line[(nPos-1):nPos] == "("):
-				return (nPos-1)
-		if(len(line) == nPos):
-				return -1
-		return 	self.findFirstBracketPos(line,nPos)
+		""" The method will find a first openning bracket. """
+		for ip in xrange(nPos,len(line)):
+			if(line[ip] == "("):
+				return ip
+		return -1
 
 	findFirstBracketPos = classmethod(findFirstBracketPos)
 
@@ -489,7 +486,7 @@ class SAD_Parser:
 		fileName = os.path.basename(SADfileName)
 		#the initilize can be recursive if there are nested SAD files
 		self.__init__()
-		self.initilize(fileName)
+		self.initialize(fileName)
 
 		#-----------------------------------------------------------
 		#The SADLines has all lines
@@ -642,30 +639,30 @@ class SAD_Parser:
 				else:
 					lattLine.addItem(lattLineDict[child], sign)
 
-	def initilize(self,SAD_file_name):
+	def initialize(self,SAD_file_name):
 		""" This method will do the preliminary editing the input file."""
 		fl = open(os.path.join(self.__SADFilePath, SAD_file_name))
 		sad_strings = []
 		str_local = ""
 		for str_in in fl.readlines():
 			#check if the line is a comment
-			str = ""
+			str0 = ""
 			if(str_in.find("!") == 0):
 				continue
 			if(str_in.find("!") > 0):
-				str = str_in[0:str_in.find("!")].strip()
+				str0 = str_in[0:str_in.find("!")].strip()
 			else:
-				str = str_in.strip()
-			if(str.rfind(";") >= 0):
-				str_local = str_local + str
+				str0 = str_in.strip()
+			if(str0.rfind(";") >= 0):
+				str_local = str_local + " " + str0
 				strs = re.compile(r'([^;]*);{1,1}').findall(str_local)
-				for str in strs:
-					str = str.strip()
-					if(len(str) > 0):
-						sad_strings.append(str.expandtabs(1))
+				for str1 in strs:
+					str1 = str1.strip()
+					if(len(str1) > 0):
+						sad_strings.append(str1.expandtabs(1))
 				str_local = ""
 			else:
-				str_local = str_local + " " + str
+				str_local = str_local + " " + str0
 		#--------------------------------------------
 		"""
 		#debug printing the input file after initial modifications
@@ -677,14 +674,14 @@ class SAD_Parser:
 		fl.close()
 		# the sad_strings list should be transformed to
 		# the list of _SAD_String with types
-		for str in sad_strings:
+		for str0 in sad_strings:
 			#check if it is a line
-			type_name = re.compile(r'\A\s*(\S*)\s*').findall(str)
+			type_name = re.compile(r'\A\s*(\S*)\s*').findall(str0)
 			if(len(type_name) == 1 and type_name[0].upper() == "LINE"):
 				#find the first line name
-				name = re.compile(r'\A\s*\S+\s+(\S+)\s*={1,1}').findall(str)[0]
+				name = re.compile(r'\A\s*\S+\s+(\S+)\s*={1,1}').findall(str0)[0]
 				#cut the LINE from the beggining of the string
-				str_rest = str[str.find(name):]
+				str_rest = str0[str0.find(name):]
 				while(str_rest != None and len(str_rest) > 0):
 					#loop through all lines NAME = (...)
 					(ind0,ind1) = StringFunctions.findBracketsPos(str_rest)
@@ -696,32 +693,32 @@ class SAD_Parser:
 					str_rest = str_rest[ind1+1:].strip()
 				continue
 			#check if it is element - str = TYPE NAME =
-			type_name = re.compile(r'\A\s*(\S+)\s+\S+\s*={1,1}').findall(str)
+			type_name = re.compile(r'\A\s*(\S+)\s+\S+\s*={1,1}').findall(str0)
 			if(len(type_name) == 1 and self._typeChecker.checkType(type_name[0]) != None):
-				type = self._typeChecker.checkType(type_name[0])
+				type0 = self._typeChecker.checkType(type_name[0])
 				#find the first line name
-				name = re.compile(r'\A\s*\S+\s+(\S+)\s*={1,1}').findall(str)[0]
+				name = re.compile(r'\A\s*\S+\s+(\S+)\s*={1,1}').findall(str0)[0]
 				#cut the LINE from the beggining of the string
-				str_rest = str[str.find(name):]
+				str_rest = str0[str0.find(name):]
 				while(str_rest != None and len(str_rest) > 0):
 					#loop through all lines NAME = (...)
 					(ind0,ind1) = StringFunctions.findBracketsPos(str_rest)
 					if(ind0 < 0 or ind1 < 0): break
 					sadString = _SAD_String()
-					sadString.setLine(type+" "+str_rest[0:ind1+1])
+					sadString.setLine(type0+" "+str_rest[0:ind1+1])
 					sadString.setType(_element.getType())
 					self.__SAD_Strings.append(sadString)
 					str_rest = str_rest[ind1+1:].strip()
 				continue
 			#check the valriables
-			name = re.compile(r'\A\s*(\S+)\s*={1,1}.*').findall(str)
+			name = re.compile(r'\A\s*(\S+)\s*={1,1}.*').findall(str0)
 			if(len(name) == 1):
 				sadString = _SAD_String()
-				sadString.setLine(str)
+				sadString.setLine(str0)
 				sadString.setType(_variable.getType())
 				self.__SAD_Strings.append(sadString)
 				continue
-			self.__unknownLines.append(str)
+			self.__unknownLines.append(str0)
 			continue
 		#--------------------------------------------
 		#SADLine list is ready for sorting according

@@ -1,5 +1,6 @@
 DIRS  = 
 DIRS += ./ecloud
+DIRS += ./tracker3dfield
 
 #========rules=========================
 

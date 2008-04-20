@@ -38,7 +38,7 @@ PYTHON_ROOT_INC	- location of the python header files.
 
 PYTHONPATH	- should be modified to include access to the ORBIT
 		  python modules:
-		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py
+		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py:${ORBIT_ROOT}/modules
 
 ORBIT_ARCH	- architecture of the system. At present it is LINUX only.
 

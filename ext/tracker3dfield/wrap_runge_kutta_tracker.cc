@@ -8,6 +8,7 @@
 #include "RungeKuttaTracker.hh"
 
 using namespace Tracker3DField;
+using namespace OrbitUtils;
 
 namespace wrap_tracker3dfield{
 
@@ -28,6 +29,7 @@ extern "C" {
 		pyORBIT_Object* self;
 		self = (pyORBIT_Object *) type->tp_alloc(type, 0);
 		self->cpp_obj = NULL;
+		//std::cerr<<"The RungeKuttaTracker new has been called!"<<std::endl;
 		return (PyObject *) self;
 	}
 
@@ -39,6 +41,7 @@ extern "C" {
 			error("PyRungeKuttaTracker - RungeKuttaTracker(length[m]) - constructor needs a parameter.");
 		}
 		self->cpp_obj = new RungeKuttaTracker(length);
+		//std::cerr<<"The RungeKuttaTracker __init__ has been called!"<<std::endl;
 		return 0;
   }
 

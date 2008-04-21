@@ -184,6 +184,10 @@ public:
 	int getMPI_Size();
 	int getMPI_Rank();
 
+	//returns and sets the reference to the python wrapper of Bunch class
+	PyObject* getPyWrapper();
+	void setPyWrapper(PyObject* py_wrapperIn);
+	
 protected:
 
   //Initializes the different data that are the same for the all bunches.
@@ -267,6 +271,10 @@ protected:
   int size_MPI;
 
 	pyORBIT_MPI_Comm* pyComm_Local;
+	
+	//reference to the python wrapping class instance
+	PyObject* py_wrapper;
+	
 };
 
 ///////////////////////////////////////////////////////////////////////////

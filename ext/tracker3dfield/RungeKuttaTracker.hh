@@ -71,7 +71,7 @@ namespace Tracker3DField{
 		void getExitPlane(double& a, double& b, double& c, double& d);
 		
 		/** It tracks the bunch. The external effects instance could be NULL. */
-		void trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, ExternalEffects* extEff);
+		void trackBunch(Bunch* bunch, OrbitUtils::BaseFieldSource* fieldSource, ExternalEffects* extEff);
 		
 		
 	private:

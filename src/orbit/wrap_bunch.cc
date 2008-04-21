@@ -37,9 +37,9 @@ namespace wrap_orbit_bunch{
   //this is implementation of the __init__ method
   static int Bunch_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
     //std::cerr<<"The Bunch __init__ has been called!"<<std::endl;
-
 		//instantiation of a new c++ Bunch
 		self->cpp_obj = (void*) new Bunch();
+		((Bunch*) self->cpp_obj)->setPyWrapper((PyObject*) self);
 		//This is the way to create new class instance from the C-level
 		// Template: PyObject* PyObject_CallMethod(	PyObject *o, char *method, char *format, ...)
 		//see Python/C API documentation

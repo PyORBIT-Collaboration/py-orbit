@@ -21,7 +21,7 @@
 #include <cstdlib>
 
 using namespace Tracker3DField;
-
+using namespace OrbitUtils;
 		
 RungeKuttaTracker::RungeKuttaTracker(double length){
 	
@@ -128,6 +128,13 @@ void RungeKuttaTracker::getExitPlane(double& a, double& b, double& c, double& d)
 
 /** It tracks the bunch. The external effects instance could be NULL. */
 void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, ExternalEffects* extEff){
+	
+	double x = 2. ,y = 2., z = 2. , t = 3.;
+	double fx,fy,fz;
+	fieldSource->getElectricField(x,y,z,t,fx,fy,fz);
+	std::cerr<<"debug Electr. field ="<< fx <<" "<< fy <<" "<< fz <<std::endl;
+  fieldSource->getMagneticField(x,y,z,t,fx,fy,fz);
+	std::cerr<<"debug Magnet. field ="<< fx <<" "<< fy <<" "<< fz <<std::endl;
 }
 
 //--------------------------------------------------

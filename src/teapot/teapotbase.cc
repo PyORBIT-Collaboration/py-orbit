@@ -1654,9 +1654,7 @@ void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage,
 	if(phase_s != 0.){
 		double kin_e = syncPart->getEnergy();
 		kin_e = kin_e + coeff * voltage * sin(phase_s);
-		syncPart->setPX(0.);
-		syncPart->setPY(0.);
-		syncPart->setPZ(syncPart->energyToMomentum(kin_e));
+		syncPart->setMomentum(syncPart->energyToMomentum(kin_e));
 	}
 
 	//coordinate array [part. index][x,xp,y,yp,z,dE]

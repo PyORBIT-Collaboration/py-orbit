@@ -313,6 +313,7 @@ void Bunch::copyEmptyBunchTo(Bunch* bunch){
 	target->setTime(source->getTime());
 	target->setXYZ(source->getX(),source->getY(),source->getZ());
 	target->setPXYZ(source->getPX(),source->getPY(),source->getPZ());
+	target->setNormalX(source->getNormalXX(),source->getNormalXY(),source->getNormalXZ());
 
 	//copy particles attributes
 	bunch->removeAllParticleAttributes();

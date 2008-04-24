@@ -34,8 +34,11 @@
 #include <vector>
 
 #include "ParticleAttributes.hh"
-#include "AttributesBucket.hh"
 #include "SyncPart.hh"
+
+//from utils
+#include "AttributesBucket.hh"
+#include "CppPyWrapper.hh"
 
 using namespace std;
 
@@ -48,7 +51,7 @@ using namespace std;
 //
 ///////////////////////////////////////////////////////////////////////////
 
-class  Bunch
+class  Bunch: public OrbitUtils::CppPyWrapper
 {
 public:
   //--------------------------------------
@@ -183,10 +186,6 @@ public:
 	void setMPI_Comm_Local(pyORBIT_MPI_Comm* pyComm_Local);
 	int getMPI_Size();
 	int getMPI_Rank();
-
-	//returns and sets the reference to the python wrapper of Bunch class
-	PyObject* getPyWrapper();
-	void setPyWrapper(PyObject* py_wrapperIn);
 	
 protected:
 

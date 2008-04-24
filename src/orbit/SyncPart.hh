@@ -10,7 +10,10 @@
 //    12/14/2005
 //
 // DESCRIPTION
-//    Specification and inline functions for a  synchronous macro-particle
+//    Specification and inline functions for a  synchronous macro-particle.
+//    The synchronous particle bears the coordinate system with z-axis 
+//    directing along pz vector, and x-axis perpendicular to z. The y-axis
+//    ort direction is defined as ny = [nz*nx].
 //
 //
 ///////////////////////////////////////////////////////////////////////////
@@ -91,11 +94,20 @@ class  SyncPart
 	void setPX(double px);
 	void setPY(double py);
 	void setPZ(double pz);
+	void setMomentum(double p);
 	double getPX();
 	double getPY();
 	double getPZ();
 	double getMomentum();
 
+	/**
+	  normal unit vector of x-axis
+	*/
+	void setNormalX(double x, double y, double z);
+	double getNormalXX();
+	double getNormalXY();
+	double getNormalXZ();
+	
 	double getBeta();
 	double getGamma();
 
@@ -144,6 +156,10 @@ private:
 	//position [m] and momentum [GeV/c]
 	double xyz[3];
 	double pxyz[3];
+	
+	//vector of local x-axis
+	double x_normal[3];
+	
 };
 
 ///////////////////////////////////////////////////////////////////////////

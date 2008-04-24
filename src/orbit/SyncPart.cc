@@ -12,6 +12,10 @@
 // DESCRIPTION
 //    Source code for the synchronous particle class. It keeps info
 //    about energy, momentum etc. of the synchronous macro-particle
+//    The synchronous particle bears the coordinate system with z-axis 
+//    directing along pz vector, and x-axis perpendicular to z. The y-axis
+//    ort direction is defined as ny = [nz*nx].
+//
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -86,6 +90,10 @@ void SyncPart::init()
 	pxyz[0] = 0.;
 	pxyz[1] = 0.;
 	pxyz[2] = 0.;
+	
+	x_normal[0] = 1.;
+	x_normal[1] = 0.;
+	x_normal[2] = 0.;
 }
 
 // Kinetic energy in GeV
@@ -123,6 +131,20 @@ void SyncPart::setY(double y){
 
 void SyncPart::setZ(double z){
 	this->xyz[2] = z;
+}
+
+void SyncPart::setMomentum(double p){
+	if(p_abs == 0.){
+		this->pxyz[0] = 0.;
+		this->pxyz[1] = 0.;
+		this->pxyz[2] = p;
+	} else {
+		double coef = p/p_abs;
+		this->pxyz[0] = coef*this->pxyz[0];
+		this->pxyz[1] = coef*this->pxyz[1];
+		this->pxyz[2] = coef*this->pxyz[2];
+	}
+	updateKinematics();
 }
 
 double SyncPart::getX(){
@@ -190,9 +212,60 @@ double SyncPart::getGamma(){
 	return gamma;
 }
 
+void SyncPart::setNormalX(double x, double y, double z){
+	x_normal[0] = x;
+	x_normal[1] = y;
+	x_normal[2] = z;	
+	updateKinematics();
+}
+
+double SyncPart::getNormalXX(){
+	return x_normal[0];
+}
+	
+double SyncPart::getNormalXY(){
+	return x_normal[1];
+}
+	
+double SyncPart::getNormalXZ(){
+	return x_normal[2];
+}
+
 void SyncPart::updateKinematics(){
 	double p2 = pxyz[0]*pxyz[0]+pxyz[1]*pxyz[1]+pxyz[2]*pxyz[2];
 	p_abs = sqrt(p2);
+	if(p_abs != 0.){
+		int iter = 0;
+		double x_normal_abs = 0.;
+		do {
+			if(iter >= 1){
+				x_normal[0] = x_normal[0] + iter*1.0;
+				if((iter % 2) == 0) x_normal[1] = x_normal[1] + iter*1.0;
+				if((iter % 3) == 0) x_normal[2] = x_normal[2] + iter*1.0;
+			}
+			double coef = x_normal[0]*pxyz[0] + x_normal[1]*pxyz[1] + x_normal[2]*pxyz[2];
+			coef = coef/p2;
+			x_normal[0] = x_normal[0] - coef*pxyz[0];
+			x_normal[1] = x_normal[1] - coef*pxyz[1];
+			x_normal[2] = x_normal[2] - coef*pxyz[2];
+			x_normal_abs = sqrt(x_normal[0]*x_normal[0] + x_normal[1]*x_normal[1] + x_normal[2]*x_normal[2]);
+			iter = iter + 1;
+		} while(x_normal_abs == 0.);
+		x_normal[0] = x_normal[0]/x_normal_abs;
+		x_normal[1] = x_normal[1]/x_normal_abs;
+		x_normal[2] = x_normal[2]/x_normal_abs;
+	} else {
+		double x_normal_abs = sqrt(x_normal[0]*x_normal[0] + x_normal[1]*x_normal[1] + x_normal[2]*x_normal[2]);
+		if(x_normal_abs == 0.){
+			x_normal[0] = 1.;
+			x_normal[1] = 0.;
+			x_normal[2] = 0.;
+		} else {
+			x_normal[0] = x_normal[0]/x_normal_abs;
+			x_normal[1] = x_normal[1]/x_normal_abs;
+			x_normal[2] = x_normal[2]/x_normal_abs;
+		}
+	}
 	double m = bunch->getMass();
 	double m2 = m*m;
 	double w2 = m2+p2;
@@ -284,7 +357,8 @@ void SyncPart::readSyncPart(const char* fileName){
           int nT = StringUtils::Tokenize(str,v_str);
           if(nT > 5 &&
 						( v_str[1] == "SYNC_PART_COORDS" ||
-							v_str[1] == "SYNC_PART_MOMENTUM" )
+							v_str[1] == "SYNC_PART_MOMENTUM" || 
+							v_str[1] == "SYNC_PART_X_AXIS" )
 						){
             def_found_ind = 1;
           }
@@ -344,6 +418,18 @@ void SyncPart::readSyncPart(const char* fileName){
 				setPXYZ(val_arr);
       }
 
+			//set x-axis ort
+      if(v_str.size() > 5 && v_str[1] == "SYNC_PART_X_AXIS"){
+        double val_arr[3];
+				val_arr[0] = 0.;
+				val_arr[1] = 0.;
+				val_arr[2] = 0.;
+        sscanf( v_str[3].c_str(),"%lf",&val_arr[0]);
+				sscanf( v_str[4].c_str(),"%lf",&val_arr[1]);
+				sscanf( v_str[5].c_str(),"%lf",&val_arr[2]);
+				setNormalX(val_arr[0],val_arr[1],val_arr[2]);
+      }
+			
 			//set time
       if(v_str.size() > 3 && v_str[1] == "SYNC_PART_TIME"){
         double val = 0.;
@@ -393,6 +479,14 @@ void SyncPart::print(std::ostream& Out)
 		Out << getPY()  <<" ";
 		Out << getPZ()  <<" ";
 		Out <<" px, py, pz momentum component in GeV/c";
+    Out << std::endl;
+
+    //print x-axis ort
+    Out << "%  SYNC_PART_X_AXIS ";
+		Out << getNormalXX()  <<" ";
+		Out << getNormalXY()  <<" ";
+		Out << getNormalXZ()  <<" ";
+		Out <<" nxx, nxy, pxz - x-axis ort coordinates";
     Out << std::endl;
 
     //print energy

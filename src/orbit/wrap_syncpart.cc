@@ -86,7 +86,7 @@ extern "C" {
         }
         SyncPart* cpp_SyncPart = (SyncPart*) pySyncPart->cpp_obj;
 				val = cpp_SyncPart->energyToMomentum(val);
-        cpp_SyncPart->setPXYZ(0.,0.,val);
+        cpp_SyncPart->setMomentum(val);
 				val = cpp_SyncPart->momentumToEnergy(val);
       }
 			return Py_BuildValue("d",val);
@@ -147,7 +147,7 @@ extern "C" {
           error("PySyncPart - momentum(value) - a new value are needed");
         }
         SyncPart* cpp_SyncPart = (SyncPart*) pySyncPart->cpp_obj;
-        cpp_SyncPart->setPXYZ(0.,0.,val);
+        cpp_SyncPart->setMomentum(val);
       }
 			return Py_BuildValue("d",val);
     }
@@ -158,7 +158,106 @@ extern "C" {
     return Py_None;
   }
 
-
+  //  Sets or returns the momentum vector as a Tuple
+	//  for the SyncPart object the action is depended on 
+	//  the number of arguments
+  //  pVector() - returns Tuple (px,py,pz)
+  //  pVector((px,py,pz)) - sets the new value for momentum vector
+  static PyObject* SyncPart_pVector(PyObject *self, PyObject *args){
+    //if nVars == 0 this is get momentum vector
+    //if nVars == 1 this is set momentum vector
+    int nVars = PyTuple_Size(args);
+		SyncPart* cpp_SyncPart = (SyncPart*) ((pyORBIT_Object*) self)->cpp_obj;
+    if(nVars == 0 ||  nVars == 1){
+      if(nVars == 0){
+				double px = cpp_SyncPart->getPX();
+				double py = cpp_SyncPart->getPY();
+				double pz = cpp_SyncPart->getPZ();
+        return Py_BuildValue("(ddd)",px,py,pz);
+      }
+      else{
+				PyObject* pyVect = PyTuple_GetItem(args,0);
+				double px = 0.,py = 0.,pz = 0.;
+        if(!PyArg_ParseTuple(pyVect,"ddd:pVector",&px,&py,&pz)){
+          error("PySyncPart - pVector(((px,py,pz)) - a tuple (px,py,pz) needed");
+        }
+				cpp_SyncPart->setPXYZ(px,py,pz);
+      }
+    }
+    else{
+      error("PySyncPart. You should call pVector() or pVector((px,py,pz))");
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+  }	
+	
+  //  Sets or returns the position vector as a Tuple
+	//  for the SyncPart object the action is depended on 
+	//  the number of arguments
+  //  rVector() - returns Tuple (x,y,z)
+  //  rVector((x,y,z)) - sets the new value for position vector
+  static PyObject* SyncPart_rVector(PyObject *self, PyObject *args){
+    //if nVars == 0 this is get position vector
+    //if nVars == 1 this is set position vector
+    int nVars = PyTuple_Size(args);
+		SyncPart* cpp_SyncPart = (SyncPart*) ((pyORBIT_Object*) self)->cpp_obj;
+    if(nVars == 0 ||  nVars == 1){
+      if(nVars == 0){
+				double x = cpp_SyncPart->getX();
+				double y = cpp_SyncPart->getY();
+				double z = cpp_SyncPart->getZ();
+        return Py_BuildValue("(ddd)",x,y,z);
+      }
+      else{
+				PyObject* pyVect = PyTuple_GetItem(args,0);
+				double x = 0., y = 0., z = 0.;
+        if(!PyArg_ParseTuple(pyVect,"ddd:rVector",&x,&y,&z)){
+          error("PySyncPart - rVector(((x,y,z)) - a tuple (x,y,z) needed");
+        }
+				cpp_SyncPart->setXYZ(x,y,z);
+      }
+    }
+    else{
+      error("PySyncPart. You should call rVector() or rVector((x,y,z))");
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+  }	
+	
+	
+  //  Sets or returns the nX axis vector as a Tuple
+	//  for the SyncPart object the action is depended on 
+	//  the number of arguments
+  //  nxVector() - returns Tuple (nxx,nxy,nxz)
+  //  nxVector((x,y,z)) - sets the new value for nx axis vector
+  static PyObject* SyncPart_nxVector(PyObject *self, PyObject *args){
+    //if nVars == 0 this is get nx axis vector
+    //if nVars == 1 this is set nx axis vector
+    int nVars = PyTuple_Size(args);
+		SyncPart* cpp_SyncPart = (SyncPart*) ((pyORBIT_Object*) self)->cpp_obj;
+    if(nVars == 0 ||  nVars == 1){
+			double x = 0.,y = 0.,z = 0.;
+      if(nVars == 0){
+				x = cpp_SyncPart->getNormalXX();
+				y = cpp_SyncPart->getNormalXY();
+				z = cpp_SyncPart->getNormalXZ();
+        return Py_BuildValue("(ddd)",x,y,z);
+      }
+      else{
+				PyObject* pyVect = PyTuple_GetItem(args,0);
+        if(!PyArg_ParseTuple(pyVect,"ddd:nxVector",&x,&y,&z)){
+          error("PySyncPart - nxVector(((x,y,z)) - a tuple (x,y,z) needed");
+        }
+				cpp_SyncPart->setNormalX(x,y,z);
+      }
+    }
+    else{
+      error("PySyncPart. You should call nxVector() or nxVector((x,y,z))");
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+  }		
+	
  //Sets or returns the time in seconds for the SyncPart object
   //  the action is depended on the number of arguments
   //  time() - returns time in seconds
@@ -427,7 +526,7 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef SyncPartClassMethods[] = {
     { "mass",       SyncPart_mass      ,METH_VARARGS,"Returns mass in GeV"},
-    { "momentum",   SyncPart_momentum  ,METH_VARARGS,"Returns or sets momentum in GeV/c. If setting px=0,py=0,pz=val."},
+    { "momentum",   SyncPart_momentum  ,METH_VARARGS,"Returns or sets momentum in GeV/c."},
     { "beta",       SyncPart_beta      ,METH_VARARGS,"Returns beta=v/c"},
 		{ "gamma",      SyncPart_gamma     ,METH_VARARGS,"Returns gamma=1/sqrt(1-(v/c)**2)"},
 		{ "kinEnergy",  SyncPart_kinEnergy ,METH_VARARGS,"Returns or sets kinetic energy of the synchronous particle in MeV"},
@@ -438,6 +537,9 @@ extern "C" {
 		{ "px",		      SyncPart_px        ,METH_VARARGS,"Sets or returns the x-momentum"},
 		{ "py",		      SyncPart_py        ,METH_VARARGS,"Sets or returns the y-momentum"},
 		{ "pz",		      SyncPart_pz        ,METH_VARARGS,"Sets or returns the z-momentum"},
+		{ "pVector",    SyncPart_pVector   ,METH_VARARGS,"Sets or returns the momentum vector as a tuple"},		
+		{ "rVector",    SyncPart_rVector   ,METH_VARARGS,"Sets or returns the position vector as a tuple"},		
+		{ "nxVector",		SyncPart_nxVector  ,METH_VARARGS,"Sets or returns the x-axis vector as a tuple"},		
 		{ "energyToMomentum",  SyncPart_eToP  ,METH_VARARGS,"Transforms the kinetic energy to momentum"},
 		{ "momentumToEnergy",  SyncPart_pToE  ,METH_VARARGS,"Transforms the momentum to kinetic energy"},
     {NULL}

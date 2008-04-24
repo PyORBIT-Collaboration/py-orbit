@@ -35,7 +35,7 @@ using namespace OrbitUtils;
 //   Constructor and Desctructor
 ///////////////////////////////////////////////////////////////////////////
 
-Bunch::Bunch()
+Bunch::Bunch(): CppPyWrapper(NULL)
 {
 
   //initialization all necessary variables and attributes
@@ -1582,11 +1582,4 @@ int Bunch::getMPI_Rank(){
 	return rank_MPI;
 }
 
-void Bunch::setPyWrapper(PyObject* py_wrapperIn){
-	py_wrapper = py_wrapperIn;
-}
-
-PyObject* Bunch::getPyWrapper(){
-	return py_wrapper;
-}
 

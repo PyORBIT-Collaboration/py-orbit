@@ -26,9 +26,8 @@
 
 using namespace OrbitUtils;
 
-PyBaseFieldSource::PyBaseFieldSource(PyObject* py_wrapperIn)
+PyBaseFieldSource::PyBaseFieldSource(PyObject* py_wrapperIn): CppPyWrapper(py_wrapperIn)
 {
-	py_wrapper = py_wrapperIn;
 }
 
 PyBaseFieldSource::~PyBaseFieldSource()
@@ -37,7 +36,8 @@ PyBaseFieldSource::~PyBaseFieldSource()
 
 void PyBaseFieldSource::getElectricField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z)
 {	  
-  	PyObject* ef_tuple = PyObject_CallMethod(py_wrapper,"getElectricField","dddd",x,y,z,t);
+	  PyObject* py_wrp = getPyWrapper();
+  	PyObject* ef_tuple = PyObject_CallMethod(py_wrp,"getElectricField","dddd",x,y,z,t);
     if(!PyArg_ParseTuple(	ef_tuple,"ddd:electric_field",&f_x,&f_y,&f_z)){
       ORBIT_MPI_Finalize("PyBaseFieldSource - getElectricField(x,y,z,t0 method does not work!");
     }	
@@ -47,7 +47,8 @@ void PyBaseFieldSource::getElectricField(double x, double y, double z, double t,
 
 void PyBaseFieldSource::getMagneticField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z)
 {
-  	PyObject* ef_tuple = PyObject_CallMethod(py_wrapper,"getMagneticField","dddd",x,y,z,t);
+	  PyObject* py_wrp = getPyWrapper();
+  	PyObject* ef_tuple = PyObject_CallMethod(py_wrp,"getMagneticField","dddd",x,y,z,t);
     if(!PyArg_ParseTuple(	ef_tuple,"ddd:electric_field",&f_x,&f_y,&f_z)){
       ORBIT_MPI_Finalize("PyBaseFieldSource - getElectricField(x,y,z,t0 method does not work!");
     }	
@@ -55,6 +56,3 @@ void PyBaseFieldSource::getMagneticField(double x, double y, double z, double t,
 		Py_DECREF(ef_tuple);
 }
 
-PyObject* PyBaseFieldSource::getPyWrapper(){
-	return py_wrapper;
-}

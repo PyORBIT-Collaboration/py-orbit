@@ -25,10 +25,11 @@
 #include "Python.h"
 
 #include "BaseFieldSource.hh"
+#include "CppPyWrapper.hh"
 
 namespace OrbitUtils{
 	
-	class  PyBaseFieldSource: public BaseFieldSource
+	class  PyBaseFieldSource: public BaseFieldSource, CppPyWrapper
 	{
 		public:
 		
@@ -37,12 +38,6 @@ namespace OrbitUtils{
 		
 			void getElectricField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z);
 			void getMagneticField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z);
-		
-			PyObject* getPyWrapper();
-			
-			private:
-				
-				PyObject* py_wrapper;
 
 	};
 };

@@ -89,7 +89,13 @@ namespace Tracker3DField{
 		int isBeforeExit(double* r);
 		int isBeforeExit(double x, double y, double z);
 		
-		
+		//calculates ff_vct[6] - right side of ODE system
+		//d(r)/d(t) = c*p/sqrt(p^2+m^2)
+		//d(p)/d(t) = (c*E + c*q*[pxB]/sqrt(p^2+m^2))/(10^9)
+		//p and m in GeV/c and GeV, c in [m/c], r in [m]
+		//E in [V/m] and B in [T]
+		void calculateRightSideODE(double t, OrbitUtils::BaseFieldSource* fieldSource);
+		void rk4Step(double t, double t_st, OrbitUtils::BaseFieldSource* fieldSource);
 		
 		//-----------------------------------
 		//  private data members
@@ -119,7 +125,25 @@ namespace Tracker3DField{
 		double* plEntrV;
 		double* plExitV;
 		
+		//vectors for ODE system of equations
+		//y[6] r(position) and p(momentum) vectors
+    double ff_vct[6];
+		double y_init_vct[6];
+		double y_in_vct[6];
+		double y_vct[6];
+		double y_out_vct[6];
+		double y_final_vct[6];
+		double e_vct[3];
+		double b_vct[3];
+		double c_light;
+		double charge;
+		double mass;
+		double mass2;
 		
+		double k1_vct[6];
+		double k2_vct[6];
+		double k3_vct[6];
+		double k4_vct[6];
 	};
 	
 }; // end of Tracker3DField name-space

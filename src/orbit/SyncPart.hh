@@ -101,12 +101,17 @@ class  SyncPart
 	double getMomentum();
 
 	/**
-	  normal unit vector of x-axis
+	  normal unit vector of x-axis and y-axis
 	*/
 	void setNormalX(double x, double y, double z);
 	double getNormalXX();
 	double getNormalXY();
 	double getNormalXZ();
+	
+	double getNormalYX();
+	double getNormalYY();
+	double getNormalYZ();
+	
 	
 	double getBeta();
 	double getGamma();
@@ -157,8 +162,9 @@ private:
 	double xyz[3];
 	double pxyz[3];
 	
-	//vector of local x-axis
+	//vector of local x-axis and y-axis
 	double x_normal[3];
+	double y_normal[3];
 	
 };
 

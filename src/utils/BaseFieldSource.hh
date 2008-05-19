@@ -15,8 +15,10 @@
 #ifndef BASE_FIELD_SOURCE_H
 #define BASE_FIELD_SOURCE_H
 
+#include "CppPyWrapper.hh"
+
 namespace OrbitUtils{
-	class  BaseFieldSource
+	class  BaseFieldSource: public CppPyWrapper
 	{
 	public:
 		

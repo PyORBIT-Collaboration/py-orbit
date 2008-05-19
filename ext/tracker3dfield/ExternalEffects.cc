@@ -11,14 +11,15 @@
 //    slow changing magnetic and electric fields.
 //
 ///////////////////////////////////////////////////////////////////////////
-#include "ExternalEffects.hh"
-
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 
-using namespace Tracker3DField;
+#include "ExternalEffects.hh"
+#include "RungeKuttaTracker.hh"
 
+using namespace Tracker3DField;
+using namespace OrbitUtils;
 		
 ExternalEffects::ExternalEffects(){
 	name = "empty";
@@ -28,18 +29,33 @@ ExternalEffects::~ExternalEffects(){
 }
 
 /** It initializes effects. */
-void ExternalEffects::setupEffects(Bunch bunch){
+void ExternalEffects::setupEffects(Bunch* bunch){
 }
 
 /** It finalizes effects. */
-void ExternalEffects::finalizeEffects(Bunch bunch){
+void ExternalEffects::finalizeEffects(Bunch* bunch){
 }
 
-/** It applies the external effects to a particle with certain index. */
-void ExternalEffects::applyEffects(Bunch bunch,int index){
+/** It applies the external effects to a particle with certain index. 
+    y_in_vct and y_out_vct are double[6] vectors with initial and final
+                           		[r,p] coordinates for particular time step.
+		t, t_step - initial moment and time step
+		fieldSource - electric and magnetic field source 
+		tracker - RungeKuttaTracker instance
+*/
+void ExternalEffects::applyEffects(Bunch* bunch, int index, 
+	                                 double* y_in_vct, double* y_out_vct, 
+																	 double t, double t_step, 
+																	 BaseFieldSource* fieldSource,
+																	 RungeKuttaTracker* tracker){
 }
 
 /** It returns the name of the effect to distinguish them later. */
-string ExternalEffects::getName(){
+std::string ExternalEffects::getName(){
 	return name;
+}
+
+/** It sets the name of the effect to distinguish them later. */
+void ExternalEffects::setName(std::string name){
+	this->name = name;
 }

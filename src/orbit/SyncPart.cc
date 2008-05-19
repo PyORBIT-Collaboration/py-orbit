@@ -231,9 +231,22 @@ double SyncPart::getNormalXZ(){
 	return x_normal[2];
 }
 
+double SyncPart::getNormalYX(){
+	return y_normal[0];
+}
+	
+double SyncPart::getNormalYY(){
+	return y_normal[1];
+}
+	
+double SyncPart::getNormalYZ(){
+	return y_normal[2];
+}
+
 void SyncPart::updateKinematics(){
 	double p2 = pxyz[0]*pxyz[0]+pxyz[1]*pxyz[1]+pxyz[2]*pxyz[2];
 	p_abs = sqrt(p2);
+	//create x-axis ort
 	if(p_abs != 0.){
 		int iter = 0;
 		double x_normal_abs = 0.;
@@ -266,6 +279,33 @@ void SyncPart::updateKinematics(){
 			x_normal[2] = x_normal[2]/x_normal_abs;
 		}
 	}
+	//create y-axis ort
+	double y_normal_abs = 0.;
+	if(p_abs != 0.){
+		y_normal[0] = pxyz[1]*x_normal[2] - pxyz[2]*x_normal[1];
+		y_normal[1] = -(pxyz[0]*x_normal[2] - pxyz[2]*x_normal[0]);
+		y_normal[0] = pxyz[0]*x_normal[1] - pxyz[1]*x_normal[0];
+		y_normal_abs = sqrt(y_normal[0]*y_normal[0] + y_normal[1]*y_normal[1] + y_normal[2]*y_normal[2]);
+	} else {
+		int iter = 0;
+		do {
+			if(iter >= 1){
+				y_normal[0] = y_normal[0] + iter*1.0;
+				if((iter % 2) == 0) y_normal[1] = y_normal[1] + iter*1.0;
+				if((iter % 3) == 0) y_normal[2] = y_normal[2] + iter*1.0;
+			}
+			double coef = y_normal[0]*x_normal[0] + y_normal[1]*x_normal[1] + y_normal[2]*x_normal[2];
+			y_normal[0] = y_normal[0] - coef*x_normal[0];
+			y_normal[1] = y_normal[1] - coef*x_normal[1];
+			y_normal[2] = y_normal[2] - coef*x_normal[2];
+			y_normal_abs = sqrt(y_normal[0]*y_normal[0] + y_normal[1]*y_normal[1] + y_normal[2]*y_normal[2]);
+			iter = iter + 1;
+		} while(y_normal_abs == 0.);
+	}
+	y_normal[0] = y_normal[0]/y_normal_abs;
+	y_normal[1] = y_normal[1]/y_normal_abs;
+	y_normal[2] = y_normal[2]/y_normal_abs;
+	//--- particle kinematics
 	double m = bunch->getMass();
 	double m2 = m*m;
 	double w2 = m2+p2;

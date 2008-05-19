@@ -8,14 +8,14 @@
 //
 // DESCRIPTION
 //    The base class for Python implementation of a field source. 
-//    It should be sub-classed on Python level and implements 
+//    It should be sub-classed on Python level and implement 
 //    getElectricField(x,y,z,t) and getMagneticField (x,y,z,t) methods.
 //    The results of these methods will be available from the c++ level.
 //    This is an example of embedding Python in C++ Orbit level.
 //
 //    ATTENTION: Using this class in real calculations is not wise! 
 //               It is slow, because it delegates the field calculations
-//               to the Python level. It is only for prototyping and 
+//               to the Python level. It is for prototyping and 
 //               debugging only.
 //
 ///////////////////////////////////////////////////////////////////////////
@@ -25,11 +25,10 @@
 #include "Python.h"
 
 #include "BaseFieldSource.hh"
-#include "CppPyWrapper.hh"
 
 namespace OrbitUtils{
 	
-	class  PyBaseFieldSource: public BaseFieldSource, CppPyWrapper
+	class  PyBaseFieldSource: public BaseFieldSource
 	{
 		public:
 		

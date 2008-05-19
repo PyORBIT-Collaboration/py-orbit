@@ -21,9 +21,11 @@
 #include "BaseFieldSource.hh"
 #include "ExternalEffects.hh"
 
+#include "CppPyWrapper.hh"
+
 namespace Tracker3DField{
 	
-	class RungeKuttaTracker
+	class RungeKuttaTracker: public OrbitUtils::CppPyWrapper
 	{
 		//--------------------------------------------------
 		// public methods of the RungeKuttaTracker class
@@ -42,6 +44,9 @@ namespace Tracker3DField{
 
 		/** It returns the accuracy of the spatial resolution for tracking. */
 		double getSpatialEps();
+		
+		/** It returns the time step size for tracking. */
+		double getTimeStep();
 		
 		/** It sets the number of initial steps in tracking. */
 		void setInitialStepsNumber(int n_init);
@@ -70,24 +75,37 @@ namespace Tracker3DField{
 		/** It returns (a*x+b*y+c*z+d=0) coefficients for the exit plane. */
 		void getExitPlane(double& a, double& b, double& c, double& d);
 		
-		/** It tracks the bunch. The external effects instance could be NULL. */
+		/** It tracks the traditional ORBIT bunch. The external effects instance could be NULL. */
 		void trackBunch(Bunch* bunch, OrbitUtils::BaseFieldSource* fieldSource, ExternalEffects* extEff);
+
+		/** It tracks the bunch with non-relative r and p vectors. 
+		    The external effects instance could be NULL. 
+		*/
+		void track(Bunch* bunch, double t, double t_step, 
+			         OrbitUtils::BaseFieldSource* fieldSource, ExternalEffects* extEff);
 		
+		/** It returns 0 if it is outside of both planes and 1 otherwise */
+		int isOutside(double* r);
+		
+		/** It returns 0 if it is outside of both planes and 1 otherwise */
+		int isOutside(double x, double y, double z);
+		
+		/** It returns 0 if it is after entrance plane and 1 otherwise */
+		int isAfterEntrance(double* r);
+		
+		/** It returns 0 if it is after entrance plane and 1 otherwise */
+		int isAfterEntrance(double x, double y, double z);
+		
+		/** It returns 0 if it is after exit plane and 1 otherwise */
+		int isBeforeExit(double* r);
+		
+		/** It returns 0 if it is after exit plane and 1 otherwise */
+		int isBeforeExit(double x, double y, double z);		
 		
 	private:
 		//--------------------------------------------------
 		// private methods of the RungeKuttaTracker class
 		//--------------------------------------------------
-		
-		//return 0 if it is outside of both planes and 1 otherwise
-		int isOutside(double* r);
-		int isOutside(double x, double y, double z);
-		
-		int isAfterEntrance(double* r);
-		int isAfterEntrance(double x, double y, double z);
-		
-		int isBeforeExit(double* r);
-		int isBeforeExit(double x, double y, double z);
 		
 		//calculates ff_vct[6] - right side of ODE system
 		//d(r)/d(t) = c*p/sqrt(p^2+m^2)

@@ -26,8 +26,9 @@
 
 using namespace OrbitUtils;
 
-PyBaseFieldSource::PyBaseFieldSource(PyObject* py_wrapperIn): CppPyWrapper(py_wrapperIn)
+PyBaseFieldSource::PyBaseFieldSource(PyObject* py_wrapperIn)
 {
+	setPyWrapper(py_wrapperIn);
 }
 
 PyBaseFieldSource::~PyBaseFieldSource()

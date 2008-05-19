@@ -17,12 +17,15 @@
 #include <string>
 
 #include "Bunch.hh"
+#include "BaseFieldSource.hh"
 
-using namespace std;
+#include "CppPyWrapper.hh"
 
 namespace Tracker3DField{
 	
-	class ExternalEffects
+	class RungeKuttaTracker;
+	
+	class ExternalEffects: public OrbitUtils::CppPyWrapper
 	{
 		//--------------------------------------------------
 		// public methods of the ExternalEffects class
@@ -33,20 +36,27 @@ namespace Tracker3DField{
 		virtual ~ExternalEffects();
 		
 		/** It initializes effects. */
-		virtual void setupEffects(Bunch bunch);
+		virtual void setupEffects(Bunch* bunch);
 		
 		/** It finalizes effects. */
-		virtual void finalizeEffects(Bunch bunch);
+		virtual void finalizeEffects(Bunch* bunch);
 
 		/** It applies the external effects to a particle with certain index. */
-		virtual void applyEffects(Bunch bunch,int index);
+		virtual void applyEffects(Bunch* bunch, int index, 
+	                            double* y_in_vct, double* y_out_vct, 
+														  double t, double t_step, 
+														  OrbitUtils::BaseFieldSource* fieldSource,
+															RungeKuttaTracker* tracker);	
 		
 		/** It returns the name of the effect to distinguish them later. */
-		string getName();
+		std::string getName();
+		
+		/** It sets the name of the effect to distinguish them later. */
+		void setName(std::string name);
 		
 	  private:
 		   
-			string name;
+			std::string name;
 		
 	};
 	

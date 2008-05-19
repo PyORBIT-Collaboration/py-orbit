@@ -257,7 +257,24 @@ extern "C" {
     Py_INCREF(Py_None);
     return Py_None;
   }		
-	
+
+  //  Returns the nY axis vector as a Tuple
+	//  for the SyncPart object the action is depended on 
+	//  the number of arguments
+  //  nyVector() - returns Tuple (nyx,nyy,nyz)
+  static PyObject* SyncPart_nyVector(PyObject *self, PyObject *args){
+		SyncPart* cpp_SyncPart = (SyncPart*) ((pyORBIT_Object*) self)->cpp_obj;
+		int nVars = PyTuple_Size(args);
+		if(nVars != 0){
+			error("PySyncPart - nyVector - you cannot set ny vector");
+		}
+		double x = 0.,y = 0.,z = 0.;
+		x = cpp_SyncPart->getNormalYX();
+		y = cpp_SyncPart->getNormalYY();
+		z = cpp_SyncPart->getNormalYZ();
+    return Py_BuildValue("(ddd)",x,y,z);
+  }		
+
  //Sets or returns the time in seconds for the SyncPart object
   //  the action is depended on the number of arguments
   //  time() - returns time in seconds
@@ -540,6 +557,7 @@ extern "C" {
 		{ "pVector",    SyncPart_pVector   ,METH_VARARGS,"Sets or returns the momentum vector as a tuple"},		
 		{ "rVector",    SyncPart_rVector   ,METH_VARARGS,"Sets or returns the position vector as a tuple"},		
 		{ "nxVector",		SyncPart_nxVector  ,METH_VARARGS,"Sets or returns the x-axis vector as a tuple"},		
+		{ "nyVector",		SyncPart_nyVector  ,METH_VARARGS,"Returns the y-axis vector as a tuple"},		
 		{ "energyToMomentum",  SyncPart_eToP  ,METH_VARARGS,"Transforms the kinetic energy to momentum"},
 		{ "momentumToEnergy",  SyncPart_pToE  ,METH_VARARGS,"Transforms the momentum to kinetic energy"},
     {NULL}

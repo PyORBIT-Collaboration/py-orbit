@@ -60,7 +60,7 @@ extern "C" {
   //this is implementation of the __del__ method
   static void MPI_Group_del(pyORBIT_MPI_Group* self){
 		//std::cerr<<"The MPI_Group __del__ has been called!"<<std::endl;
-		MPI_Comm group = self->group;
+		MPI_Group group = self->group;
 		if(group != MPI_GROUP_NULL && group != MPI_GROUP_EMPTY){
 			ORBIT_MPI_Group_free(&group);
 		}		

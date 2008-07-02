@@ -948,7 +948,7 @@ namespace wrap_orbit_bunch{
     int attr_index = 0;
     double val = 0.;
 
-    if(nVars == 4 ||  nVars == 5){
+    if(nVars == 3 ||  nVars == 4){
       if(nVars == 4){
         //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
         if(!PyArg_ParseTuple(	args,"sii:partAttrValue",&attr_name,&part_index ,&attr_index)){

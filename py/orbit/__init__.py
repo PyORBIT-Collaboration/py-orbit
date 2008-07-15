@@ -1,5 +1,5 @@
 ## \namespace orbit
-## \brief The base module for all pyORBIT core python 
+## \brief The base module for all pyORBIT core python
 ## modules.
 ##
 ## Some of the modules:
@@ -8,8 +8,3 @@
 ## - teapot - the TEAPOT like ORBIT lattice elements\
 ## - teapot_base - fundamental bricks of teapot elements
 ## - utils - the collection of useful Python utilites
-
-
-
-
-

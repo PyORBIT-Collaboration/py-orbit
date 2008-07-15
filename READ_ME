@@ -41,4 +41,3 @@ PYTHONPATH	- should be modified to include access to the ORBIT
 		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py:${ORBIT_ROOT}/modules
 
 ORBIT_ARCH	- architecture of the system. At present it is LINUX only.
-

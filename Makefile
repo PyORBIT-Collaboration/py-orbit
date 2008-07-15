@@ -6,7 +6,7 @@ DIRS += ./ext
 
 all: compile
 
-compile:  
+compile:
 	@for dir in $(DIRS); do \
 		(cd $$dir; if [ -f ./Makefile ]; then $(MAKE) compile; fi;); \
 	done	
@@ -17,6 +17,6 @@ clean:
 	done
 	rm -rf ./bin/pyORBIT
 	rm -rf ./doc/html
-    
-docs: 
+
+docs:
 	doxygen

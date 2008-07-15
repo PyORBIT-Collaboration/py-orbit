@@ -3,26 +3,28 @@ Notes about pyORBIT Development
 
 title 01.31.2008 py::orbit::lattice modification
 The initial state is a revision 59.
-Problems with AccLattice and AccElement classes: 
-1. We need possibility to access the particular node by using 
-   name (lattice could have duplicates!) or position. The position 
-	 of the element cannot be a property of the node, because the same 
-	 node could be a part of other lattice or sub-lattice. So, it should be 
-	 the method of the lattice class - getPosition(index).
-	 The position means the start point only. All other information should be
-	 retrieved from node (AccElement class instance).
-	 
-2. To provide the ability to track particles from one particular node 
-   to another we can use sub-lattices instead of very complicated 
-	 start-stop methods in nodes and action containers. So, the "should stop"
-	 methods can be removed from AccActionsContainer class. The new method for 
-	 sub-lattice generation should be introduced.
-	 
-3. Initialization structure for nodes is not necessary. We need initialization 
-   only for the lattice (to put positions into an array). The node 
-	 initialization should be moved to TEAPOT base element as a part of 
-	 construction of nodes. 
+Problems with AccLattice and AccElement classes:
 
-4. AccActionsContainer has sets of similar methods for entrance, body, and exit 
-   actions. It could be a shorter and clearer code if we provide one set 
-	 of methods with a parameter specifying ENTRANCE,BODY, and EXIT.
+1. We need possibility to access any particular node by using its
+	 name (lattice could have duplicates!) or position. The position
+	 of the element cannot be a property of the node, because the same
+	 node could be a part of more than one lattice or sub-lattice. Thus,
+	 it should be a method of the lattice class - getPosition(index).
+	 The position means the start point of the node. All other information
+	 should be retrieved from node (AccElement class instance).
+
+2. To provide the ability to track particles from one particular node
+	 to another we can use sub-lattices instead of very complicated
+	 start-stop methods in nodes and action containers. So, the
+	 "should stop" methods can be removed from AccActionsContainer class.
+	 The new method for sub-lattice generation should be introduced.
+
+3. Initialization structure for nodes is not necessary. We need initialization
+	 only for the lattice (to put positions into an array). The node
+	 initialization should be moved to TEAPOT base element as a part of
+	 construction of nodes.
+
+4. AccActionsContainer has sets of similar methods for entrance, body, and
+	 exit actions. It could be a shorter and clearer code if we provide
+	 one set of methods with a parameter specifying ENTRANCE, BODY,
+	 or EXIT.

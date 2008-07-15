@@ -1,7 +1,7 @@
 ######################################################################
-# Linux g++ for shared libraries creation
+# Linux g++ for creation of shared libraries
 ######################################################################
 
 CXX             =  g++
 CXXFLAGS        = -g -fPIC -Wall
-LINKFLAGS       = -fPIC -shared  -Wl,--export-dynamic
+LINKFLAGS       = -fPIC -shared -Wl,--export-dynamic

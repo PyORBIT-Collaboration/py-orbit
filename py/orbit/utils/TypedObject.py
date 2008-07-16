@@ -5,7 +5,7 @@ class TypedObject:
 
 	def __init__(self, type_in = "no type" ):
 		"""
-		Contsructor. Object that has a type.
+		Constructor. Object that has a type.
 		"""
 		self.__type = type_in
 

@@ -17,7 +17,7 @@ class ParamsDictObject:
 
 	def addParam(self, key, value):
 		"""
-		Method. Sets a parameter of the object.
+		Method. Adds a parameter to the object.
 		"""
 		self.__paramsDict[key] = value
 
@@ -36,7 +36,7 @@ class ParamsDictObject:
 
 	def getParam(self, key):
 		"""
-		Method. Returns the parameters of the node
+		Method. Returns requested parameters of the object.
 		"""
 		if(not self.hasParam(key)):
 			msg = "The object does not have a parameter for the key you requested!"
@@ -61,7 +61,7 @@ class ParamsDictObject:
 
 	def hasParam(self, key):
 		"""
-		Method. Returns True if the node has a parameter for this key.
+		Method. Returns True if the object has a parameter for this key.
 		Returns False otherwise.
 		"""
 		return self.__paramsDict.has_key(key)

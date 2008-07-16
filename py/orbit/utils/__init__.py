@@ -2,16 +2,16 @@
 ## \brief Utility classes.
 ##
 ## Classes:
-## - multiDimArray - function to generate multi-dimensional array
-## - orbitFinalize - function to finalize ORBIT script execution
-## - NamedObject - class represents an object with name
-## - TypedObject - class represents an object with type
-## - ParamsDictObject - class represents an object that has a parameters dictionary
+## - multiDimArray    - Method. Generates multi-dimensional array.
+## - orbitFinalize    - Method. Finalizes ORBIT script execution.
+## - NamedObject      - Class. Represents an object with a name.
+## - TypedObject      - Class. Represents an object with a type.
+## - ParamsDictObject - Class. Represents an object that has a parameters dictionary.
 
-from orbit.utils.multiDimArray import multiDimArray
-from orbit.utils.orbitFinalize import orbitFinalize
-from orbit.utils.NamedObject import NamedObject
-from orbit.utils.TypedObject import TypedObject
+from orbit.utils.multiDimArray    import multiDimArray
+from orbit.utils.orbitFinalize    import orbitFinalize
+from orbit.utils.NamedObject      import NamedObject
+from orbit.utils.TypedObject      import TypedObject
 from orbit.utils.ParamsDictObject import ParamsDictObject
 
 __all__ = []

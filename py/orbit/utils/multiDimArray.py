@@ -16,4 +16,3 @@ def multiDimArray(*dims):
 		for j in xrange(dims[0]):
 			res.append(multiDimArray(*dims_rest))
 	return res
-

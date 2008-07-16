@@ -10,4 +10,3 @@ def orbitFinalize(message = None):
 		traceback.print_stack()
 	print "STOP"
 	sys.exit(1)
-

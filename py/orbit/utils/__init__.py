@@ -2,7 +2,7 @@
 ## \brief Utility classes.
 ##
 ## Classes:
-## - multiDimArray - function for multi-dimension array generation
+## - multiDimArray - function to generate multi-dimensional array
 ## - orbitFinalize - function to finalize ORBIT script execution
 ## - NamedObject - class represents an object with name
 ## - TypedObject - class represents an object with type

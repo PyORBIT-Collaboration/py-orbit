@@ -3,7 +3,7 @@ class TypedObject:
 	Class. Object that has a type.
 	"""
 
-	def __init__(self, type_in = "no type" ):
+	def __init__(self, type_in = "no type"):
 		"""
 		Constructor. Object that has a type.
 		"""

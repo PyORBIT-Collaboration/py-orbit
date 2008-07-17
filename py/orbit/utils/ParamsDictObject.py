@@ -1,8 +1,8 @@
 import os
 
 from orbit.utils.orbitFinalize import orbitFinalize
-from orbit.utils.NamedObject import NamedObject
-from orbit.utils.TypedObject import TypedObject
+from orbit.utils.NamedObject   import NamedObject
+from orbit.utils.TypedObject   import TypedObject
 
 class ParamsDictObject:
 	"""

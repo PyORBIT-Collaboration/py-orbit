@@ -3,7 +3,7 @@ class NamedObject:
 	Class. An object that has a name.
 	"""
 
-	def __init__(self, name = "no name" ):
+	def __init__(self, name = "no name"):
 		"""
 		Contsructor. Object that has a name.
 		"""

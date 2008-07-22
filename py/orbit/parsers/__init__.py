@@ -20,4 +20,3 @@ __all__.append("MAD_LattLine")
 __all__.append("SAD_Parser")
 __all__.append("SAD_LattElement")
 __all__.append("SAD_LattLine")
-

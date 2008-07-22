@@ -175,4 +175,4 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		#start EXIT
 		paramsDict["node"] = self
 		paramsDict["parentNode"] = parentNode
-		actionsContainer.performActions(paramsDict,AccNode.EXIT)
+		actionsContainer.performActions(paramsDict, AccNode.EXIT)

@@ -53,7 +53,7 @@ class AccLattice(NamedObject, TypedObject):
 		paramsDict = {}
 		actions = AccActionsContainer()
 		d = [0.]
-		poss = {}
+		posn = {}
 
 		def accNodeExitAction(paramsDict):
 		"""
@@ -65,12 +65,12 @@ class AccLattice(NamedObject, TypedObject):
 				posBefore = d[0]
 				d[0] += node.getLength()
 				posAfter = d[0]
-				poss[node]=(posBefore, posAfter)
+				posn[node]=(posBefore, posAfter)
 
 		actions.addAction(accNodeExitAction, AccNode.EXIT)
 		self.trackActions(actions, paramsDict)
 		self.__length = d[0]
-		self.__childPositions = poss
+		self.__childPositions = posn
 		self.__isInitialized = True
 
 	def isInitialized(self):

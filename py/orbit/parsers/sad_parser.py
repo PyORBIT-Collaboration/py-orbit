@@ -36,10 +36,10 @@ class SAD_LattElement:
 	""" An Arbitrary Element in the Lattice """
 	_typeChecker = _possibleElementType()
 
-	def __init__(self,name,Tname):
+	def __init__(self,name,Typename):
 		""" Create instance with name, typeName and type """
 		self.__name = name
-		self.__type = self._typeChecker.checkType(Tname)
+		self.__type = self._typeChecker.checkType(Typename)
 		self.__par = {}
 
 	def __del__(self):

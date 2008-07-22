@@ -59,13 +59,13 @@ class MAD_LattElement:
 	"""
 	_typeChecker = _possibleElementType()
 
-	def __init__(self, name, Tname):
+	def __init__(self, name, Typename):
 		"""
 		Constructor. Creates element with name, type,
 		and parameter dictionary.
 		"""
 		self.__name = name
-		self.__type = self._typeChecker.checkType(Tname)
+		self.__type = self._typeChecker.checkType(Typename)
 		self.__par = {}
 
 	def __del__(self):
@@ -80,17 +80,17 @@ class MAD_LattElement:
 		"""
 		return self.__name
 
-	def getType(self):
-		"""
-		Method. Returns type of element
-		"""
-		return self.__type
-
 	def setType(self, tp):
 		"""
 		Method. Sets the type of element without checking.
 		"""
 		self.__type = tp
+
+	def getType(self):
+		"""
+		Method. Returns type of element
+		"""
+		return self.__type
 
 	def addParameter(self, nameOfPar, parVal):
 		"""
@@ -172,7 +172,7 @@ class MAD_LattLine:
 
 	def getLinesDict(self):
 		"""
-		Method. Returns the dictionary
+		Method. Returns a dictionary
 		containing all lattice lines, recursive.
 		"""
 		dict = {}

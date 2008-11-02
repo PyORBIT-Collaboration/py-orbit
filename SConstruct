@@ -10,7 +10,7 @@ if os.environ.has_key("CCFLAGS"):
 	cpp_flags = os.environ["CCFLAGS"]
 
 cpp_flags = cpp_flags + " -fPIC " 
-cpp_flags = cpp_flags + " -DUSE_MPI -DMPICH_IGNORE_CXX_SEEK " 
+cpp_flags = cpp_flags + " -DUSE_MPI=1 -DMPICH_IGNORE_CXX_SEEK " 
 
 cpp_shared_lib_flags = " -Xlinker -export-dynamic "
 
@@ -62,9 +62,11 @@ for dr in incl_ext_dirs:
 	cpp_files_list = cpp_files_list + Glob(dr+"obj"+"/*.cc")
 
 tracker3D_lib = tracker3DFieldEnv.SharedLibrary('./modules/tracker3dfield',
-	                          cpp_files_list, LIBS = py_libs,
-                                  LIBPATH = py_lib_path, 
-                                  LINKFLAGS = cpp_shared_lib_flags)
+	                          cpp_files_list, 
+														#LIBS = py_libs,
+                            #LIBPATH = py_lib_path, 
+                            LINKFLAGS = cpp_shared_lib_flags,
+														SHLIBPREFIX = "")
 Default(tracker3D_lib)
 
 #--------------------------------------
@@ -74,9 +76,3 @@ if 'docs' in COMMAND_LINE_TARGETS:
 	import posix
 	posix.system("doxygen")
 
-#---------------------------------------
-# Clean documentation
-#---------------------------------------
-print "COMMAND_LINE_TARGETS =",COMMAND_LINE_TARGETS
-if '-c' in COMMAND_LINE_TARGETS:
-	print "DEBUG"	

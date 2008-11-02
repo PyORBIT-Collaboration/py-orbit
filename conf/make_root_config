@@ -22,7 +22,6 @@ LIBS  =
 
 LIBS += $(PYTHON_ROOT_LIB)
 LIBS += -ldl -lreadline -ltermcap -lpthread -lutil -lm -Xlinker -export-dynamic
-LIBS += -L$(MPI_ROOT)/lib -lmpich
 
 #-------------------------------------------------------------------------------
 # include file locations
@@ -37,6 +36,5 @@ INCLUDES  =
 #-------------------------------------------------------------------------------
 
 INCLUDES += -I$(PYTHON_ROOT_INC)
-INCLUDES += -I$(MPI_ROOT)/include
 
 include  ${ORBIT_ROOT}/conf/${ORBIT_ARCH}/make_root_config

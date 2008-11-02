@@ -24,7 +24,7 @@ The user should define:
 
 ORBIT_ROOT	- the full path to the directory pyORBIT.
 
-MPI_ROOT	- MPI library with bin/ and lib/ directories.
+ORBIT_ARCH	- architecture of the system. At present it is LINUX only.
 
 PYTHON_VERSION	- python version, for example: export PYTHON_VERSION = 2.4
 
@@ -40,4 +40,4 @@ PYTHONPATH	- should be modified to include access to the ORBIT
 		  python modules:
 		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py:${ORBIT_ROOT}/modules
 
-ORBIT_ARCH	- architecture of the system. At present it is LINUX only.
+

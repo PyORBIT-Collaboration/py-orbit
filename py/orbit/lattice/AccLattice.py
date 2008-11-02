@@ -57,7 +57,9 @@ class AccLattice(NamedObject, TypedObject):
 
 		def accNodeExitAction(paramsDict):
 		"""
-		Method. Sets lattice length and node positions..
+		Nonbound function. Sets lattice length and node positions. 
+		This is a Closures (well, may be not exactly). It uses external 
+		objects.
 		"""
 			node = paramsDict["node"]
 			parentNode = paramsDict["parentNode"]
@@ -83,7 +85,9 @@ class AccLattice(NamedObject, TypedObject):
 		"""
 		Method. Adds a child node into the lattice.
 		"""
-		if(isinstance(node, AccNode) == True): self.__children.append(node)
+		if(isinstance(node, AccNode) == True): 
+			self.__children.append(node)
+			self.__isInitialized = False
 
 	def getNodes(self):
 		"""

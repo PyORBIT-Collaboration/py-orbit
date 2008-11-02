@@ -7,7 +7,7 @@
 ./ext		- source code for external modules. Compilations of this
 		  code should be placed into ./modules.
 
-./modules	- .so shared libraries to be used under python interpreter,
+./lib  	- .so shared libraries to be used under python interpreter,
 		  pyORBIT.
 
 ./examples	- sample pyORBIT scripts.

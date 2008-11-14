@@ -34,7 +34,7 @@ py_include_dir = sysconfig.get_config_var('INCLUDEPY')
 pyOrbit_incl_dirs = incl_dirs + [py_include_dir,]
 py_libs = py_libs + py_shared_libs
 
-pyOrbitEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, CPPPATH = pyOrbit_incl_dirs,  ENV = {'PATH':path})
+pyOrbitEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, LINKFLAGS =cpp_shared_lib_flags,  CPPPATH = pyOrbit_incl_dirs,  ENV = {'PATH':path})
 
 cpp_files_list = []
 for dr in incl_dirs:
@@ -61,13 +61,37 @@ for dr in incl_ext_dirs:
 	tracker3DFieldEnv.VariantDir(dr+"obj", dr, duplicate=0)
 	cpp_files_list = cpp_files_list + Glob(dr+"obj"+"/*.cc")
 
-tracker3D_lib = tracker3DFieldEnv.SharedLibrary('./modules/tracker3dfield',
+tracker3D_lib = tracker3DFieldEnv.SharedLibrary('./lib/tracker3dfield',
 	                          cpp_files_list, 
 														#LIBS = py_libs,
                             #LIBPATH = py_lib_path, 
                             LINKFLAGS = cpp_shared_lib_flags,
 														SHLIBPREFIX = "")
 Default(tracker3D_lib)
+
+#--------- Traker 3D Field Module -----
+incl_ext_dirs = []
+incl_ext_dirs.append("./ext/spacecharge/")
+if (not os.environ.has_key("FFTW_ROOT")):
+	print "You have to define FFTW_ROOT env variable"
+	sys.exit(1)
+incl_ext_dirs.append(os.environ["FFTW_ROOT"]+"/include")
+
+incl_dirs = pyOrbit_incl_dirs + incl_ext_dirs
+spacechargeEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, CPPPATH = incl_dirs,  ENV = {'PATH':path})
+
+cpp_files_list = []
+for dr in incl_ext_dirs:
+	spacechargeEnv.VariantDir(dr+"obj", dr, duplicate=0)
+	cpp_files_list = cpp_files_list + Glob(dr+"obj"+"/*.cc")
+
+spacecharge_lib = spacechargeEnv.SharedLibrary('./lib/spacecharge',
+	                          cpp_files_list, 
+														LIBS = ["librfftw","libfftw"],
+                            LIBPATH = [os.environ["FFTW_ROOT"]+"/lib",] ,
+                            LINKFLAGS = cpp_shared_lib_flags,
+														SHLIBPREFIX = "")
+Default(spacecharge_lib)
 
 #--------------------------------------
 # Make documentation

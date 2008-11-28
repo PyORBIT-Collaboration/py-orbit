@@ -94,9 +94,8 @@ spacecharge_lib = spacechargeEnv.SharedLibrary('./lib/spacecharge',
 Default(spacecharge_lib)
 
 #--------------------------------------
-# Make documentation
+# Make documentation (see Phony Target for Scons)
 #--------------------------------------
-if 'docs' in COMMAND_LINE_TARGETS:
-	import posix
-	posix.system("doxygen")
+docEnv = Environment()
+docEnv.AlwaysBuild(docEnv.Alias('docs',[],"doxygen"))
 

@@ -191,7 +191,8 @@ extern "C" {
 		PyObject *pyExtEffects = NULL;
 		double tm = 0.;
 		double t_step = 0.;
-		if(!PyArg_ParseTuple(args,"OddO|O:track",&pyBunch,&tm,&t_step, &pyFieldSource,&pyExtEffects)){
+		double t_begin = 0.;
+		if(!PyArg_ParseTuple(args,"OdddO|O:track",&pyBunch,&t_begin,&tm,&t_step, &pyFieldSource,&pyExtEffects)){
 			error("PyRungeKuttaTracker - track(bunch,time, time_step, field_source[,exteranl_effects]) - parameters are needed.");
 		}
 		Bunch* bunch = (Bunch*) ((pyORBIT_Object*) pyBunch)->cpp_obj;
@@ -199,8 +200,8 @@ extern "C" {
 		ExternalEffects* extEf = NULL;
 		if(pyExtEffects != NULL){
 			extEf = (ExternalEffects*) ((pyORBIT_Object*) pyExtEffects)->cpp_obj;
-		}
-		cpp_RungeKuttaTracker->track(bunch,tm,t_step,fs,extEf);
+		}    
+		cpp_RungeKuttaTracker->track(bunch,t_begin,tm,t_step,fs,extEf);
 		Py_INCREF(Py_None);
     return Py_None;	
   }	

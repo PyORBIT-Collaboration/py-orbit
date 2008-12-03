@@ -34,12 +34,15 @@ extern "C" {
 		return (PyObject *) self;
 	}
 
-  //initializator for python  PyExternalEffects class
+  //initializator for python  CppExternalEffects class
   //this is implementation of the __init__ method
   static int PyExternalEffects_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
 		self->cpp_obj = new PyExternalEffects((PyObject*) self);
     return 0;
   }
+  
+  
+  
 	
 	// name([name]) - sets or returns the name of the External Effeects class 
   static PyObject* PyExternalEffects_name(PyObject *self, PyObject *args){

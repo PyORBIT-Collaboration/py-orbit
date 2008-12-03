@@ -42,6 +42,7 @@ RungeKuttaTracker::RungeKuttaTracker(double lengthIn){
 	plEntrV = new double[4];
 	plExitV = new double[4];
 	
+	
 	plEntrV[0] = 0.;
 	plEntrV[1] = 0.;
 	plEntrV[2] = - 1.0/(length/2.0);
@@ -434,7 +435,7 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 	*/
 }
 
-void RungeKuttaTracker::track(Bunch* bunch, double t_period, double t_step_in, 
+void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, double t_step_in, 
 	                            BaseFieldSource* fieldSource, ExternalEffects* extEff)
 {
 	c_light = OrbitConst::c;
@@ -445,7 +446,7 @@ void RungeKuttaTracker::track(Bunch* bunch, double t_period, double t_step_in,
 	double vpt = 0.;
 	double** partCoordArr = bunch->coordArr();
 	int flag = 0;
-	double t = 0.;
+	double t = t_begin;
 	double tmp_vct[6];
 	for(int i = 0 ; i < 6; i++){
 		tmp_vct[i] = 0.;
@@ -454,7 +455,7 @@ void RungeKuttaTracker::track(Bunch* bunch, double t_period, double t_step_in,
 	//performs the necessary actions before tracking
 	if(extEff != NULL) extEff->setupEffects(bunch);
 	//------------------------------------------------	
-	while( t < t_period){
+	while( t < t_period+t_begin){
 		for(int ip = 0, nParts = bunch->getSize(); ip < nParts; ip++){
 			flag = bunch->flag(ip);
 			if(flag > 0){

@@ -81,7 +81,7 @@ namespace Tracker3DField{
 		/** It tracks the bunch with non-relative r and p vectors. 
 		    The external effects instance could be NULL. 
 		*/
-		void track(Bunch* bunch, double t, double t_step, 
+		void track(Bunch* bunch,double t_begin, double t, double t_step, 
 			         OrbitUtils::BaseFieldSource* fieldSource, ExternalEffects* extEff);
 		
 		/** It returns 0 if it is outside of both planes and 1 otherwise */
@@ -145,7 +145,7 @@ namespace Tracker3DField{
 		
 		//vectors for ODE system of equations
 		//y[6] r(position) and p(momentum) vectors
-    double ff_vct[6];
+		double ff_vct[6];
 		double y_init_vct[6];
 		double y_in_vct[6];
 		double y_vct[6];

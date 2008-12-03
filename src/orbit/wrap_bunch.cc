@@ -949,7 +949,7 @@ namespace wrap_orbit_bunch{
     double val = 0.;
 
     if(nVars == 3 ||  nVars == 4){
-      if(nVars == 4){
+      if(nVars == 3){
         //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
         if(!PyArg_ParseTuple(	args,"sii:partAttrValue",&attr_name,&part_index ,&attr_index)){
           error("PyBunch - partAttrValue(attr_name,part_index,atr_index) - params. are needed");

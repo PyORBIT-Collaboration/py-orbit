@@ -271,6 +271,22 @@ void Grid2D::findPotential(Grid2D* phiGrid2D){
 	getBoundary2D()->findPotential(getArr(),phiGrid2D->getArr());
 }
 
+/** Adds the boundary induced potential to itself. It should be the potential Grid2D. */	
+void Grid2D::addBoundaryPotential(){
+	if(getBoundary2D() == NULL){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << " Grid2D::addBoundaryPotential() "<< std::endl
+			<< "No local boundary!"<< std::endl
+			<< "this->getBoundary2D() = " << getBoundary2D() << std::endl
+			<< "Stop."<< std::endl;
+		}
+		ORBIT_MPI_Finalize();
+	}
+	getBoundary2D()->addBoundaryPotential(getArr());
+}
+
 /** Sets all grid points to zero */	
 void Grid2D::setZero(){
 	for(int i = 0; i < xBins_; i++){

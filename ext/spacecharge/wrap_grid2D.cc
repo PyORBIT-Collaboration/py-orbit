@@ -57,7 +57,7 @@ extern "C" {
 			}	
 			PyObject* pyORBIT_Boindary2D_Type = getSpaceChargeType("Boundary2D");
 			if(!PyObject_IsInstance(pyB,pyORBIT_Boindary2D_Type)){
-				ORBIT_MPI_Finalize("PyPhaseVector - Grid2D(Boundary2D) - constructor needs a parameter.");
+				ORBIT_MPI_Finalize("PyGrid2D - Grid2D(Boundary2D) - constructor needs a parameter.");
 			}			
 			Boundary2D* boundary2D = (Boundary2D*)(((pyORBIT_Object*) pyB)->cpp_obj);
 			self->cpp_obj = new Grid2D(boundary2D);	
@@ -205,6 +205,33 @@ extern "C" {
     return Py_None;	
 	}	
 
+	//findPotential(Grid2D* phiGrid2D)
+  static PyObject* Grid2D_findPotential(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		PyObject* pyB;
+		if(!PyArg_ParseTuple(args,"O:__init__",&pyB)){		
+			ORBIT_MPI_Finalize("PyGrid2D.findPotential(Grid2D* phiGrid2D) - method needs a parameter.");
+		}	
+		PyObject* pyORBIT_Grid2D_Type = getSpaceChargeType("Grid2D");
+		if(!PyObject_IsInstance(pyB,pyORBIT_Grid2D_Type)){
+			ORBIT_MPI_Finalize("PyGrid2D.findPotential(Grid2D* phiGrid2D) - method needs a parameter.");
+		}			
+		Grid2D* grid2D = (Grid2D*)(((pyORBIT_Object*) pyB)->cpp_obj);
+		cpp_Grid2D->findPotential(grid2D);
+		Py_INCREF(Py_None);
+    return Py_None;	
+	}		
+	
+	//addBoundaryPotential()
+  static PyObject* Grid2D_addBoundaryPotential(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		cpp_Grid2D->addBoundaryPotential();
+		Py_INCREF(Py_None);
+    return Py_None;	
+	}		
+	
 	//calcGradient(double x, double y)
   static PyObject* Grid2D_calcGradient(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
@@ -234,17 +261,19 @@ extern "C" {
 	// defenition of the methods of the python Grid2D wrapper class
 	// they will be vailable from python level
   static PyMethodDef Grid2DClassMethods[] = {
-		{ "getBoundary2D",   Grid2D_getBoundary2D, METH_VARARGS,"returns the internal Boundary2D instance"},
-		{ "setBoundary2D",   Grid2D_setBoundary2D, METH_VARARGS,"sets the internal Boundary2D instance"},
-		{ "setZero",         Grid2D_setZero,       METH_VARARGS,"sets all points on the grid to zero"},
-		{ "getValue",        Grid2D_getValue,      METH_VARARGS,"returns value for (x,y) point"},
-		{ "setValue",        Grid2D_setValue,      METH_VARARGS,"sets value for (ix,iy) point"},
-		{ "setGridX",        Grid2D_setGridX,      METH_VARARGS,"sets the X grid with min,max, number of points"},
-		{ "setGridY",        Grid2D_setGridY,      METH_VARARGS,"sets the Y grid with min,max, number of points"},
-		{ "getGridX",        Grid2D_getGridX,      METH_VARARGS,"returns the X as a tuple"},
-		{ "getGridY",        Grid2D_getGridY,      METH_VARARGS,"returns the Y as a tuple"},
-		{ "binValue",        Grid2D_binValue,      METH_VARARGS,"bins the value into the 2D mesh"},
-		{ "calcGradient",    Grid2D_calcGradient,  METH_VARARGS,"returns gradient as (gx,gy) for point (x,y)"},
+		{ "getBoundary2D",          Grid2D_getBoundary2D,        METH_VARARGS,"returns the internal Boundary2D instance"},
+		{ "setBoundary2D",          Grid2D_setBoundary2D,        METH_VARARGS,"sets the internal Boundary2D instance"},
+		{ "setZero",                Grid2D_setZero,              METH_VARARGS,"sets all points on the grid to zero"},
+		{ "getValue",               Grid2D_getValue,             METH_VARARGS,"returns value for (x,y) point"},
+		{ "setValue",               Grid2D_setValue,             METH_VARARGS,"sets value for (ix,iy) point"},
+		{ "setGridX",               Grid2D_setGridX,             METH_VARARGS,"sets the X grid with min,max, number of points"},
+		{ "setGridY",               Grid2D_setGridY,             METH_VARARGS,"sets the Y grid with min,max, number of points"},
+		{ "getGridX",               Grid2D_getGridX,             METH_VARARGS,"returns the X as a tuple"},
+		{ "getGridY",               Grid2D_getGridY,             METH_VARARGS,"returns the Y as a tuple"},
+		{ "binValue",               Grid2D_binValue,             METH_VARARGS,"bins the value into the 2D mesh"},
+		{ "findPotential",          Grid2D_findPotential,        METH_VARARGS,"Finds the potential and put it into external Grid2D"},
+		{ "addBoundaryPotential", 	Grid2D_addBoundaryPotential, METH_VARARGS,"Adds the boundary induced potential to itself"},
+		{ "calcGradient",           Grid2D_calcGradient,         METH_VARARGS,"returns gradient as (gx,gy) for point (x,y)"},
     {NULL}
   };
 

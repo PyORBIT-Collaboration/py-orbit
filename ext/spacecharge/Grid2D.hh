@@ -69,6 +69,9 @@ public:
 	/** Finds and sets the potential to the external grid */	
 	void findPotential(Grid2D* phiGrid2D);
 	
+	/** Adds the boundary induced potential to itself. It should be the potential Grid2D. */	
+	void addBoundaryPotential();
+	
   /** Returns the grid size in x-direction */
   int getBinsX(); 
 

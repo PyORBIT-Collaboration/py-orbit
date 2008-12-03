@@ -786,6 +786,14 @@ void Boundary2D::addBoundaryPotential(double** phisc,
   //std::cout << "debug Boundary exit. \n";
 }
 
+// Adds potential from the boundary to the grid for all points
+void Boundary2D::addBoundaryPotential(double** phisc)
+{
+	addBoundaryPotential(phisc,0,xBins_ - 1, 0,yBins_ - 1);
+}
+
+
+
 void Boundary2D::findPotential(double** rhosc, double** phisc)
 {
   int i, j, index;

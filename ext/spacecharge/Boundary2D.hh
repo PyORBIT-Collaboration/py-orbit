@@ -100,6 +100,9 @@ public:
                            int iXmin, int iXmax, 
                            int iYmin, int iYmax);
 
+	/** Adds potential from the boundary to the grid for all points */
+	void addBoundaryPotential(double** phisc);
+	
   /** Solves the Poisson problem for an external charge distribution and
 	    puts results into an external potential grid
 	*/

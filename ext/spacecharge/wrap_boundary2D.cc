@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "Boundary2D.hh"
+#include "Grid2D.hh"
 
 using namespace OrbitUtils;
 
@@ -54,7 +55,7 @@ extern "C" {
     pyORBIT_Object* pyBoundary2D = (pyORBIT_Object*) self;
 		Boundary2D* cpp_Boundary2D = (Boundary2D*) pyBoundary2D->cpp_obj;
 		double x,y;
-		if(!PyArg_ParseTuple(args,"dd:getValue",&x,&y)){
+		if(!PyArg_ParseTuple(args,"dd:calculatePhi",&x,&y)){
 			ORBIT_MPI_Finalize("PyBoundary2D - calculatePhi(x,y) - parameters are needed.");
 		}
 		return Py_BuildValue("d",cpp_Boundary2D->calculatePhi(x,y));
@@ -175,6 +176,54 @@ extern "C" {
 		}		
 		return Py_BuildValue("d",cpp_Boundary2D->getBoundPointY(i));
 	}		
+		
+	//findPotential(Grid2D* rhoGrid2D,Grid2D* phiGrid2D)
+  static PyObject* Boundary2D_findPotential(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyBoundary2D = (pyORBIT_Object*) self;
+		Boundary2D* cpp_Boundary2D = (Boundary2D*) pyBoundary2D->cpp_obj;
+		PyObject* pyRhoG;
+		PyObject* pyPhiG;
+		if(!PyArg_ParseTuple(args,"OO:__init__",&pyRhoG,&pyPhiG)){		
+			ORBIT_MPI_Finalize("PyBoundary2D.findPotential(Grid2D rhoGrid2D,Grid2D phiGrid2D) - method needs parameters.");
+		}	
+		PyObject* pyORBIT_Grid2D_Type = getSpaceChargeType("Grid2D");
+		if(!PyObject_IsInstance(pyRhoG,pyORBIT_Grid2D_Type) || !PyObject_IsInstance(pyPhiG,pyORBIT_Grid2D_Type)){
+			ORBIT_MPI_Finalize("PyBoundary2D.findPotential(Grid2D rhoGrid2D,Grid2D phiGrid2D) - method needs parameters.");
+		}			
+		Grid2D* grid2D_rho = (Grid2D*)(((pyORBIT_Object*) pyRhoG)->cpp_obj);
+		Grid2D* grid2D_phi = (Grid2D*)(((pyORBIT_Object*) pyPhiG)->cpp_obj);
+		if(cpp_Boundary2D->getBinsX() != grid2D_rho->getBinsX() || 
+			 cpp_Boundary2D->getBinsY() != grid2D_rho->getBinsY() ||
+			 cpp_Boundary2D->getBinsX() != grid2D_phi->getBinsX() || 
+			 cpp_Boundary2D->getBinsY() != grid2D_phi->getBinsY()){
+		    ORBIT_MPI_Finalize("PyBoundary2D.findPotential(Grid2D rhoGrid2D,Grid2D phiGrid2D) - grid sizes are wrong.");
+			 }
+		cpp_Boundary2D->findPotential(grid2D_rho->getArr(),grid2D_phi->getArr());
+		Py_INCREF(Py_None);
+    return Py_None;	
+	}		
+	
+	//addBoundaryPotential(double** phisc)
+  static PyObject* Boundary2D_addBoundaryPotential(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyBoundary2D = (pyORBIT_Object*) self;
+		Boundary2D* cpp_Boundary2D = (Boundary2D*) pyBoundary2D->cpp_obj;
+		PyObject* pyPhiG;
+		if(!PyArg_ParseTuple(args,"O:__init__",&pyPhiG)){		
+			ORBIT_MPI_Finalize("PyBoundary2D.addBoundaryPotential(Grid2D phiGrid2D) - method needs parameter.");
+		}	
+		PyObject* pyORBIT_Grid2D_Type = getSpaceChargeType("Grid2D");
+		if(!PyObject_IsInstance(pyPhiG,pyORBIT_Grid2D_Type)){
+			ORBIT_MPI_Finalize("PyBoundary2D.addBoundaryPotential(Grid2D phiGrid2D) - method needs parameter.");
+		}			
+		Grid2D* grid2D_phi = (Grid2D*)(((pyORBIT_Object*) pyPhiG)->cpp_obj);
+		if(cpp_Boundary2D->getBinsX() != grid2D_phi->getBinsX() || 
+			 cpp_Boundary2D->getBinsY() != grid2D_phi->getBinsY()){
+		    ORBIT_MPI_Finalize("PyBoundary2D.addBoundaryPotential(Grid2D phiGrid2D) - grid sizes are wrong.");
+			 }
+		cpp_Boundary2D->addBoundaryPotential(grid2D_phi->getArr());
+		Py_INCREF(Py_None);
+    return Py_None;	
+	}	
 	
   //-----------------------------------------------------
   //destructor for python Boundary2D class (__del__ method).
@@ -190,21 +239,24 @@ extern "C" {
 	// defenition of the methods of the python Boundary2D wrapper class
 	// they will be vailable from python level
   static PyMethodDef Boundary2DClassMethods[] = {
-		{ "calculatePhi",     Boundary2D_calculatePhi,     METH_VARARGS,"returns potential from boundary for (x,y) point "},
-		{ "getBinsX",         Boundary2D_getBinsX,         METH_VARARGS,"returns the number of grid points in x-direction"},
-		{ "getBinsY",         Boundary2D_getBinsY,         METH_VARARGS,"returns the number of grid points in y-direction"},
-		{ "getGridMaxX",      Boundary2D_getGridMaxX,      METH_VARARGS,"returns max grid value in x-direction"},
-		{ "getGridMaxY",      Boundary2D_getGridMaxY,      METH_VARARGS,"returns max grid value in y-direction"},
-		{ "getGridMinX",      Boundary2D_getGridMinX,      METH_VARARGS,"returns min grid value in x-direction"},
-		{ "getGridMinY",      Boundary2D_getGridMinY,      METH_VARARGS,"returns min grid value in y-direction"},
-		{ "getStepX",         Boundary2D_getStepX,         METH_VARARGS,"returns grid step in x-direction"},
-		{ "getStepY",         Boundary2D_getStepY,         METH_VARARGS,"returns grid step in y-direction"},
-		{ "getBoundaryShape", Boundary2D_getBoundaryShape, METH_VARARGS,"returns boundary shape Circle,Ellipse, or Rectangle"},
-		{ "getBoundarySizeX", Boundary2D_getBoundarySizeX, METH_VARARGS,"returns size (from min to max) in x-direction"},
-		{ "getBoundarySizeY", Boundary2D_getBoundarySizeY, METH_VARARGS,"returns size (from min to max) in y-direction"},
-		{ "getNumbBPoints",   Boundary2D_getNumbBPoints,   METH_VARARGS,"returns number of points on boundary"},
-		{ "getBoundPointX",   Boundary2D_getBoundPointX,   METH_VARARGS,"returns x-coord. of the i-th boundary point"},
-		{ "getBoundPointY",   Boundary2D_getBoundPointY,   METH_VARARGS,"returns y-coord. of the i-th boundary point"},
+		{ "calculatePhi",        Boundary2D_calculatePhi,        METH_VARARGS,"returns potential from boundary for (x,y) point "},
+		{ "getBinsX",            Boundary2D_getBinsX,            METH_VARARGS,"returns the number of grid points in x-direction"},
+		{ "getBinsY",            Boundary2D_getBinsY,            METH_VARARGS,"returns the number of grid points in y-direction"},
+		{ "getGridMaxX",         Boundary2D_getGridMaxX,         METH_VARARGS,"returns max grid value in x-direction"},
+		{ "getGridMaxY",         Boundary2D_getGridMaxY,         METH_VARARGS,"returns max grid value in y-direction"},
+		{ "getGridMinX",         Boundary2D_getGridMinX,         METH_VARARGS,"returns min grid value in x-direction"},
+		{ "getGridMinY",         Boundary2D_getGridMinY,         METH_VARARGS,"returns min grid value in y-direction"},
+		{ "getStepX",            Boundary2D_getStepX,            METH_VARARGS,"returns grid step in x-direction"},
+		{ "getStepY",            Boundary2D_getStepY,            METH_VARARGS,"returns grid step in y-direction"},
+		{ "getBoundaryShape",    Boundary2D_getBoundaryShape,    METH_VARARGS,"returns boundary shape Circle,Ellipse, or Rectangle"},
+		{ "getBoundarySizeX",    Boundary2D_getBoundarySizeX,    METH_VARARGS,"returns size (from min to max) in x-direction"},
+		{ "getBoundarySizeY",    Boundary2D_getBoundarySizeY,    METH_VARARGS,"returns size (from min to max) in y-direction"},
+		{ "getNumbBPoints",      Boundary2D_getNumbBPoints,      METH_VARARGS,"returns number of points on boundary"},
+		{ "getBoundPointX",      Boundary2D_getBoundPointX,      METH_VARARGS,"returns x-coord. of the i-th boundary point"},
+		{ "getBoundPointY",      Boundary2D_getBoundPointY,      METH_VARARGS,"returns y-coord. of the i-th boundary point"},
+		{ "findPotential",       Boundary2D_findPotential,       METH_VARARGS,"findPotential(Grid2D rhoGrid2D,Grid2D phiGrid2D)"},
+		{ "addBoundaryPotential",Boundary2D_addBoundaryPotential,METH_VARARGS,"addBoundaryPotential(Grid2D phiGrid2D)"},
+
     {NULL}
   };
 

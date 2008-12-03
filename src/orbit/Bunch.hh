@@ -61,6 +61,8 @@ public:
   Bunch();
   virtual ~Bunch();
 
+  double** arrAttr;
+  
   double& x(int index);
   double& y(int index);
   double& z(int index);
@@ -252,7 +254,7 @@ protected:
   //inclusive Low and exclusive Upp indexes
   std::map<std::string,int> attrCntrLowIndMap;
   std::map<std::string,int> attrCntrUppIndMap;
-  double** arrAttr;
+
 
   std::map<std::string,ParticleAttributes*> attrCntrMapTemp;
   std::set<ParticleAttributes*> attrCntrSet;

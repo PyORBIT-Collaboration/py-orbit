@@ -36,7 +36,7 @@
 #include "LasStripExternalEffects.hh"
 #include "RungeKuttaTracker.hh"
 #include "OrbitConst.hh"
-#include "Relativism.hh"
+#include "LorentzTransformationEM.hh"
 
 inline int	KroneckerDelta(int i,int j)	{	if	(i==j) return	1; else return	0;}
 
@@ -114,28 +114,26 @@ void LasStripExternalEffects::applyEffects(Bunch* bunch, int index,
 {
 	double** xyz = bunch->coordArr();
 	double B_x,B_y,B_z;
+	double mass = bunch->getMass();
 	
-	
-
-
-
 		for (int i=0; i<bunch->getSizeGlobal();i++)	{
 
 		GetLabLaserField(xyz[i][0],xyz[i][2],xyz[i][4],t,Ex_las,Ey_las,Ez_las,B_x,B_y,B_z);
-		Relativism::LorentzTransformation(xyz[i][1],xyz[i][3],xyz[i][5],Ex_las,Ey_las,Ez_las,B_x,B_y,B_z);	
+		LorentzTransformationEM::transform(mass,
+			                                 xyz[i][1],xyz[i][3],xyz[i][5],
+																			 Ex_las,Ey_las,Ez_las,
+																			 B_x,B_y,B_z);	
 		
 			
 		fieldSource->getElectricField(xyz[i][0],xyz[i][2],xyz[i][4],t,Ex_stat,Ey_stat,Ez_stat);
 		fieldSource->getMagneticField(xyz[i][0],xyz[i][2],xyz[i][4],t,B_x,B_y,B_z);		
-		Relativism::LorentzTransformation(xyz[i][1],xyz[i][3],xyz[i][5],Ex_stat,Ey_stat,Ez_stat,B_x,B_y,B_z);	
-
-
+		LorentzTransformationEM::transform(mass,
+			                                 xyz[i][1],xyz[i][3],xyz[i][5],
+																			 Ex_stat,Ey_stat,
+																			 Ez_stat,B_x,B_y,B_z);	
 			
 			GetFrameParticleParameters(i,t_step,bunch);	//	This function gives parameters Ez_stat	Ex_las	Ey_las	Ez_las	t_part	omega_part	part_t_step phasa_part
 
-			
-			
-			
 			ofstream file("data_ampl.txt",ios::app);
 			file<<t<<"\t";
 			for(int n=1;n<levels+1;n++)	file<<Re(i,n,n)<<"\t";

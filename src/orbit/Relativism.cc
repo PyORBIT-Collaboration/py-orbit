@@ -1,7 +1,7 @@
 //////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
-//    Relativism.cc
+//    LorentzTransformationEM.cc
 //
 // AUTHOR
 //    T. Gorlov
@@ -10,11 +10,14 @@
 //    06/28/2005
 //
 // DESCRIPTION
-//    This class provides Lorentz transvormation for the electro-magnetic field
+//    This class provides Lorentz transformations for the electromagnetic field
 //    from the laboratory frame to the particle rest frame.
-//    px,py,pz - momentums of the particle inline the lab frame in eV/c
-//    E_x,E_y,E_z - components of the electric field V/m (parameters are replaced on the place) 
-//    B_x,B_y,B_z - components of the magnetic field [T] (parameters are replaced on the place) 
+//    mass - mass of the particle in GeV
+//    px,py,pz - momentum of the particle the lab frame in GeV/c
+//    E_x,E_y,E_z - components of the electric field V/m (parameters are replaced in place) 
+//    B_x,B_y,B_z - components of the magnetic field [T] (parameters are replaced in place) 
+//
+//    OrbitConst::c in [m/sec]
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -25,19 +28,20 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-#include "Relativism.hh"
+#include "LorentzTransformationEM.hh"
 #include "OrbitConst.hh"
 #include <math.h>
 
-void 	Relativism::LorentzTransformation(double px, double py, double pz,
+void 	LorentzTransformationEM::transform(double mass, 
+	                                      double px, double py, double pz,
 	                                      double& E_x, double& E_y, double& E_z,
 																				double& B_x, double& B_y, double& B_z)
 {
 	
-	double mp2=(OrbitConst::mass_proton)*(OrbitConst::mass_proton);
+	double mp2= mass*mass;
 	double p2=px*px+py*py+pz*pz;
 	double E=sqrt(mp2+p2);
-	double gamma=E/(OrbitConst::mass_proton);
+	double gamma=E/mass;
 	double _b=(OrbitConst::c)/E;
 	double vx=_b*px;
 	double vy=_b*py;

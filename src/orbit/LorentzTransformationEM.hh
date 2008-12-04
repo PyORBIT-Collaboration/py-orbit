@@ -1,5 +1,5 @@
-#ifndef RELATIVISM_HH_
-#define RELATIVISM_HH_
+#ifndef LORENTZ_TRANSFORMATION_EM_
+#define LORENTZ_TRANSFORMATION_EM_
 
 //////////////////////////////// -*- C++ -*- //////////////////////////////
 //
@@ -10,7 +10,7 @@
 //    T. Gorlov
 //
 // CREATED
-//    06/28/2005
+//    06/28/2008
 //
 // DESCRIPTION
 //    This class provides Lorentz transformations for the electromagnetic field
@@ -20,14 +20,8 @@
 //    E_x,E_y,E_z - components of the electric field V/m (parameters are replaced in place) 
 //    B_x,B_y,B_z - components of the magnetic field [T] (parameters are replaced in place)   
 //
+//    OrbitConst::c in [m/sec]
 ///////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// include files
-//
-/////////////////////////////////////////////////////////////////////////////
-
 
 class  LorentzTransformationEM
 {
@@ -38,14 +32,6 @@ public:
 													double& B_x, double& B_y, double& B_z);	
 };
 
-///////////////////////////////////////////////////////////////////////////
-//
-// END OF FILE
-//
-///////////////////////////////////////////////////////////////////////////
-
-
-
-#endif /*RELATIVISM_HH_*/
+#endif /*LORENTZ_TRANSFORMATION_EM_*/
 
 

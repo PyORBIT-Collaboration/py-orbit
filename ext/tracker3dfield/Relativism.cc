@@ -10,7 +10,11 @@
 //    06/28/2005
 //
 // DESCRIPTION
-//    
+//    This class provides Lorentz transvormation for the electro-magnetic field
+//    from the laboratory frame to the particle rest frame.
+//    px,py,pz - momentums of the particle inline the lab frame in eV/c
+//    E_x,E_y,E_z - components of the electric field V/m (parameters are replaced on the place) 
+//    B_x,B_y,B_z - components of the magnetic field [T] (parameters are replaced on the place) 
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -25,9 +29,10 @@
 #include "OrbitConst.hh"
 #include <math.h>
 
-
-void 	Relativism::LorentzTransformation(double px, double py, double pz,double& E_x, double& E_y, double& E_z,double& B_x, double& B_y, double& B_z)	{
-	
+void 	Relativism::LorentzTransformation(double px, double py, double pz,
+	                                      double& E_x, double& E_y, double& E_z,
+																				double& B_x, double& B_y, double& B_z)
+{
 	
 	double mp2=(OrbitConst::mass_proton)*(OrbitConst::mass_proton);
 	double p2=px*px+py*py+pz*pz;
@@ -62,17 +67,6 @@ void 	Relativism::LorentzTransformation(double px, double py, double pz,double& 
 	// Magnetic field in the frame of particle	(ignored in case of useless for faster computations)
 	B_x=gamma*EV1-vx*BK;
 	B_y=gamma*EV2-vy*BK;
-	B_z=gamma*EV3-vz*BK;
-
-	
-}
-
-
-Relativism::Relativism()
-{
-}
-
-Relativism::~Relativism()
-{
+	B_z=gamma*EV3-vz*BK;	
 }
 

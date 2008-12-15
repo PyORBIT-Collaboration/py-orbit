@@ -22,6 +22,10 @@
 //
 //    OrbitConst::c in [m/sec]
 ///////////////////////////////////////////////////////////////////////////
+#include <complex>
+typedef std::complex<double>	tcomplex;
+
+
 
 class  LorentzTransformationEM
 {
@@ -29,7 +33,13 @@ public:
   static  void 	transform(double mass,
 		                      double px, double py, double pz,
 													double& E_x, double& E_y, double& E_z,
-													double& B_x, double& B_y, double& B_z);	
+													double& B_x, double& B_y, double& B_z);
+  
+  static  void 	complex_transform(double mass,
+  		                      double px, double py, double pz,
+  		                    tcomplex& E_x, tcomplex& E_y, tcomplex& E_z,
+  		                    tcomplex& B_x, tcomplex& B_y, tcomplex& B_z);
+  
 };
 
 #endif /*LORENTZ_TRANSFORMATION_EM_*/

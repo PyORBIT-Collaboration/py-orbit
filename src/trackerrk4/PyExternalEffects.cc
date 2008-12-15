@@ -32,7 +32,7 @@
 #include "PyExternalEffects.hh"
 #include "RungeKuttaTracker.hh"
 
-using namespace Tracker3DField;
+using namespace TrackerRK4;
 using namespace OrbitUtils;
 
 PyExternalEffects::PyExternalEffects(PyObject* py_wrapperIn)

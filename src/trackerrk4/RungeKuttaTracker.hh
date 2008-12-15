@@ -23,7 +23,7 @@
 
 #include "CppPyWrapper.hh"
 
-namespace Tracker3DField{
+namespace TrackerRK4{
 	
 	class RungeKuttaTracker: public OrbitUtils::CppPyWrapper
 	{
@@ -164,7 +164,7 @@ namespace Tracker3DField{
 		double k4_vct[6];
 	};
 	
-}; // end of Tracker3DField name-space
+}; // end of TrackerRK4 name-space
 
 
 #endif

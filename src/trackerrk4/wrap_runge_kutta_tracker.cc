@@ -7,10 +7,10 @@
 
 #include "RungeKuttaTracker.hh"
 
-using namespace Tracker3DField;
+using namespace TrackerRK4;
 using namespace OrbitUtils;
 
-namespace wrap_tracker3dfield{
+namespace wrap_trackerrk4{
 
   void error(const char* msg){ ORBIT_MPI_Finalize(msg); }
 
@@ -295,5 +295,5 @@ extern "C" {
 }
 #endif
 
-//end of namespace wrap_tracker3dfield
+//end of namespace wrap_trackerrk4
 }

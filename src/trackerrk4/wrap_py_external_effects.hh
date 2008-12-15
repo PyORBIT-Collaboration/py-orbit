@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-  namespace wrap_tracker3dfield_py_external_effects{
+  namespace wrap_trackerrk4_py_external_effects{
     void initPyExternalEffects(PyObject* module);
   }
 

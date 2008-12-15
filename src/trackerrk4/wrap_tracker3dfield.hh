@@ -1,5 +1,5 @@
-#ifndef WRAP_TRACKER_3D_FIELD_H
-#define WRAP_TRACKER_3D_FIELD_H
+#ifndef WRAP_RK4_TRACKER_H
+#define WRAP_RK4_TRACKER_H
 
 #include "Python.h"
 
@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-	void inittracker3dfield(void);
+	void inittrackerrk4(void);
 	
 #ifdef __cplusplus
 }

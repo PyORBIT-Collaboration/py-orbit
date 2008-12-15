@@ -21,10 +21,7 @@
 
 #include "CppPyWrapper.hh"
 
-
-
-
-namespace Tracker3DField{
+namespace TrackerRK4{
 	
 	class RungeKuttaTracker;
 	
@@ -66,7 +63,7 @@ namespace Tracker3DField{
 		
 	};
 	
-}; // end of Tracker3DField name-space
+}; // end of TrackerRK4 name-space
 
 
 #endif

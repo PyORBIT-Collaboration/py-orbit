@@ -18,7 +18,7 @@
 #include "ExternalEffects.hh"
 #include "RungeKuttaTracker.hh"
 
-using namespace Tracker3DField;
+using namespace TrackerRK4;
 using namespace OrbitUtils;
 		
 ExternalEffects::ExternalEffects(){

@@ -10,9 +10,9 @@
 #include "PyExternalEffects.hh"
 
 using namespace OrbitUtils;
-using namespace Tracker3DField;
+using namespace TrackerRK4;
 
-namespace wrap_tracker3dfield_py_external_effects{
+namespace wrap_trackerrk4_py_external_effects{
 
   void error(const char* msg){ ORBIT_MPI_Finalize(msg); }
 
@@ -138,5 +138,5 @@ extern "C" {
 }
 #endif
 
-//end of namespace wrap_tracker3dfield
+//end of namespace wrap_trackerrk4
 }

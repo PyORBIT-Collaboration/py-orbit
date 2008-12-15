@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-  namespace wrap_tracker3dfield{
+  namespace wrap_trackerrk4{
     void initRungeKuttaTracker(PyObject* module);
   }
 

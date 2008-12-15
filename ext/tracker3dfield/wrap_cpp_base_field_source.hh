@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
   namespace wrap_tracker3dfield_cpp_base_field_source{
-    void initBaseFieldSource(PyObject* module);
+    void initCppBaseFieldSource(PyObject* module);
   }
 
 #ifdef __cplusplus

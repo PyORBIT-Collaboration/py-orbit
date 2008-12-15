@@ -8,6 +8,7 @@
 #include "wrap_bunch.hh"
 #include "wrap_utils.hh"
 #include "wrap_teapotbase.hh"
+#include "wrap_trackerrk4.hh"
 
 /**
  * The main function that will initialize the MPI and will 
@@ -43,7 +44,7 @@ int main (int argc, char **argv)
 	wrap_orbit_utils::initutils();
 	
 	wrap_teapotbase::initteapotbase();
-
+	inittrackerrk4();
 
 	//the python interpreter
 	//It will call Py_Initialize() again, but there is no harm

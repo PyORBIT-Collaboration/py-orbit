@@ -1,6 +1,7 @@
 DIRS  = 
 DIRS += ./ecloud
-DIRS += ./tracker3dfield
+DIRS += ./laserstripping
+DIRS += ./spacecharge
 
 #========rules=========================
 

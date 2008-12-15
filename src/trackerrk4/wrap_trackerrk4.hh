@@ -13,4 +13,4 @@ extern "C" {
 }
 #endif  // __cplusplus
 
-#endif // WRAP_TRACKER_3D_FIELD_H
+#endif // WRAP_RK4_TRACKER_H

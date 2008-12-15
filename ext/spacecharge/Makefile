@@ -13,6 +13,10 @@ INC += $(wildcard *.h)
 INC_DIRS =$(filter %/,$(shell ls -F ../../src))
 INCLUDES_LOCAL = $(patsubst %/, -I../../src/%, $(INC_DIRS))
 
+#FFTW library
+INCLUDES_LOCAL += -I${FFTW_ROOT}/include
+FFTW_LIBS = -L${FFTW_ROOT}/lib -lrfftw -lfftw
+
 #wrappers CC FLAGS
 WRAPPER_FLAGS = -fno-strict-aliasing
 
@@ -27,7 +31,7 @@ spacecharge_lib = spacecharge.so
 
 #========rules=========================
 compile: $(OBJS_WRAP) $(OBJS) $(INC)
-	$(CXX) -fPIC $(SHARED_LIB) -o ../../modules/$(spacecharge_lib) $(OBJS) 
+	$(CXX) -fPIC $(SHARED_LIB) $(FFTW_LIBS) -o ../../modules/$(spacecharge_lib) $(OBJS) 
 
 ./obj/wrap_%.o : wrap_%.cc $(INC)
 	$(CXX) $(CXXFLAGS) $(WRAPPER_FLAGS) $(INCLUDES_LOCAL) $(INCLUDES) -c $< -o $@;

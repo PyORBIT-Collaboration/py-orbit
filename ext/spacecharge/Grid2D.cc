@@ -226,11 +226,6 @@ void Grid2D::calcGradient(double x, double y, double& ex, double& ey){
 /** Calculates gradient at a grid point (ix,iy) */	
 void Grid2D::calcGradient(int iX, int iY, double& ex, double& ey){
 	if(iX != 0 && iX != (xBins_ - 1) && iY != 0 && iY != (yBins_ - 1)){
-		double Wm = 0.125;
-		double W0 = 0.75;
-		double Wp = 0.125;	
-		double dWm = -0.5; 
-		double dWp = 0.5; 
 		ex =
 		(- 0.125) * arr_[iX-1][iY-1] +
 		(- 0.75 )* arr_[iX-1][iY]   +

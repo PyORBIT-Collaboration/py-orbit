@@ -6,7 +6,7 @@
 #include "Python.h"
 
 #include "ExternalEffects.hh"
-#include <complex.h>
+#include <complex>
 
 typedef std::complex<double>	tcomplex;
 
@@ -71,6 +71,7 @@ namespace Tracker3DField{
 			  double* Gamma_i;
 			  double* E_i;
 			  double** gamma_ij;
+			  bool** cond;
 
 			  
 			  double delta_F;

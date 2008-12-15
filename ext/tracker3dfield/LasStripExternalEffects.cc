@@ -29,21 +29,25 @@
 #include "orbit_mpi.hh"
 #include <iostream>
 #include <iomanip>
-#include <math.h>
-#include <fstream.h>
-#include <complex.h>
+#include <cmath>
+#include <fstream>
 
 #include "LasStripExternalEffects.hh"
 #include "RungeKuttaTracker.hh"
 #include "OrbitConst.hh"
 #include "LorentzTransformationEM.hh"
 
-inline int	KroneckerDelta(int i,int j)	{	if	(i==j) return	1; else return	0;}
 
 #define Re(i,n,m) bunch->arrAttr[i][(n-1)*levels+m]		//i-part index, n,m-attr index
 #define Im(i,n,m) bunch->arrAttr[i][(n-1)*levels+m+levels*levels]
 #define phasa(i)  bunch->arrAttr[i][0]
 #define time(i)  bunch->arrAttr[i][2*levels*levels+1]
+#define x0(i)  bunch->arrAttr[i][2*levels*levels+2]
+#define y0(i)  bunch->arrAttr[i][2*levels*levels+3]
+#define z0(i)  bunch->arrAttr[i][2*levels*levels+4]
+#define px0(i)  bunch->arrAttr[i][2*levels*levels+5]
+#define py0(i)  bunch->arrAttr[i][2*levels*levels+6]
+#define pz0(i)  bunch->arrAttr[i][2*levels*levels+7]
 #define dm(i,n,m) tcomplex(bunch->arrAttr[i][(n-1)*levels+m],bunch->arrAttr[i][(n-1)*levels+m+levels*levels])
 #define J tcomplex(0.,1.)
 #define k_rk(j,n,m) k_RungeKutt[j][(n-1)*levels+m]
@@ -69,6 +73,7 @@ LasStripExternalEffects::LasStripExternalEffects(double a,double b,double c,char
 k_RungeKutt=new tcomplex**[levels+1];	for (int i=0;i<levels+1;i++)	k_RungeKutt[i]=new tcomplex*[levels+1]; for (int i=0;i<levels+1;i++) for (int j=0;j<levels+1;j++)	k_RungeKutt[i][j]=new tcomplex[5];
 exp_mu_El=new tcomplex**[levels+1];	for (int i=0;i<levels+1;i++)	exp_mu_El[i]=new tcomplex*[levels+1]; for (int i=0;i<levels+1;i++) for (int j=0;j<levels+1;j++)	exp_mu_El[i][j]=new tcomplex[5];
 gamma_ij=new double*[levels+1];	for (int i=0;i<levels+1;i++)	gamma_ij[i]=new double[levels+1];
+cond=new bool*[levels+1];	for (int i=0;i<levels+1;i++)	cond[i]=new bool[levels+1];
 Gamma_i=new double[levels+1];
 E_i=new double[levels+1];
 
@@ -84,6 +89,7 @@ LasStripExternalEffects::~LasStripExternalEffects()
 	delete [] E_i;
 	delete [] Gamma_i;
 	for (int i=0;i<levels+1;i++)	delete	[]	gamma_ij[i];	delete	[]	gamma_ij;
+	for (int i=0;i<levels+1;i++)	delete	[]	cond[i];		delete	[]	cond;
 	for (int i=0;i<levels+1;i++)	delete	[]	energy[i];		delete	[]	energy;	
 	for (int i=0;i<levels+1;i++)	delete	[]	gamma_autoionization[i];		delete	[]	gamma_autoionization;
 	for (int i=0;i<levels+1;i++) for (int j=0;j<levels+1;j++)	delete [] gamma_spontaneous_relax[i][j]; for (int i=0;i<levels+1;i++)	delete [] gamma_spontaneous_relax[i];	delete	[]	gamma_spontaneous_relax;
@@ -125,7 +131,7 @@ void LasStripExternalEffects::applyEffects(Bunch* bunch, int index,
 																			 B_x,B_y,B_z);	
 		
 			
-		fieldSource->getElectricField(xyz[i][0],xyz[i][2],xyz[i][4],t,Ex_stat,Ey_stat,Ez_stat);
+		fieldSource->getElectricField(xyz[i][0],xyz[i][2],xyz[i][4],t,Ex_stat,Ey_stat,Ez_stat);	
 		fieldSource->getMagneticField(xyz[i][0],xyz[i][2],xyz[i][4],t,B_x,B_y,B_z);		
 		LorentzTransformationEM::transform(mass,
 			                                 xyz[i][1],xyz[i][3],xyz[i][5],
@@ -140,13 +146,13 @@ void LasStripExternalEffects::applyEffects(Bunch* bunch, int index,
 			double sum=0;	for(int n=1;n<levels+1;n++)	sum+=Re(i,n,n);
 			file<<sum<<"\n";
 			file.close();			
-			
+		
 //				cout<<scientific<<setprecision(10)<<bunch->x(0)<<"\t"<<bunch->y(0)<<"\t"<<bunch->z(0)<<"\n";			
 				
 			
 		AmplSolver4step(i,bunch);	
 		
-		
+	
 		
 		}
 	
@@ -174,6 +180,8 @@ double	LasStripExternalEffects::getLaserPower()	{	return LaserPower;}
 void	LasStripExternalEffects::setLaser_lambda(double a)	{	Laser_lambda=a;}
 
 double	LasStripExternalEffects::getLaser_lambda()	{	return Laser_lambda;}
+
+
 
 
 
@@ -374,13 +382,14 @@ void	LasStripExternalEffects::GetFrameParticleParameters(int i, double t_step, B
 	
 	double ta=2.418884326505e-17;			//atomic unit of time
 	double Ea=5.14220642e11;				//Atomic unit of electric field
+	double mp=bunch->getMass();
 
 	
 //next four lines calculate relyativistic factor-Gamma
 double p2=xyz[i][1]*xyz[i][1]+xyz[i][3]*xyz[i][3]+xyz[i][5]*xyz[i][5];
-double mp2=(OrbitConst::mass_proton)*(OrbitConst::mass_proton);
+double mp2=mp*mp;
 double E=sqrt(mp2+p2);
-double gamma=E/(OrbitConst::mass_proton);
+double gamma=E/mp;
 double beta_cos_pn=(xyz[i][1]*nx_lab+xyz[i][3]*ny_lab+xyz[i][5]*nz_lab)/E;
 
 
@@ -415,29 +424,32 @@ omega_part=2*OrbitConst::PI*OrbitConst::c*gamma*(1-beta_cos_pn)*ta/Laser_lambda;
 /////froissar stora test      froissar stora test      froissar stora test      froissar stora test    ///////////////   
 //next eight lines are testing parameters of laser electric field (in atomic units)
 
-double Rabi=1e+11*ta;					//Rabi frequensy (in atomic units)
+double Rabi=1e+12*ta;					//Rabi frequensy (in atomic units)
 double Elas=64*Rabi*sqrt(2.)/27;		//Amplitude of laser field (in atonic units)
 Ex_las=0.5773502691896258*Elas;			//components of laser field (in atomic units)
 Ey_las=0.5773502691896258*Elas;	
 Ez_las=0.5773502691896258*Elas;
 
-//Ex_las=Elas;
-//Ey_las=0;
-//Ez_las=0;
+Ex_las=Elas;
+Ey_las=0;
+Ez_las=0;
 
 
 Ez_stat=0.00005;
 
+
 double gamma_sweep=-OrbitConst::PI*Rabi*Rabi/2/log(1-0.9);
 
-omega_part=4/9.+gamma_sweep*(t_part-60*(2*OrbitConst::PI/Rabi)/2);				// frequensy of laser in particle frame (in atomic units) 
+omega_part=0*0.44421741823240407099+4/9.+gamma_sweep*(t_part-10000*(2*OrbitConst::PI/Rabi)/2);				// frequensy of laser in particle frame (in atomic units) 
 
 /////////////froissar stora test      froissar stora test      froissar stora test      froissar stora test ///////////          
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
 
 
-//cout<<"gamma="<<gamma<<"\n";
+//cout<<setprecision(20)<<"gamma="<<gamma_sweep<<"\n";
+
+
 	
 }
 
@@ -455,87 +467,109 @@ omega_part=4/9.+gamma_sweep*(t_part-60*(2*OrbitConst::PI/Rabi)/2);				// frequen
 
 
 void LasStripExternalEffects::AmplSolver4step(int i, Bunch* bunch)	{
-
 	
-double dt;
-tcomplex z;
+	
+	
+	
 	
 
-	for(int n=1; n<levels+1;n++)	GetEnergyAutoionization(n,E_i[n], Gamma_i[n]);
-	
-//	if(t_part==0)	{ for (int kk=1; kk<15; kk++)	cout<<setprecision(20)<<"Ei=  "<<E_i[kk]<<"\n";}
+	double** xyz = bunch->coordArr();
+	tcomplex z,mu_Elas;
+	double dt,mu_x,mu_y,mu_z;
 		
-	for(int n=1; n<levels+1;n++)
-	for(int m=1; m<levels+1;m++)	{
-		
-	double mu_x,mu_y,mu_z;
 
-		GetDipoleTransition(n,m,gamma_ij[n][m],mu_x,mu_y,mu_z);
-		tcomplex mu_Elas=mu_x*Ex_las+J*mu_y*Ey_las+mu_z*Ez_las;
+		for(int n=1; n<levels+1;n++)	GetEnergyAutoionization(n,E_i[n], Gamma_i[n]);
 		
-		exp_mu_El[n][m][1]=exp(J*(t_part*fabs(E_i[n]-E_i[m])-phasa_part))*mu_Elas;
-		exp_mu_El[n][m][2]=exp(J*((t_part+part_t_step/2)*fabs(E_i[n]-E_i[m])-(phasa_part+omega_part*part_t_step/2)))*mu_Elas;
-		exp_mu_El[n][m][3]=exp_mu_El[n][m][2];
-		exp_mu_El[n][m][4]=exp(J*((t_part+part_t_step)*fabs(E_i[n]-E_i[m])-(phasa_part+omega_part*part_t_step)))*mu_Elas;
+//		 cout<<setprecision(20)<<fabs(E_i[1]-E_i[7])<<"\n";
+			
+		for(int n=2; n<levels+1;n++)
+		for(int m=1; m<n;m++)	{
+			
+			GetDipoleTransition(n,m,gamma_ij[n][m],mu_x,mu_y,mu_z);
+			mu_Elas=mu_x*Ex_las+J*mu_y*Ey_las+mu_z*Ez_las;							
+			cond[n][m]=fabs(fabs(E_i[n]-E_i[m])-omega_part)<1000*abs(mu_Elas);
+			
+			if (cond[n][m])	{
+				
+			exp_mu_El[n][m][1]=exp(J*(t_part*fabs(E_i[n]-E_i[m])-phasa_part))*mu_Elas;
+			exp_mu_El[n][m][2]=exp(J*((t_part+part_t_step/2)*fabs(E_i[n]-E_i[m])-(phasa_part+omega_part*part_t_step/2)))*mu_Elas;
+			exp_mu_El[n][m][3]=exp_mu_El[n][m][2];
+			exp_mu_El[n][m][4]=exp(J*((t_part+part_t_step)*fabs(E_i[n]-E_i[m])-(phasa_part+omega_part*part_t_step)))*mu_Elas;	
+			}
+			
+		}
+
+					
+		
+
+		for(int j=1; j<5; j++)
+		for(int n=1; n<levels+1;n++)
+		for(int m=1; m<n+1;m++)	{	
+			
+			if (j==4)	dt=part_t_step;	else dt=part_t_step/2.;
+
+			k_RungeKutt[n][m][j]*=0.;
+			for(int k=1;k<n;k++)			if (cond[n][k]) 	k_RungeKutt[n][m][j]+=exp_mu_El[n][k][j]*(dm(i,k,m)+k_RungeKutt[k][m][j-1]*dt);	
+			for(int k=n+1;k<levels+1;k++)	if (cond[k][n]) 	k_RungeKutt[n][m][j]+=conj(exp_mu_El[k][n][j])*(dm(i,k,m)+k_RungeKutt[k][m][j-1]*dt);
+			for(int k=1;k<m;k++)			if (cond[m][k]) 	k_RungeKutt[n][m][j]-=conj(exp_mu_El[m][k][j])*(dm(i,n,k)+k_RungeKutt[n][k][j-1]*dt);
+			for(int k=m+1;k<levels+1;k++)	if (cond[k][m]) 	k_RungeKutt[n][m][j]-=exp_mu_El[k][m][j]*(dm(i,n,k)+k_RungeKutt[n][k][j-1]*dt);
+			k_RungeKutt[n][m][j]*=J/2.;
+			
+
+
+
+			if(n==m){
+			for(int k=m+1;k<levels+1;k++)	k_RungeKutt[n][m][j]+=gamma_ij[k][m]*(dm(i,k,k)+k_RungeKutt[k][k][j-1]*dt);
+			for(int k=1;k<m;k++)			k_RungeKutt[n][m][j]-=gamma_ij[m][k]*(dm(i,n,m)+k_RungeKutt[n][m][j-1]*dt);
+			}
+			
+			if(n!=m){
+			for(int k=1;k<m;k++)			k_RungeKutt[n][m][j]-=gamma_ij[m][k]*(dm(i,n,m)+k_RungeKutt[n][m][j-1]*dt)/2.;
+			for(int k=1;k<n;k++)			k_RungeKutt[n][m][j]-=gamma_ij[n][k]*(dm(i,n,m)+k_RungeKutt[n][m][j-1]*dt)/2.;
+			}
+		
+			
+			k_RungeKutt[n][m][j]-=(Gamma_i[n]+Gamma_i[m])*(dm(i,n,m)+k_RungeKutt[n][m][j-1]*dt)/2.;
+
+
+			k_RungeKutt[m][n][j]=conj(k_RungeKutt[n][m][j]);
+			
+		}
+
+		
+		
+		
+		
+		
+		
+	for(int n=1;n<levels+1;n++)
+	for(int m=1;m<n+1;m++)	{
+		
+		
+		z=(k_RungeKutt[n][m][1]+2.*k_RungeKutt[n][m][2]+2.*k_RungeKutt[n][m][3]+k_RungeKutt[n][m][4])/6.;
+		Re(i,n,m)+=z.real()*part_t_step;
+		Im(i,n,m)+=z.imag()*part_t_step;
+		
+		Re(i,m,n)=Re(i,n,m);
+		Im(i,m,n)=-Im(i,n,m);
+
 		
 	}
 
+	time(i)+=part_t_step;
+	phasa(i)+=omega_part*part_t_step;
 	
+	x0(i)=xyz[i][0];
+	y0(i)=xyz[i][2];
+	z0(i)=xyz[i][4];
 	
-
-	for(int j=1; j<5; j++)
-	for(int n=1; n<levels+1;n++)
-	for(int m=1; m<levels+1;m++)	{	
+	px0(i)=xyz[i][1];
+	py0(i)=xyz[i][3];
+	pz0(i)=xyz[i][5];
 		
-		if (j==4)	dt=part_t_step;	else dt=part_t_step/2.;
-		
-		k_RungeKutt[n][m][j]*=0.;
-		for(int k=1;k<n;k++)			k_RungeKutt[n][m][j]+=exp_mu_El[n][k][j]*(dm(i,k,m)+k_RungeKutt[k][m][j-1]*dt);
-		for(int k=n+1;k<levels+1;k++)	k_RungeKutt[n][m][j]+=conj(exp_mu_El[k][n][j])*(dm(i,k,m)+k_RungeKutt[k][m][j-1]*dt);
-		for(int k=1;k<m;k++)			k_RungeKutt[n][m][j]-=conj(exp_mu_El[m][k][j])*(dm(i,n,k)+k_RungeKutt[n][k][j-1]*dt);
-		for(int k=m+1;k<levels+1;k++)	k_RungeKutt[n][m][j]-=exp_mu_El[k][m][j]*(dm(i,n,k)+k_RungeKutt[n][k][j-1]*dt);
-		k_RungeKutt[n][m][j]*=J/2.;
-/*		
-		if(n==m){
-		for(int k=m+1;k<levels+1;k++)	k_RungeKutt[n][m][j]+=gamma_ij[k][m]*(dm(i,k,k)+k_RungeKutt[k][k][j-1]*dt);
-		for(int k=1;k<m;k++)			k_RungeKutt[n][m][j]-=gamma_ij[m][k]*(dm(i,n,m)+k_RungeKutt[n][m][j-1]*dt);
-		}
-		
-		if(n!=m){
-		for(int k=1;k<m;k++)			k_RungeKutt[n][m][j]-=gamma_ij[m][k]*(dm(i,n,m)+k_RungeKutt[n][m][j-1]*dt)/2.;
-		for(int k=1;k<n;k++)			k_RungeKutt[n][m][j]-=gamma_ij[n][k]*(dm(i,n,m)+k_RungeKutt[n][m][j-1]*dt)/2.;
-		}
-	
-		
-		k_RungeKutt[n][m][j]*=(Gamma_i[n]+Gamma_i[m])*(dm(i,n,k)+k_RungeKutt[n][k][j-1]*dt)/2.;
-*/		
-		
-		
-	}
-
-	
-	
-	
-	
-	
-	
-for(int n=1;n<levels+1;n++)
-for(int m=1;m<levels+1;m++)	{
-	
-	
-	z=(k_RungeKutt[n][m][1]+2.*k_RungeKutt[n][m][2]+2.*k_RungeKutt[n][m][3]+k_RungeKutt[n][m][4])/6.;
-	Re(i,n,m)+=z.real()*part_t_step;
-	Im(i,n,m)+=z.imag()*part_t_step;
-
 	
 }
 
-time(i)+=part_t_step;
-phasa(i)+=omega_part*part_t_step;
-
-
-
-}
 
 
 

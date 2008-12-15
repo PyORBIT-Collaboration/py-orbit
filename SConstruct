@@ -24,6 +24,7 @@ incl_dirs.append("./src/main/")
 incl_dirs.append("./src/mpi/")
 incl_dirs.append("./src/orbit/")
 incl_dirs.append("./src/teapot/")
+incl_dirs.append("./src/trackerrk4/")
 incl_dirs.append("./src/utils/")
 
 py_lib_path = sysconfig.get_config_var('LIBPL')
@@ -51,7 +52,7 @@ Default(pyOrbit_exe)
 
 #--------- Traker 3D Field Module -----
 incl_ext_dirs = []
-incl_ext_dirs.append("./ext/tracker3dfield/")
+incl_ext_dirs.append("./ext/laserstripping/")
 
 incl_dirs = pyOrbit_incl_dirs + incl_ext_dirs
 tracker3DFieldEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, CPPPATH = incl_dirs,  ENV = {'PATH':path})
@@ -61,7 +62,7 @@ for dr in incl_ext_dirs:
 	tracker3DFieldEnv.VariantDir(dr+"obj", dr, duplicate=0)
 	cpp_files_list = cpp_files_list + Glob(dr+"obj"+"/*.cc")
 
-tracker3D_lib = tracker3DFieldEnv.SharedLibrary('./lib/tracker3dfield',
+tracker3D_lib = tracker3DFieldEnv.SharedLibrary('./lib/laserstripping',
 	                          cpp_files_list, 
 														#LIBS = py_libs,
                             #LIBPATH = py_lib_path, 

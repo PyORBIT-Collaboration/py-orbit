@@ -194,10 +194,10 @@ extern "C" {
 		Grid2D* grid2D_phi = (Grid2D*)(((pyORBIT_Object*) pyPhiG)->cpp_obj);
 		if(cpp_Boundary2D->getBinsX() != grid2D_rho->getBinsX() || 
 			 cpp_Boundary2D->getBinsY() != grid2D_rho->getBinsY() ||
-			 cpp_Boundary2D->getBinsX() != grid2D_phi->getBinsX() || 
-			 cpp_Boundary2D->getBinsY() != grid2D_phi->getBinsY()){
-		    ORBIT_MPI_Finalize("PyBoundary2D.findPotential(Grid2D rhoGrid2D,Grid2D phiGrid2D) - grid sizes are wrong.");
-			 }
+		   cpp_Boundary2D->getBinsX() != grid2D_phi->getBinsX() || 
+		   cpp_Boundary2D->getBinsY() != grid2D_phi->getBinsY()){
+		   ORBIT_MPI_Finalize("PyBoundary2D.findPotential(Grid2D rhoGrid2D,Grid2D phiGrid2D) - grid sizes are wrong.");
+		}
 		cpp_Boundary2D->findPotential(grid2D_rho->getArr(),grid2D_phi->getArr());
 		Py_INCREF(Py_None);
     return Py_None;	
@@ -231,7 +231,9 @@ extern "C" {
   static void Boundary2D_del(pyORBIT_Object* self){
 	  //std::cerr<<"The Boundary2D __del__ has been called! 0"<<std::endl;
 		Boundary2D* cpp_Boundary2D = (Boundary2D*) self->cpp_obj;
-		delete (cpp_Boundary2D);
+		if(cpp_Boundary2D != NULL){
+			delete cpp_Boundary2D;
+		}
 		self->ob_type->tp_free((PyObject*)self);
 		//std::cerr<<"The Boundary2D __del__ has been called! 1"<<std::endl;
   }

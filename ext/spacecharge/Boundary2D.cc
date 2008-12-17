@@ -329,6 +329,8 @@ void Boundary2D::init(int xBins, int yBins,
 // Destructor
 Boundary2D::~Boundary2D()
 {
+	
+	//std::cerr<<"debug Boundary2D::~Boundary2D() start! "<<std::endl;
    int i;
   //delete Green function and FFT input and output arrays
 
@@ -584,7 +586,7 @@ void Boundary2D::_defineGreenF()
 			//this constant is + log(1000000.0)
 			//here in the original ORBIT we deleted this constant 
 			if(iX != 0 || iY != 0){
-				greensF_[iX][iY] = - log(rTot2);
+				greensF_[iX][iY] = - log(rTot2)/2;
 			}
 			else{
 				greensF_[iX][iY] = 0.0;

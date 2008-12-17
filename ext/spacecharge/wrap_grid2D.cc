@@ -254,7 +254,7 @@ extern "C" {
 		if(cpp_Grid2D->getBoundary2D() != NULL){
 			Py_DECREF(cpp_Grid2D->getBoundary2D()->getPyWrapper());
 		}
-		delete (cpp_Grid2D);
+		delete cpp_Grid2D;
 		self->ob_type->tp_free((PyObject*)self);
   }
 	

@@ -46,7 +46,7 @@ Grid2D::Grid2D(Boundary2D* boundary2D): CppPyWrapper(NULL)
 {
 	boundary2D_ = boundary2D;
 	xBins_ = boundary2D_->getBinsX();
-	yBins_ = boundary2D_->getBinsX();
+	yBins_ = boundary2D_->getBinsY();
 	xGrid_ = new double[xBins_];
 	yGrid_ = new double[yBins_];
 	makeGrid(xGrid_, dx_, boundary2D_->getGridMinX(),boundary2D_-> getGridMaxX(), xBins_);
@@ -61,6 +61,7 @@ Grid2D::Grid2D(Boundary2D* boundary2D): CppPyWrapper(NULL)
 // Destructor
 Grid2D::~Grid2D()
 {
+	//std::cerr<<"debug Grid2D::~Grid2D()"<<std::endl;
 	delete[] xGrid_;
 	delete[] yGrid_;
 	for(int i = 0; i < xBins_; i++){
@@ -85,7 +86,7 @@ Boundary2D* Grid2D::getBoundary2D(){
 void Grid2D::setBoundary2D(Boundary2D* boundary2D){
 	boundary2D_ = boundary2D;
 	int xBins = boundary2D_->getBinsX();
-	int yBins = boundary2D_->getBinsX();
+	int yBins = boundary2D_->getBinsY();
 	double xMin = boundary2D_->getGridMinX();
 	double xMax = boundary2D_->getGridMaxX();
 	double yMin = boundary2D_->getGridMinY();
@@ -101,7 +102,7 @@ void Grid2D::setBoundary2D(Boundary2D* boundary2D){
 			}
 			delete [] arr_;
 			xBins_ = boundary2D_->getBinsX();
-			yBins_ = boundary2D_->getBinsX();		
+			yBins_ = boundary2D_->getBinsY();		
 			arr_ = new double*[xBins_];
 			for(int i = 0; i < xBins_; i++){
 				arr_[i] = new double[yBins_];

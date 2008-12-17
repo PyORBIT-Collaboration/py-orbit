@@ -50,27 +50,27 @@ Default(pyOrbit_exe)
 # Make extensions 
 #--------------------------------------
 
-#--------- Traker 3D Field Module -----
+#--------- Laser Stripping Module -----
 incl_ext_dirs = []
 incl_ext_dirs.append("./ext/laserstripping/")
 
 incl_dirs = pyOrbit_incl_dirs + incl_ext_dirs
-tracker3DFieldEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, CPPPATH = incl_dirs,  ENV = {'PATH':path})
+laserStrippingFieldEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, CPPPATH = incl_dirs,  ENV = {'PATH':path})
 
 cpp_files_list = []
 for dr in incl_ext_dirs:
-	tracker3DFieldEnv.VariantDir(dr+"obj", dr, duplicate=0)
+	laserStrippingFieldEnv.VariantDir(dr+"obj", dr, duplicate=0)
 	cpp_files_list = cpp_files_list + Glob(dr+"obj"+"/*.cc")
 
-tracker3D_lib = tracker3DFieldEnv.SharedLibrary('./lib/laserstripping',
+laserstripping_lib = laserStrippingFieldEnv.SharedLibrary('./lib/laserstripping',
 	                          cpp_files_list, 
 														#LIBS = py_libs,
                             #LIBPATH = py_lib_path, 
                             LINKFLAGS = cpp_shared_lib_flags,
 														SHLIBPREFIX = "")
-Default(tracker3D_lib)
+Default(laserstripping_lib)
 
-#--------- Traker 3D Field Module -----
+#--------- Space Charge 2D Field Module -----
 incl_ext_dirs = []
 incl_ext_dirs.append("./ext/spacecharge/")
 if (not os.environ.has_key("FFTW_ROOT")):

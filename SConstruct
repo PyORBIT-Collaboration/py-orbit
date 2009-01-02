@@ -73,10 +73,10 @@ Default(laserstripping_lib)
 #--------- Space Charge 2D Field Module -----
 incl_ext_dirs = []
 incl_ext_dirs.append("./ext/spacecharge/")
-if (not os.environ.has_key("FFTW_ROOT")):
-	print "You have to define FFTW_ROOT env variable"
+if (not os.environ.has_key("FFTW3_ROOT")):
+	print "You have to define FFTW3_ROOT env variable"
 	sys.exit(1)
-incl_ext_dirs.append(os.environ["FFTW_ROOT"]+"/include")
+incl_ext_dirs.append(os.environ["FFTW3_ROOT"]+"/include")
 
 incl_dirs = pyOrbit_incl_dirs + incl_ext_dirs
 spacechargeEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, CPPPATH = incl_dirs,  ENV = {'PATH':path})
@@ -89,7 +89,7 @@ for dr in incl_ext_dirs:
 spacecharge_lib = spacechargeEnv.SharedLibrary('./lib/spacecharge',
 	                          cpp_files_list, 
 														LIBS = ["libfftw3"],
-                            LIBPATH = [os.environ["FFTW_ROOT"]+"/lib",] ,
+                            LIBPATH = [os.environ["FFTW3_ROOT"]+"/lib",] ,
                             LINKFLAGS = cpp_shared_lib_flags,
 														SHLIBPREFIX = "")
 Default(spacecharge_lib)

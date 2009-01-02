@@ -63,21 +63,18 @@ void Boundary2D::init(int xBins, int yBins,
   for( i = 0; i < xBins2_ ; i++) {
     greensF_[i] =  new double [yBins2_];
   }
+	
+  in_        = (double *) fftw_malloc(sizeof(double)*xBins2_ * yBins2_);
+  in_res_    = (double *) fftw_malloc(sizeof(double)*xBins2_ * yBins2_);
+  out_green_ = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) *xBins2_ * (yBins2_/2+1));
+  out_       = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) *xBins2_ * (yBins2_/2+1));
+  out_res_   = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) *xBins2_ * (yBins2_/2+1));
 
-  in_        = (FFTW_REAL *)    new char[ xBins2_ * yBins2_ * sizeof(FFTW_REAL)];
-  in_res_    = (FFTW_REAL *)    new char[ xBins2_ * yBins2_ * sizeof(FFTW_REAL)];
-  out_green_ = (FFTW_COMPLEX *) new char[ xBins2_ * (yBins2_/2+1)* sizeof(FFTW_COMPLEX)];
-  out_       = (FFTW_COMPLEX *) new char[ xBins2_ * (yBins2_/2+1)* sizeof(FFTW_COMPLEX)];
-  out_res_   = (FFTW_COMPLEX *) new char[ xBins2_ * (yBins2_/2+1)* sizeof(FFTW_COMPLEX)];
+	// FFTW_MEASURE or FFTW_ESTIMATE
 
-  planForward_ = rfftw2d_create_plan(xBins2_ , yBins2_ , 
-//				     FFTW_REAL_TO_COMPLEX, FFTW_MEASURE);
-				       FFTW_REAL_TO_COMPLEX, FFTW_ESTIMATE);
-
-  planBackward_ = rfftw2d_create_plan(xBins2_ , yBins2_ , 
-//				     FFTW_COMPLEX_TO_REAL, FFTW_MEASURE);
-				       FFTW_COMPLEX_TO_REAL, FFTW_ESTIMATE);
-
+  planForward_greenF_ = fftw_plan_dft_r2c_2d(xBins2_ , yBins2_ , in_,  out_green_, FFTW_ESTIMATE);
+  planForward_        = fftw_plan_dft_r2c_2d(xBins2_ , yBins2_ , in_,  out_,       FFTW_ESTIMATE);
+  planBackward_       = fftw_plan_dft_c2r_2d(xBins2_ , yBins2_ , out_res_, in_res_,FFTW_ESTIMATE);
 
   //=================================================================
   //================   Border parameters      =======================
@@ -339,14 +336,15 @@ Boundary2D::~Boundary2D()
   }   
   delete [] greensF_;
 
-  delete [] in_;
-  delete [] in_res_;
-  delete [] out_green_;
-  delete [] out_;
-  delete [] out_res_;
-
-  rfftwnd_destroy_plan(planForward_);
-  rfftwnd_destroy_plan(planBackward_);
+  fftw_free(in_);
+  fftw_free(in_res_);
+  fftw_free(out_green_);
+  fftw_free(out_);
+  fftw_free(out_res_);
+	
+  fftw_destroy_plan(planForward_greenF_);
+  fftw_destroy_plan(planForward_);
+  fftw_destroy_plan(planBackward_);
 
   //delete arrays describing boundary
   delete [] BPx_ ;
@@ -562,7 +560,7 @@ double Boundary2D::getStepX(){ return dx_;};
 double Boundary2D::getStepY(){ return dy_;};
 
 // Returns the pointers to the FFT array of the Green Function values
-FFTW_COMPLEX* Boundary2D::getOutFFTGreenF()
+fftw_complex* Boundary2D::getOutFFTGreenF()
 {
   return out_green_;
 }
@@ -615,7 +613,8 @@ void Boundary2D::_defineGreenF()
       in_[j + yBins2_*i] = greensF_[i][j];
 		}
     
-		rfftwnd_one_real_to_complex(planForward_, in_, out_green_);
+		fftw_execute(planForward_greenF_);
+		//rfftwnd_one_real_to_complex(planForward_, in_, out_green_);
 		
 		for (i = 0; i < xBins2_; i++)
 			for (j = 0; j < yBins2_; j++)
@@ -809,7 +808,8 @@ void Boundary2D::findPotential(double** rhosc, double** phisc)
     in_[j + yBins2_*i] = rhosc[i][j];
   }
 
-  rfftwnd_one_real_to_complex(planForward_, in_, out_);
+	fftw_execute(planForward_);
+  //rfftwnd_one_real_to_complex(planForward_, in_, out_);
 
   //do convolution with the FFT of the Green's function 
 
@@ -817,14 +817,13 @@ void Boundary2D::findPotential(double** rhosc, double** phisc)
   for (j = 0; j < yBins2_/2+1; j++)
   {
     index = j + (yBins2_/2+1)*i;
-    c_re(out_res_[index]) = c_re(out_[index])*c_re(out_green_[index]) -
-                            c_im(out_[index])*c_im(out_green_[index]);
-    c_im(out_res_[index]) = c_re(out_[index])*c_im(out_green_[index]) +
-	                    c_im(out_[index])*c_re(out_green_[index]);
+    out_res_[index][0] = out_[index][0]*out_green_[index][0] - out_[index][1]*out_green_[index][1];
+    out_res_[index][1] = out_[index][0]*out_green_[index][1] + out_[index][1]*out_green_[index][0];
   }
 
   //do backward FFT
-  rfftwnd_one_complex_to_real(planBackward_, out_res_, in_res_);
+	fftw_execute(planBackward_);
+  //rfftwnd_one_complex_to_real(planBackward_, out_res_, in_res_);
 
   //set the potential
   for (i = 0; i < xBins_; i++)

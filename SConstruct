@@ -88,7 +88,7 @@ for dr in incl_ext_dirs:
 
 spacecharge_lib = spacechargeEnv.SharedLibrary('./lib/spacecharge',
 	                          cpp_files_list, 
-														LIBS = ["librfftw","libfftw"],
+														LIBS = ["libfftw3"],
                             LIBPATH = [os.environ["FFTW_ROOT"]+"/lib",] ,
                             LINKFLAGS = cpp_shared_lib_flags,
 														SHLIBPREFIX = "")

@@ -16,8 +16,9 @@
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 
-#include "rfftw.h"
-#include "fftw.h"
+//#include "rfftw.h"
+//#include "fftw.h"
+#include "fftw3.h"
 
 using namespace std;
 
@@ -92,7 +93,7 @@ public:
   double calculatePhi(double x, double y);	
 	
 	/** Returns the pointers to the FFT array of the Green Function values */
-	FFTW_COMPLEX* getOutFFTGreenF();
+	fftw_complex* getOutFFTGreenF();
 	
 	
   /** Adds potential from the boundary to the external grid */
@@ -196,14 +197,15 @@ protected:
   double** greensF_;
   
   //FFT arrays
-  FFTW_REAL* in_;
-  FFTW_REAL* in_res_;
-  FFTW_COMPLEX* out_green_;
-  FFTW_COMPLEX* out_;
-  FFTW_COMPLEX* out_res_;
+  double* in_;
+  double* in_res_;
+  fftw_complex* out_green_;
+  fftw_complex* out_;
+  fftw_complex* out_res_;
 
-  rfftwnd_plan planForward_;
-  rfftwnd_plan planBackward_;
+	fftw_plan planForward_greenF_;
+  fftw_plan planForward_;
+  fftw_plan planBackward_;
 
   //boundary points
   //BPoints_ - number of boundary points

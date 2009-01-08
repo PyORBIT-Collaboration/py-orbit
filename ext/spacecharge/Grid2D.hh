@@ -13,9 +13,6 @@
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 
-//local for this module
-#include "Boundary2D.hh"
-
 using namespace std;
 
 /** 
@@ -27,23 +24,15 @@ class Grid2D: public OrbitUtils::CppPyWrapper
 public:
 	
 	/** Constructor with just grid sizes*/
-  Grid2D(int xBins, int yBins);
+  Grid2D(int xSize, int ySize);
 	
 	/** Constructor with grid limits and sizes*/
-	Grid2D(double xMin, double xMax, int xBins,    
-	       double yMin, double yMax, int yBins);
-	
-	/** Constructor with the Boundary2D instance */
-  Grid2D(Boundary2D* boundary2D);   
-	
+	Grid2D(int xSize, int ySize,
+		     double xMin, double xMax,     
+	       double yMin, double yMax);
+
   /** Destructor */
   virtual ~Grid2D();
-	
-	/** Sets the Boundary2D instance and redefine grid parameters */	
-	void setBoundary2D(Boundary2D* boundary2D);
-	
-	/** Returns the Boundary2D instance. It could be NULL. */	
-	Boundary2D* getBoundary2D();
 	
 	/** Sets all grid points to zero */	
 	void setZero();
@@ -65,18 +54,15 @@ public:
 	
 	/** Calculates gradient at a grid point (ix,iy) */	
 	void calcGradient(int ix, int iy, double& ex, double& ey);
-	
-	/** Finds and sets the potential to the external grid */	
-	void findPotential(Grid2D* phiGrid2D);
-	
-	/** Adds the boundary induced potential to itself. It should be the potential Grid2D. */	
-	void addBoundaryPotential();
-	
+		
   /** Returns the grid size in x-direction */
-  int getBinsX(); 
+  int getSizeX(); 
 
   /** Returns the grid size in y-direction */
-  int getBinsY();
+  int getSizeY();
+	
+	/** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */
+	int isInside(double x,double y);
 
   /** Returns the index and the fraction of the grid's point for particular x.
       The index is a central point in three point interpolation:
@@ -104,33 +90,44 @@ public:
 	/** Returns the grid step along y-axis */
   double getStepY();	
 	
+  /** Returns the maximal value of the grid in x-axis */   
+  double getMaxX();
+
+  /** Returns the minimal value of the grid in x-axis */   	
+  double getMinX();
+	
+  /** Returns the maximal value of the grid in y-axis */ 	
+  double getMaxY();
+	
+  /** Returns the minimal value of the grid in y-axis */ 	
+  double getMinY();	
+	
   /** Sets x-grid */
-  void setGridX(double xMin, double xMax, int nPoints);
+  void setGridX(double xMin, double xMax);
 
   /** Sets y-grid */
-  void setGridY(double yMin, double yMax, int nPoints);
+  void setGridY(double yMin, double yMax);
 	
-	private:
-		void makeGrid(double* grid, double& step, double zMin,double zMax,int n);
+  private:
 	
+		//memory allocation and step calculation for dx_ and dy_ 
+		void init();
+		
 	protected:
 		
 		double** arr_;
 		
   //Grid size
-  int xBins_;
-  int yBins_;
+  int xSize_;
+  int ySize_;
 	
 	//Grid steps
 	double dx_;
 	double dy_;
 	
-	//x,y-axis grids 
-	double* xGrid_;
-  double* yGrid_; 
-	
-	//boundary
-	Boundary2D* boundary2D_;
+	//grid limits
+	double xMin_,xMax_;
+  double yMin_,yMax_; 
 	
 };
 

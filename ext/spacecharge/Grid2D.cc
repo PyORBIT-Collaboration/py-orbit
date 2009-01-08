@@ -7,115 +7,65 @@
 using namespace OrbitUtils;
 
 // Constructor
-Grid2D::Grid2D(int xBins,    int yBins): CppPyWrapper(NULL)
+Grid2D::Grid2D(int xSize,    int ySize): CppPyWrapper(NULL)
 {
-	boundary2D_ = NULL;
-	xBins_ = xBins;
-	yBins_ = yBins;
-	dx_ = 1.0;
-	dy_ = 1.0;
-	xGrid_ = new double[xBins_];
-	yGrid_ = new double[yBins_];	
-	makeGrid(xGrid_,dx_,0.,1.0*(xBins_ - 1), xBins_);
-	makeGrid(yGrid_,dy_,0.,1.0*(yBins_ - 1), yBins_);	
-	arr_ = new double*[xBins_];
-	for(int i = 0; i < xBins_; i++){
-		arr_[i] = new double[yBins_];
-	}
+	xSize_ = xSize;
+	ySize_ = ySize;
+	xMin_ = -1.0; 
+	xMax_ = +1.0; 
+	yMin_ = -1.0; 
+	yMax_ = +1.0; 
+	init();
 	setZero();
 }
 
-Grid2D::Grid2D(double xMin, double xMax, int xBins,    
-	             double yMin, double yMax, int yBins): CppPyWrapper(NULL)
+Grid2D::Grid2D( int xSize, int ySize, 
+	             double xMin, double xMax,    
+	             double yMin, double yMax): CppPyWrapper(NULL)
 {
-	boundary2D_ = NULL;
-	xBins_ = xBins;
-	yBins_ = yBins;
-	xGrid_ = new double[xBins_];
-	yGrid_ = new double[yBins_];	
-	makeGrid(xGrid_,dx_,xMin,xMax, xBins_);
-	makeGrid(yGrid_,dy_,yMin,yMax, yBins_);	
-	arr_ = new double*[xBins_];
-	for(int i = 0; i < xBins_; i++){
-		arr_[i] = new double[yBins_];
-	}
+	xSize_ = xSize;
+	ySize_ = ySize; 
+	xMin_ = xMin;
+	xMax_ = xMax;
+	yMin_ = yMin;
+	yMax_ = yMax;
+	init();
 	setZero();
 }
 
-Grid2D::Grid2D(Boundary2D* boundary2D): CppPyWrapper(NULL)
-{
-	boundary2D_ = boundary2D;
-	xBins_ = boundary2D_->getBinsX();
-	yBins_ = boundary2D_->getBinsY();
-	xGrid_ = new double[xBins_];
-	yGrid_ = new double[yBins_];
-	makeGrid(xGrid_, dx_, boundary2D_->getGridMinX(),boundary2D_-> getGridMaxX(), xBins_);
-	makeGrid(yGrid_, dy_, boundary2D_->getGridMinY(),boundary2D_-> getGridMaxY(), yBins_);
-	arr_ = new double*[xBins_];
-	for(int i = 0; i < xBins_; i++){
-		arr_[i] = new double[yBins_];
+void Grid2D::init(){
+	
+  if( xSize_ < 3 || ySize_ < 3){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "Grid2D::Grid2D - CONSTRUCTOR \n" 
+         				<< "The grid size too small (should be more than 3)! \n" 
+								<< "number x bins ="<< xSize_ <<" \n"
+								<< "number y bins ="<< ySize_ <<" \n"
+								<< "Stop. \n";
+		}
+		ORBIT_MPI_Finalize();
+  }	
+	
+	dx_ = (xMax_ - xMin_)/(xSize_ -1);
+	dy_ = (yMax_ - yMin_)/(ySize_ -1);
+	arr_ = new double*[xSize_];
+	for(int i = 0; i < xSize_; i++){
+		arr_[i] = new double[ySize_];
 	}
-	setZero();
 }
 
 // Destructor
 Grid2D::~Grid2D()
 {
 	//std::cerr<<"debug Grid2D::~Grid2D()"<<std::endl;
-	delete[] xGrid_;
-	delete[] yGrid_;
-	for(int i = 0; i < xBins_; i++){
+	for(int i = 0; i < xSize_; i++){
 		delete [] arr_[i];
 	}
 	delete [] arr_;
 }
 
-void Grid2D::makeGrid(double* grid, double& step, double zMin,double zMax,int n){
-	grid[0] = zMin;
-	step = (zMax - zMin)/(n - 1);
-	for(int i = 1; i < n; i++){
-		grid[i] =  grid[0] + ((zMax - zMin)*i)/(n - 1);
-	}
-	grid[n-1] = zMax;
-}
-
-Boundary2D* Grid2D::getBoundary2D(){
-	return boundary2D_;
-}
-
-void Grid2D::setBoundary2D(Boundary2D* boundary2D){
-	boundary2D_ = boundary2D;
-	int xBins = boundary2D_->getBinsX();
-	int yBins = boundary2D_->getBinsY();
-	double xMin = boundary2D_->getGridMinX();
-	double xMax = boundary2D_->getGridMaxX();
-	double yMin = boundary2D_->getGridMinY();
-	double yMax = boundary2D_->getGridMaxY();
-	if(	xBins != xBins_ || yBins != yBins_ ||
-		xMin  != xGrid_[0] || xMax != xGrid_[xBins_-1] ||
-		yMin  != yGrid_[0] || yMax != yGrid_[yBins_-1]){
-	  if(xBins != xBins_ || yBins != yBins_){
-			delete[] xGrid_;
-			delete[] yGrid_;
-			for(int i = 0; i < xBins_; i++){
-				delete [] arr_[i];
-			}
-			delete [] arr_;
-			xBins_ = boundary2D_->getBinsX();
-			yBins_ = boundary2D_->getBinsY();		
-			arr_ = new double*[xBins_];
-			for(int i = 0; i < xBins_; i++){
-				arr_[i] = new double[yBins_];
-			}			
-			xGrid_ = new double[xBins_];
-			yGrid_ = new double[yBins_];
-		}
-		makeGrid(xGrid_, dx_, boundary2D_->getGridMinX(),boundary2D_-> getGridMaxX(), xBins_);
-		makeGrid(yGrid_, dy_, boundary2D_->getGridMinY(),boundary2D_-> getGridMaxY(), yBins_);
-	  setZero();		
-	}	
-}
-	
 /** Sets the value to the one point of the 2D grid  */	
 void Grid2D::setValue(double value, int ix, int iy){
 	arr_[ix][iy] = value;
@@ -226,7 +176,7 @@ void Grid2D::calcGradient(double x, double y, double& ex, double& ey){
 
 /** Calculates gradient at a grid point (ix,iy) */	
 void Grid2D::calcGradient(int iX, int iY, double& ex, double& ey){
-	if(iX != 0 && iX != (xBins_ - 1) && iY != 0 && iY != (yBins_ - 1)){
+	if(iX != 0 && iX != (xSize_ - 1) && iY != 0 && iY != (ySize_ - 1)){
 		ex =
 		(- 0.125) * arr_[iX-1][iY-1] +
 		(- 0.75 )* arr_[iX-1][iY]   +
@@ -245,48 +195,15 @@ void Grid2D::calcGradient(int iX, int iY, double& ex, double& ey){
 		ey = 0.5 * ey / dy_;
 		return;
 	} 
-	double x = xGrid_[iX];
-	double y = yGrid_[iY];
+	double x = xMin_ + iX*dx_;
+	double y = yMin_ + iY*dy_;
 	calcGradient(x,y,ex,ey);
-}
-
-/** Finds and sets the potential to the external grid */	
-void Grid2D::findPotential(Grid2D* phiGrid2D){
-	if(getBoundary2D() == NULL || getBoundary2D() != phiGrid2D->getBoundary2D()){
-		int rank = 0;
-		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		if(rank == 0){
-			std::cerr << " Grid2D::findPotential(Grid2D* phiGrid2D) "<< std::endl
-			<< "local boundar !=  phiGrid2D boundary "<< std::endl
-			<< "this->getBoundary2D() = " << getBoundary2D() << std::endl
-			<< "phiGrid2D->getBoundary2D() = " << phiGrid2D->getBoundary2D() << std::endl
-			<< "Stop."<< std::endl;
-		}
-		ORBIT_MPI_Finalize();
-	}
-	getBoundary2D()->findPotential(getArr(),phiGrid2D->getArr());
-}
-
-/** Adds the boundary induced potential to itself. It should be the potential Grid2D. */	
-void Grid2D::addBoundaryPotential(){
-	if(getBoundary2D() == NULL){
-		int rank = 0;
-		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		if(rank == 0){
-			std::cerr << " Grid2D::addBoundaryPotential() "<< std::endl
-			<< "No local boundary!"<< std::endl
-			<< "this->getBoundary2D() = " << getBoundary2D() << std::endl
-			<< "Stop."<< std::endl;
-		}
-		ORBIT_MPI_Finalize();
-	}
-	getBoundary2D()->addBoundaryPotential(getArr());
 }
 
 /** Sets all grid points to zero */	
 void Grid2D::setZero(){
-	for(int i = 0; i < xBins_; i++){
-		for(int j = 0; j < yBins_; j++){
+	for(int i = 0; i < xSize_; i++){
+		for(int j = 0; j < ySize_; j++){
 			arr_[i][j] = 0.;
 		}
 	}
@@ -298,37 +215,37 @@ double** Grid2D::getArr(){
 }
 	
 /** Returns the grid size in x-direction */
-int Grid2D::getBinsX(){
-	return xBins_;
+int Grid2D::getSizeX(){
+	return xSize_;
 }
 
 /** Returns the grid size in y-direction */
-int Grid2D::getBinsY(){
-	return yBins_;
+int Grid2D::getSizeY(){
+	return ySize_;
 }
 
 void Grid2D::getIndAndFracX(double x, int& ind, double& frac){
-   ind  = int ( (x - xGrid_[0])/dx_ + 0.5 );
+   ind  = int ( (x - xMin_)/dx_ + 0.5 );
    if(ind < 1) ind = 1;
-   if(ind > (xBins_-2)) ind = xBins_ - 2;
-   frac = (x - xGrid_[ind])/dx_; 	
+   if(ind > (xSize_-2)) ind = xSize_ - 2;
+   frac = (x - (xMin_ + ind*dx_))/dx_; 	
 }
 
 void Grid2D::getIndAndFracY(double y, int& ind, double& frac){
-   ind  = int ( (y - yGrid_[0])/dy_ + 0.5 );
+   ind  = int ( (y - yMin_)/dy_ + 0.5 );
    if(ind < 1) ind = 1;
-   if(ind > (yBins_-2)) ind = yBins_ - 2;
-   frac = (y - yGrid_[ind])/dy_; 	
+   if(ind > (ySize_-2)) ind = ySize_ - 2;
+   frac = (y - (yMin_ + ind*dy_))/dy_; 	
 }	
 
 /** Returns the grid point x-coordinate for this index. */   
 double Grid2D::getGridX(int index){
-	return xGrid_[index];
+	return xMin_ + index*dx_;
 }
 
 /** Returns the grid point y-coordinate for this index. */   
 double Grid2D::getGridY(int index){
-	return yGrid_[index];
+	return yMin_ + index*dy_;
 }
 
 /** Returns the grid step along x-axis */
@@ -341,45 +258,38 @@ double Grid2D::getStepY(){
 	return dy_;
 }
 
+/** Returns the max x in the grid points */ 
+double Grid2D::getMaxX(){return xMax_;};
+
+/** Returns the min x in the grid points */ 
+double Grid2D::getMinX(){return xMin_;};
+
+/** Returns the max y in the grid points */ 
+double Grid2D::getMaxY(){return yMax_;};
+
+/** Returns the min y in the grid points */ 
+double Grid2D::getMinY(){return yMin_;};
+
 /** Sets x-grid */
-void Grid2D::setGridX(double xMin, double xMax, int nPoints){
-	if(nPoints != xBins_ || xMin != xGrid_[0] || xMax != xGrid_[xBins_-1]){
-		if(nPoints != xBins_){
-			delete[] xGrid_;
-			for(int i = 0; i < xBins_; i++){
-				delete [] arr_[i];
-			}
-			delete [] arr_;
-			xBins_ = nPoints;
-			xGrid_ = new double[xBins_];
-			arr_ = new double*[xBins_];
-			for(int i = 0; i < xBins_; i++){
-				arr_[i] = new double[yBins_];
-			}
-		}
-		makeGrid(xGrid_, dx_, xMin, xMax, xBins_);		
-		setZero();	
-	}
+void Grid2D::setGridX(double xMin, double xMax){
+	xMax_ = xMin;
+	xMax_ = xMax;
+	dx_ = (xMax_ - xMin_)/(xSize_ -1);
+	setZero();
 }
 
 /** Sets y-grid */
-void Grid2D::setGridY(double yMin, double yMax, int nPoints){
-	if(nPoints != yBins_ || yMin != yGrid_[0] || yMax != yGrid_[yBins_-1]){
-		if(nPoints != yBins_){
-			delete[] yGrid_;
-			for(int i = 0; i < xBins_; i++){
-				delete [] arr_[i];
-			}
-			delete [] arr_;
-			yBins_ = nPoints;
-			yGrid_ = new double[yBins_];
-			arr_ = new double*[xBins_];
-			for(int i = 0; i < xBins_; i++){
-				arr_[i] = new double[yBins_];
-			}
-		}
-		makeGrid(yGrid_, dy_, yMin, yMax, yBins_);
-		setZero();	
-	}		
+void Grid2D::setGridY(double yMin, double yMax){
+	yMax_ = yMin;
+	yMax_ = yMax;
+	dy_ = (yMax_ - yMin_)/(ySize_ -1);		
+	setZero();
+}
+
+/** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */
+int Grid2D::isInside(double x,double y){
+	if(x < xMin_ || x > xMax_) return 0;
+	if(y < yMin_ || y > yMax_) return 0;
+	return 1;
 }
 	

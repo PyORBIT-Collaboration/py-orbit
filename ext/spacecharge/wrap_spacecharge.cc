@@ -1,7 +1,7 @@
 #include "orbit_mpi.hh"
 
-#include "wrap_boundary2D.hh"
 #include "wrap_grid2D.hh"
+#include "wrap_poissonsolverfft2d.hh"
 
 static PyMethodDef spacechargeMethods[] = { {NULL,NULL} };
 
@@ -13,8 +13,8 @@ extern "C" {
     //create new module
     PyObject* module = Py_InitModule("spacecharge",spacechargeMethods);
 		//add the other classes init
-		wrap_spacecharge::initBoundary2D(module);
 		wrap_spacecharge::initGrid2D(module);
+		wrap_spacecharge::initPoissonSolverFFT2D(module);
   }
 	
 	PyObject* getSpaceChargeType(char* name){
@@ -25,8 +25,6 @@ extern "C" {
 		return pyType;
 	}
 		
-	
-	
 #ifdef __cplusplus
 }
 #endif

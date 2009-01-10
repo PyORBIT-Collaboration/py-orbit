@@ -23,7 +23,7 @@
 
 #include "OrbitConst.hh"
 
-const double OrbitConst::PI = 3.14159265358979323;
+const double OrbitConst::PI = 3.14159265358979323846264;
 const double OrbitConst::c = 2.99792458e+8;
 const double OrbitConst::elementary_charge_CGS = 4.8032068e-10;
 const double OrbitConst::coeff_Tesla_to_inner = (1.0e+4/4.8032068e-10)*0.01*(1.0e+6);

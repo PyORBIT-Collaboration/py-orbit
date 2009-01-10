@@ -115,7 +115,7 @@ namespace wrap_orbit_bunch{
 
     //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
     if(!PyArg_ParseTuple(	args,"dddddd:coordinates",&x,&xp,&y,&yp,&z,&zp)){
-      error("PyBunch - addParticle - cannot parse arguments! It should be (x,xp,y,yp,z,zp)");
+      error("PyBunch - addParticle - cannot parse arguments! It should be (x,xp,y,yp,z,zp)");	
     }
     int ind = cpp_bunch->addParticle(x,xp,y,yp,z,zp);
     return Py_BuildValue("i",ind);

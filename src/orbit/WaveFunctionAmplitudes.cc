@@ -51,6 +51,6 @@ double& WaveFunctionAmplitudes::Im0(int particle_index){
 
 //zero element is phasa and las t element is time of i-th particle in the particle frame
 int WaveFunctionAmplitudes::getAttSize(){
-  return 394; //2*14*14+1+1
+  return 400; //2*14*14+1+1+6
 }
 

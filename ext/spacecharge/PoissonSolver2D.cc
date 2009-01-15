@@ -74,22 +74,22 @@ int PoissonSolver2D::checkSizes(Grid2D* rhoGrid,Grid2D*  phiGrid){
 			<< "The grid sizes are different "<< std::endl 
 								<< "number x bins ="<< xSize_ << std::endl
 								<< "number y bins ="<< ySize_ << std::endl
-								<< "number rhoGrid x bins ="<< rhoGrid->getSizeX() <<std::endl
-								<< "number rhoGrid y bins ="<< rhoGrid->getSizeY() <<std::endl
-								<< "number phiGrid x bins ="<< rhoGrid->getSizeX() <<std::endl
-								<< "number phiGrid y bins ="<< rhoGrid->getSizeY() <<std::endl
-								<< "number dx_  ="<< dx_ <<std::endl
-								<< "number dy_  ="<< dy_ <<std::endl
-								<< "number rhoGrid dx ="<< rhoGrid->getStepX() <<std::endl
-								<< "number rhoGrid dy ="<< rhoGrid->getStepY() <<std::endl
-								<< "number phiGrid dx ="<< phiGrid->getStepX() <<std::endl
-								<< "number phiGrid dy ="<< phiGrid->getStepY() <<std::endl
-								<< "number xMin ="<< xMin_ <<std::endl
-								<< "number yMin  ="<< yMin_ <<std::endl
-								<< "number rhoGrid xMin ="<< rhoGrid->getMinX() <<std::endl
-								<< "number rhoGrid yMin ="<< rhoGrid->getMinY() <<std::endl
-								<< "number phiGrid xMin ="<< phiGrid->getMinX() <<std::endl
-								<< "number phiGrid yMin ="<< phiGrid->getMinY() <<std::endl
+								<< "rhoGrid x bins ="<< rhoGrid->getSizeX() <<std::endl
+								<< "rhoGrid y bins ="<< rhoGrid->getSizeY() <<std::endl
+								<< "phiGrid x bins ="<< phiGrid->getSizeX() <<std::endl
+								<< "phiGrid y bins ="<< phiGrid->getSizeY() <<std::endl
+								<< "dx_  ="<< dx_ <<std::endl
+								<< "dy_  ="<< dy_ <<std::endl
+								<< "rhoGrid dx ="<< rhoGrid->getStepX() <<std::endl
+								<< "rhoGrid dy ="<< rhoGrid->getStepY() <<std::endl
+								<< "phiGrid dx ="<< phiGrid->getStepX() <<std::endl
+								<< "phiGrid dy ="<< phiGrid->getStepY() <<std::endl
+								<< "xMin ="<< xMin_ <<std::endl
+								<< "yMin  ="<< yMin_ <<std::endl
+								<< "rhoGrid xMin ="<< rhoGrid->getMinX() <<std::endl
+								<< "rhoGrid yMin ="<< rhoGrid->getMinY() <<std::endl
+								<< "phiGrid xMin ="<< phiGrid->getMinX() <<std::endl
+								<< "phiGrid yMin ="<< phiGrid->getMinY() <<std::endl
 								<< "Stop. \n";
 		}
 		ORBIT_MPI_Finalize();

@@ -81,7 +81,7 @@ public:
 protected:
 	
 	//checks that sizes of Grid2D instances are the same as solver 
-	int checkSizes(Grid2D* rhoGrid,Grid2D*  phiGrid); 
+	void checkSizes(Grid2D* rhoGrid,Grid2D*  phiGrid); 
 
 	//should be implemented in subclasses. It should be called in both types of constructors.
 	virtual void init(int xSize, int ySize, double xMin, double xMax, double yMin, double yMax) = 0;

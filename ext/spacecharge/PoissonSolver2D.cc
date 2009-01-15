@@ -60,7 +60,7 @@ double PoissonSolver2D::getStepX(){ return dx_;};
 double PoissonSolver2D::getStepY(){ return dy_;};
 
 
-int PoissonSolver2D::checkSizes(Grid2D* rhoGrid,Grid2D*  phiGrid){
+void PoissonSolver2D::checkSizes(Grid2D* rhoGrid,Grid2D*  phiGrid){
   if( xSize_ !=  rhoGrid->getSizeX() || ySize_ != rhoGrid->getSizeY() ||
 		  xSize_ !=  phiGrid->getSizeX() || ySize_ != phiGrid->getSizeY() ||
 		  dx_ != rhoGrid->getStepX() || dy_ != rhoGrid->getStepY() ||

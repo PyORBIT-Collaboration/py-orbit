@@ -3,5 +3,5 @@
 ######################################################################
 
 CXX             =  mpiCC
-CXXFLAGS        = -g -fPIC -Wall
+CXXFLAGS        = -g -fPIC
 LINKFLAGS       = -fPIC -shared -Wl,--export-dynamic

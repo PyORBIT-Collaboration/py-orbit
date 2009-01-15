@@ -3,5 +3,5 @@
 ######################################################################
 
 CXX             =  mpiCC -DUSE_MPI=1
-CXXFLAGS        = -g -Wall -O3
+CXXFLAGS        = -g -O3
 LINKFLAGS       =

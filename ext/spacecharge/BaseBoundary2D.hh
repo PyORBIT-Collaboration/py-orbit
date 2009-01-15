@@ -66,7 +66,7 @@ class BaseBoundary2D: public OrbitUtils::CppPyWrapper
 		void _gaussjinv(double **a, int n);
 		
 		/** Calculates all of the LSQM functions at one point */
-		double* lsq_fuctions(double x, double y);	
+		void lsq_fuctions(double x, double y);	
 		
 	protected:
 		

@@ -165,7 +165,7 @@ void BaseBoundary2D::initializeBPs(){
   }}
 
   for (int  iBp = 0; iBp < nPoints_ ; iBp++){
-    lsq_func_vctr_ =  lsq_fuctions(bArrX_[iBp],bArrY_[iBp]);
+    lsq_fuctions(bArrX_[iBp],bArrY_[iBp]);
      for(int i = 0; i < (2*nModes_+1); i++) {
      for(int j = 0; j < (2*nModes_+1); j++) {
        tmp_matrix_[i][j] += lsq_func_vctr_[i]*lsq_func_vctr_[j];
@@ -178,7 +178,7 @@ void BaseBoundary2D::initializeBPs(){
   for(int i = 0; i < (2*nModes_+1); i++) {
   for(int j = 0; j < nPoints_     ; j++) {
     LSQ_matrix_[i][j] = 0.0;
-    lsq_func_vctr_ =  lsq_fuctions(bArrX_[j],bArrY_[j]);
+    lsq_fuctions(bArrX_[j],bArrY_[j]);
     for (int k = 0; k < (2*nModes_+1); k++) {
       LSQ_matrix_[i][j] += tmp_matrix_[i][k] * lsq_func_vctr_[k];
     }    
@@ -272,7 +272,7 @@ void BaseBoundary2D::_gaussjinv(double **a, int n)
 }
 
 /** Calculates all of the LSQM functions at one point */
-double* BaseBoundary2D::lsq_fuctions(double x, double y)
+void BaseBoundary2D::lsq_fuctions(double x, double y)
 {
   int i = 0;
   double r,r2;
@@ -282,7 +282,7 @@ double* BaseBoundary2D::lsq_fuctions(double x, double y)
      for( i = 1; i < (2*nModes_+1); i++) {
        lsq_func_vctr_[i] = 0.0;
      }
-     return lsq_func_vctr_;
+     return;
   }
   
   r = sqrt(r2);
@@ -304,7 +304,6 @@ double* BaseBoundary2D::lsq_fuctions(double x, double y)
     sin_f0 = sin_f1;
     cos_f0 = cos_f1;
   }
-  return lsq_func_vctr_;
 }
 
 
@@ -384,20 +383,24 @@ void BaseBoundary2D::addBoundaryPotential(Grid2D* rhoGrid,Grid2D*  phiGrid){
      for(int j = 0; j < nPoints_ ; j++) {
        lsq_coef_vctr_[i] += LSQ_matrix_[i][j]*bnd_phi_arr_[j];
      } 
+		 //std::cout<<"debug i="<<i<<" coef="<<lsq_coef_vctr_[i]<<std::endl;
   }
 	
 	double phi = 0.;
 	double** phi_arr = phiGrid->getArr();
 	for(int i = 0, nx = phiGrid->getSizeX(); i < nx; i++){
-		for(int j = 0, ny = phiGrid->getSizeY(); i < ny; i++){
+		for(int j = 0, ny = phiGrid->getSizeY(); j < ny; j++){
 			phi = 0.;
-			lsq_func_vctr_ =  lsq_fuctions(phiGrid->getGridX(i),phiGrid->getGridY(j));
+			//std::cout<<"debug ================= i="<<i<<"  j="<< j <<std::endl;
+			lsq_fuctions(phiGrid->getGridX(i),phiGrid->getGridY(j));
 			for(int k = 0, n = (2*nModes_+1); k < n; k++){
-				phi += lsq_coef_vctr_[i]*lsq_func_vctr_[i];
+				phi += lsq_coef_vctr_[k]*lsq_func_vctr_[k];
+				//std::cout<<"debug k="<<k<<" coef="<<lsq_coef_vctr_[k]<<" func="<<lsq_func_vctr_[k]<<std::endl;
 			}
-			phi_arr[i][j] +=  phi;
+			phi_arr[i][j] -=  phi;
+			//std::cout<<"debug phi="<<phi<<std::endl;
 		}
-	}
+	}	
 }
 
 

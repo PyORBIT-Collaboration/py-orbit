@@ -25,9 +25,6 @@ namespace OrbitUtils{
 		BaseFieldSource();
 		virtual ~BaseFieldSource();
 		
-//		virtual void getElectricField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z);
-//		virtual void getMagneticField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z);
-		
 		virtual void getElectricMagneticField(double x, double y, double z, double t, 
 				double& E_x, double& E_y, double& E_z,
 				double& H_x, double& H_y, double& H_z);

@@ -26,24 +26,12 @@ BaseFieldSource::~BaseFieldSource()
 {
 }
 
-/*
-void BaseFieldSource::getElectricField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z)
-{
-  f_x = 0.0; f_y = 0.0; f_z = 0.0; 
-}
-
-void BaseFieldSource::getMagneticField(double x, double y, double z, double t, double& f_x, double& f_y, double& f_z)
-{
-  f_x = 0.0; f_y = 0.0; f_z = 0.0; 
-}
-*/
-
 void BaseFieldSource::getElectricMagneticField(double x, double y, double z, double t, 
 		double& E_x, double& E_y, double& E_z,
 		double& H_x, double& H_y, double& H_z){
 	
-	E_x=0;	E_y=0;	E_z=0;
-	H_x=0;	H_y=0;	H_z=0;
+	E_x=0.;	E_y=0.;	E_z=0.;
+	H_x=0.;	H_y=0.;	H_z=0.;
 	
 }
 

@@ -580,7 +580,9 @@ void RungeKuttaTracker::rk4Step(double t, double t_st, BaseFieldSource* fieldSou
 }
 
 void RungeKuttaTracker::calculateRightSideODE(double t, BaseFieldSource* fieldSource){
-	fieldSource->getElectricMagneticField(y_vct[0],y_vct[1],y_vct[2],t,e_vct[0],e_vct[1],e_vct[2],b_vct[0],b_vct[1],b_vct[2]);
+	fieldSource->getElectricMagneticField(y_vct[0],y_vct[1],y_vct[2],t,
+		                                    e_vct[0],e_vct[1],e_vct[2],
+																				b_vct[0],b_vct[1],b_vct[2]);
 	//std::cerr<<"debug E=" << e_vct[0] <<" "<< e_vct[1] <<" "<< e_vct[2] <<std::endl;
 	//std::cerr<<"debug B=" << b_vct[0] <<" "<< b_vct[1] <<" "<< b_vct[2] <<std::endl;
 	double coef = mass2 + y_vct[3]*y_vct[3] + y_vct[4]*y_vct[4] + y_vct[5]*y_vct[5];

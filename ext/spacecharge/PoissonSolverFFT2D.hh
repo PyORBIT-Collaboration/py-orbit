@@ -77,6 +77,9 @@ class PoissonSolverFFT2D: public PoissonSolver2D
 			fftw_complex* out_;
 			fftw_complex* out_res_;
 			
+			//real part of out_green[0][0] - is used for scaling
+			double out_green_re00_;
+			
 			fftw_plan planForward_greenF_;
 			fftw_plan planForward_;
 			fftw_plan planBackward_;

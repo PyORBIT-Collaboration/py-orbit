@@ -139,7 +139,7 @@ void PoissonSolverFFT2D::_defineGreenF()
 			greensF_[iX][iY] = greensF_[iX][ySize2_-iY];
 		}
 	}
-	
+		
 	//   Calculate the FFT of the Greens Function:
 	
 	for (i = 0; i < xSize2_; i++)
@@ -149,6 +149,8 @@ void PoissonSolverFFT2D::_defineGreenF()
 		}
     
 		fftw_execute(planForward_greenF_);
+		
+		out_green_re00_ = out_green_[0][0];
 		
 		for (i = 0; i < xSize2_; i++)
 			for (j = 0; j < ySize2_; j++)
@@ -160,8 +162,46 @@ void PoissonSolverFFT2D::_defineGreenF()
 
 void PoissonSolverFFT2D::findPotential(Grid2D* rhoGrid,Grid2D*  phiGrid)
 {
+	double shape_diff_limit = 0.0000001;
+	//check sizes of the grids
+  if( xSize_ !=  rhoGrid->getSizeX() || ySize_ != rhoGrid->getSizeY() ||
+		  xSize_ !=  phiGrid->getSizeX() || ySize_ != phiGrid->getSizeY() ||
+		  fabs(dx_/dy_ - rhoGrid->getStepX()/rhoGrid->getStepY()) > shape_diff_limit ||
+			fabs(dx_/dy_ - phiGrid->getStepX()/phiGrid->getStepY()) > shape_diff_limit ||
+			phiGrid->getMinX()  != rhoGrid->getMinX()  || phiGrid->getMinY() != rhoGrid->getMinY() ||
+			phiGrid->getStepX() != rhoGrid->getStepX() || phiGrid->getStepY() != rhoGrid->getStepY()){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "PoissonSolverFFT2D:" 
+			<< "The grid sizes or shape are different "<< std::endl 
+								<< "number x bins ="<< xSize_ << std::endl
+								<< "number y bins ="<< ySize_ << std::endl
+								<< "rhoGrid x bins ="<< rhoGrid->getSizeX() <<std::endl
+								<< "rhoGrid y bins ="<< rhoGrid->getSizeY() <<std::endl
+								<< "phiGrid x bins ="<< phiGrid->getSizeX() <<std::endl
+								<< "phiGrid y bins ="<< phiGrid->getSizeY() <<std::endl
+								<< "dx_  ="<< dx_ <<std::endl
+								<< "dy_  ="<< dy_ <<std::endl
+								<< "rhoGrid dx ="<< rhoGrid->getStepX() <<std::endl
+								<< "rhoGrid dy ="<< rhoGrid->getStepY() <<std::endl
+								<< "phiGrid dx ="<< phiGrid->getStepX() <<std::endl
+								<< "phiGrid dy ="<< phiGrid->getStepY() <<std::endl
+								<< "xMin ="<< xMin_ <<std::endl
+								<< "yMin  ="<< yMin_ <<std::endl
+								<< "rhoGrid xMin ="<< rhoGrid->getMinX() <<std::endl
+								<< "rhoGrid yMin ="<< rhoGrid->getMinY() <<std::endl
+								<< "phiGrid xMin ="<< phiGrid->getMinX() <<std::endl
+								<< "phiGrid yMin ="<< phiGrid->getMinY() <<std::endl
+								<< "Stop. \n";
+		}
+		ORBIT_MPI_Finalize();
+  }		
 	
-	checkSizes(rhoGrid,phiGrid);
+	//scaling the FFT of the Green functions
+  double scale_coeff = log(dx_/rhoGrid->getStepX());
+	out_green_[0][0] = out_green_re00_ + scale_coeff*(xSize2_*ySize2_);
+	
 	double** rhosc = rhoGrid->getArr();
 	double** phisc = phiGrid->getArr();
 		
@@ -177,17 +217,24 @@ void PoissonSolverFFT2D::findPotential(Grid2D* rhoGrid,Grid2D*  phiGrid)
 	fftw_execute(planForward_);
 	
   //do convolution with the FFT of the Green's function 
+	double gr_re = 0.;
+	double gr_im = 0.;
   for (i = 0; i < xSize2_; i++)
   for (j = 0; j < ySize2_/2+1; j++)
   {
     index = j + (ySize2_/2+1)*i;
-    out_res_[index][0] = out_[index][0]*out_green_[index][0] - out_[index][1]*out_green_[index][1];
-    out_res_[index][1] = out_[index][0]*out_green_[index][1] + out_[index][1]*out_green_[index][0];
+		gr_re = out_green_[index][0] - scale_coeff;
+		gr_im = out_green_[index][1];
+		//std::cout<<" debug gr_re="<<gr_re<<" gr_im="<<gr_im<<" scale_coeff="<<scale_coeff<<std::endl;
+    out_res_[index][0] = out_[index][0]*gr_re - out_[index][1]*gr_im;
+    out_res_[index][1] = out_[index][0]*gr_im + out_[index][1]*gr_re;
   }
 
   //do backward FFT
 	fftw_execute(planBackward_);
 
+	out_green_[0][0] = out_green_re00_;
+	
   //set the potential
   double denom = 1.0 / (xSize2_*ySize2_);	
   for (i = 0; i < xSize_; i++)

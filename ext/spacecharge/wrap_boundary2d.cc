@@ -1,7 +1,7 @@
 #include "orbit_mpi.hh"
 #include "pyORBIT_Object.hh"
 
-#include "wrap_baseboundary2d.hh"
+#include "wrap_boundary2d.hh"
 #include "wrap_spacecharge.hh"
 
 #include <iostream>
@@ -107,6 +107,14 @@ extern "C" {
 		return Py_BuildValue("i",cpp_Boundary2D->getNumberOfModes());
 	}
 	
+	//getShapeName()
+	static PyObject* Boundary2D_getShapeName(PyObject *self, PyObject *args){
+		pyORBIT_Object* pyBoundary2D = (pyORBIT_Object*) self;
+		BaseBoundary2D* cpp_Boundary2D = (BaseBoundary2D*) pyBoundary2D->cpp_obj;
+		return Py_BuildValue("s",cpp_Boundary2D->getShapeName().c_str());
+	}
+	
+	
 	//isInitialized()
 	static PyObject* Boundary2D_isInitialized(PyObject *self, PyObject *args){
 		pyORBIT_Object* pyBoundary2D = (pyORBIT_Object*) self;
@@ -192,6 +200,7 @@ extern "C" {
 		{ "getMinY",             Boundary2D_getMinY,             METH_VARARGS,"returns min value in y-direction"},
 		{ "getNumberOfModes",    Boundary2D_getNumberOfModes,    METH_VARARGS,"returns the number of free-space modes"},
 		{ "getNumberOfPoints",   Boundary2D_getNumberOfPoints,   METH_VARARGS,"returns the number of boundary points"},
+		{ "getShapeName",        Boundary2D_getShapeName,        METH_VARARGS,"returns the shape name"},
 		{ "isInitialized",       Boundary2D_isInitialized,       METH_VARARGS,"returns 1 if initialized and 0 if not"},
 		{ "initialize",          Boundary2D_initialize,          METH_VARARGS,"initializes all boundary arrays"},
 		{ "getBoundaryPoint",    Boundary2D_getBoundaryPoint,    METH_VARARGS,"returns tuple (x,y) - a boundary point with index"},

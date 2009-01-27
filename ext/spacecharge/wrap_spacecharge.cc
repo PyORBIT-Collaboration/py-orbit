@@ -2,7 +2,7 @@
 
 #include "wrap_grid2D.hh"
 #include "wrap_poissonsolverfft2d.hh"
-#include "wrap_baseboundary2d.hh"
+#include "wrap_boundary2d.hh"
 
 static PyMethodDef spacechargeMethods[] = { {NULL,NULL} };
 

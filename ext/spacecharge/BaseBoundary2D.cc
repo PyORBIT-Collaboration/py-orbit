@@ -143,7 +143,7 @@ double BaseBoundary2D::getBoundaryPointY(int i){
 /** Sets the boundary point with index to (x,y) */
 void BaseBoundary2D::setBoundaryPoint(int index, double x, double y){
 	
-	if(no_shape_key_ == 1){
+	if(no_shape_key_ != 1){
 		int rank = 0;
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){

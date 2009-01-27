@@ -18,6 +18,13 @@ BaseBoundary2D::BaseBoundary2D(int nPoints, int nModes): CppPyWrapper(NULL)
 	
 	BPrnorm_ = DBL_MAX;
 	
+	shape_ = "noshape";
+	NO_SHAPE = shape_;
+	shape_type_ = -1;	
+	no_shape_key_ = 1;
+	xDim_ = 0.;
+	yDim_ = 0.;	
+	
 	//number of points on the boundary
 	nPoints_ = nPoints;
 	
@@ -135,6 +142,21 @@ double BaseBoundary2D::getBoundaryPointY(int i){
 
 /** Sets the boundary point with index to (x,y) */
 void BaseBoundary2D::setBoundaryPoint(int index, double x, double y){
+	
+	if(no_shape_key_ == 1){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "BaseBoundary2D::setBoundaryPoint(...) " << std::endl
+			<< " You can not do this! The shape has been defined already! "<< std::endl
+			<< " shape = " << shape_ << std::endl
+			<< " x size = " << xDim_    << std::endl
+			<< " y size = " << yDim_    << std::endl
+			<< "Stop."<< std::endl;
+		}
+		ORBIT_MPI_Finalize();			
+	}
+	
 	if(index < nPoints_ && index >= 0){
 		bArrX_[index] = x;
 		bArrY_[index] = y;				
@@ -186,6 +208,11 @@ void BaseBoundary2D::initializeBPs(){
 	
 	//boundary is initialized
 	initialized_ = 1;
+}
+
+/** Returns the name of the shape */
+string BaseBoundary2D::getShapeName(){
+	return shape_;
 }
 
 void BaseBoundary2D::_gaussjinv(double **a, int n)

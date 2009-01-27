@@ -16,7 +16,7 @@ extern "C" {
 		//add the other classes init
 		wrap_spacecharge::initGrid2D(module);
 		wrap_spacecharge::initPoissonSolverFFT2D(module);
-		wrap_spacecharge::initBaseBoundary2D(module);
+		wrap_spacecharge::initBoundary2D(module);
   }
 	
 	PyObject* getSpaceChargeType(char* name){

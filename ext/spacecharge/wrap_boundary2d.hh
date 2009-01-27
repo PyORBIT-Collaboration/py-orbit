@@ -1,5 +1,5 @@
-#ifndef WRAP_BASE_BOUNDARY_2D_H
-#define WRAP_BASE_BOUNDARY_2D_H
+#ifndef WRAP_BOUNDARY_2D_H
+#define WRAP_BOUNDARY_2D_H
 
 #include "Python.h"
 
@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
   namespace wrap_spacecharge{
-    void initBaseBoundary2D(PyObject* module);
+    void initBoundary2D(PyObject* module);
   }
 
 #ifdef __cplusplus

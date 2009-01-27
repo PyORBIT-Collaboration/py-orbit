@@ -1,6 +1,8 @@
 #ifndef SC_BASE_BOUNDARY_2D_H
 #define SC_BASE_BOUNDARY_2D_H
 
+#include <string>
+
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 
@@ -60,6 +62,14 @@ class BaseBoundary2D: public OrbitUtils::CppPyWrapper
 		/** Initializes all arrays related to boundary points  */
 		void initializeBPs();
 		
+		/** Returns the name of the shape */
+		string getShapeName();
+		
+	public:
+		
+		/** NOSHAPE String constant */
+		string NO_SHAPE;
+		
 	protected:
 	
 		/** Calculates an inverse matrix  */
@@ -69,6 +79,16 @@ class BaseBoundary2D: public OrbitUtils::CppPyWrapper
 		void lsq_fuctions(double x, double y);	
 		
 	protected:
+		
+		string shape_;	
+		int shape_type_;
+		
+		//should be set to 1 in the base constructor
+		int no_shape_key_;
+
+		//x and y sizes for shaped border
+		double xDim_;
+		double yDim_;		
 		
 		//initialized - 1 if not it is 0
 		int initialized_;

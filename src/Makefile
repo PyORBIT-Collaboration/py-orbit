@@ -5,6 +5,10 @@ DIRS = $(patsubst %/, %, $(filter %/,$(shell ls -F)))
 #objects files list for ORBIT executable
 OBJS := $(foreach dir,$(DIRS),$(patsubst $(dir)/%.cc,$(dir)/obj/%.o,$(wildcard $(dir)/*.cc)))
 
+#FFTW library
+FFTW_LIBS = -L${FFTW3_ROOT}/lib -lfftw3
+LIBS += ${FFTW_LIBS}
+
 #========rules=========================
 
 all: compile

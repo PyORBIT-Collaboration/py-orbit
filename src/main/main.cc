@@ -9,6 +9,7 @@
 #include "wrap_utils.hh"
 #include "wrap_teapotbase.hh"
 #include "wrap_trackerrk4.hh"
+#include "wrap_spacecharge.hh"
 
 /**
  * The main function that will initialize the MPI and will 
@@ -44,8 +45,13 @@ int main (int argc, char **argv)
 	wrap_orbit_utils::initutils();
 	
 	wrap_teapotbase::initteapotbase();
+	
+	//Runge-Kutta tracker package
 	inittrackerrk4();
-
+	
+	//space-charge package
+	initspacecharge();
+	
 	//the python interpreter
 	//It will call Py_Initialize() again, but there is no harm
   Py_Main(argc,argv);

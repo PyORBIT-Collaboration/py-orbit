@@ -16,6 +16,11 @@ cpp_shared_lib_flags = " -Xlinker -export-dynamic "
 
 Decider('make')
 
+#-----We need FFTW3 library
+if (not os.environ.has_key("FFTW3_ROOT")):
+	print "You have to define FFTW3_ROOT env variable"
+	sys.exit(1)
+
 #--------------------------------------
 # Make pyORBIT
 #--------------------------------------
@@ -25,15 +30,18 @@ incl_dirs.append("./src/mpi/")
 incl_dirs.append("./src/orbit/")
 incl_dirs.append("./src/teapot/")
 incl_dirs.append("./src/trackerrk4/")
+incl_dirs.append("./src/spacecharge/")
 incl_dirs.append("./src/utils/")
+incl_dirs.append(os.environ["FFTW3_ROOT"]+"/include")
 
-py_lib_path = sysconfig.get_config_var('LIBPL')
+py_lib_path = [sysconfig.get_config_var('LIBPL'),os.environ["FFTW3_ROOT"]+"/lib"]
 py_libs = [sysconfig.get_config_var('LIBRARY')]
 py_shared_libs = sysconfig.get_config_var('SHLIBS').split()
 py_include_dir = sysconfig.get_config_var('INCLUDEPY')
 
 pyOrbit_incl_dirs = incl_dirs + [py_include_dir,]
 py_libs = py_libs + py_shared_libs
+py_libs = py_libs + ["libfftw3",]
 
 pyOrbitEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, LINKFLAGS =cpp_shared_lib_flags,  CPPPATH = pyOrbit_incl_dirs,  ENV = {'PATH':path})
 
@@ -69,30 +77,6 @@ laserstripping_lib = laserStrippingFieldEnv.SharedLibrary('./lib/laserstripping'
                             LINKFLAGS = cpp_shared_lib_flags,
 														SHLIBPREFIX = "")
 Default(laserstripping_lib)
-
-#--------- Space Charge 2D Field Module -----
-incl_ext_dirs = []
-incl_ext_dirs.append("./ext/spacecharge/")
-if (not os.environ.has_key("FFTW3_ROOT")):
-	print "You have to define FFTW3_ROOT env variable"
-	sys.exit(1)
-incl_ext_dirs.append(os.environ["FFTW3_ROOT"]+"/include")
-
-incl_dirs = pyOrbit_incl_dirs + incl_ext_dirs
-spacechargeEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, CPPPATH = incl_dirs,  ENV = {'PATH':path})
-
-cpp_files_list = []
-for dr in incl_ext_dirs:
-	spacechargeEnv.VariantDir(dr+"obj", dr, duplicate=0)
-	cpp_files_list = cpp_files_list + Glob(dr+"obj"+"/*.cc")
-
-spacecharge_lib = spacechargeEnv.SharedLibrary('./lib/spacecharge',
-	                          cpp_files_list, 
-														LIBS = ["libfftw3"],
-                            LIBPATH = [os.environ["FFTW3_ROOT"]+"/lib",] ,
-                            LINKFLAGS = cpp_shared_lib_flags,
-														SHLIBPREFIX = "")
-Default(spacecharge_lib)
 
 #--------------------------------------
 # Make documentation (see Phony Target for Scons)

@@ -6,11 +6,12 @@
 const int ShapedBoundary2D::IS_INSIDE    =  1;
 const int ShapedBoundary2D::IS_OUTSIDE   = -1;
 const int ShapedBoundary2D::TO_BE_KILLED =  0;
+
 const double ShapedBoundary2D::PI = 3.14159265358979324;
 
 using namespace OrbitUtils;
 
-// Constructor
+/** Constructor */
 ShapedBoundary2D::ShapedBoundary2D(int nPoints, int nModes, string shape, double xDim, double yDim): 
            BaseBoundary2D(4*((int)(nPoints/4)),nModes)
 {
@@ -137,9 +138,170 @@ ShapedBoundary2D::ShapedBoundary2D(int nPoints, int nModes, string shape, double
 	no_shape_key_ = 0;
 }
 
-// Destructor
+/** Destructor */
 ShapedBoundary2D::~ShapedBoundary2D()
 {
+}
+
+/** The method calculates an impact position on the surface 
+and a normal vector at the point of entry. 
+The normal vector is directed into the inner volume. 
+The first vector is a position vector and the second one is a 
+normal to the surface vector.
+If the particle did not cross the surface we do not know what to do
+and we will kill it (return TO_BE_KILLED int value).
+*/
+int ShapedBoundary2D::impactPoint(double x,  double y,  double z,
+                                  double px, double py, double pz,
+	                                double* r_v,double* n_v)
+{
+	// NOTICE: in the rectangle case, we could remove corner and boundary plane 
+	// conditions if we found out they would not change results so much.	
+  double time_impact=-1.0;
+	
+  r_v[0]=x;    r_v[1]=y;    r_v[2]=z;
+  n_v[0]=0.0;  n_v[1]=0.0;  n_v[2]=0.0;
+	
+  //we consider the particle outside of the boundary
+  int isIns = isInside(x,y);
+  if (isIns == IS_OUTSIDE){
+		
+    //Circle-------------------------------------------------
+    if (shape_type_ == 1){
+      double c1=px*px+py*py, c2=x*px+y*py, c3=x*x+y*y-r_circle_*r_circle_;
+      if (c2*c2-c1*c3 <= 0.0){return TO_BE_KILLED;}
+      double t1=(c2+sqrt(c2*c2-c1*c3))/c1, t2=(c2-sqrt(c2*c2-c1*c3))/c1;
+      if(t1>=0.0 && t2>=0.0){
+				time_impact=t2;
+      }else{
+				//std::cout <<"the particle may have inward momentum \n";
+				//std::cout <<"Please check '"<<t1*t2<<"' be positive \n";
+				return TO_BE_KILLED;
+      }
+      double norm = sqrt(x*x+y*y);
+      n_v[0] = -x/norm; n_v[1] = -y/norm; n_v[2] = 0.0;
+    }
+    //-------------------------------------------------------
+		
+    //Ellipse------------------------------------------------
+    if (shape_type_ == 2){
+      double c1 = pow(px/a_ellipse_,2) + pow(py/b_ellipse_,2);
+      double c2 = x*px/pow(a_ellipse_,2) + y*py/pow(b_ellipse_,2);
+      double c3 = pow(x/a_ellipse_,2) + pow(y/b_ellipse_,2) -1;
+      if (c2*c2-c1*c3 <= 0.0){return TO_BE_KILLED;}
+      double t1=(c2+sqrt(c2*c2-c1*c3))/c1, t2=(c2-sqrt(c2*c2-c1*c3))/c1;
+      if(t1>=0.0 && t2>=0.0) {
+				time_impact=t2;
+      }else{
+				//std::cout <<"the particle may have inward momentum \n";
+				//std::cout <<"Please check '"<<t1*t2<<"' be positive \n";
+				return TO_BE_KILLED;
+      }
+      double norm = sqrt(pow(b_ellipse_,4)*x*x + pow(a_ellipse_,4)*y*y);
+      n_v[0] = -pow(b_ellipse_,2)*x/norm; n_v[1] = -pow(a_ellipse_,2)*y/norm; n_v[2] = 0.0;
+    }
+    //-------------------------------------------------------
+		
+    //Rectangle----------------------------------------------
+    if (shape_type_ == 3){
+      double L = a_rect_,W = b_rect_; 
+			
+      double t1,t2,t3,t4, ry1,ry2,rx3,rx4;
+      t1= (x - 0.5*L)/px;      ry1=y-t1*py;
+      t2= (x + 0.5*L)/px;      ry2=y-t2*py;
+      t3= (y - 0.5*W)/py;      rx3=x-t3*px;
+      t4= (y + 0.5*W)/py;      rx4=x-t4*px;
+			
+      //      std::cout<<"debug (t1,t2,t3,t4)= ("
+      //	       <<t1<<","<<t2<<","<<t3<<","<<t4<<") \n";
+			
+      double eps=1.E-10; //to define corners and planes of the boundary 
+			
+      //the particle is at a corner
+      if( fabs(fabs(x)-0.5*L)<eps && fabs(fabs(y)-0.5*W)<eps ){
+				return TO_BE_KILLED;
+      }
+      //the particle is on a boundary plane
+      else if( fabs(t1)<eps && fabs(ry1)<0.5*W && px>0.0 ){time_impact =t1;}
+      else if( fabs(t2)<eps && fabs(ry2)<0.5*W && px<0.0 ){time_impact =t2;}
+      else if( fabs(t3)<eps && fabs(rx3)<0.5*L && py>0.0 ){time_impact =t3;}
+      else if( fabs(t4)<eps && fabs(rx4)<0.5*L && py<0.0 ){time_impact =t4;}
+      else if( fabs(t1)<eps && fabs(ry1)<0.5*W && px<0.0 ){return IS_INSIDE;}
+      else if( fabs(t2)<eps && fabs(ry2)<0.5*W && px>0.0 ){return IS_INSIDE;}
+      else if( fabs(t3)<eps && fabs(rx3)<0.5*L && py<0.0 ){return IS_INSIDE;}
+      else if( fabs(t4)<eps && fabs(rx4)<0.5*L && py>0.0 ){return IS_INSIDE;}
+      else{
+				//the particle locates outside boundary
+				if(t1>0.0 && fabs(ry1)<0.5*W){time_impact=t1;}
+				if(t2>0.0 && fabs(ry2)<0.5*W){
+					if(time_impact<=0.0){       time_impact=t2;}
+					if(time_impact > t2){       time_impact=t2;}
+				}
+				if(t3>0.0 && fabs(rx3)<0.5*L){
+					if(time_impact<=0.0){       time_impact=t3;} 
+					if(time_impact > t3){       time_impact=t3;}
+				}
+				if(t4>0.0 && fabs(rx4)<0.5*L){ 
+					if(time_impact<=0.0){       time_impact=t4;}
+					if(time_impact > t4){       time_impact=t4;}
+				}	  
+				
+				//the particle came from a corner
+				if( ( fabs(time_impact-t1)<eps && fabs(time_impact-t3)<eps ) ||
+					( fabs(time_impact-t1)<eps && fabs(time_impact-t4)<eps ) ||
+				( fabs(time_impact-t2)<eps && fabs(time_impact-t3)<eps ) ||
+				( fabs(time_impact-t2)<eps && fabs(time_impact-t4)<eps ) ){
+				return TO_BE_KILLED;
+				}
+      }
+			
+      //      std::cout<<"debug time_impact= ("<<time_impact<<") \n";
+			
+      if(time_impact<0.0){
+				// std::cout<<"the particle has inward momentum \n";
+        return TO_BE_KILLED;
+      }
+			
+      if(fabs(time_impact-t1)<eps){n_v[0]=-1.0; n_v[1]= 0.0; n_v[2]= 0.0;}
+      if(fabs(time_impact-t2)<eps){n_v[0]= 1.0; n_v[1]= 0.0; n_v[2]= 0.0;}
+      if(fabs(time_impact-t3)<eps){n_v[0]= 0.0; n_v[1]=-1.0; n_v[2]= 0.0;}
+      if(fabs(time_impact-t4)<eps){n_v[0]= 0.0; n_v[1]= 1.0; n_v[2]= 0.0;}
+			
+    }
+    //-------------------------------------------------------
+		
+    //positive "time_impact" means that the particle goes outward 
+    r_v[0] = x - time_impact*px; 
+    r_v[1] = y - time_impact*py; 
+    r_v[2] = z - time_impact*pz;
+    return IS_OUTSIDE;
+  }
+  else{
+    return IS_INSIDE;
+  }
+}
+
+/** Returns IS_INSIDE or IS_OUTSIDE depending on the particle's position */
+int ShapedBoundary2D::isInside(double x, double y)
+{
+  int isIns = IS_OUTSIDE;
+
+  if (shape_type_ == 1){
+    if( x*x+y*y < r_circle_*r_circle_ ) isIns = IS_INSIDE;
+  }
+
+  if (shape_type_ == 2){
+    double xx,yy;
+    xx = x/a_ellipse_;
+    yy = y/b_ellipse_;
+    if( (xx*xx + yy*yy) < 1.0 ) isIns = IS_INSIDE;
+  }
+
+  if (shape_type_ == 3){
+    if( fabs(x/a_rect_) < 0.5 && fabs(y/b_rect_) < 0.5 ) isIns = IS_INSIDE;
+  }
+
+  return isIns;
 }
 
 

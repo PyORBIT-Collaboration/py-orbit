@@ -25,6 +25,20 @@ class ShapedBoundary2D: public BaseBoundary2D
 		/** Destructor */
 		virtual ~ShapedBoundary2D();
 	
+		/** The method calculates an impact position on the surface 
+		and a normal vector at the point of entry. 
+		The normal vector is directed into the inner volume. 
+		The first vector is a position vector and the second one is a 
+		normal to the surface vector.
+		If the particle did not cross the surface we do not know what to do
+		and we will kill it (return TO_BE_KILLED int value).*/
+	  int impactPoint(double x,  double y,  double z,
+		                double px, double py, double pz,
+		                double* r_v,double* n_v);
+		
+		/** Returns IS_INSIDE or IS_OUTSIDE depending on the particle's position */
+		int isInside(double x, double y);	
+		
 		///public static members
 		public:
 			const static int IS_INSIDE;

@@ -65,6 +65,9 @@ class BaseBoundary2D: public OrbitUtils::CppPyWrapper
 		/** Returns the name of the shape */
 		string getShapeName();
 		
+		/** Returns the shape index */
+		int getShapeType();
+		
 	public:
 		
 		/** NOSHAPE String constant */

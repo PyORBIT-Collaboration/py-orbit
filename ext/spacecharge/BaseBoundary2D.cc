@@ -215,6 +215,11 @@ string BaseBoundary2D::getShapeName(){
 	return shape_;
 }
 
+/** Returns the shape index */
+int BaseBoundary2D::getShapeType(){
+	return shape_type_;
+}
+
 void BaseBoundary2D::_gaussjinv(double **a, int n)
 {
 	//    Taken from Nrecipes and slightly modified.

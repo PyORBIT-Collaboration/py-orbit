@@ -38,6 +38,9 @@ PYTHON_ROOT_INC	- location of the python header files.
 
 PYTHONPATH	- should be modified to include access to the ORBIT
 		  python modules:
-		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py:${ORBIT_ROOT}/modules
+		  export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py:${ORBIT_ROOT}/lib
+			
+LD_LIBRARY_PATH - location of the shared libraries with extenstions of the pyORBIT
+			export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ORBIT_ROOT}/lib
 
 

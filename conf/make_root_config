@@ -23,11 +23,17 @@ LIBS  =
 LIBS += $(PYTHON_ROOT_LIB)
 LIBS += -ldl -lreadline -ltermcap -lpthread -lutil -lm -Xlinker -export-dynamic
 
+#FFTW library
+LIBS +=  -L${FFTW3_ROOT}/lib -lfftw3
+
 #-------------------------------------------------------------------------------
 # include file locations
 #-------------------------------------------------------------------------------
 
 INCLUDES  =
+
+#Headers for FFTW library
+INCLUDES += -I${FFTW3_ROOT}/include
 
 #-------------------------------------------------------------------------------
 # PYTHON_ROOT_INC - specify the location of the python header files.

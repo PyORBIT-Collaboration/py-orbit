@@ -1,7 +1,6 @@
 DIRS  = 
 DIRS += ./ecloud
 DIRS += ./laserstripping
-DIRS += ./spacecharge
 
 #========rules=========================
 

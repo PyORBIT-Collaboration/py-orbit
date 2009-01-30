@@ -1,0 +1,20 @@
+include ../conf/make_root_config
+
+DIRS = $(filter-out test%,$(patsubst %/, %, $(filter %/,$(shell ls -F))))
+
+#objects files list for ORBIT executable
+OBJS = $(foreach dir,$(DIRS),$(wildcard $(dir)/obj/*.o))
+
+#FFTW library
+FFTW_LIBS = -L${FFTW3_ROOT}/lib -lfftw3
+LIBS += ${FFTW_LIBS}
+
+#========rules=========================
+
+all: compile
+
+compile: $(orbit_main)
+
+$(orbit_main): $(OBJS)
+	$(CXX) -o $(orbit_main) $(OBJS) $(LIBS) $(LINKFLAGS)
+

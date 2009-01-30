@@ -1,14 +1,6 @@
 include ../conf/make_root_config
 
-DIRS = $(patsubst %/, %, $(filter %/,$(shell ls -F)))
-
-#objects files list for ORBIT executable
-OBJS := $(foreach dir,$(DIRS),$(patsubst $(dir)/%.cc,$(dir)/obj/%.o,$(wildcard $(dir)/*.cc)))
-
-#FFTW library
-FFTW_LIBS = -L${FFTW3_ROOT}/lib -lfftw3
-LIBS += ${FFTW_LIBS}
-
+DIRS = $(filter-out test%,$(patsubst %/, %, $(filter %/,$(shell ls -F))))
 #========rules=========================
 
 all: compile
@@ -17,7 +9,7 @@ compile:
 	@for dir in $(DIRS); do \
 		(cd $$dir; if [ -f ./Makefile ]; then $(MAKE) compile; fi;); \
 	done
-	$(CXX) -o $(orbit_main) $(OBJS) $(LIBS) $(LINKFLAGS)
+	$(MAKE) --makefile=MakefileMain compile
 
 clean:
 	@for dir in $(DIRS); do \

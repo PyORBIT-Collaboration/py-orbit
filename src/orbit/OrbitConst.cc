@@ -35,6 +35,7 @@ const double OrbitConst::charge_electron = -1.0;
 const double OrbitConst::mass_proton = 0.9382723;
 const double OrbitConst::classicalRadius_proton = 1.534698e-18;
 const double OrbitConst::charge_proton = +1.0;
+const double OrbitConst::permeability = 4*3.14159265358979323846264*1e-007;
 
 OrbitConst::OrbitConst()
 {

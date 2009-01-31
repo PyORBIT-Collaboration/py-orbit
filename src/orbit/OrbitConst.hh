@@ -52,6 +52,9 @@ public:
 
   //coeffitient to get volts from our potentials
   const static double coeff_Phi_to_Volts;
+  
+  //magnetic permeability
+  const static double permeability;
 
   //------------------------------------------------------------
   //electron parameters

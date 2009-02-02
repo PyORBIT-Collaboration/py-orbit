@@ -42,5 +42,7 @@ PYTHONPATH	- should be modified to include access to the ORBIT
 			
 LD_LIBRARY_PATH - location of the shared libraries with extenstions of the pyORBIT
 			export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${ORBIT_ROOT}/lib
+			
+FFTW3_ROOT - location of the root directory of the FFTW library, version 3 and above  
 
 

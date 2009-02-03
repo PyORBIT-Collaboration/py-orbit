@@ -1,6 +1,7 @@
 //This class repersents a 2D rectangular grid 
 
 #include "Grid2D.hh"
+#include "ParticleMacroSize.hh"
 
 #include <iostream>
 
@@ -100,8 +101,29 @@ double Grid2D::getValue(double x, double y){
 	return value;
 }	
 
+/** Bins the Bunch into the 2D grid. If bunch has a macrosize particle attribute it will be used. */	
+void Grid2D::binBunch(Bunch* bunch){
+	bunch->compress();
+	double** part_coord_arr = bunch->coordArr();
+	int has_msize = bunch->hasParticleAttributes("macrosize");
+	if(has_msize > 0){
+		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
+		double m_size = 0.;
+		for(int i = 0, n = bunch->getSize(); i < n; i++){
+			m_size = macroSizeAttr->macrosize(i);
+			binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);
+		}	
+		return;
+	}
+	double m_size = bunch->getMacroSize();
+	for(int i = 0, n = bunch->getSize(); i < n; i++){
+		binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);	
+	}
+}
+
 /** Bins the value into the 2D grid */	
 void Grid2D::binValue(double value, double x, double y){
+	if(x < xMin_ || x > xMax_ || y < yMin_ || y > yMax_) return;
 	int iX, iY;
 	double Wxm, Wx0, Wxp, Wym, Wy0, Wyp;
 	double xFract,  yFract;

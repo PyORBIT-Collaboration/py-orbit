@@ -10,6 +10,9 @@
 #include <cstdlib>
 #include <cmath>
 
+//ORBIT bunch
+#include "Bunch.hh"
+
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 
@@ -46,6 +49,11 @@ public:
 	/** Sets the value to the one point of the 2D grid  */	
 	void setValue(double value, int ix, int iy);
 		
+	/** Bins the Bunch into the 2D grid. If bunch has a macrosize 
+	    particle attribute it will be used. 
+	*/	
+	void binBunch(Bunch* bunch);	
+	
 	/** Bins the value into the 2D grid */	
 	void binValue(double value, double x, double y);	
 	

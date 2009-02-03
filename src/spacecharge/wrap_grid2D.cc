@@ -3,6 +3,7 @@
 
 #include "wrap_grid2D.hh"
 #include "wrap_spacecharge.hh"
+#include "wrap_bunch.hh"
 
 #include <iostream>
 
@@ -178,6 +179,24 @@ extern "C" {
 		return Py_BuildValue("i",cpp_Grid2D->isInside(x,y));
 	}		
 	
+	//binBunch(Bunch* bunch)
+  static PyObject* Grid2D_binBunch(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		PyObject* pyBunch;
+		if(!PyArg_ParseTuple(args,"O:binBunch",&pyBunch)){
+			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch) - parameter are needed.");
+		}
+		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch) - constructor needs a Bunch.");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+		cpp_Grid2D->binBunch(cpp_bunch);
+		Py_INCREF(Py_None);
+    return Py_None;	
+	}		
+	
 	//binValue(double value, double x, double y)
   static PyObject* Grid2D_binValue(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
@@ -232,6 +251,7 @@ extern "C" {
 		{ "getMaxY",      Grid2D_getMaxY,     METH_VARARGS,"returns the max grid point in Y dir."},
 		{ "isInside",     Grid2D_isInside,    METH_VARARGS,"returns 1 or 0 if (x,y) inside grid or not"},
 		{ "binValue",     Grid2D_binValue,    METH_VARARGS,"bins the value into the 2D mesh"},
+		{ "binBunch",     Grid2D_binBunch,    METH_VARARGS,"bins the Bunch instance into the 2D mesh"},
 		{ "calcGradient", Grid2D_calcGradient,METH_VARARGS,"returns gradient as (gx,gy) for point (x,y)"},
     {NULL}
   };

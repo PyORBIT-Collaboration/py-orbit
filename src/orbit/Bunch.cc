@@ -332,8 +332,8 @@ void Bunch::copyBunchTo(Bunch* bunch){
 void Bunch::addParticlesTo(Bunch* bunch){
 	for(int i = 0, n = this->getSize(); i < n; i++){
 		//add particles coordinates
-		bunch->addParticle(this->x(i),this->y(i),this->z(i),
-			this->px(i),this->py(i),this->pz(i));
+		bunch->addParticle(this->x(i),this->px(i),this->y(i),
+			this->py(i),this->z(i),this->pz(i));
 	}
 
 	//add particles attributes

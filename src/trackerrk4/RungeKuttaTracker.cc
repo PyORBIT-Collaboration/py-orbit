@@ -453,7 +453,7 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 	}
 	//------------------------------------------------
 	//performs the necessary actions before tracking
-	if(extEff != NULL) extEff->setupEffects(bunch);
+	if(extEff != NULL) extEff->setupEffects(bunch);	
 	//------------------------------------------------	
 	while( t < t_period+t_begin){
 		for(int ip = 0, nParts = bunch->getSize(); ip < nParts; ip++){
@@ -486,7 +486,7 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 			}
 		}
 		//apply the external effects
-		
+
 		if(extEff != NULL) extEff->applyEffects(bunch, -1, tmp_vct, tmp_vct, t, t_step, fieldSource, this);
 		
 		t = t + t_step;

@@ -1,6 +1,10 @@
 //------------------------------------------------------------------
 // Wrappers for MPI functions related to the MPI_Comm manipulations
 //------------------------------------------------------------------
+#ifndef MPI_MAX_NAME_STRING
+#define MPI_MAX_NAME_STRING 128
+#endif
+
 static PyObject* mpi_comm_create(PyObject *self, PyObject *args) {
 	if(PyTuple_Size(args) != 2){
 		error("MPI_Comm_create(MPI_Comm, MPI_Group) needs 2 parameters.");

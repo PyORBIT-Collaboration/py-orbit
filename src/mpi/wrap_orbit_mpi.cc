@@ -19,6 +19,11 @@
 
 using namespace OrbitUtils;
 
+#ifndef MPI_UNDEFINED_RANK
+#define MPI_UNDEFINED_RANK MPI_UNDEFINED
+#endif
+
+
 /** The namespace for the python wrappers around MPI functions. */
 namespace wrap_orbit_mpi{
 	

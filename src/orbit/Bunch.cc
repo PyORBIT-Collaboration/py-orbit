@@ -543,7 +543,7 @@ void Bunch::resize()
     double** tmp_arrAttr    = new double*[nTotalSize];
     if(nOldTotalSize <= nTotalSize){
       for(int i = nOldTotalSize; i < nTotalSize; i++){
-				tmp_arrAttr[i]    = new double[nDim];
+				tmp_arrAttr[i]    = new double[attributesSize];
       }
       for(int i=0; i < nOldTotalSize; i++){
 				tmp_arrAttr[i]    = arrAttr[i];

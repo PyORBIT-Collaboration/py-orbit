@@ -888,11 +888,12 @@ namespace wrap_orbit_bunch{
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* file_name = NULL;
     std::vector<std::string> names;
+		std::map<std::string,std::map<std::string,double> > part_attr_dicts;
     //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
     if(!PyArg_ParseTuple(	args,"s:readPartAttrNames",&file_name)){
       error("PyBunch - readPartAttrNames(fileName) - a file name are needed");
     }
-    cpp_bunch->readParticleAttributesNames(file_name,names);
+    cpp_bunch->readParticleAttributesNames(file_name,names,part_attr_dicts);
 		//create tuple with names
 		PyObject* resTuple = PyTuple_New(names.size());
 		for(int i = 0, n = names.size(); i < n; i++){

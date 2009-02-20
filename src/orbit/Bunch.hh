@@ -141,7 +141,9 @@ public:
   //these methods return the number of actual macro-particles that were read
   int readBunchCoords(const char* fileName, int nParts);
   int readBunchCoords(const char* fileName);
-  int readParticleAttributesNames(const char* fileName, std::vector<std::string>& attr_names);
+  int readParticleAttributesNames(const char* fileName,
+		                              std::vector<std::string>& attr_names,
+																	std::map<std::string,std::map<std::string,double> >& part_attr_dicts);
   void readParticleAttributes(const char* fileName);
 
   void deleteAllParticles();

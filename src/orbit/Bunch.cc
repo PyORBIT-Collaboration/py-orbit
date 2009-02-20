@@ -1238,16 +1238,19 @@ void Bunch::deleteAllParticles()
 }
 
 void Bunch::readParticleAttributes(const char* fileName){
+	std::map<std::string,std::map<std::string,double> > part_attr_dicts;
 	removeAllParticleAttributes();
 	std::vector<std::string> attr_names;
-	readParticleAttributesNames(fileName,attr_names);
+	readParticleAttributesNames(fileName,attr_names,part_attr_dicts);
 	for(int i = 0, n = attr_names.size(); i < n; i++){
 		ParticleAttributes* partAttr = ParticleAttributesFactory::getParticleAttributesInstance(attr_names[i],this);
 		addParticleAttributes(partAttr);
 	}
 }
 
-int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::string>& attr_names){
+int Bunch::readParticleAttributesNames(const char* fileName, 
+	                                     std::vector<std::string>& attr_names, 
+																			 std::map<std::string,std::map<std::string,double> >& part_attr_dicts){
 
 	attr_names.clear();
 
@@ -1274,7 +1277,9 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 
 	std::string  str;
 	std::vector<std::string> v_str;
-
+	
+	std::vector<std::string> v_str_part_attr;	
+	
 	if(rank_MPI == 0){
 		while(!is.eof()){
 			getline(is,str);
@@ -1283,6 +1288,20 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 				if(nT > 2 && v_str[1] == "PARTICLE_ATTRIBUTES_CONTROLLERS_NAMES"){
 					for(int i = 2, n = v_str.size(); i < n; i++){
 						attr_names.push_back(v_str[i]);
+					}
+					for(int i = 2, n = v_str.size(); i < n; i++){
+						if(!is.eof()){
+							std::string  str_part_attr;
+							getline(is,str_part_attr);
+							if(strlen(str_part_attr.c_str()) <= 0  || str_part_attr.c_str()[0] != '%'){
+								break;
+							}
+							std::vector<std::string> v_str_dict;
+							nT = StringUtils::Tokenize(str_part_attr,v_str_dict);
+							if(nT > 2 && v_str_dict[1] == "PARTICLE_ATTRIBUTES_CONTROLLER_DICT"){
+								v_str_part_attr.push_back(str_part_attr);
+							}
+						}
 					}
 					break;
 				}
@@ -1294,26 +1313,26 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 		is.close();
 	}
 
-	if(rank_MPI == 0){
-	}
-
 	int nTypes = attr_names.size();
 	int strLength = strlen(str.c_str());
+	
+	for(int i = 0, n = v_str_part_attr.size(); i < n; i++){
+		int ln_str = strlen(v_str_part_attr[i].c_str());
+		if(strLength < ln_str) { strLength = ln_str;}
+	}	
 
-	if(size_MPI > 1){
-		ORBIT_MPI_Bcast ( &nTypes,   1, MPI_INT,    0, pyComm_Local->comm );
-		ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, pyComm_Local->comm );
-	}
-	else{
-		return nTypes;
-	}
-
+	ORBIT_MPI_Bcast ( &nTypes,   1, MPI_INT,    0, pyComm_Local->comm );
+	ORBIT_MPI_Bcast ( &strLength,1, MPI_INT,    0, pyComm_Local->comm );
+		
 	if(nTypes == 0) return 0;
-
+	
 	int buff_index = 0;
 	char* char_tmp = BufferStore::getBufferStore()->getFreeCharArr(buff_index,strLength+1);
+	
 	strcpy(char_tmp, str.c_str());
-	ORBIT_MPI_Bcast ( char_tmp,  strLength+1, MPI_CHAR,    0, pyComm_Local->comm );
+	int ln_str = strlen(str.c_str());
+	ORBIT_MPI_Bcast ( &ln_str,   1, MPI_INT,    0, pyComm_Local->comm );
+	ORBIT_MPI_Bcast ( char_tmp,ln_str +1, MPI_CHAR,    0, pyComm_Local->comm );
 	std::string str_new(char_tmp);
 	StringUtils::Tokenize(str_new,v_str);
 
@@ -1322,6 +1341,41 @@ int Bunch::readParticleAttributesNames(const char* fileName, std::vector<std::st
 	for(int i = 2, n = v_str.size(); i < n; i++){
 		attr_names.push_back(v_str[i]);
 	}
+	
+	//spreading all attr. dictionaries across all CPUs
+	int nDicts = v_str_part_attr.size();
+	ORBIT_MPI_Bcast ( &nDicts,   1, MPI_INT,    0, pyComm_Local->comm );
+	if(rank_MPI != 0){
+		v_str_part_attr.clear();
+	}
+	for(int i = 0; i < nDicts; i++){
+		ln_str = 0;
+		if(rank_MPI == 0){
+			ln_str = strlen(v_str_part_attr[i].c_str());
+			strcpy(char_tmp, v_str_part_attr[i].c_str());
+		}
+		ORBIT_MPI_Bcast ( &ln_str,   1, MPI_INT,    0, pyComm_Local->comm );
+		ORBIT_MPI_Bcast ( char_tmp,ln_str +1, MPI_CHAR,    0, pyComm_Local->comm );
+		std::string str_tmp(char_tmp);
+		if(rank_MPI != 0){
+			v_str_part_attr.push_back(str_tmp);
+		}
+	}
+	
+	part_attr_dicts.clear();
+	std::vector<std::string> v_str_dict;
+	for(int i = 0; i < nDicts; i++){
+		int nT = StringUtils::Tokenize(v_str_part_attr[i],v_str_dict);
+		int dict_size = (v_str_dict.size() - 3)/2;
+		map<std::string,double> attr_dict;
+		for(int k = 0; k < dict_size; k++){
+			int val = 0;
+			sscanf(v_str_dict[2*k+2+1].c_str(),"%d",&val);
+			attr_dict[v_str_dict[2*k+2]] = val;
+		}
+		part_attr_dicts[v_str_dict[2]] = attr_dict;
+	}
+	
 	BufferStore::getBufferStore()->setUnusedCharArr(buff_index);
 	return attr_names.size();
 }
@@ -1345,6 +1399,9 @@ void Bunch::addParticleAttributes(const std::string att_name){
 	ParticleAttributes* attr = ParticleAttributesFactory::getParticleAttributesInstance(att_name,this);
 	addParticleAttributes(attr);
 }
+
+std::map<std::string,ParticleAttributes*> attrCntrMapTemp;
+
 
 int Bunch::hasParticleAttributes(const std::string att_name){
 	return attrCntrSizeMap.count(att_name);

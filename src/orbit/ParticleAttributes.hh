@@ -31,6 +31,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 #include <string>
+#include <map>
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -77,6 +78,11 @@ public:
   //returns the flag of the particle (dead or alive)
   int flag(int particle_index);
 
+public:
+	
+	//dictionary with parameters. It is used during the dump or read procedures.
+	std::map<std::string,double> parameterDict;
+	
 protected:
 
   //initializes the attribute data

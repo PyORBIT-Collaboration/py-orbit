@@ -22,10 +22,7 @@
 //
 //    OrbitConst::c in [m/sec]
 ///////////////////////////////////////////////////////////////////////////
-#include <complex>
-typedef std::complex<double>	tcomplex;
-
-
+#include "tcomplex.hh"
 
 class  LorentzTransformationEM
 {

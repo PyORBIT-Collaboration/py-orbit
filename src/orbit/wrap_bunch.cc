@@ -791,12 +791,29 @@ namespace wrap_orbit_bunch{
   static PyObject* Bunch_addPartAttr(PyObject *self, PyObject *args){
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
     const char* attr_name = NULL;
+		PyObject* py_attrParamsDict = NULL;
     //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-    if(!PyArg_ParseTuple(	args,"s:addPartAttr",&attr_name)){
-      error("PyBunch - addPartAttr(name) - a particle attr. name are needed");
+    if(!PyArg_ParseTuple(	args,"s|O:addPartAttr",&attr_name,&py_attrParamsDict)){
+      error("PyBunch - addPartAttr(name, [param_dict]) - a particle attr. name are needed");
     }
     std::string attr_name_str(attr_name);
-    cpp_bunch->addParticleAttributes(attr_name_str);
+		std::map<std::string,double> part_attr_dict;
+		if(py_attrParamsDict != NULL){
+			if(!PyDict_Check(py_attrParamsDict)){
+				error("PyBunch - addPartAttr(name, [param_dict]) - param_dict is not a dictionary");
+			}
+			PyObject *key, *value;
+			int pos = 0;
+			while (PyDict_Next(py_attrParamsDict, &pos, &key, &value)) {
+				if(!PyString_Check(key) || !PyNumber_Check(value)){
+					error("PyBunch - addPartAttr(name, [param_dict]) - param_dict is not a {str:val} dictionary");
+				}
+				std::string par_name(PyString_AsString(key));
+				double d_val = PyFloat_AsDouble(value);
+				part_attr_dict[par_name] = d_val;
+			}
+		}
+    cpp_bunch->addParticleAttributes(attr_name_str,part_attr_dict);
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -839,7 +856,28 @@ namespace wrap_orbit_bunch{
     return resTuple;
   }
 
-   //Returns a list (tuple) of the possible particles' attributes names
+	//Returns a dict{"part. attribute name":dict{"key":val}}
+  static PyObject* Bunch_getPartAttrDicts(PyObject *self, PyObject *args){
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+    std::vector<std::string> names;
+    cpp_bunch->getParticleAttributesNames(names);
+		//make dict{"part. attribute name":dict{"key":val}}
+		PyObject* resDict = PyDict_New();
+		for(int i = 0, n = names.size(); i < n; i++){
+			PyObject* py_param_dict = PyDict_New();
+			PyDict_SetItemString(resDict,names[i].c_str(),py_param_dict);
+			std::map<std::string,double> param_dict = cpp_bunch->getParticleAttributes(names[i])->parameterDict;
+			std::map<std::string,double>::iterator pos;
+			for (pos = param_dict.begin(); pos != param_dict.end(); ++pos) {
+					std::string key = pos->first;
+					double val = pos->second;
+					PyDict_SetItemString(py_param_dict,key.c_str(),Py_BuildValue("d",val));				
+			}
+		}
+    return resDict;
+  }
+
+  //Returns a list (tuple) of the possible particles' attributes names
 	 static PyObject* Bunch_getPossiblePartAttrNames(PyObject *self, PyObject *args){
 		 std::vector<std::string> names;
 		 ParticleAttributesFactory::getParticleAttributesNames(names);
@@ -903,6 +941,34 @@ namespace wrap_orbit_bunch{
 			}
 		}
     return resTuple;
+  }
+	
+  //Returns a dictionary with the bunch particles attribute names as keys and 
+	//dictionaries with parameter:value for each attribute
+  static PyObject* Bunch_readPartAttrDicts(PyObject *self, PyObject *args){
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+    const char* file_name = NULL;
+    std::vector<std::string> names;
+		std::map<std::string,std::map<std::string,double> > part_attr_dicts;
+    if(!PyArg_ParseTuple(	args,"s:readPartAttrDicts",&file_name)){
+      error("PyBunch - readPartAttrDicts(fileName) - a file name are needed");
+    }
+    cpp_bunch->readParticleAttributesNames(file_name,names,part_attr_dicts);
+		PyObject* resDict = PyDict_New();
+		for(int i = 0, n = names.size(); i < n; i++){
+			if(part_attr_dicts.count(names[i]) > 0){
+				PyObject* py_param_dict = PyDict_New();
+				PyDict_SetItemString(resDict,names[i].c_str(),py_param_dict);
+				std::map<std::string,double> param_dict = part_attr_dicts[names[i]];
+				std::map<std::string,double>::iterator pos;
+				for (pos = param_dict.begin(); pos != param_dict.end(); ++pos) {
+					std::string key = pos->first;
+					double val = pos->second;
+					PyDict_SetItemString(py_param_dict,key.c_str(),Py_BuildValue("d",val));
+				}
+			}
+		}
+		return resDict;
   }
 
   //initilizes particles' attributes from the bunch file
@@ -1179,11 +1245,13 @@ namespace wrap_orbit_bunch{
     { "removePartAttr",                 Bunch_removePartAttr                ,METH_VARARGS,"Removes a particles' attributes from the bunch"},
     { "removeAllPartAttr",              Bunch_removeAllPartAttr             ,METH_VARARGS,"Removes all particles' attributes from the bunch"},
     { "getPartAttrNames",               Bunch_getPartAttrNames              ,METH_VARARGS,"Returns all particles' attributes names in the bunch at this moment"},
+    { "getPartAttrDicts",               Bunch_getPartAttrDicts              ,METH_VARARGS,"Returns dict{part. attribute name:dict{key:val}}"},
     { "getPossiblePartAttrNames",       Bunch_getPossiblePartAttrNames      ,METH_VARARGS,"Returns all possible particles' attributes names"},
     { "clearAllPartAttrAndMemorize",    Bunch_clearAllPartAttrAndMemorize   ,METH_VARARGS,"Temporary removes and memorizes all particles' attributes names"},
     { "restoreAllPartAttrFromMemory",   Bunch_restoreAllPartAttrFromMemory  ,METH_VARARGS,"Restores all particles' attributes names from memory"},
     { "hasPartAttr",                    Bunch_hasPartAttr                   ,METH_VARARGS,"Returns 1 if there is a particles' attr. with this name, 0 - otherwis"},
     { "readPartAttrNames",              Bunch_readPartAttrNames             ,METH_VARARGS,"Returns a tuple with particles' attr. names in the bunch file"},
+    { "readPartAttrDicts",              Bunch_readPartAttrDicts             ,METH_VARARGS,"Returns a dict{attr_name:dicts{param_name:val}} in the bunch file"},
     { "readPartAttr",                   Bunch_readPartAttr                  ,METH_VARARGS,"Initializes the particles' attr. from the bunch file"},
     { "getPartAttrSize",                Bunch_getPartAttrSize               ,METH_VARARGS,"Returns the number of variables in the particles' attributes with a particular name"},
     { "partAttrValue",                  Bunch_partAttrValue                 ,METH_VARARGS,"Sets or returns a particles' attribute value"},

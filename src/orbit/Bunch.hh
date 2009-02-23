@@ -150,7 +150,7 @@ public:
 
   //methods related to the attribute buckets
   void addParticleAttributes(ParticleAttributes* attr);
-  void addParticleAttributes(const std::string att_name);
+  void addParticleAttributes(const std::string att_name,std::map<std::string,double> part_attr_dict);
   int  hasParticleAttributes(const std::string att_name);
   void removeParticleAttributes(const std::string name);
   void removeAllParticleAttributes();

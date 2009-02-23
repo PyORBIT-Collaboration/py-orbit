@@ -32,7 +32,16 @@ WaveFunctionAmplitudes::WaveFunctionAmplitudes(Bunch* bunch):
   ParticleAttributes(bunch)
 {
   cl_name_ = "Amplitudes";
-  attrDescr = "This Attribute describe complex coefficients at Wave functions";
+  attrDescr = "Ampls";
+	size = 400; //2*14*14+1+1+6
+}
+
+WaveFunctionAmplitudes::WaveFunctionAmplitudes(Bunch* bunch, int size_in):
+  ParticleAttributes(bunch)
+{
+  cl_name_ = "Amplitudes";
+  attrDescr = "Ampls";
+	size = size_in;
 }
 
 WaveFunctionAmplitudes::~WaveFunctionAmplitudes()
@@ -48,9 +57,8 @@ double& WaveFunctionAmplitudes::Im0(int particle_index){
 
 }
 
-
-//zero element is phasa and las t element is time of i-th particle in the particle frame
+//zero element is phase and the last one is the time of i-th particle in the particle frame
 int WaveFunctionAmplitudes::getAttSize(){
-  return 400; //2*14*14+1+1+6
+  return size;
 }
 

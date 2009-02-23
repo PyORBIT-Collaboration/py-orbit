@@ -320,7 +320,8 @@ void Bunch::copyEmptyBunchTo(Bunch* bunch){
 	names.clear();
 	this->getParticleAttributesNames(names);
 	for(int i = 0, n = names.size(); i < n; i++){
-		bunch->addParticleAttributes(names[i]);
+		ParticleAttributes* part_attr_tmp = this->getParticleAttributes(names[i]);
+		bunch->addParticleAttributes(names[i],part_attr_tmp->parameterDict);
 	}
 }
 
@@ -874,6 +875,21 @@ void Bunch::print(std::ostream& Out)
       Out << attrCntr->name()<<" ";
     }
     Out << std::endl;
+		
+    for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
+      ParticleAttributes* attrCntr = pos->second;
+			std::map<std::string,double>  params_dict = attrCntr->parameterDict;
+			if(params_dict.size() > 0){
+				std::map<std::string,double>::iterator params_pos;
+				Out <<"% PARTICLE_ATTRIBUTES_CONTROLLER_DICT "<< attrCntr->name() <<" ";
+				for (params_pos = params_dict.begin(); params_pos != params_dict.end(); ++params_pos) {
+					std::string name = params_pos->first;
+					double val = params_pos->second;
+					Out << name <<" " << val << " ";
+				}
+				Out << std::endl;
+			}
+		}
 
     //print bunch attributes
     std::vector<std::string> bunch_attr_names;
@@ -1243,7 +1259,16 @@ void Bunch::readParticleAttributes(const char* fileName){
 	std::vector<std::string> attr_names;
 	readParticleAttributesNames(fileName,attr_names,part_attr_dicts);
 	for(int i = 0, n = attr_names.size(); i < n; i++){
-		ParticleAttributes* partAttr = ParticleAttributesFactory::getParticleAttributesInstance(attr_names[i],this);
+		ParticleAttributes* partAttr = NULL;
+		if(part_attr_dicts.count(attr_names[i]) > 0){
+			partAttr = ParticleAttributesFactory::getParticleAttributesInstance(
+				attr_names[i],
+				part_attr_dicts[attr_names[i]] 
+				,this);
+		} else {
+			std::map<std::string,double> part_attr_dict;
+			partAttr = ParticleAttributesFactory::getParticleAttributesInstance(attr_names[i],part_attr_dict,this);
+		}
 		addParticleAttributes(partAttr);
 	}
 }
@@ -1370,8 +1395,8 @@ int Bunch::readParticleAttributesNames(const char* fileName,
 		map<std::string,double> attr_dict;
 		for(int k = 0; k < dict_size; k++){
 			int val = 0;
-			sscanf(v_str_dict[2*k+2+1].c_str(),"%d",&val);
-			attr_dict[v_str_dict[2*k+2]] = val;
+			sscanf(v_str_dict[2*k+3+1].c_str(),"%df",&val);
+			attr_dict[v_str_dict[2*k+3]] = val;
 		}
 		part_attr_dicts[v_str_dict[2]] = attr_dict;
 	}
@@ -1394,9 +1419,12 @@ double& Bunch::getParticleAttributeVal(int ind, int attr_ind){
 	return arrAttr[ind][attr_ind];
 }
 
-void Bunch::addParticleAttributes(const std::string att_name){
+void Bunch::addParticleAttributes(
+	const std::string att_name,
+	std::map<std::string,double> part_attr_dict)
+{
 	if(attrCntrSizeMap.count(att_name) > 0) return;
-	ParticleAttributes* attr = ParticleAttributesFactory::getParticleAttributesInstance(att_name,this);
+	ParticleAttributes* attr = ParticleAttributesFactory::getParticleAttributesInstance(att_name,part_attr_dict,this);
 	addParticleAttributes(attr);
 }
 

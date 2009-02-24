@@ -1004,15 +1004,15 @@ void Bunch::print(std::ostream& Out)
         for( int j = 0; j < (j_stop - j_start); j++){
           int flg = (int) dump_arr[(nDimAndAttr)*j + 6];
           if(flg > 0){
-            Out<< dump_arr[(nDimAndAttr)*j + 0] << "  "
-            << dump_arr[(nDimAndAttr)*j + 1] << "  "
-            << dump_arr[(nDimAndAttr)*j + 2] << "  "
-            << dump_arr[(nDimAndAttr)*j + 3] << "  "
-            << dump_arr[(nDimAndAttr)*j + 4] << "  "
-            << dump_arr[(nDimAndAttr)*j + 5] << "  ";
+            Out<< dump_arr[(nDimAndAttr)*j + 0] << " "
+            << dump_arr[(nDimAndAttr)*j + 1] << " "
+            << dump_arr[(nDimAndAttr)*j + 2] << " "
+            << dump_arr[(nDimAndAttr)*j + 3] << " "
+            << dump_arr[(nDimAndAttr)*j + 4] << " "
+            << dump_arr[(nDimAndAttr)*j + 5] << " ";
 
             for(int k = 0; k < attributesSize; k++){
-              Out<<   dump_arr[(nDimAndAttr)*j + 7 + k] << "  ";
+              Out<<   dump_arr[(nDimAndAttr)*j + 7 + k] << " ";
             }
 
             Out << std::endl;

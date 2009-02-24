@@ -473,11 +473,11 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 					y_out_vct[0] = y_in_vct[0] + vpt*y_in_vct[3];
 					y_out_vct[1] = y_in_vct[1] + vpt*y_in_vct[4];
 					y_out_vct[2] = y_in_vct[2] + vpt*y_in_vct[5];
-					y_out_vct[3] = y_out_vct[3];
-					y_out_vct[4] = y_out_vct[4];
-					y_out_vct[5] = y_out_vct[5];
+					y_out_vct[3] = y_in_vct[3];
+					y_out_vct[4] = y_in_vct[4];
+					y_out_vct[5] = y_in_vct[5];
 				}
-				partCoordArr[ip][0] = y_out_vct[0];
+			  partCoordArr[ip][0] = y_out_vct[0];
 			  partCoordArr[ip][2] = y_out_vct[1];
 			  partCoordArr[ip][4] = y_out_vct[2];
 			  partCoordArr[ip][1] = y_out_vct[3];

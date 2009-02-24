@@ -37,6 +37,11 @@ public:
   		                    tcomplex& E_x, tcomplex& E_y, tcomplex& E_z,
   		                    tcomplex& B_x, tcomplex& B_y, tcomplex& B_z);
   
+  static  void 	complex_electric_transform(double mass,
+  		                      double px, double py, double pz,
+  		                    tcomplex& E_x, tcomplex& E_y, tcomplex& E_z,
+  		                    tcomplex B_x, tcomplex B_y, tcomplex B_z);
+  
 };
 
 #endif /*LORENTZ_TRANSFORMATION_EM_*/

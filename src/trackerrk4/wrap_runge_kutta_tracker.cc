@@ -182,7 +182,7 @@ extern "C" {
     return Py_None;	
   }	
 	
-	// track(bunch,time, time_step, field_source,exteranl_effects) - track bunch with r and p vectors
+	// track(bunch, time_start, time_max , time_step, field_source,exteranl_effects) - track bunch with r and p vectors
   static PyObject* RungeKuttaTracker_track(PyObject *self, PyObject *args){
     pyORBIT_Object* pyRungeKuttaTracker = (pyORBIT_Object*) self;
 		RungeKuttaTracker* cpp_RungeKuttaTracker = (RungeKuttaTracker*) pyRungeKuttaTracker->cpp_obj;

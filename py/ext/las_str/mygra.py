@@ -10,13 +10,13 @@ import time
 
 #g.title('A simple example')
 
-def PlotPopl(population):
+def PlotPopl(population,N_plots,rank):
     
     
     
     g = Gnuplot.Gnuplot(debug=1)
     g('set term png ')
-    g('set output "/home/tg4/workspace/PyOrbit/ext/laserstripping/working_dir/image.png"')
+    g('set output "/home/tg4/workspace/PyOrbit/ext/laserstripping/working_dir/image%6.0f.png"'%(rank))
     g('set xlabel "Time"')
     g('set size 5.0,3.0')
     g('set pointsize 0.3')
@@ -101,6 +101,44 @@ def PlotPopl(population):
 
     g('unset multiplot')
 
+
+
+
+def PlotPopl2(population,N_plots,rank):
+    
+    
+    
+    g = Gnuplot.Gnuplot(debug=1)
+    g('set term png ')
+    g('set output "/home/tg4/workspace/PyOrbit/ext/laserstripping/working_dir/image%6.0f.png"'%(rank))
+    g('set xlabel "Time"')
+    g('set size 5.0,3.0')
+    g('set pointsize 0.3')
+    g('set multiplot')
+    g('set yrange [0:1.01] ')
+    g('set size 1.,1.')  
+    
+  
+
+
+    
+    g('set title "000"')
+    g('set origin 0.,2')
+    g('plot "/home/tg4/workspace/PyOrbit/ext/laserstripping/working_dir/data_ampl.txt" using 1:2 title ""    ')
+
+    g('set title "00-1"')
+    g('set origin 1,2')
+    g(' plot "/home/tg4/workspace/PyOrbit/ext/laserstripping/working_dir/data_ampl.txt" using 1:3 title ""    ')
+    
+    g(' set label "     %f" at 0.,0.5 left font "Vera,50"  '%population)
+    g('set title "Population Sum"')
+    g('set origin 2,2')
+    g(' plot "/home/tg4/workspace/PyOrbit/ext/laserstripping/working_dir/data_ampl.txt" using 1:4 title ""    ')
+
+
+
+
+    g('unset multiplot')
 
 
 

@@ -1,11 +1,16 @@
-import math,random
+import math,random, time, sys, os, orbit_mpi
+
+from bunch import *
+from orbit_utils import *
+from orbit_mpi import mpi_comm,mpi_datatype,mpi_op
+
 
 class TransverseCoordGen:
     """ Generates u and u' coordinates distributed according
     to the Gaussian with certain parameters emit_rms and
     beta: exp(-(u^2+beta^2*((alpha/beta)*u + u')^2)/(2*beta*emit_rms)) 
     alpha in [rad]
-    u in [m] u' in [rad] beta in [m^2]
+    u in [m] u' in [rad] beta in [m]
     emit_rms in [m*rad]
     """
     
@@ -35,8 +40,8 @@ class EnergyGen:
     """
     It generates momentum distributed around P0. All values in GeV.
     """
-    def __init__(self,eKin,relativeSpread):
-        self.mass = 0.938256 + 0.000511
+    def __init__(self,eKin,relativeSpread,mass):
+        self.mass = mass
         self.eKin = eKin
         self.relativeSpreadE = relativeSpread
         self.p0 = math.sqrt(math.pow(self.mass+eKin,2) - self.mass*self.mass)
@@ -84,3 +89,58 @@ class ParticlesGen:
 #-----------------------------------------------------
 #Generates bunch with certain parameters
 #-----------------------------------------------------
+
+
+class BunchGen:
+
+
+    def getBunch(self,time_par):
+
+        rank = orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
+        random.seed((rank+1)*12571+time_par*int(time.time()))
+
+
+        TK = self.TK
+        N_part = self.N_part
+        N_attr = self.N_attr
+        alphaX = self.alphaX
+        betaX = self.betaX
+        emtX = self.emtX
+        alphaY = self.alphaY
+        betaY = self.betaY
+        emtY = self.emtY
+        relativeSpread = self.relativeSpread
+        dispD = self.dispD
+        dispDP = self.dispDP
+        cutOffX = self.cutOffX
+        cutOffY = self.cutOffY
+        attr_name = self.attr_name
+        mass = self.mass
+        charge = self.charge
+
+
+        trGenX = TransverseCoordGen(alphaX,betaX,emtX,cutOffX)
+        trGenY = TransverseCoordGen(alphaY,betaY,emtY,cutOffY)
+
+        gamaX = (1.0+alphaX*alphaX)/betaX
+        gamaY = (1.0+alphaY*alphaY)/betaY
+
+        sigmaXP = math.sqrt(emtX*gamaX)*1.0e+3
+        sigmaYP = math.sqrt(emtY*gamaY)*1.0e+3
+
+
+        pGen = EnergyGen(TK,relativeSpread,mass)
+        partGen = ParticlesGen(dispD,dispDP,trGenX,trGenY,pGen)
+
+        bunch = Bunch()
+        bunch.charge(charge)
+        bunch.mass(mass)
+        bunch.addPartAttr(attr_name,{"size":N_attr})
+        for i in range(N_part):
+            (x,px,y,py,z,pz) = partGen.getCoords()
+            bunch.addParticle(x,px,y,py,0.,pz)
+            #bunch.addParticle(0.,0.,0.,0.,0., pGen.getP0())
+            bunch.partAttrValue(attr_name,i,1,1.0)
+
+        return bunch
+

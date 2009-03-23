@@ -1,4 +1,4 @@
-import orbit_mpi
+import orbit_mpi, types
 from orbit_mpi import *
 
 class printf:
@@ -22,7 +22,12 @@ class printf:
         if (rank == 0):
             f_out = open(self.f_name,"a")
             for i in range(len(data)):
-                f_out.write("%19.4f"%data[i])
+                if (type(data[i]) == types.StringType):
+                    f_out.write("%19s"%data[i])
+                if (type(data[i]) == types.IntType):
+                    f_out.write("%19i"%data[i])
+                if (type(data[i]) == types.FloatType):
+                    f_out.write("%19.4f"%data[i])
             f_out.write("\n")
             f_out.close()
 

@@ -38,6 +38,7 @@ class TwoLevelFunc:
         self.wx = []
         self.wy = []
         self.power = []
+        self.data_addr_name = []
         
         self.bunch = Bunch()
         self.bunch_target = Bunch()
@@ -60,6 +61,8 @@ class TwoLevelFunc:
 
 
 
+        data_addr_name = self.data_addr_name
+        
         bunch = self.bunch
         N_part = bunch.getSize()
         TK = self.TK
@@ -103,6 +106,8 @@ class TwoLevelFunc:
         LFS.setLaserFieldOrientation(0.,0.,0.,   -1.,0.,kz,   1.,0.,1./kz,  0.,1.,0.)
         tracker = RungeKuttaTracker(0.000000001)
         First = TwoLevelAtom(LFS,delta_E,dip_transition)
+        if(data_addr_name != []):    
+            First.SetupPrint(max(n_step/10000,1),data_addr_name)
         fS = LSFieldSource(0.,0.,0.,0.,0.,0.)
         tracker.track(bunch_target,0,time_step*n_step, time_step,fS,First)
 #    	bunch_target.dumpBunch("bunch_res"+str(1)+".dat")

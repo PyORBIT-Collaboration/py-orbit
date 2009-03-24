@@ -18,10 +18,15 @@ import Gnuplot, Gnuplot.funcutils
 
 def PlotPopl(ratio,pop,p_size,data,pic):
     
-    f = open(data,"r")
-    n_row_max = len(f.readline().split())
-    f.close()
-    
+
+    lines = open(data,"r").readlines()
+    n_row_max = len(lines[0].split())
+    xmin = float(lines[0].split()[0])
+    xmax = float(lines[len(lines)-1].split()[0])
+    xav = (xmin+xmax)*0.5
+
+
+
     g = Gnuplot.Gnuplot(debug=1)
     g('set term png ')
     g('set output "%s"'%pic)
@@ -39,7 +44,9 @@ def PlotPopl(ratio,pop,p_size,data,pic):
                             for ny in range(ratio[1]-1,-1,-1)
                             for nx in range(ratio[0])]:
                                 
-        if (n_row == n_row_max):    g(' set label "     %f" at 0.,0.5 center font "Vera,50"  '%pop)
+        if (n_row == n_row_max):    
+            for j in range(len(pop)):
+                g(' set label "     %s" at %s,%f center font "Vera,30"  '%(pop[j],str(xav),0.8-0.1*j))
         g('set title "000"')
         g('set origin %f,%f'%(nx,ny))
         g('plot "%s" using 1:%f title ""   '%(data,n_row))

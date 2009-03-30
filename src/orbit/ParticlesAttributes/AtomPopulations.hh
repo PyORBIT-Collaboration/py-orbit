@@ -1,4 +1,5 @@
-//////////////////////////////// -*- C++ -*- //////////////////////////////
+
+/////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
 //   MyAttr.hh
@@ -20,8 +21,8 @@
 // INCLUDE FILES
 //
 ///////////////////////////////////////////////////////////////////////////
-#ifndef MYATTR_H
-#define MYATTR_H
+#ifndef POPULATIONS_HH_
+#define POPULATIONS_HH_
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -38,7 +39,7 @@
 ///////////////////////////////////////////////////////////////////////////
 #include "ParticleAttributes.hh"
 
-class WaveFunctionAmplitudes : public ParticleAttributes
+class AtomPopulations : public ParticleAttributes
 {
 public:
   //--------------------------------------
@@ -48,21 +49,21 @@ public:
 	/** Constructor. This Attribute describe complex coefficients of Wave functions.
 	  * The defailt size is 400. 
 		*/
-	WaveFunctionAmplitudes(Bunch* bunch);
+	AtomPopulations(Bunch* bunch);
 	
 	/** This Attribute describe complex coefficients of Wave functions.
 	  * User can specify the number of variables that he wants to reserve.
 		*/
-	WaveFunctionAmplitudes(Bunch* bunch, int size_in);
+	AtomPopulations(Bunch* bunch, int size_in);
 	
-  ~WaveFunctionAmplitudes();
+  ~AtomPopulations();
   
-
+  double& Re0(int particle_index);
+  double& Im0(int particle_index);
 	
   int getAttSize();
 	
 private:
-	
 	int size;
 	
 	
@@ -74,4 +75,5 @@ private:
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#endif
+
+#endif /*POPULATIONS_HH_*/

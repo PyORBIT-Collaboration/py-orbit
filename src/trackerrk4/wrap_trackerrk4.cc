@@ -3,6 +3,7 @@
 #include "wrap_trackerrk4.hh"
 #include "wrap_runge_kutta_tracker.hh"
 #include "wrap_py_external_effects.hh"
+#include "wrap_ext_effects_container.hh"
 
 static PyMethodDef trackerrk4Methods[] = { {NULL,NULL} };
 
@@ -16,6 +17,7 @@ extern "C" {
 		//add the other classes init
 		wrap_trackerrk4::initRungeKuttaTracker(module);
 		wrap_trackerrk4_py_external_effects::initPyExternalEffects(module);
+		wrap_ext_effects_container::initExtEffectsContainer(module);
   }
 	
 #ifdef __cplusplus

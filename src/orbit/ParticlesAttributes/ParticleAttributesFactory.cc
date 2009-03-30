@@ -24,6 +24,7 @@
 
 #include "ParticleMacroSize.hh"
 #include "WaveFunctionAmplitudes.hh"
+#include "AtomPopulations.hh"
 ///////////////////////////////////////////////////////////////////////////
 //   Constructor and Desctructor
 ///////////////////////////////////////////////////////////////////////////
@@ -34,7 +35,6 @@ ParticleAttributesFactory::ParticleAttributesFactory()
 
 ParticleAttributesFactory::~ParticleAttributesFactory()
 {
-
 }
 
 ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
@@ -64,9 +64,11 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
     part_atrs = new ParticleMacroSize(bunch);
   }
 
+  
+  
   if(name == "Amplitudes"){
 		if(params_dict.size() == 0){
-			part_atrs = new WaveFunctionAmplitudes(bunch);
+			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
 				int i_size = (int) params_dict["size"];
@@ -84,6 +86,33 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			}
 		}
   }
+  
+  
+  
+  if(name == "Populations"){
+		if(params_dict.size() == 0){
+			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
+		} else {
+			if(params_dict.count("size") == 1){
+				int i_size = (int) params_dict["size"];
+				part_atrs = new AtomPopulations(bunch,i_size);
+			} else {
+				if(rank_MPI == 0){
+					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
+					std::cerr << "MPI Communicator="<< MPI_COMM_Local << std::endl;
+					std::cerr << "MPI size="<< size_MPI << std::endl;
+					std::cerr << "MPI rank="<< rank_MPI << std::endl;
+					std::cerr << "attr. name:"<< name << std::endl;					
+					std::cerr << "There is no <size> specification in the dict. "<< std::endl;
+				}				
+				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
+			}
+		}
+  }
+  
+  
+  
+  
 
   if(part_atrs == NULL) {
     if(rank_MPI == 0){
@@ -108,6 +137,7 @@ void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& 
   names.clear();
   names.push_back("macrosize");
   names.push_back("Amplitudes");
+  names.push_back("Populations");
 }
 
 

@@ -60,8 +60,6 @@ public:
 
   Bunch();
   virtual ~Bunch();
-
-  double** arrAttr;
   
   double& x(int index);
   double& y(int index);
@@ -218,6 +216,7 @@ private:
 
 protected:
 
+  double** arrAttr;
   double mass;
   double charge;
   double classicalRadius;

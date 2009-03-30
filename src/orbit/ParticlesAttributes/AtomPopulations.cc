@@ -23,34 +23,35 @@
 ///////////////////////////////////////////////////////////////////////////
 #include "Bunch.hh"
 
-#include "WaveFunctionAmplitudes.hh"
+#include "AtomPopulations.hh"
 ///////////////////////////////////////////////////////////////////////////
 //   Constructor and Desctructor
 ///////////////////////////////////////////////////////////////////////////
 
-WaveFunctionAmplitudes::WaveFunctionAmplitudes(Bunch* bunch):
+AtomPopulations::AtomPopulations(Bunch* bunch):
   ParticleAttributes(bunch)
 {
-  cl_name_ = "Amplitudes";
-  attrDescr = "Ampls";
+  cl_name_ = "Populations";
+  attrDescr = "Pops";
 
 }
 
-WaveFunctionAmplitudes::WaveFunctionAmplitudes(Bunch* bunch, int size_in):
+AtomPopulations::AtomPopulations(Bunch* bunch, int size_in):
   ParticleAttributes(bunch)
 {
-  cl_name_ = "Amplitudes";
-  attrDescr = "Ampls";
+  cl_name_ = "Populations";
+  attrDescr = "Pops";
 	size = size_in;
 }
 
-WaveFunctionAmplitudes::~WaveFunctionAmplitudes()
+AtomPopulations::~AtomPopulations()
 {
 }
 
 
+
 //zero element is phase and the last one is the time of i-th particle in the particle frame
-int WaveFunctionAmplitudes::getAttSize(){
+int AtomPopulations::getAttSize(){
   return size;
 }
 

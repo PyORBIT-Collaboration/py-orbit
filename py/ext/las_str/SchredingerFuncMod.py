@@ -20,7 +20,7 @@ class SchredingerFunc:
     
     
     
-    def __init__(self,trans,n_states):
+    def __init__(self,trans,n_states,cut_par):
         
         
         self.TK = []
@@ -37,6 +37,7 @@ class SchredingerFunc:
         self.bunch = Bunch()
         self.bunch_target = Bunch()
         self.count = 0
+        self.cut_par = cut_par
         
         self.Stark = HydrogenStarkParam(trans,n_states)
         self.levels = n_states*(1+n_states)*(1+2*n_states)/6
@@ -68,6 +69,7 @@ class SchredingerFunc:
         n_sigma = self.n_sigma
         power = self.power
         levels = self.levels
+        cut_par = self.cut_par
         Stark = self.Stark
         fS = self.fS
         la = self.la
@@ -103,7 +105,7 @@ class SchredingerFunc:
         LFS = HermiteGaussianLFmode(math.sqrt(power),0,0,wx,wy,fx,fy,la)
         LFS.setLaserFieldOrientation(0.,0.,0.,   -1.,0.,kz,   1.,0.,1./kz,  0.,1.,0.)
         tracker = RungeKuttaTracker(0.000000001)
-        First = SchrodingerEquation(LFS,Stark,1000.)
+        First = SchrodingerEquation(LFS,Stark,cut_par)
         tracker.track(bunch_target,0,time_step*n_step, time_step,fS,First)
 #        bunch_target.dumpBunch("bunch_res"+str(1)+".dat")
         population = 0.

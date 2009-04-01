@@ -114,7 +114,6 @@ class BunchGen:
         dispDP = self.dispDP
         cutOffX = self.cutOffX
         cutOffY = self.cutOffY
-        attr_name = self.attr_name
         mass = self.mass
         charge = self.charge
 
@@ -135,12 +134,11 @@ class BunchGen:
         bunch = Bunch()
         bunch.charge(charge)
         bunch.mass(mass)
-        bunch.addPartAttr(attr_name,{"size":N_attr})
+        
         for i in range(N_part):
             (x,px,y,py,z,pz) = partGen.getCoords()
             bunch.addParticle(x,px,y,py,0.,pz)
             #bunch.addParticle(0.,0.,0.,0.,0., pGen.getP0())
-            bunch.partAttrValue(attr_name,i,1,1.0)
 
         return bunch
 

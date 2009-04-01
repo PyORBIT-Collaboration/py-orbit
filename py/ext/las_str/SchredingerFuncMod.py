@@ -15,16 +15,15 @@ from orbit_mpi import mpi_comm,mpi_datatype,mpi_op
 
 
        
-class TwoLevelFunc:    
+class SchredingerFunc:    
 
     
     
     
-    def __init__(self):
+    def __init__(self,trans,n_states):
         
-
+        
         self.TK = []
-        self.dip_transition = []
         self.n_sigma = []
         self.la = []
         self.n_step = []
@@ -38,6 +37,11 @@ class TwoLevelFunc:
         self.bunch = Bunch()
         self.bunch_target = Bunch()
         self.count = 0
+        
+        self.Stark = HydrogenStarkParam(trans,n_states)
+        self.levels = n_states*(1+n_states)*(1+2*n_states)/6
+        self.By = []
+        self.EMfield = []
 
 
 
@@ -63,6 +67,9 @@ class TwoLevelFunc:
         dip_transition = self.dip_transition
         n_sigma = self.n_sigma
         power = self.power
+        levels = self.levels
+        Stark = self.Stark
+        fS = self.fS
         la = self.la
         fx = self.fx
         fy = self.fy
@@ -96,17 +103,15 @@ class TwoLevelFunc:
         LFS = HermiteGaussianLFmode(math.sqrt(power),0,0,wx,wy,fx,fy,la)
         LFS.setLaserFieldOrientation(0.,0.,0.,   -1.,0.,kz,   1.,0.,1./kz,  0.,1.,0.)
         tracker = RungeKuttaTracker(0.000000001)
-        First = TwoLevelAtom(LFS,delta_E,dip_transition)
-        fS = LSFieldSource()
+        First = SchrodingerEquation(LFS,Stark,1000.)
         tracker.track(bunch_target,0,time_step*n_step, time_step,fS,First)
-#    	bunch_target.dumpBunch("bunch_res"+str(1)+".dat")
+#        bunch_target.dumpBunch("bunch_res"+str(1)+".dat")
         population = 0.
         population2 = 0.    
         for i in range(N_part):
             val = bunch_target.partAttrValue("Populations",i,0) - bunch_target.partAttrValue("Populations",i,1)
             population += val
             population2 += val*val
-        
         op = mpi_op.MPI_SUM
         data_type = mpi_datatype.MPI_DOUBLE
         population = orbit_mpi.MPI_Allreduce(population,data_type,op,mpi_comm.MPI_COMM_WORLD)
@@ -116,7 +121,6 @@ class TwoLevelFunc:
         if(N_part*mpi_size > 1):
             sigma_pop = math.sqrt((population2 - N_part*mpi_size*population*population)/(N_part*mpi_size*(N_part*mpi_size - 1)))
 
-      
         return population, sigma_pop
   
   
@@ -124,9 +128,10 @@ class TwoLevelFunc:
         
         self.bunch = bunch_in
         bunch = self.bunch
+        levels = self.levels
         
-        if (bunch.hasPartAttr("Amplitudes") == 0): bunch.addPartAttr("Amplitudes",{"size":2*2+8})
-        if (bunch.hasPartAttr("Populations") == 0): bunch.addPartAttr("Populations",{"size":2+1})
+        if (bunch.hasPartAttr("Amplitudes") == 0): bunch.addPartAttr("Amplitudes",{"size":2*levels+8})
+        if (bunch.hasPartAttr("Populations") == 0): bunch.addPartAttr("Populations",{"size":levels+1})
          
         for i in range(bunch.getSize()):
             bunch.partAttrValue("Amplitudes",i,1,1.0)
@@ -135,9 +140,10 @@ class TwoLevelFunc:
         
         bunch_in.copyBunchTo(self.bunch)
         bunch = self.bunch
+        levels = self.levels
         
-        if (bunch.hasPartAttr("Amplitudes") == 0): bunch.addPartAttr("Amplitudes",{"size":2*2+8})
-        if (bunch.hasPartAttr("Populations") == 0): bunch.addPartAttr("Populations",{"size":2+1})
+        if (bunch.hasPartAttr("Amplitudes") == 0): bunch.addPartAttr("Amplitudes",{"size":2*levels+8})
+        if (bunch.hasPartAttr("Populations") == 0): bunch.addPartAttr("Populations",{"size":levels+1})
          
         for i in range(bunch.getSize()):
             bunch.partAttrValue("Amplitudes",i,1,1.0)    

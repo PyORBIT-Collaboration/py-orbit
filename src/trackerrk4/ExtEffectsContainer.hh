@@ -16,15 +16,15 @@ namespace LaserStripping{
 	
 	class  ExtEffectsContainer: public ExternalEffects
 	{
-		public:
+	public:
 		
-			/** Constructor. */
-			ExtEffectsContainer();
-			
-			/** Destructor. */
-			~ExtEffectsContainer();
-			
-		/** Method that initialise and defines parameters of printing */
+		/** Constructor. */
+		ExtEffectsContainer();
+		
+		/** Destructor. */
+		~ExtEffectsContainer();
+		
+		/** Adds the instance of the  ExternalEffects class to the container. */
 		void AddEffect(ExternalEffects* eff);
 		
 		/** It initializes effects. */
@@ -32,25 +32,18 @@ namespace LaserStripping{
 		
 		/** It finalizes effects. */
 		void finalizeEffects(Bunch* bunch);
-
-		/** It applies the external effects to a particle with certain index. */
-		void applyEffects(Bunch* bunch, int index, 
-	                            double* y_in_vct, double* y_out_vct, 
-														  double t, double t_step, 
-														  OrbitUtils::BaseFieldSource* fieldSource,
-															RungeKuttaTracker* tracker);	
 		
+		/** It applies the external effects to a particle with certain index. */
+		void applyEffects(Bunch* bunch, int index,
+			double* y_in_vct, double* y_out_vct,
+			double t, double t_step,
+			OrbitUtils::BaseFieldSource* fieldSource,
+			RungeKuttaTracker* tracker);
+		
+		private:
+			
+			vector<ExternalEffects*>	ref_eff;
 
-
-		  private:
-
-		  
-			 
-
-			  vector<ExternalEffects*>	ref_eff;
-
-
-				
 	};
 };
 

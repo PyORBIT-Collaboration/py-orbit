@@ -54,13 +54,13 @@ class AccLattice(NamedObject, TypedObject):
 		actions = AccActionsContainer()
 		d = [0.]
 		posn = {}
-
+		
 		def accNodeExitAction(paramsDict):
-		"""
-		Nonbound function. Sets lattice length and node positions. 
-		This is a Closures (well, may be not exactly). It uses external 
-		objects.
-		"""
+			"""
+			Nonbound function. Sets lattice length and node positions. 
+			This is a Closures (well, may be not exactly). It uses external 
+			objects.
+			"""
 			node = paramsDict["node"]
 			parentNode = paramsDict["parentNode"]
 			if(isinstance(parentNode, AccLattice)):
@@ -68,7 +68,7 @@ class AccLattice(NamedObject, TypedObject):
 				d[0] += node.getLength()
 				posAfter = d[0]
 				posn[node]=(posBefore, posAfter)
-
+			
 		actions.addAction(accNodeExitAction, AccNode.EXIT)
 		self.trackActions(actions, paramsDict)
 		self.__length = d[0]

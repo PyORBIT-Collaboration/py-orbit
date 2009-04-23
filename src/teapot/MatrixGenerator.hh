@@ -34,6 +34,8 @@ namespace teapot_base{
 		
 	private:
 		double* step_arr;		
+		
+		double step_reduce;
 	};
 	
 }  //end of namespace teapot_base

@@ -81,12 +81,16 @@ class AccLattice(NamedObject, TypedObject):
 		"""
 		return self.__isInitialized
 
-	def addNode(self, node):
+	def addNode(self, node, index = -1):
 		"""
-		Method. Adds a child node into the lattice.
+		Method. Adds a child node into the lattice. If the user specifies the index >= 0 the 
+		element will be inserted in the specified position into the children array
 		"""
 		if(isinstance(node, AccNode) == True): 
-			self.__children.append(node)
+			if(index < 0): 
+				self.__children.append(node)
+			else:
+				self.__children.insert(index,node)
 			self.__isInitialized = False
 
 	def getNodes(self):
@@ -109,6 +113,30 @@ class AccLattice(NamedObject, TypedObject):
 		"""
 		return self.__length
 
+	def _getSubLattice(self, accLatticeNew, index_start = -1, index_stop = -1,):
+		"""
+		It returns the sub-accelerator lattice with children with indexes 
+		between index_start and index_stop inclusive. The subclasses of 
+		AccLattice should NOT override this method.
+		"""
+		if(index_start < 0): index_start = 0
+		if(index_stop < 0): index_stop = len(self.__children) - 1 
+		#clear the node array in the new sublattice
+		accLatticeNew.getNodes()[:] = []
+		for node in self.__children[index_start:index_stop]:
+			accLatticeNew.addNode(node)
+		accLatticeNew.initialize()
+		return accLatticeNew
+		
+	def getSubLattice(self, index_start = -1, index_stop = -1,):
+		"""
+		It returns the sub-accelerator lattice with children with indexes 
+		between index_start and index_stop inclusive. The subclasses of 
+		AccLattice should override this method to replace AccLattice() constructor 
+		by the sub-class type constructor
+		"""
+		return self._getSubLattice( AccLattice(),index_start,index_stop)
+		
 	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""
 		Method. Tracks the actions through all nodes in the lattice.

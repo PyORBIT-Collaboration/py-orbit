@@ -97,9 +97,10 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		self.__nParts = n
 		self.__lengthArr = []
 		self.__childNodesArr[AccNode.BODY] = []
-		for i in xrange(self.__nParts):
+		for i in range(self.__nParts):
 			self.__lengthArr.append(self.__length/self.__nParts)
 			self.__childNodesArr[AccNode.BODY].append([[],[]])	
+
 	def initialize(self):
 		"""
 		Abstract method. Must be implemented if the length
@@ -148,7 +149,7 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 			paramsDict["parentNode"] = self
 			node.trackActions(actionsContainer, paramsDict)
 		#start BODY
-		for i in xrange(self.__nParts):
+		for i in range(self.__nParts):
 			paramsDict["node"] = self
 			paramsDict["parentNode"] = parentNode
 			self.__activePartIndex = i

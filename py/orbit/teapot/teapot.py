@@ -61,6 +61,22 @@ class TEAPOT_Lattice(AccLattice):
 			self.addNode(elem)
 		self.initialize()
 
+	def initialize(self):
+		AccLattice.initialize(self)
+		#set up ring length for RF nodes
+		ringRF_Node = RingRFTEAPOT()
+		for node in self.getNodes():
+			if(node.getType() == ringRF_Node.getType()):
+				node.getParamsDict()["ring_lenght"] = self.getLength()		
+	
+
+	def getSubLattice(self, index_start = -1, index_stop = -1,):
+		"""
+		It returns the new TEAPOT_Lattice with children with indexes 
+		between index_start and index_stop inclusive
+		"""
+		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
+
 	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
 		"""
 		It tracks the bunch through the lattice.
@@ -74,6 +90,7 @@ class TEAPOT_Lattice(AccLattice):
 			
 		actionContainer.addAction(track, AccActionsContainer.BODY)
 		self.trackActions(actionContainer,paramsDict)
+		actionContainer.removeAction(track, AccActionsContainer.BODY)
 		
 
 class _teapotFactory:
@@ -234,7 +251,7 @@ class _teapotFactory:
 			volt = 0.
 			if(params.has_key("volt")):
 				volt = params["volt"]
-			harmon = 0.
+			harmon = 1
 			if(params.has_key("harmon")):
 				harmon = params["harmon"]
 			phase_s = 0.
@@ -293,6 +310,21 @@ class BaseTEAPOT(AccNode):
 		AccNode.__init__(self,name)
 		self.setType("base teapot")
 		
+	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
+		"""
+		It tracks the bunch through the BaseTEAPOT instance.
+		"""
+		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
+		paramsDict["bunch"] = bunch
+		
+		def track(paramsDict):
+			node = paramsDict["node"]
+			node.track(paramsDict)
+			
+		actionContainer.addAction(track, AccActionsContainer.BODY)
+		self.trackActions(actionContainer,paramsDict)
+		actionContainer.removeAction(track, AccActionsContainer.BODY)		
+		
 	def track(self, paramsDict):
 		"""
 		It is tracking the bunch through the element. Each element 
@@ -333,6 +365,30 @@ class NodeTEAPOT(BaseTEAPOT):
 		"""
 		return self.__tiltNodeIN.getTiltAngle()
 
+	def getNodeFringeFieldIN(self):
+		"""
+		Returns the FringeFieldTEAPOT instance before this TEAPOT node
+		"""
+		return self.__fringeFieldIN 
+ 
+	def getNodeFringeFieldOUT(self):
+		"""
+		Returns the FringeFieldTEAPOT instance after this TEAPOT node
+		"""
+		return self.__fringeFieldOUT 
+		
+	def getNodeTiltIN(self):
+		"""
+		Returns the TiltTEAPOT instance before this TEAPOT node
+		"""
+		return self.__tiltNodeIN 
+ 
+	def getNodeTiltOUT(self):
+		"""
+		Returns the  TiltTEAPOT instance after this TEAPOT node
+		"""
+		return self.__tiltNodeOUT		
+		
 	def setFringeFieldFunctionIN(self, trackFunction = None):
 		"""
 		Sets the fringe field function that will track the bunch
@@ -573,7 +629,7 @@ class QuadTEAPOT(NodeTEAPOT):
 		self.setnParts(2)
 
 		def fringeIN(node,paramsDict):
-			usageIN = node.getUsage()
+			usageIN = node.getUsage()		
 			if(not usageIN):
 				return
 			kq = node.getParam("kq")
@@ -612,6 +668,10 @@ class QuadTEAPOT(NodeTEAPOT):
 
 		self.setFringeFieldFunctionIN(fringeIN)
 		self.setFringeFieldFunctionOUT(fringeOUT)
+		self.getNodeTiltIN().setType("quad tilt in")
+		self.getNodeTiltOUT().setType("quad tilt out")
+		self.getNodeFringeFieldIN().setType("quad fringe in")
+		self.getNodeFringeFieldOUT().setType("quad fringe out")
 
 		self.setType("quad teapot")
 
@@ -862,6 +922,7 @@ class RingRFTEAPOT(NodeTEAPOT):
 		self.addParam("harmonics",[])
 		self.addParam("voltages",[])
 		self.addParam("phases",[])
+		self.addParam("ring_length",0.)
 		self.setType("RingRF teapot")
 		
 		self.setnParts(1)
@@ -904,9 +965,10 @@ class RingRFTEAPOT(NodeTEAPOT):
 		harmArr = self.getParam("harmonics")
 		voltArr = self.getParam("voltages")
 		phaseArr = self.getParam("phases")
+		ring_length = self.getParam("ring_length")
 		bunch = paramsDict["bunch"]
-		for i in xrange(len(harmArr)):
-			TPB.RingRF(bunch,harmArr[i],voltArr[i],phaseArr[i])
+		for i in range(len(harmArr)):
+			TPB.RingRF(bunch,ring_length,harmArr[i],voltArr[i],phaseArr[i])
 
 class KickTEAPOT(NodeTEAPOT):
 	"""

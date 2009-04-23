@@ -637,6 +637,12 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl,int skew)
 
 void quad1(Bunch* bunch, double length, double kq)
 {
+	
+	if(kq == 0.){
+		drift(bunch,length);
+		return;
+	}
+	
   double x_init, xp_init, y_init, yp_init, z_init;
   double sqrt_kq, kqlength;
   double cx, sx, cy, sy, m11 = 0., m12 = 0., m21 = 0., m22 = 0.;
@@ -651,7 +657,7 @@ void quad1(Bunch* bunch, double length, double kq)
 	double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
 	double dp_p_coeff = 1./(syncPart->getMomentum()*syncPart->getBeta());
 
-  if(kq >= 0.)
+  if(kq > 0.)
   {
     sqrt_kq = pow(kq, 0.5);
     kqlength = sqrt_kq * length;
@@ -797,7 +803,7 @@ void quadfringeIN(Bunch* bunch, double kq)
     yp_init = arr[i][3];
     z_init = arr[i][4];
     dp_init = dp_p;
-
+		
     arr[i][0] = (x_init +
                         kq / (12. * (1. + dp_init)) * x_init
                         * (x_init * x_init + 3. * y_init * y_init));
@@ -821,7 +827,7 @@ void quadfringeIN(Bunch* bunch, double kq)
                         * (xp_init * x_init *
                            (x_init * x_init + 3. * y_init * y_init) -
                            yp_init * y_init *
-                           (y_init * y_init + 3. * x_init * x_init));
+                           (y_init * y_init + 3. * x_init * x_init));								
   }
 }
 
@@ -929,12 +935,8 @@ void wedgerotate(Bunch* bunch, double e, int frinout)
 	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
 
-	int info = 1;
-
   for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++)
   {
-		info = 1;
-		if(arr[i][5] == 0.) info = 0;
 		dp_p = arr[i][5] * dp_p_coeff;
     x_init = arr[i][0];
     xp_init = arr[i][1];
@@ -958,7 +960,6 @@ void wedgerotate(Bunch* bunch, double e, int frinout)
       dp_p = p0 - 1.0;
     }
 		arr[i][5] = dp_p/dp_p_coeff;
-		if(info == 0) arr[i][5] = 0.;
   }
 }
 
@@ -1648,7 +1649,10 @@ void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage,
 	double charge = bunch->getCharge();
 	double coeff =  charge;
 
-	double Factor = 2.0*OrbitConst::PI/ring_length;
+	double Factor = 0.;
+	if(ring_length > 0.){
+		Factor = 2.0*OrbitConst::PI/ring_length;
+	}
 
 	SyncPart* syncPart = bunch->getSyncPart();
 	if(phase_s != 0.){

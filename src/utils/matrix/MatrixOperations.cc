@@ -40,7 +40,12 @@ int MatrixOperations::invert(double **a, int n){
 						irow=j;
 						icol=k;
 					}
- 		    } else if (ipiv[k] > 1) {return 0;};
+ 		    } else if (ipiv[k] > 1) {
+					BufferStore::getBufferStore()->setUnusedIntArr(buff_index0);
+					BufferStore::getBufferStore()->setUnusedIntArr(buff_index1);
+					BufferStore::getBufferStore()->setUnusedIntArr(buff_index2);					
+					return 0;
+				};
 			}
 			++(ipiv[icol]);
 			// Pivot found - interchanging rows

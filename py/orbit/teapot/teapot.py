@@ -57,8 +57,9 @@ class TEAPOT_Lattice(AccLattice):
 		# make TEAPOT lattice elements by using TEAPOT
 		# element factory
 		for madElem in accMADElements:
-			elem = _teapotFactory.getElement(madElem)
-			self.addNode(elem)
+			elems = _teapotFactory.getElements(madElem)
+			for elem in elems:
+				self.addNode(elem)
 		self.initialize()
 
 	def initialize(self):
@@ -67,7 +68,7 @@ class TEAPOT_Lattice(AccLattice):
 		ringRF_Node = RingRFTEAPOT()
 		for node in self.getNodes():
 			if(node.getType() == ringRF_Node.getType()):
-				node.getParamsDict()["ring_lenght"] = self.getLength()		
+				node.getParamsDict()["ring_length"] = self.getLength()		
 	
 
 	def getSubLattice(self, index_start = -1, index_stop = -1,):
@@ -100,9 +101,11 @@ class _teapotFactory:
 	def __init__(self):
 		pass
 
-	def getElement(self, madElem):
+	def getElements(self, madElem):
 		"""
-		Method. Produces TEAPOT accelerator elements.
+		Method produces TEAPOT accelerator elements. It returns the array of TEAPOT nodes.
+		Usually there is only one such element, but sometimes (RF with a non zero length) 
+		there could be more than one element in the returned array 
 		"""
 		# madElem = MAD_LattElement(" "," ")
 		params_ini = madElem.getParameters()
@@ -237,17 +240,10 @@ class _teapotFactory:
 		# ===========RF Cavity element ======================
 		if(madElem.getType().lower() == "rfcavity"):
 			elem = RingRFTEAPOT(madElem.getName())
-			# the MAD RF element has a L parameter,
-			# but it does not contribute in the ring length!
-			"""
-			if(length != 0.):
-				drft_1 = DriftTEAPOT(madElem.getName()+"_drift")
-				drft_2 = DriftTEAPOT(madElem.getName()+"_drift")
-				drft_1.setLength(length/2.0)
-				drft_2.setLength(length/2.0)
-				elem.addChildNode(drft_1,AccNode.ENTRANCE)
-				elem.addChildNode(drft_2,AccNode.EXIT)
-			"""
+			drft_1 = DriftTEAPOT(madElem.getName()+"_drift")
+			drft_2 = DriftTEAPOT(madElem.getName()+"_drift")
+			drft_1.setLength(length/2.0)
+			drft_2.setLength(length/2.0)
 			volt = 0.
 			if(params.has_key("volt")):
 				volt = params["volt"]
@@ -258,6 +254,7 @@ class _teapotFactory:
 			if(params.has_key("lag")):
 				phase_s = (-1.0) * params["lag"]*2.0*math.pi
 			elem.addRF(harmon,volt,phase_s)
+			return [drft_1,elem,drft_2]
 		# ==========Others elements such as markers,monitor,rcollimator
 		if(madElem.getType().lower() == "marker" or \
 			 madElem.getType().lower() == "monitor" or \
@@ -296,9 +293,9 @@ class _teapotFactory:
 			elem.addParam("poles",poles)
 			elem.addParam("kls",kls)
 			elem.addParam("skews",skews)
-		return elem
+		return [elem]
 
-	getElement = classmethod(getElement)
+	getElements = classmethod(getElements)
 
 
 class BaseTEAPOT(AccNode):
@@ -967,9 +964,12 @@ class RingRFTEAPOT(NodeTEAPOT):
 		phaseArr = self.getParam("phases")
 		ring_length = self.getParam("ring_length")
 		bunch = paramsDict["bunch"]
+		length = self.getLength(self.getActivePartIndex())
 		for i in range(len(harmArr)):
+			#print "debug rl=",ring_length," harm=",harmArr[i]," v=",voltArr[i],
+			#print " ph0=",phaseArr[i]," L=",self.getLength()
 			TPB.RingRF(bunch,ring_length,harmArr[i],voltArr[i],phaseArr[i])
-
+		
 class KickTEAPOT(NodeTEAPOT):
 	"""
 	Kick TEAPOT element.

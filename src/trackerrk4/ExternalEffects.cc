@@ -32,6 +32,10 @@ ExternalEffects::~ExternalEffects(){
 void ExternalEffects::setupEffects(Bunch* bunch){
 }
 
+/*it memorizes initial coordinates and impulses before rk step*/
+void ExternalEffects::memorizeInitParams(Bunch* bunch){
+}
+
 /** It finalizes effects. */
 void ExternalEffects::finalizeEffects(Bunch* bunch){
 }

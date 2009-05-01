@@ -38,6 +38,9 @@ namespace TrackerRK4{
 		/** It initializes effects. */
 		virtual void setupEffects(Bunch* bunch);
 		
+		/*it memorizes initial coordinates and impulses before rk step*/
+		virtual void memorizeInitParams(Bunch* bunch);
+		
 		/** It finalizes effects. */
 		virtual void finalizeEffects(Bunch* bunch);
 

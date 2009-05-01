@@ -51,6 +51,13 @@ void PyExternalEffects::setupEffects(Bunch* bunch){
 	PyObject* res_tuple = PyObject_CallMethod(py_wrp,"setupEffects","O",py_bunch);
 	Py_DECREF(res_tuple);
 }
+
+void PyExternalEffects::memorizeInitParams(Bunch* bunch){
+	PyObject* py_wrp = getPyWrapper();
+	PyObject* py_bunch = bunch->getPyWrapper();
+	PyObject* res_tuple = PyObject_CallMethod(py_wrp,"memorizeInitParams","O",py_bunch);
+	Py_DECREF(res_tuple);
+}
 		
 	
 void PyExternalEffects::finalizeEffects(Bunch* bunch){

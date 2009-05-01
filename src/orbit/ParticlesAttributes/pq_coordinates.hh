@@ -21,8 +21,8 @@
 // INCLUDE FILES
 //
 ///////////////////////////////////////////////////////////////////////////
-#ifndef POPULATIONS_HH_
-#define POPULATIONS_HH_
+#ifndef PQCOORDINATES_HH_
+#define PQCOORDINATES_HH_
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -39,7 +39,7 @@
 ///////////////////////////////////////////////////////////////////////////
 #include "ParticleAttributes.hh"
 
-class AtomPopulations : public ParticleAttributes
+class pq_coordinates : public ParticleAttributes
 {
 public:
   //--------------------------------------
@@ -49,15 +49,17 @@ public:
 	/** Constructor. This Attribute describe complex coefficients of Wave functions.
 	  * The defailt size is 400. 
 		*/
-	AtomPopulations(Bunch* bunch);
+	pq_coordinates(Bunch* bunch);
 	
 	/** This Attribute describe complex coefficients of Wave functions.
 	  * User can specify the number of variables that he wants to reserve.
 		*/
-	AtomPopulations(Bunch* bunch, int size_in);
+	pq_coordinates(Bunch* bunch, int size_in);
 	
-  ~AtomPopulations();
+  ~pq_coordinates();
   
+  double& Re0(int particle_index);
+  double& Im0(int particle_index);
 	
   int getAttSize();
 	
@@ -74,4 +76,4 @@ private:
 ///////////////////////////////////////////////////////////////////////////
 
 
-#endif /*POPULATIONS_HH_*/
+#endif /*PQCOORDINATES_HH_*/

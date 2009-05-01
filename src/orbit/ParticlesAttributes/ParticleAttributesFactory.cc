@@ -25,6 +25,7 @@
 #include "ParticleMacroSize.hh"
 #include "WaveFunctionAmplitudes.hh"
 #include "AtomPopulations.hh"
+#include "pq_coordinates.hh"
 ///////////////////////////////////////////////////////////////////////////
 //   Constructor and Desctructor
 ///////////////////////////////////////////////////////////////////////////
@@ -110,6 +111,27 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 		}
   }
   
+  if(name == "pq_coords"){
+		if(params_dict.size() == 0){
+			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
+		} else {
+			if(params_dict.count("size") == 1){
+				int i_size = (int) params_dict["size"];
+				part_atrs = new pq_coordinates(bunch,i_size);
+			} else {
+				if(rank_MPI == 0){
+					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
+					std::cerr << "MPI Communicator="<< MPI_COMM_Local << std::endl;
+					std::cerr << "MPI size="<< size_MPI << std::endl;
+					std::cerr << "MPI rank="<< rank_MPI << std::endl;
+					std::cerr << "attr. name:"<< name << std::endl;					
+					std::cerr << "There is no <size> specification in the dict. "<< std::endl;
+				}				
+				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
+			}
+		}
+  }
+  
   
   
   
@@ -138,6 +160,7 @@ void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& 
   names.push_back("macrosize");
   names.push_back("Amplitudes");
   names.push_back("Populations");
+  names.push_back("pq_coords");
 }
 
 

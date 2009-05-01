@@ -41,7 +41,6 @@ class SchredingerFunc:
         
         self.Stark = HydrogenStarkParam(trans,n_states)
         self.levels = n_states*(1+n_states)*(1+2*n_states)/6
-        self.By = []
         self.EMfield = []
 
 

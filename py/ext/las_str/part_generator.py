@@ -102,7 +102,6 @@ class BunchGen:
 
         TK = self.TK
         N_part = self.N_part
-        N_attr = self.N_attr
         alphaX = self.alphaX
         betaX = self.betaX
         emtX = self.emtX

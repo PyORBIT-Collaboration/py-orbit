@@ -456,6 +456,9 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 	if(extEff != NULL) extEff->setupEffects(bunch);	
 	//------------------------------------------------	
 	while( t < t_period+t_begin){
+		
+		if(extEff != NULL) extEff->memorizeInitParams(bunch);
+		
 		for(int ip = 0, nParts = bunch->getSize(); ip < nParts; ip++){
 			flag = bunch->flag(ip);
 			if(flag > 0){

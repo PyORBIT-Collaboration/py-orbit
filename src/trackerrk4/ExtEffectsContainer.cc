@@ -58,6 +58,13 @@ void ExtEffectsContainer::setupEffects(Bunch* bunch){
 	}
 }
 
+void ExtEffectsContainer::memorizeInitParams(Bunch* bunch){	
+
+	for (int i=0;i<ref_eff.size();i++){
+		ref_eff[i]->memorizeInitParams(bunch);
+	}
+}
+
 void ExtEffectsContainer::finalizeEffects(Bunch* bunch) {
 	for (int i=0;i<ref_eff.size();i++){
 		ref_eff[i]->finalizeEffects(bunch);

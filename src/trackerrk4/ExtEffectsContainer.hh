@@ -30,6 +30,9 @@ namespace LaserStripping{
 		/** It initializes effects. */
 		void setupEffects(Bunch* bunch);
 		
+		/*it memorizes initial coordinates and impulses before rk step*/
+		void memorizeInitParams(Bunch* bunch);
+		
 		/** It finalizes effects. */
 		void finalizeEffects(Bunch* bunch);
 		

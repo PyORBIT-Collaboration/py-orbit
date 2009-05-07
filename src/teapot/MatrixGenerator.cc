@@ -68,7 +68,7 @@ namespace teapot_base{
 			ORBIT_MPI_Finalize("MatrixGenerator::calculateMatrix: Matrix has a wrong size.");
 		}
 		if(bunch->getSize() != 13){
-			ORBIT_MPI_Finalize("MatrixGenerator::calculateMatrix: Bunch should have 7 macro-particles.");
+			ORBIT_MPI_Finalize("MatrixGenerator::calculateMatrix: Bunch should have 13 macro-particles.");
 		}
 		double x1,x2,y1,y2,y0;
 		double** coord_arr = bunch->coordArr();

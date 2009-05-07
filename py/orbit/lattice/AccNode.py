@@ -89,7 +89,15 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		Method. Returns the active part index of the node.
 		"""
 		return self.__activePartIndex
-
+		
+	def setActivePartIndex(self,activePartIndex):
+		"""
+		Method. Sets the active part index of the node. 
+		Please, use this method with cautions, because it was not
+		intended for a routine use.
+		"""
+		self.__activePartIndex = activePartIndex
+		
 	def _setPartsLengthEvenly(self, n = 1):
 		"""
 		Method. Sets lengths of all parts evenly.

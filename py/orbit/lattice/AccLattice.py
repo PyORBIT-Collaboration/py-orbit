@@ -37,8 +37,9 @@ class AccLattice(NamedObject, TypedObject):
 		"""
 		Method. Initializes the lattice and child node structures.
 		"""
+		res_dict = {}
 		for node in self.__children:
-			if(self.__children.count(node) > 1):
+			if(res_dict.has_key(node)):
 				msg = "The AccLattice class instance should not have duplicate nodes!"
 				msg = msg + os.linesep
 				msg = msg + "Method initialize():"
@@ -48,8 +49,11 @@ class AccLattice(NamedObject, TypedObject):
 				msg = msg + "Type of node=" + node.getType()
 				msg = msg + os.linesep
 				orbitFinalize(msg)
+			else:
+				res_dict[node] = None
 			node.initialize()
-
+		del res_dict
+		
 		paramsDict = {}
 		actions = AccActionsContainer()
 		d = [0.]

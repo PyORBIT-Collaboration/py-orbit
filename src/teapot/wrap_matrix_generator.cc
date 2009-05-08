@@ -125,6 +125,46 @@ extern "C" {
 		return Py_None;		
   }		
 	
+	//  initBunchForChromaticityCoeff() - initialize bunch for Chromaticity calculation
+  static PyObject* MatrixGenerator_initBunchChromCoeff(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyMatrixGenerator = (pyORBIT_Object*) self;
+		MatrixGenerator* cpp_MatrixGenerator = (MatrixGenerator*) pyMatrixGenerator->cpp_obj;
+		PyObject *pyIn;
+		if(!PyArg_ParseTuple(args,"O:initBunchChromCoeff",&pyIn)){
+			error("PyMatrixGenerator - initBunchChromCoeff(Bunch) - input parameter is needed.");
+		}
+		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
+		if(PyObject_IsInstance(pyIn,pyBunchType)){
+			cpp_MatrixGenerator->initBunchForChromaticityCoeff((Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj);
+			Py_INCREF(Py_None);
+			return Py_None;
+		}
+		error("PyMatrixGenerator - initBunchChromCoeff(Bunch) - input parameter is wrong.");	
+		Py_INCREF(Py_None);
+    return Py_None;			
+  }		
+	
+	//calculateChromaticityCoeff() - calculates the coeff.  coeff_x_dE, coeff_xp_dE, coeff_y_dE, coeff_yp_dE
+  static PyObject* MatrixGenerator_calcChromCoeff(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyMatrixGenerator = (pyORBIT_Object*) self;
+		MatrixGenerator* cpp_MatrixGenerator = (MatrixGenerator*) pyMatrixGenerator->cpp_obj;
+		PyObject *pyIn;
+		if(!PyArg_ParseTuple(args,"O:calcChromCoeff",&pyIn)){
+			error("PyMatrixGenerator - calcChromCoeff(Bunch) - input parameter is needed.");
+		}
+		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
+		if(PyObject_IsInstance(pyIn,pyBunchType)){
+			double coeff_x_dE, coeff_xp_dE, coeff_y_dE, coeff_yp_dE;
+			cpp_MatrixGenerator->calculateChromaticityCoeff((Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj,
+				                       coeff_x_dE, coeff_xp_dE, coeff_y_dE, coeff_yp_dE);
+			return Py_BuildValue("(dddd)",coeff_x_dE, coeff_xp_dE, coeff_y_dE, coeff_yp_dE);
+		}
+		error("PyMatrixGenerator - calcChromCoeff(Bunch) - input parameter is wrong.");	
+		Py_INCREF(Py_None);
+    return Py_None;			
+  }		
+	
+	
 	// defenition of the methods of the python MatrixGenerator wrapper class
 	// they will be vailable from python level
   static PyMethodDef MatrixGeneratorClassMethods[] = {
@@ -132,6 +172,8 @@ extern "C" {
     { "setStep",         MatrixGenerator_step_get_set   ,METH_VARARGS,"Sets the new value to step(i)"},
     { "initBunch",       MatrixGenerator_initBunch      ,METH_VARARGS,"Initializes the bunch"},
     { "calculateMatrix", MatrixGenerator_calcMatrix     ,METH_VARARGS,"Calculates the transport matrix"},
+    { "initBunchChromCoeff", MatrixGenerator_initBunchChromCoeff ,METH_VARARGS,"Initializes the bunch for chromaticity calc."},
+    { "calcChromCoeff",      MatrixGenerator_calcChromCoeff      ,METH_VARARGS,"Calculates the cromaticity coeff."},
     {NULL}
   };
 

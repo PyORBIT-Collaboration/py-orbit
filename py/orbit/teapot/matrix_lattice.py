@@ -404,6 +404,37 @@ class MATRIX_Lattice(AccLattice):
 			graph_disp_p_arr.append((pos_arr[i],disp_p_arr[i]))
 		return (graph_disp_arr,graph_disp_p_arr)
 
+	def getChromaticitiesXY(self):
+		"""
+		Calculates chromaticities for X,Y planes for the whole ring
+		"""
+		(tuneX,tmp0,tmp1) = self.getRingTwissDataX()
+		(tuneY,tmp0,tmp1) = self.getRingTwissDataY()
+		self.matrixGenerator.initBunchChromCoeff(self.bunch)
+		#track bunch through the TEAPOT nodes
+		def twissAction(paramsDict):
+			node = paramsDict["node"]
+			if(isinstance(node, BaseTEAPOT) == True and isinstance(node,RingRFTEAPOT) == False): 
+				node.track(paramsDict)
+		
+		accContainer = AccActionsContainer()
+		accContainer.addAction(twissAction,AccActionsContainer.BODY)
+		paramsDict = {}
+		paramsDict["bunch"] = self.bunch
+		self.teapot_lattice.trackActions(accContainer,paramsDict)	
+		
+		res_coeff = self.matrixGenerator.calcChromCoeff(self.bunch)
+		(coeff_x_dE,coeff_xp_dE,coeff_y_dE,coeff_yp_dE) = res_coeff
+		momentum = self.bunch.getSyncParticle().momentum()
+		mass = self.bunch.getSyncParticle().mass()
+		Ekin = self.bunch.getSyncParticle().kinEnergy()
+		chromX = - (momentum/(2*math.sin(2*math.pi*tuneX)))*(coeff_x_dE+coeff_xp_dE)
+		chromX = (momentum/(mass+Ekin))*chromX
+		chromY = - (momentum/(2*math.sin(2*math.pi*tuneY)))*(coeff_y_dE+coeff_yp_dE)
+		chromY = (momentum/(mass+Ekin))*chromY
+		return (chromX/(2*math.pi),chromY/(2*math.pi))
+		
+
 	def initialize(self):
 		"""
 		Initializes the lattice.

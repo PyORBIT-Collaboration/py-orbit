@@ -443,6 +443,7 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 	mass = bunch->getMass();
 	mass2 = mass*mass;
 	n_steps = int(t_period/t_step_in);
+	if(n_steps < 1){ n_steps = 1;}
 	t_step = t_period/n_steps;	
 	double vpt = 0.;
 	double** partCoordArr = bunch->coordArr();

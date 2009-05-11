@@ -36,38 +36,117 @@ ExtEffectsContainer::ExtEffectsContainer(){
 }
 
 ExtEffectsContainer::~ExtEffectsContainer(){
-	for (int i=0;i<ref_eff.size();i++){
-		if(ref_eff[i]->getPyWrapper() == NULL){
-			delete ref_eff[i];
+	
+	for (int i=0;i<ref.size();i++){ 
+		if(ref[i]->getPyWrapper() == NULL){
+			delete ref[i];
 		} else {
-			Py_XDECREF(ref_eff[i]->getPyWrapper());
+			Py_XDECREF(ref[i]->getPyWrapper());
 		}
 	}
+
 }
 
 void ExtEffectsContainer::AddEffect(ExternalEffects* eff)	{
 	if(eff->getPyWrapper() != NULL){
 		Py_INCREF(eff->getPyWrapper());
 	}
-	ref_eff.push_back(eff);
+
+	ref.push_back(eff);
+	
+	ref_setup.push_back(eff);
+	ref_memorize.push_back(eff);
+	ref_apply.push_back(eff);
+	ref_finalize.push_back(eff);
 }
 
 void ExtEffectsContainer::setupEffects(Bunch* bunch){
-	for (int i=0;i<ref_eff.size();i++){
-		ref_eff[i]->setupEffects(bunch);
+	
+	ExternalEffects* exchange;
+	int min;
+	
+
+	for (int i=0; i<ref_setup.size(); i++)	{
+		min=ref_setup[i]->getRankSetup();
+	for (int j=i+1; j<ref_setup.size(); j++)	{
+		
+		if(ref_setup[j]->getRankSetup()<min)	{
+			min=ref_setup[j]->getRankSetup();		
+			exchange = ref_setup[i];
+			ref_setup[i] = ref_setup[j];
+			ref_setup[j] = exchange;
+
+		}
+		
 	}
+	}
+	
+	for (int i=0; i<ref_memorize.size(); i++)	{
+		min=ref_memorize[i]->getRankMemorize();
+	for (int j=i+1; j<ref_memorize.size(); j++)	{
+		
+		if(ref_memorize[j]->getRankMemorize()<min)	{
+			min=ref_memorize[j]->getRankMemorize();		
+			exchange = ref_memorize[i];
+			ref_memorize[i] = ref_memorize[j];
+			ref_memorize[j] = exchange;
+
+		}
+		
+	}
+	}
+	
+	for (int i=0; i<ref_apply.size(); i++)	{
+		min=ref_apply[i]->getRankApply();
+	for (int j=i+1; j<ref_apply.size(); j++)	{
+		
+		if(ref_apply[j]->getRankApply()<min)	{
+			min=ref_apply[j]->getRankApply();		
+			exchange = ref_apply[i];
+			ref_apply[i] = ref_apply[j];
+			ref_apply[j] = exchange;
+
+		}
+		
+	}
+	}
+	
+	for (int i=0; i<ref_finalize.size(); i++)	{
+		min=ref_finalize[i]->getRankFinalize();
+	for (int j=i+1; j<ref_finalize.size(); j++)	{
+		
+		if(ref_finalize[j]->getRankFinalize()<min)	{
+			min=ref_finalize[j]->getRankFinalize();		
+			exchange = ref_finalize[i];
+			ref_finalize[i] = ref_finalize[j];
+			ref_finalize[j] = exchange;
+
+		}
+		
+	}
+	}
+		
+	
+	
+	
+	for (int i=0;i<ref_setup.size();i++){
+		ref_setup[i]->setupEffects(bunch);
+	}
+
+
+
 }
 
 void ExtEffectsContainer::memorizeInitParams(Bunch* bunch){	
 
-	for (int i=0;i<ref_eff.size();i++){
-		ref_eff[i]->memorizeInitParams(bunch);
+	for (int i=0;i<ref_memorize.size();i++){
+		ref_memorize[i]->memorizeInitParams(bunch);
 	}
 }
 
 void ExtEffectsContainer::finalizeEffects(Bunch* bunch) {
-	for (int i=0;i<ref_eff.size();i++){
-		ref_eff[i]->finalizeEffects(bunch);
+	for (int i=0;i<ref_finalize.size();i++){
+		ref_finalize[i]->finalizeEffects(bunch);
 	}
 }
 
@@ -76,8 +155,8 @@ void ExtEffectsContainer::applyEffects(Bunch* bunch, int index,
                                        double t, double t_step,
                                        BaseFieldSource* fieldSource,
                                        RungeKuttaTracker* tracker) {
-	for (int i=0;i<ref_eff.size();i++){
-		ref_eff[i]->applyEffects(bunch, index, y_in_vct, y_out_vct, t, t_step, fieldSource, tracker);
+	for (int i=0;i<ref_apply.size();i++){
+		ref_apply[i]->applyEffects(bunch, index, y_in_vct, y_out_vct, t, t_step, fieldSource, tracker);
 	}
 }
 

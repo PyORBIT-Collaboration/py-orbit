@@ -57,9 +57,27 @@ namespace TrackerRK4{
 		/** It sets the name of the effect to distinguish them later. */
 		void setName(std::string name);
 		
+
+		int getRankSetup();
+		int getRankMemorize();
+		int getRankApply();
+		int getRankFinalize();
+		
+
+		void setRankSetup(int i);
+		void setRankMemorize(int i);
+		void setRankApply(int i);
+		void setRankFinalize(int i);
+		
 	  private:
 		   
 			std::string name;
+
+			
+			int rank_setup;
+			int rank_memorize;
+			int rank_apply;
+			int rank_finalize;
 			
 			
 			

@@ -26,6 +26,8 @@
 #include "WaveFunctionAmplitudes.hh"
 #include "AtomPopulations.hh"
 #include "pq_coordinates.hh"
+#include "prf_time.hh"
+#include "Evolution.hh"
 ///////////////////////////////////////////////////////////////////////////
 //   Constructor and Desctructor
 ///////////////////////////////////////////////////////////////////////////
@@ -113,7 +115,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
   
   if(name == "pq_coords"){
 		if(params_dict.size() == 0){
-			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
+			cout<<"dictionary pq_coords(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
 				int i_size = (int) params_dict["size"];
@@ -131,6 +133,50 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			}
 		}
   }
+  
+  if(name == "prf_time"){
+		if(params_dict.size() == 0){
+			cout<<"dictionary prf_time(dict) should be defined "<<"\n";
+		} else {
+			if(params_dict.count("size") == 1){
+				int i_size = (int) params_dict["size"];
+				part_atrs = new prf_time(bunch,i_size);
+			} else {
+				if(rank_MPI == 0){
+					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
+					std::cerr << "MPI Communicator="<< MPI_COMM_Local << std::endl;
+					std::cerr << "MPI size="<< size_MPI << std::endl;
+					std::cerr << "MPI rank="<< rank_MPI << std::endl;
+					std::cerr << "attr. name:"<< name << std::endl;					
+					std::cerr << "There is no <size> specification in the dict. "<< std::endl;
+				}				
+				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
+			}
+		}
+  }
+  
+  if(name == "Evolution"){
+		if(params_dict.size() == 0){
+			cout<<"dictionary Evolution(dict) should be defined "<<"\n";
+		} else {
+			if(params_dict.count("size") == 1){
+				int i_size = (int) params_dict["size"];
+				part_atrs = new Evolution(bunch,i_size);
+			} else {
+				if(rank_MPI == 0){
+					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
+					std::cerr << "MPI Communicator="<< MPI_COMM_Local << std::endl;
+					std::cerr << "MPI size="<< size_MPI << std::endl;
+					std::cerr << "MPI rank="<< rank_MPI << std::endl;
+					std::cerr << "attr. name:"<< name << std::endl;					
+					std::cerr << "There is no <size> specification in the dict. "<< std::endl;
+				}				
+				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
+			}
+		}
+  }
+  
+  
   
   
   
@@ -161,6 +207,8 @@ void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& 
   names.push_back("Amplitudes");
   names.push_back("Populations");
   names.push_back("pq_coords");
+  names.push_back("prf_time");
+  names.push_back("Evolution");
 }
 
 

@@ -23,6 +23,11 @@ using namespace OrbitUtils;
 		
 ExternalEffects::ExternalEffects(){
 	name = "empty";
+
+	rank_setup=0;
+	rank_memorize=0;
+	rank_apply=0;
+	rank_finalize=0;
 }
 
 ExternalEffects::~ExternalEffects(){
@@ -57,6 +62,43 @@ void ExternalEffects::applyEffects(Bunch* bunch, int index,
 /** It returns the name of the effect to distinguish them later. */
 std::string ExternalEffects::getName(){
 	return name;
+}
+
+
+
+int ExternalEffects::getRankSetup()	{
+	return rank_setup;
+}
+
+int ExternalEffects::getRankMemorize()	{
+	return rank_memorize;
+}
+
+int ExternalEffects::getRankApply()	{
+	return rank_apply;
+}
+
+int ExternalEffects::getRankFinalize()	{
+	return rank_finalize;
+}
+
+
+
+
+void ExternalEffects::setRankSetup(int i)	{
+	rank_setup = i;
+}
+
+void ExternalEffects::setRankMemorize(int i)	{
+	rank_memorize = i;
+}
+
+void ExternalEffects::setRankApply(int i)	{
+	rank_apply = i;
+}
+
+void ExternalEffects::setRankFinalize(int i)	{
+	rank_finalize = i;
 }
 
 /** It sets the name of the effect to distinguish them later. */

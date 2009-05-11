@@ -45,7 +45,11 @@ namespace LaserStripping{
 		
 		private:
 			
-			vector<ExternalEffects*>	ref_eff;
+			vector<ExternalEffects*>	ref;			
+			vector<ExternalEffects*>	ref_setup;
+			vector<ExternalEffects*>	ref_memorize;
+			vector<ExternalEffects*>	ref_apply;
+			vector<ExternalEffects*>	ref_finalize;
 
 	};
 };

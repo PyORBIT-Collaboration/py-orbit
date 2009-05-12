@@ -258,7 +258,7 @@ protected:
 
 
   std::map<std::string,ParticleAttributes*> attrCntrMapTemp;
-  std::set<ParticleAttributes*> attrCntrSet;
+  std::vector<ParticleAttributes*> attrCntrVect;
 
   //bunch attributes
   OrbitUtils::AttributesBucket* bunchAttr;

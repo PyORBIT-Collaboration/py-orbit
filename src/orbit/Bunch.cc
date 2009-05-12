@@ -95,8 +95,8 @@ Bunch::~Bunch()
   }
 
   //delete controllers of particle attributes
-  std::set<ParticleAttributes*>::iterator pos;
-  for(pos = attrCntrSet.begin(); pos != attrCntrSet.end(); ++pos){
+  std::vector<ParticleAttributes*>::iterator pos;
+  for(pos = attrCntrVect.begin(); pos != attrCntrVect.end(); ++pos){
     delete  *pos;
   }
 
@@ -869,15 +869,15 @@ void Bunch::print(std::ostream& Out)
 
     //print particle attributes controllers names
     Out << "% PARTICLE_ATTRIBUTES_CONTROLLERS_NAMES ";
-    std::map<std::string,ParticleAttributes*>::iterator pos;
-    for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
-      ParticleAttributes* attrCntr = pos->second;
+    std::vector<ParticleAttributes*>::iterator pos;
+    for (pos = attrCntrVect.begin(); pos != attrCntrVect.end(); ++pos) {
+      ParticleAttributes* attrCntr = *pos;
       Out << attrCntr->name()<<" ";
     }
     Out << std::endl;
 		
-    for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
-      ParticleAttributes* attrCntr = pos->second;
+    for (pos = attrCntrVect.begin(); pos != attrCntrVect.end(); ++pos) {
+      ParticleAttributes* attrCntr = *pos;
 			std::map<std::string,double>  params_dict = attrCntr->parameterDict;
 			if(params_dict.size() > 0){
 				std::map<std::string,double>::iterator params_pos;
@@ -910,8 +910,8 @@ void Bunch::print(std::ostream& Out)
 
     Out << "% x[m] px[rad] y[m] py[rad] z[m]  (pz or dE [GeV]) ";
 
-    for (pos = attrCntrMap.begin(); pos != attrCntrMap.end(); ++pos) {
-      ParticleAttributes* attrCntr = pos->second;
+    for (pos = attrCntrVect.begin(); pos != attrCntrVect.end(); ++pos) {
+      ParticleAttributes* attrCntr = *pos;
       Out << attrCntr->attrDescription()<<" ";
     }
 
@@ -1428,9 +1428,6 @@ void Bunch::addParticleAttributes(
 	addParticleAttributes(attr);
 }
 
-std::map<std::string,ParticleAttributes*> attrCntrMapTemp;
-
-
 int Bunch::hasParticleAttributes(const std::string att_name){
 	return attrCntrSizeMap.count(att_name);
 }
@@ -1498,7 +1495,7 @@ void Bunch::addParticleAttributes(ParticleAttributes* attr){
 
 	//memorize attributes in the set.
 	//This set will be used in the destructor.
-	attrCntrSet.insert(attr);
+	attrCntrVect.push_back(attr);
 }
 
 void Bunch::removeAllParticleAttributes(){
@@ -1573,7 +1570,13 @@ ParticleAttributes* Bunch::removeParticleAttributesWithoutDelete(const std::stri
 	attrCntrUppIndMap.erase(name);
 
 	//remove attributes in the set.
-	attrCntrSet.erase(attr);
+  std::vector<ParticleAttributes*>::iterator pos_rm;
+  for(pos_rm = attrCntrVect.begin(); pos_rm != attrCntrVect.end(); ++pos_rm){
+    if(*pos_rm == attr){
+			attrCntrVect.erase(pos_rm);
+			break;
+		}
+  }
 
 	std::map<std::string,int>::iterator pos;
 	for (pos = attrCntrLowIndMap.begin(); pos != attrCntrLowIndMap.end(); ++pos) {
@@ -1582,6 +1585,8 @@ ParticleAttributes* Bunch::removeParticleAttributesWithoutDelete(const std::stri
 		if(ind >= lowInd) {
 			attrCntrLowIndMap[name] =  attrCntrLowIndMap[name] - attr_length;
 			attrCntrUppIndMap[name] =  attrCntrUppIndMap[name] - attr_length;
+			ParticleAttributes* attr_tmp = attrCntrMap[name];
+			attr_tmp->setAttrShift(attr_tmp->getAttrShift() - attr_length);
 		}
 	}
 

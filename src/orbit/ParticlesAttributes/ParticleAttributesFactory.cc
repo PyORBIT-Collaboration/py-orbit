@@ -67,8 +67,6 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
     part_atrs = new ParticleMacroSize(bunch);
   }
 
-  
-  
   if(name == "Amplitudes"){
 		if(params_dict.size() == 0){
 			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
@@ -176,12 +174,6 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 		}
   }
   
-  
-  
-  
-  
-  
-
   if(part_atrs == NULL) {
     if(rank_MPI == 0){
       std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(const string name, Bunch* bunch)"<< std::endl;

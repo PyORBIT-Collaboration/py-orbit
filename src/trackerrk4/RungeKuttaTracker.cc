@@ -597,9 +597,9 @@ void RungeKuttaTracker::calculateRightSideODE(double t, BaseFieldSource* fieldSo
 	ff_vct[1] = y_vct[4]*coef;
 	ff_vct[2] = y_vct[5]*coef;
 	coef *= charge;
-	ff_vct[3] = c_light*(e_vct[0] + coef*(y_vct[4]*b_vct[2] - y_vct[5]*b_vct[1]));
-	ff_vct[4] = c_light*(e_vct[1] + coef*(y_vct[5]*b_vct[0] - y_vct[3]*b_vct[2]));
-	ff_vct[5] = c_light*(e_vct[2] + coef*(y_vct[3]*b_vct[1] - y_vct[4]*b_vct[0]));
+	ff_vct[3] = c_light*(charge*e_vct[0] + coef*(y_vct[4]*b_vct[2] - y_vct[5]*b_vct[1]));
+	ff_vct[4] = c_light*(charge*e_vct[1] + coef*(y_vct[5]*b_vct[0] - y_vct[3]*b_vct[2]));
+	ff_vct[5] = c_light*(charge*e_vct[2] + coef*(y_vct[3]*b_vct[1] - y_vct[4]*b_vct[0]));
 	ff_vct[3] = ff_vct[3]/1.0e+9;
 	ff_vct[4] = ff_vct[4]/1.0e+9;
 	ff_vct[5] = ff_vct[5]/1.0e+9;

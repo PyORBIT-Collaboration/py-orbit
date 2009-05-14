@@ -1,8 +1,7 @@
-
 /////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
-//   MyAttr.hh
+//   prf_time.hh
 //
 // AUTHOR
 //    T. Gorlov
@@ -11,67 +10,28 @@
 //    07/14/2005
 //
 // DESCRIPTION
-//    A subclass of the particle attributes class. This is container
-//    for a macrosize of macro-particles in the bunch.
+//    A subclass of the particle attributes class. 
 //
 ///////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #ifndef PRF_TIME_HH_
 #define PRF_TIME_HH_
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #include <string>
 
-///////////////////////////////////////////////////////////////////////////
-//
-// CLASS NAME
-//     WaveFunctionAmplitudes
-//
-///////////////////////////////////////////////////////////////////////////
 #include "ParticleAttributes.hh"
 
 class prf_time : public ParticleAttributes
 {
 public:
-  //--------------------------------------
-  //the public methods of the ParticleMacroSize class
-  //--------------------------------------
-	
-	/** Constructor. This Attribute describe complex coefficients of Wave functions.
-	  * The defailt size is 400. 
-		*/
-	prf_time(Bunch* bunch);
-	
+
 	/** This Attribute describe complex coefficients of Wave functions.
 	  * User can specify the number of variables that he wants to reserve.
 		*/
 	prf_time(Bunch* bunch, int size_in);
 	
   ~prf_time();
-  
-	
-  int getAttSize();
-	
-private:
-	int size;
-	
-	
+
 };
-
-///////////////////////////////////////////////////////////////////////////
-//
-// END OF FILE
-//
-///////////////////////////////////////////////////////////////////////////
-
 
 #endif /*PRF_TIME_HH_*/

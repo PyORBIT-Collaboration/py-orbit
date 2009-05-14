@@ -1,7 +1,7 @@
 //////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
-//   MyAttr.hh
+//   WaveFunctionAmplitudes.hh
 //
 // AUTHOR
 //    T. Gorlov
@@ -10,32 +10,14 @@
 //    07/14/2005
 //
 // DESCRIPTION
-//    A subclass of the particle attributes class. This is container
-//    for a macrosize of macro-particles in the bunch.
+//    A subclass of the particle attributes class.
 //
 ///////////////////////////////////////////////////////////////////////////
+#ifndef WAVE_FUNCTION_AMPLITUDES_H
+#define WAVE_FUNCTION_AMPLITUDES_H
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
-#ifndef MYATTR_H
-#define MYATTR_H
-
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #include <string>
 
-///////////////////////////////////////////////////////////////////////////
-//
-// CLASS NAME
-//     WaveFunctionAmplitudes
-//
-///////////////////////////////////////////////////////////////////////////
 #include "ParticleAttributes.hh"
 
 class WaveFunctionAmplitudes : public ParticleAttributes
@@ -44,11 +26,7 @@ public:
   //--------------------------------------
   //the public methods of the ParticleMacroSize class
   //--------------------------------------
-	
-	/** Constructor. This Attribute describe complex coefficients of Wave functions.
-	  * The defailt size is 400. 
-		*/
-	WaveFunctionAmplitudes(Bunch* bunch);
+
 	
 	/** This Attribute describe complex coefficients of Wave functions.
 	  * User can specify the number of variables that he wants to reserve.
@@ -56,15 +34,6 @@ public:
 	WaveFunctionAmplitudes(Bunch* bunch, int size_in);
 	
   ~WaveFunctionAmplitudes();
-  
-
-	
-  int getAttSize();
-	
-private:
-	
-	int size;
-	
 	
 };
 
@@ -74,4 +43,4 @@ private:
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#endif
+#endif   //WAVE_FUNCTION_AMPLITUDES_H definition

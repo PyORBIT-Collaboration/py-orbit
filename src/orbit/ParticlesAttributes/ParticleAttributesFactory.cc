@@ -15,11 +15,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #include "ParticleAttributesFactory.hh"
 
 #include "ParticleMacroSize.hh"
@@ -28,9 +23,6 @@
 #include "pq_coordinates.hh"
 #include "prf_time.hh"
 #include "Evolution.hh"
-///////////////////////////////////////////////////////////////////////////
-//   Constructor and Desctructor
-///////////////////////////////////////////////////////////////////////////
 
 ParticleAttributesFactory::ParticleAttributesFactory()
 {
@@ -60,7 +52,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 	
   ParticleAttributes* part_atrs = NULL;
   if(name == "empty"){
-    part_atrs = new ParticleAttributes(bunch);
+    part_atrs = new ParticleAttributes(bunch,0);
   }
 	
   if(name == "macrosize"){
@@ -72,8 +64,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
-				int i_size = (int) params_dict["size"];
-				part_atrs = new WaveFunctionAmplitudes(bunch,i_size);
+				part_atrs = new WaveFunctionAmplitudes(bunch,(int) params_dict["size"]);
 			} else {
 				if(rank_MPI == 0){
 					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
@@ -95,8 +86,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
-				int i_size = (int) params_dict["size"];
-				part_atrs = new AtomPopulations(bunch,i_size);
+				part_atrs = new AtomPopulations(bunch,(int) params_dict["size"]);
 			} else {
 				if(rank_MPI == 0){
 					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
@@ -116,8 +106,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			cout<<"dictionary pq_coords(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
-				int i_size = (int) params_dict["size"];
-				part_atrs = new pq_coordinates(bunch,i_size);
+				part_atrs = new pq_coordinates(bunch,(int) params_dict["size"]);
 			} else {
 				if(rank_MPI == 0){
 					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
@@ -137,8 +126,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			cout<<"dictionary prf_time(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
-				int i_size = (int) params_dict["size"];
-				part_atrs = new prf_time(bunch,i_size);
+				part_atrs = new prf_time(bunch, (int) params_dict["size"]);
 			} else {
 				if(rank_MPI == 0){
 					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
@@ -158,8 +146,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			cout<<"dictionary Evolution(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
-				int i_size = (int) params_dict["size"];
-				part_atrs = new Evolution(bunch,i_size);
+				part_atrs = new Evolution(bunch, (int) params_dict["size"]);
 			} else {
 				if(rank_MPI == 0){
 					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;
@@ -189,6 +176,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 	
 	//copy the particle attributes dictionary
 	part_atrs->parameterDict = params_dict;
+	part_atrs->parameterDict["size"] = part_atrs->getAttSize();
 	
   return part_atrs;
 }

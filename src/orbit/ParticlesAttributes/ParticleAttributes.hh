@@ -50,7 +50,7 @@ public:
   //the public methods of the ParticleAttributes class
   //--------------------------------------
 
-  ParticleAttributes(Bunch* bunch);
+  ParticleAttributes(Bunch* bunch, int size_in);
   virtual ~ParticleAttributes();
 
   //returns the name of the particle attributes bucket
@@ -73,7 +73,7 @@ public:
   virtual int getAttSize();
 
   //returns the number of particles
-  int getSize();
+  int getBunchSize();
 
   //returns the flag of the particle (dead or alive)
   int flag(int particle_index);
@@ -111,10 +111,11 @@ protected:
   Bunch* bunch_;
 
   int attr_ind_shift_;
+	
+	//size of the array for particles attribute
+	int size;
 
 private:
-
-
 
 
 };

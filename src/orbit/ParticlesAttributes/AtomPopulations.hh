@@ -16,54 +16,23 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #ifndef POPULATIONS_HH_
 #define POPULATIONS_HH_
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #include <string>
 
-///////////////////////////////////////////////////////////////////////////
-//
-// CLASS NAME
-//     WaveFunctionAmplitudes
-//
-///////////////////////////////////////////////////////////////////////////
 #include "ParticleAttributes.hh"
 
 class AtomPopulations : public ParticleAttributes
 {
 public:
-  //--------------------------------------
-  //the public methods of the ParticleMacroSize class
-  //--------------------------------------
-	
-	/** Constructor. This Attribute describe complex coefficients of Wave functions.
-	  * The defailt size is 400. 
-		*/
-	AtomPopulations(Bunch* bunch);
-	
-	/** This Attribute describe complex coefficients of Wave functions.
+
+/** This Attribute describe complex coefficients of Wave functions.
 	  * User can specify the number of variables that he wants to reserve.
 		*/
 	AtomPopulations(Bunch* bunch, int size_in);
 	
-  ~AtomPopulations();
-  
-	
-  int getAttSize();
-	
-private:
-	int size;
-	
+  ~AtomPopulations();	
 	
 };
 

@@ -17,25 +17,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #include "Bunch.hh"
-
 #include "ParticleAttributes.hh"
 
-///////////////////////////////////////////////////////////////////////////
-//   Constructor and Desctructor
-///////////////////////////////////////////////////////////////////////////
-
-ParticleAttributes::ParticleAttributes(Bunch* bunch)
+ParticleAttributes::ParticleAttributes(Bunch* bunch, int size_in)
 {
   attr_ind_shift_ = 0;
   cl_name_ = "empty";
   bunch_ = bunch;
   attrDescr = "no attributes";
+	size = size_in;
+	parameterDict["size"] = size;
 }
 
 ParticleAttributes::~ParticleAttributes()
@@ -57,10 +49,10 @@ double* ParticleAttributes::attArr(int particle_index){
 }
 
 int ParticleAttributes::getAttSize(){
-  return 0;
+  return size;
 }
 
-int ParticleAttributes::getSize(){
+int ParticleAttributes::getBunchSize(){
   return bunch_->getSize();
 }
 

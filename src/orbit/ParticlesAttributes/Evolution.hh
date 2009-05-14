@@ -41,26 +41,14 @@ public:
   //--------------------------------------
   //the public methods of the ParticleMacroSize class
   //--------------------------------------
-	
-	/** Constructor. This Attribute describe complex coefficients of Wave functions.
-	  * The defailt size is 400. 
-		*/
-	Evolution(Bunch* bunch);
-	
+
 	/** This Attribute describe complex coefficients of Wave functions.
 	  * User can specify the number of variables that he wants to reserve.
 		*/
 	Evolution(Bunch* bunch, int size_in);
 	
   ~Evolution();
-  
-	
-  int getAttSize();
-	
-private:
-	int size;
-	
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////

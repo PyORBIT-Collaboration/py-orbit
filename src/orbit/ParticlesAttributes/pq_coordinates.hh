@@ -1,8 +1,7 @@
-
 /////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
-//   MyAttr.hh
+//   pq_coordinates.hh
 //
 // AUTHOR
 //    T. Gorlov
@@ -11,14 +10,7 @@
 //    07/14/2005
 //
 // DESCRIPTION
-//    A subclass of the particle attributes class. This is container
-//    for a macrosize of macro-particles in the bunch.
-//
-///////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
+//    A subclass of the particle attributes class. 
 //
 ///////////////////////////////////////////////////////////////////////////
 #ifndef PQCOORDINATES_HH_
@@ -31,25 +23,11 @@
 ///////////////////////////////////////////////////////////////////////////
 #include <string>
 
-///////////////////////////////////////////////////////////////////////////
-//
-// CLASS NAME
-//     WaveFunctionAmplitudes
-//
-///////////////////////////////////////////////////////////////////////////
 #include "ParticleAttributes.hh"
 
 class pq_coordinates : public ParticleAttributes
 {
 public:
-  //--------------------------------------
-  //the public methods of the ParticleMacroSize class
-  //--------------------------------------
-	
-	/** Constructor. This Attribute describe complex coefficients of Wave functions.
-	  * The defailt size is 400. 
-		*/
-	pq_coordinates(Bunch* bunch);
 	
 	/** This Attribute describe complex coefficients of Wave functions.
 	  * User can specify the number of variables that he wants to reserve.
@@ -57,16 +35,7 @@ public:
 	pq_coordinates(Bunch* bunch, int size_in);
 	
   ~pq_coordinates();
-  
-  double& Re0(int particle_index);
-  double& Im0(int particle_index);
-	
-  int getAttSize();
-	
-private:
-	int size;
-	
-	
+
 };
 
 ///////////////////////////////////////////////////////////////////////////

@@ -148,7 +148,6 @@ public:
   void deleteAllParticles();
 
   //methods related to the attribute buckets
-  void addParticleAttributes(ParticleAttributes* attr);
   void addParticleAttributes(const std::string att_name,std::map<std::string,double> part_attr_dict);
   int  hasParticleAttributes(const std::string att_name);
   void removeParticleAttributes(const std::string name);
@@ -202,6 +201,9 @@ private:
 
   friend class ParticleAttributes;
 
+  //methods related to the particles attribute buckets
+  void addParticleAttributes(ParticleAttributes* attr);	
+	
   void resize();
   void FinalizeExecution();
   void attrInit(int particle_index);

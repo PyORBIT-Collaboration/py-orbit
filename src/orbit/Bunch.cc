@@ -448,7 +448,7 @@ double& Bunch::z(int index){    return arrCoord[index][4];}
 double& Bunch::pz(int index){   return arrCoord[index][5];}
 double& Bunch::dE(int index){   return arrCoord[index][5];}
 
-int& Bunch::flag(int index){   return arrFlag[index];}
+int Bunch::flag(int index){   return arrFlag[index];}
 
 double* Bunch::coordPartArr(int index){ return arrCoord[index];}
 double** Bunch::coordArr(){ return arrCoord;}
@@ -748,26 +748,6 @@ void Bunch::compress()
   needOfCompress = 0;
 
   resize();
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// NAME
-//    Bunch::forcedCompress
-//
-// DESCRIPTION
-//    compresses the workspace to the number of "alive" macroparticles
-//    with removing "dead" flagged macroparticles and renumbering "alive"
-//    flagged macroparticles. It will be executed even if there is no need for
-//    for this according to the internal varibale needOfCompress.
-//
-// RETURNS
-//    Nothing.
-//
-///////////////////////////////////////////////////////////////////////////
-void Bunch::forcedCompress(){
-	needOfCompress = 1;
-	compress();
 }
 
 ///////////////////////////////////////////////////////////////////////////

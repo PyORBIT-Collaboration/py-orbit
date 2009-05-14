@@ -73,9 +73,8 @@ public:
   double& xp(int index);
   double& yp(int index);
 
-  //only flag == 0 means that particle is dead. Please, be carefull using this
-	//for setting the flag. The forcedCompress method should be used after this.
-  int& flag(int index);
+  //only flag == 0 means that particle is dead. 
+  int flag(int index);
 
   //returns the pointer to the 6D coordinates array
   //the values order is : x,px,y,py,z,pz
@@ -104,12 +103,8 @@ public:
   //The number of macro-particles will be changed inside this method
   void deleteParticle(int index);
 
-	//removes the dead particles from bunch. It will work if the particels
-	//were deleted by deleteParticle(ind) or deleteParticleFast(ind) methods
-	//If you used flag(ind) = 0 you have to use forced compress method
-	//forcedCompress()
+	//removes the dead particles from bunch.
   void compress();
-	void forcedCompress();
 
   double getMass();                // GeV
   double getClassicalRadius();     // m

@@ -419,38 +419,23 @@ namespace wrap_orbit_bunch{
   //Sets or returns flag of the macro-particle
   //  the action is depended on the number of arguments
   //  (index) - returns flag
-  //  (index, value) - sets the new flag
   //this is implementation of the flag(int index)  method
   static PyObject* Bunch_flag(PyObject *self, PyObject *args){
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
     //if nVars == 1 get flag
-    //if nVars == 2 set flag
     int nVars = PyTuple_Size(args);
-
     int index = 0;
     int flag = 0;
-
-    if(nVars == 1 ||  nVars == 2){
-      if(nVars == 1){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"i:flag",&index)){
-          error("PyBunch - flag(index) - index is needed");
-        }
-        flag = cpp_bunch->flag(index);
-      }
-      else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"ii:flag",&index,&flag)){
-          error("PyBunch - flag(index, flag) - index and value are needed");
-        }
-        cpp_bunch->flag(index) = flag;
-      }
+    if(nVars == 1){
+			if(!PyArg_ParseTuple(	args,"i:flag",&index)){
+				error("PyBunch - flag(index) - index is needed");
+			}
+			flag = cpp_bunch->flag(index);
 			return Py_BuildValue("i",flag);
     }
     else{
-      error("PyBunch. You should call flag(index) or flag(index,flag)");
+      error("PyBunch. You should call bunch.flag(index)");
     }
-
     Py_INCREF(Py_None);
     return Py_None;		
   }
@@ -1228,7 +1213,7 @@ namespace wrap_orbit_bunch{
     { "dE",                             Bunch_pz                            ,METH_VARARGS,"Set dE(index,value) or get dE(index) coordinate"},
     { "xp",                             Bunch_px                            ,METH_VARARGS,"Set xp(index,value) or get xp(index) coordinate"},
     { "yp",                             Bunch_py                            ,METH_VARARGS,"Set yp(index,value) or get yp(index) coordinate"},
-    { "flag",                           Bunch_flag                          ,METH_VARARGS,"Set flag(index,value) or get flag(index) coordinate"},
+    { "flag",                           Bunch_flag                          ,METH_VARARGS,"Returns flag(index) for particle with index"},
     { "ringwrap",                       Bunch_ringwrap                      ,METH_VARARGS,"Perform the ring wrap. Usage: ringwrap(ring_length)"},
     { "mass",                           Bunch_mass                          ,METH_VARARGS,"Set mass(value) or get mass() the mass of particle in MeV"},
     { "classicalRadius",                Bunch_classicalRadius               ,METH_VARARGS,"Set and get a classical radius of particle in [m]"},

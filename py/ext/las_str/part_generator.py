@@ -115,10 +115,17 @@ class BunchGen:
         cutOffY = self.cutOffY
         mass = self.mass
         charge = self.charge
+        
+        
+        E = mass + TK
+        beta = math.sqrt(E*E - mass*mass)/E
+        gamma = 1./math.sqrt(1-beta*beta)
+        
+        bg = beta*gamma
 
 
-        trGenX = TransverseCoordGen(alphaX,betaX,emtX,cutOffX)
-        trGenY = TransverseCoordGen(alphaY,betaY,emtY,cutOffY)
+        trGenX = TransverseCoordGen(alphaX,betaX,emtX/bg,cutOffX)
+        trGenY = TransverseCoordGen(alphaY,betaY,emtY/bg,cutOffY)
 
         gamaX = (1.0+alphaX*alphaX)/betaX
         gamaY = (1.0+alphaY*alphaY)/betaY
@@ -140,4 +147,59 @@ class BunchGen:
             #bunch.addParticle(0.,0.,0.,0.,0., pGen.getP0())
 
         return bunch
+
+
+
+    def getAutoionizationBunch(self,mult,b,time_par):
+
+        rank = orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
+        random.seed((rank+1)*12571+time_par*int(time.time()))
+
+
+        N_evol = int(b.getPartAttrDicts()['Evolution']['size'])-5
+
+        bunch = Bunch()
+        bunch.charge(1)
+        bunch.mass(0.938256)
+        
+        bunch_unstr = Bunch()
+        bunch_unstr.charge(0)
+        bunch_unstr.mass(b.mass())
+        
+
+        
+        for i in range(b.getSize()):
+            
+            dt = b.partAttrValue("Evolution",i,N_evol+1)
+            x0 = b.partAttrValue("Evolution",i,N_evol+2)
+            y0 = b.partAttrValue("Evolution",i,N_evol+3)
+            z0 = b.partAttrValue("Evolution",i,N_evol+4)
+                
+            (x1, y1, z1, px, py, pz) = (b.x(i), b.y(i), b.z(i), b.px(i), b.py(i), b.pz(i))
+            p1 = b.partAttrValue("Evolution",i,N_evol)
+
+                            
+            for j in range(mult):
+
+                ran = random.random()
+                if(p1 <= ran):
+                    bunch_unstr.addParticle(x1,px,y1,py,z1,pz)
+                else:
+
+                    for k in range(N_evol):
+                        f1 = b.partAttrValue("Evolution",i,k)
+                        f2 = b.partAttrValue("Evolution",i,k+1)
+                        
+                        if (f1 <= ran and ran < f2):
+                            coeff = (k+(ran-f1)/(f2-f1))/N_evol               
+                            (x,y,z) = (x0 + (x1 - x0)*coeff, y0 + (y1 - y0)*coeff, z0 + (z1 - z0)*coeff)  
+                            bunch.addParticle(x,px,y,py,z,pz)
+                            break
+
+              
+        return bunch, bunch_unstr
+
+
+
+
 

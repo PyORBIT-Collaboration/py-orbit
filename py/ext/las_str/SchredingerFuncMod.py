@@ -27,10 +27,15 @@ class SchredingerFunc:
         self.n_sigma = []
         self.la = []
         self.n_step = []
-        self.delta_E = []
+        self.delta_E = 1./2. - 1./(2.*n_states*n_states)
         self.fx = []
+        self.fy = []
         self.wx = []
         self.wy = []
+        self.rx = []
+        self.ry = []
+        self.ax = []
+        self.ay = []
         self.power = []
         self.data_addr_name = []
         
@@ -38,8 +43,7 @@ class SchredingerFunc:
         self.bunch_target = Bunch()
         self.count = 0
         self.cut_par = cut_par
-        
-        self.Stark = HydrogenStarkParam(trans,n_states)
+        self.St = Stark(trans,n_states)
         self.levels = n_states*(1+n_states)*(1+2*n_states)/6
         self.EMfield = []
 
@@ -63,19 +67,23 @@ class SchredingerFunc:
         N_part = bunch.getSize()
         TK = self.TK
         n_step = self.n_step
-        delta_E = self.delta_E
-        dip_transition = self.dip_transition
         n_sigma = self.n_sigma
         power = self.power
         levels = self.levels
+        delta_E = self.delta_E
         cut_par = self.cut_par
-        Stark = self.Stark
+        St = self.St
         fS = self.fS
         la = self.la
         fx = self.fx
         fy = self.fy
         wx = self.wx
-        wy = self.wy
+        wy = self.wy 
+               
+        rx = self.rx
+        ry = self.ry
+        ax = self.ax
+        ay = self.ay
         ####### Here are defined parameters of the function ###############
 
 
@@ -92,6 +100,7 @@ class SchredingerFunc:
         kz = -1/math.sqrt(math.pow(P/(bunch.mass()*(la/la0-1)-TK),2)-1.)
     
         z0 = n_sigma*wx*math.sqrt(1+math.pow(fx*la/(wx*wx*math.pi),2))*math.sqrt(1+kz*kz)
+        z0 = n_sigma*rx*math.sqrt(1+kz*kz)
 
         time_step = (2*z0/vz)/n_step
         #       alpha=360*math.acos((b.mass()*(la/la0-1)-TK)/P)/2/math.pi
@@ -101,16 +110,27 @@ class SchredingerFunc:
             x = bunch_target.x(i)
             bunch_target.z(i,-z0 - kz*x)   
         #bunch_target.dumpBunch("bunch_ini"+str(count)+".dat")
-        LFS = HermiteGaussianLFmode(math.sqrt(power),0,0,wx,wy,fx,fy,la)
+        LFS = HermiteGaussianLFmode(math.sqrt(power),0,0,abs(wx), abs(wy),fx,fy,la)
+        LFS.setLocalParameters(abs(rx), abs(ry),ax,ay)
+        
         LFS.setLaserFieldOrientation(0.,0.,0.,   -1.,0.,kz,   1.,0.,1./kz,  0.,1.,0.)
-        tracker = RungeKuttaTracker(0.000000001)
-        First = SchrodingerEquation(LFS,Stark,cut_par)
-        tracker.track(bunch_target,0,time_step*n_step, time_step,fS,First)
+        tracker = RungeKuttaTracker(0)
+        eff = SchrodingerEquation(LFS,St,cut_par)
+        
+        cont_eff = ExtEffectsContainer()
+#        cont_eff.AddEffect(pr)
+        cont_eff.AddEffect(eff)
+        
+        
+        tracker.track(bunch_target,0,time_step*n_step, time_step,fS,cont_eff)
 #        bunch_target.dumpBunch("bunch_res"+str(1)+".dat")
+
+#        print 1 - bunch_target.partAttrValue("Populations",0,0) - bunch_target.partAttrValue("Populations",0,1)
+#        print bunch_target.px(0),orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
         population = 0.
         population2 = 0.    
         for i in range(N_part):
-            val = bunch_target.partAttrValue("Populations",i,0) - bunch_target.partAttrValue("Populations",i,1)
+            val = 1 - bunch_target.partAttrValue("Populations",i,0) - bunch_target.partAttrValue("Populations",i,1)
             population += val
             population2 += val*val
         op = mpi_op.MPI_SUM
@@ -123,34 +143,4 @@ class SchredingerFunc:
             sigma_pop = math.sqrt((population2 - N_part*mpi_size*population*population)/(N_part*mpi_size*(N_part*mpi_size - 1)))
 
         return population, sigma_pop
-  
-  
-    def SetGroundStateBeam_ref(self,bunch_in):
-        
-        self.bunch = bunch_in
-        bunch = self.bunch
-        levels = self.levels
-        
-        if (bunch.hasPartAttr("Amplitudes") == 0): bunch.addPartAttr("Amplitudes",{"size":2*levels+8})
-        if (bunch.hasPartAttr("Populations") == 0): bunch.addPartAttr("Populations",{"size":levels+1})
-         
-        for i in range(bunch.getSize()):
-            bunch.partAttrValue("Amplitudes",i,1,1.0)
-            
-    def SetGroundStateBeam_copy(self,bunch_in):
-        
-        bunch_in.copyBunchTo(self.bunch)
-        bunch = self.bunch
-        levels = self.levels
-        
-        if (bunch.hasPartAttr("Amplitudes") == 0): bunch.addPartAttr("Amplitudes",{"size":2*levels+8})
-        if (bunch.hasPartAttr("Populations") == 0): bunch.addPartAttr("Populations",{"size":levels+1})
-         
-        for i in range(bunch.getSize()):
-            bunch.partAttrValue("Amplitudes",i,1,1.0)    
-    
-
-
-
-        
 

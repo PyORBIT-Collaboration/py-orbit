@@ -52,6 +52,7 @@ class Simplex:
         kE            expansion constant   (gamma = 2.0)
         kC            contraction constant (beta  = 0.5)
         """
+        
         self.testfunc = testfunc
         self.guess = guess
         self.increments = increments
@@ -67,7 +68,7 @@ class Simplex:
 
         self.errors = []
         self.currenterror = 0
-
+        
         # Initialize vertices
         # MV: the first vertex is just the initial guess
         #     the other N vertices are the initial guess plus the individual increments
@@ -76,13 +77,14 @@ class Simplex:
         
         for vertex in range(0, self.numvars + 3):
             self.simplex.append(copy.copy(self.guess))
-
+          
         for vertex in range(0, self.numvars + 1):
             for x in range(0, self.numvars):
                 if x == (vertex - 1):
                     self.simplex[vertex][x] = self.guess[x] + self.increments[x]
             self.errors.append(0)
         self.calculate_errors_at_vertices()
+        
 
     def minimize(self, epsilon = 0.0001, maxiters = 250, monitor = 1):
         """Walks to the simplex down to a local minima.
@@ -262,7 +264,7 @@ class Simplex:
 
 
     def calculate_errors_at_vertices(self):
-        for vertex in range(0, self.numvars + 1):
+        for vertex in range(0, self.numvars + 1):          
             if vertex == self.lowest:
                 # compute the error unless we're the lowest vertex
                 continue

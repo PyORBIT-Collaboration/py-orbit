@@ -40,13 +40,15 @@ def PlotPopl(ratio,pop,p_size,data,pic):
   
     n_row = 2
 
+    for j in range(len(pop)):
+        g(' set label "     %s" at %s,%f center font "Vera,30"  '%(pop[j],str(xav),0.8-0.1*j))
+
     for ny, nx  in [(ny,nx)
                             for ny in range(ratio[1]-1,-1,-1)
                             for nx in range(ratio[0])]:
                                 
-        if (n_row == n_row_max):    
-            for j in range(len(pop)):
-                g(' set label "     %s" at %s,%f center font "Vera,30"  '%(pop[j],str(xav),0.8-0.1*j))
+        if (n_row == 3):        g(' unset label ' )
+
         g('set title "000"')
         g('set origin %f,%f'%(nx,ny))
         g('plot "%s" using 1:%f title ""   '%(data,n_row))

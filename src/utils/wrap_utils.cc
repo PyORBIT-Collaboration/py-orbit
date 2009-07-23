@@ -4,6 +4,7 @@
 #include "wrap_matrix.hh"
 #include "wrap_phase_vector.hh"
 #include "wrap_py_base_field_source.hh"
+#include "wrap_field_source_container.hh"
 
 namespace wrap_orbit_utils{
 
@@ -22,6 +23,7 @@ extern "C" {
 		wrap_utils_martix::initMatrix(module);
 		wrap_utils_phase_vector::initPhaseVector(module);
 		wrap_utils_py_base_field_source::initPyBaseFieldSource(module);
+		wrap_field_source_container::initFieldSourceContainer(module);
   }
 
 	PyObject* getOrbitUtilsType(char* name){

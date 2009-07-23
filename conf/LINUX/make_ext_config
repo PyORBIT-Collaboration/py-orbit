@@ -3,5 +3,5 @@
 ######################################################################
 
 CXX             =  mpiCC
-CXXFLAGS        = -g -fPIC
-LINKFLAGS       = -fPIC -shared -Wl,--export-dynamic
+CXXFLAGS       += -g -fPIC -DUSE_MPI=1
+LINKFLAGS      += -fPIC -shared -Wl,--export-dynamic

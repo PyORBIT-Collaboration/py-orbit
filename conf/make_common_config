@@ -1,0 +1,26 @@
+#-------------------------------------------------------------------------------
+# PYTHON_ROOT_LIB - specify the name of the python library including full path.
+#   It is usually
+#   /usr/lib/python$(PYTHON_VERSION)/config/libpython$(PYTHON_VERSION).a
+#-------------------------------------------------------------------------------
+
+LIBS += $(PYTHON_ROOT_LIB)
+LIBS += -ldl -lreadline -ltermcap -lpthread -lutil -lm -Xlinker -export-dynamic
+
+#FFTW library
+LIBS +=  -L${FFTW3_ROOT}/lib -lfftw3
+
+#-------------------------------------------------------------------------------
+# include file locations
+#-------------------------------------------------------------------------------
+
+#Headers for FFTW library
+INCLUDES += -I${FFTW3_ROOT}/include
+
+#-------------------------------------------------------------------------------
+# PYTHON_ROOT_INC - specify the location of the python header files.
+#   It is usually
+#   /usr/include/python$(PYTHON_VERSION)
+#-------------------------------------------------------------------------------
+
+INCLUDES += -I$(PYTHON_ROOT_INC)

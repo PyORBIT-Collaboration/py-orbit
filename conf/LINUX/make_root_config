@@ -2,6 +2,6 @@
 # Linux g++ for creation of ORBIT interpreter executable
 ######################################################################
 
-CXX             =  mpiCC -DUSE_MPI=1
-CXXFLAGS        = -g -O3
-LINKFLAGS       =
+CXX             =  mpiCC
+CXXFLAGS       += -g -O3 -DUSE_MPI=1
+LINKFLAGS      +=

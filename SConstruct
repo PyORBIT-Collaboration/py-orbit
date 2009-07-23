@@ -4,11 +4,15 @@ from distutils import sysconfig
 path = os.environ["PATH"]
 
 mpi_cpp = os.environ["MPI_CPP"]
-
+	
 cpp_flags = ""
-if os.environ.has_key("CCFLAGS"):
-	cpp_flags = os.environ["CCFLAGS"]
-
+if os.environ.has_key("CXXFLAGS"):
+	cpp_flags = os.environ["CXXFLAGS"]
+	
+cpp_link_flags =""
+if os.environ.has_key("LINKFLAGS"):
+	 cpp_link_flags = os.environ["LINKFLAGS"]
+	
 cpp_flags = cpp_flags + " -fPIC " 
 cpp_flags = cpp_flags + " -DUSE_MPI=1 -DMPICH_IGNORE_CXX_SEEK " 
 
@@ -79,7 +83,10 @@ pyOrbit_incl_dirs = orbit_incl_dirs + [py_include_dir,]
 py_libs = py_libs + py_shared_libs
 py_libs = py_libs + ["libfftw3",]
 
-pyOrbitEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, LINKFLAGS =cpp_shared_lib_flags,  CPPPATH = pyOrbit_incl_dirs,  ENV = {'PATH':path})
+
+pyOrbitEnv = Environment(CXX = mpi_cpp, CCFLAGS = cpp_flags, \
+						 LINKFLAGS =cpp_shared_lib_flags + cpp_link_flags,\
+						 CPPPATH = pyOrbit_incl_dirs,  ENV = {'PATH':path})
 
 cpp_files_list = makeVariantDirs(pyOrbitEnv,m_path,[".svn","tests","obj"])
 
@@ -108,7 +115,7 @@ laserstripping_lib = laserStrippingFieldEnv.SharedLibrary('./lib/laserstripping'
 	                          cpp_files_list, 
 														#LIBS = py_libs,
                             #LIBPATH = py_lib_path, 
-                            LINKFLAGS = cpp_shared_lib_flags,
+                            LINKFLAGS = cpp_shared_lib_flags + cpp_link_flags,
 														SHLIBPREFIX = "")
 Default(laserstripping_lib)
 

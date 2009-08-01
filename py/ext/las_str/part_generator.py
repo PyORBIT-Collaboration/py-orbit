@@ -115,6 +115,8 @@ class BunchGen:
         cutOffY = self.cutOffY
         mass = self.mass
         charge = self.charge
+        sigma_beam = self.sigma_beam
+        cutOffZ = self.cutOffZ
         
         
         E = mass + TK
@@ -143,8 +145,13 @@ class BunchGen:
         
         for i in range(N_part):
             (x,px,y,py,z,pz) = partGen.getCoords()
-            bunch.addParticle(x,px,y,py,0.,pz)
-            #bunch.addParticle(0.,0.,0.,0.,0., pGen.getP0())
+            
+            res = 0
+            while(res == 0):
+                z = random.gauss(0,sigma_beam)
+                if( abs(z) <  cutOffZ):
+                    res = 1
+            bunch.addParticle(x,px,y,py,z,pz)
 
         return bunch
 

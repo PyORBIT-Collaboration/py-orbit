@@ -36,6 +36,8 @@ class SchredingerFunc:
         self.ry = []
         self.ax = []
         self.ay = []
+        self.sigma_beam = 0
+        self.env_simga = 0
         self.power = []
         self.data_addr_name = []
         
@@ -63,6 +65,7 @@ class SchredingerFunc:
         bunch_target = self.bunch_target
         mpi_size = orbit_mpi.MPI_Comm_size(mpi_comm.MPI_COMM_WORLD)
 
+
         bunch = self.bunch
         N_part = bunch.getSize()
         TK = self.TK
@@ -72,6 +75,8 @@ class SchredingerFunc:
         levels = self.levels
         delta_E = self.delta_E
         cut_par = self.cut_par
+        sigma_beam = self.sigma_beam
+        env_sigma = self.env_sigma
         St = self.St
         fS = self.fS
         la = self.la
@@ -99,18 +104,18 @@ class SchredingerFunc:
         la0 = 2*math.pi*5.291772108e-11/7.297352570e-3/delta_E
         kz = -1/math.sqrt(math.pow(P/(bunch.mass()*(la/la0-1)-TK),2)-1.)
     
-        z0 = n_sigma*wx*math.sqrt(1+math.pow(fx*la/(wx*wx*math.pi),2))*math.sqrt(1+kz*kz)
-        z0 = n_sigma*rx*math.sqrt(1+kz*kz)
+#        z0 = n_sigma*wx*math.sqrt(1+math.pow(fx*la/(wx*wx*math.pi),2))*math.sqrt(1+kz*kz)
+#        z0 = n_sigma*rx*math.sqrt(1+kz*kz)
+        zb = -5*sigma_beam
+        zl = zb*E/P      
+        time_step = (2*abs(zb)/vz)/n_step
 
-        time_step = (2*z0/vz)/n_step
-        #       alpha=360*math.acos((b.mass()*(la/la0-1)-TK)/P)/2/math.pi
-        #       print alpha      
+
         for i in range(N_part):
             z = bunch_target.z(i)
-            x = bunch_target.x(i)
-            bunch_target.z(i,-z0 - kz*x)   
+            bunch_target.z(i,z + zb)   
         #bunch_target.dumpBunch("bunch_ini"+str(count)+".dat")
-        LFS = HermiteGaussianLFmode(math.sqrt(power),0,0,abs(wx), abs(wy),fx,fy,la)
+        LFS = HermiteGaussianLFmode(math.sqrt(power),0,0,abs(wx), abs(wy),fx,fy,la,zl,env_sigma)
         LFS.setLocalParameters(abs(rx), abs(ry),ax,ay)
         
         LFS.setLaserFieldOrientation(0.,0.,0.,   -1.,0.,kz,   1.,0.,1./kz,  0.,1.,0.)
@@ -121,12 +126,8 @@ class SchredingerFunc:
 #        cont_eff.AddEffect(pr)
         cont_eff.AddEffect(eff)
         
-        
         tracker.track(bunch_target,0,time_step*n_step, time_step,fS,cont_eff)
-#        bunch_target.dumpBunch("bunch_res"+str(1)+".dat")
 
-#        print 1 - bunch_target.partAttrValue("Populations",0,0) - bunch_target.partAttrValue("Populations",0,1)
-#        print bunch_target.px(0),orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
         population = 0.
         population2 = 0.    
         for i in range(N_part):

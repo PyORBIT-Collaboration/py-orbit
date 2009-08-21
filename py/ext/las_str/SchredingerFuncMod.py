@@ -103,10 +103,12 @@ class SchredingerFunc:
         
         la0 = 2*math.pi*5.291772108e-11/7.297352570e-3/delta_E
         kz = -1/math.sqrt(math.pow(P/(bunch.mass()*(la/la0-1)-TK),2)-1.)
+        print kz
     
 #        z0 = n_sigma*wx*math.sqrt(1+math.pow(fx*la/(wx*wx*math.pi),2))*math.sqrt(1+kz*kz)
 #        z0 = n_sigma*rx*math.sqrt(1+kz*kz)
         zb = -5*sigma_beam
+        zb = -0.015
         zl = zb*E/P      
         time_step = (2*abs(zb)/vz)/n_step
 
@@ -118,12 +120,13 @@ class SchredingerFunc:
         LFS = HermiteGaussianLFmode(math.sqrt(power),0,0,abs(wx), abs(wy),fx,fy,la,zl,env_sigma)
         LFS.setLocalParameters(abs(rx), abs(ry),ax,ay)
         
-        LFS.setLaserFieldOrientation(0.,0.,0.,   -1.,0.,kz,   1.,0.,1./kz,  0.,1.,0.)
+        LFS.setLaserFieldOrientation(0.,0.,0.,   -1.,0.,kz,   1.,0.,1./kz,  kz, 0.,1.)
         tracker = RungeKuttaTracker(0)
         eff = SchrodingerEquation(LFS,St,cut_par)
+        pr = PrintExtEffects("Populations",10000,os.environ["ORBIT_ROOT"]+"/ext/laserstripping/working_dir/"+"/data")
         
         cont_eff = ExtEffectsContainer()
-#        cont_eff.AddEffect(pr)
+        cont_eff.AddEffect(pr)
         cont_eff.AddEffect(eff)
         
         tracker.track(bunch_target,0,time_step*n_step, time_step,fS,cont_eff)

@@ -546,6 +546,8 @@ class MAD_Parser:
 		#old style lattice elements and lines
 		self.__lattElems = []
 		self.__lattLines = []
+		#the lines to ignore will start with these words
+		self.__ingnoreWords = ["title","beam"]
 
 	def __del__(self):
 		del self.__madLines
@@ -726,7 +728,7 @@ class MAD_Parser:
 				str_local = ""
 				continue
 			#STOP parsing a MAD file if there is a start of mad commands
-			if(re.findall("(Use)",str)):
+			if(str.strip().lower().find("use") == 0):
 				break
 			str_local = "".join([str_local,str.strip()])
 			#this part deal with a comment "!" at the end of line
@@ -808,6 +810,9 @@ class MAD_Parser:
 		# 3 - MAD line definition
 		# 4 - call another nested MAD file
 		stype = 0
+		for word in self.__ingnoreWords:
+			if(line.lower().find(word) == 0):
+				return stype
 		t_match = re.search(r'.*:=.*',line)
 		if t_match:
 			stype = 1

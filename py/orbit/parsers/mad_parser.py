@@ -218,11 +218,11 @@ class _madLine:
 		"""
 		return self.__line
 
-	def setType(self, type):
+	def setType(self, ltype):
 		"""
 		Method. Sets a MAD file line type.
 		"""
-		self.__type = type
+		self.__type = ltype
 
 	def getType(self):
 		"""
@@ -329,8 +329,8 @@ class _element:
 	def getName(self):
 		return self._name
 
-	def setElementType(self, type):
-		self._elementType = type
+	def setElementType(self, etype):
+		self._elementType = etype
 
 	def getElementType(self):
 		return self._elementType
@@ -555,8 +555,8 @@ class MAD_Parser:
 		#1-st stage read MAD file into the lines array
 		self.__madFilePath = os.path.dirname(MADfileName)
 		fileName = os.path.basename(MADfileName)
-		#the initilize can be recursive if there are nested MAD files
-		self.initilize(fileName)
+		#the initialize can be recursive if there are nested MAD files
+		self.initialize(fileName)
 		#-----------------------------------------------------------
 		#The madLines has all lines
 		#Let's create values, elements, and accelerator lines arrays
@@ -717,7 +717,7 @@ class MAD_Parser:
 				else:
 					lattLine.addItem(lattLineDict[child])
 
-	def initilize(self,mad_file_name):
+	def initialize(self,mad_file_name):
 		fl = open(os.path.join(self.__madFilePath, mad_file_name))
 		str_local = ""
 		for str in fl.readlines():
@@ -763,7 +763,7 @@ class MAD_Parser:
 		fl.close()
 
 	def _init_string(self,str0):
-		""" The method initilizes the one string """
+		""" The method initializes the one string """
 		#Now here 5 types of string
 		# 0 - unknown type of the line
 		# 1 - variables calculations
@@ -797,7 +797,7 @@ class MAD_Parser:
 		if tp == 4:
 			#print "StrType =4 :",str0
 			fl = self._parseNestedFileLine(str0)
-			self.initilize(fl)
+			self.initialize(fl)
 
 	def _findLineType(self,line):
 		""" Return type of the string """
@@ -807,27 +807,27 @@ class MAD_Parser:
 		# 2 - element definition
 		# 3 - MAD line definition
 		# 4 - call another nested MAD file
-		type = 0
+		stype = 0
 		t_match = re.search(r'.*:=.*',line)
 		if t_match:
-			type = 1
+			stype = 1
 		t_match = re.search(r'.*=.*',line)
-		if type != 1:
+		if stype != 1:
 			t_match = re.search(r'[\w]* *:.*',line)
 			if t_match:
-				type = 2
+				stype = 2
 		t_match = re.search(r'.*:.*line.*=',line.lower())
 		if t_match:
-			type = 3
+			stype = 3
 		t_match = re.search(r' *call *file *=',line.lower())
 		if t_match:
-			type = 4
+			stype = 4
 		#deal with constant defenition like AAA = 1.0
-		if(type == 0):
+		if(stype == 0):
 			t_match = re.search(r'.*=.*',line)
 			if t_match:
-				type = 1
-		return type
+				stype = 1
+		return stype
 
 	def _parseNestedFileLine(self, line):
 		""" Returns the name of the nested file"""

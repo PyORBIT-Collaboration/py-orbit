@@ -21,7 +21,7 @@
 #include "WaveFunctionAmplitudes.hh"
 #include "AtomPopulations.hh"
 #include "pq_coordinates.hh"
-#include "prf_time.hh"
+#include "part_time.hh"
 #include "Evolution.hh"
 
 ParticleAttributesFactory::ParticleAttributesFactory()
@@ -121,7 +121,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 		}
   }
   
-  if(name == "prf_time"){
+  if(name == "part_time"){
 		if(params_dict.size() == 0){
 			cout<<"dictionary prf_time(dict) should be defined "<<"\n";
 		} else {
@@ -187,7 +187,7 @@ void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& 
   names.push_back("Amplitudes");
   names.push_back("Populations");
   names.push_back("pq_coords");
-  names.push_back("prf_time");
+  names.push_back("part_time");
   names.push_back("Evolution");
 }
 

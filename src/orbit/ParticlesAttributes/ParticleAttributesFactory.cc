@@ -126,7 +126,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			cout<<"dictionary prf_time(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
-				part_atrs = new prf_time(bunch, (int) params_dict["size"]);
+				part_atrs = new part_time(bunch, (int)params_dict["size"]);
 			} else {
 				if(rank_MPI == 0){
 					std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(name,dict)"<< std::endl;

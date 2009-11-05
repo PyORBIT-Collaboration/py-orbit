@@ -11,8 +11,9 @@
 
 
 using namespace TrackerRK4;
+using namespace OrbitUtils;
 
-namespace LaserStripping{
+
 	
 	class  ExtEffectsContainer: public ExternalEffects
 	{
@@ -40,7 +41,7 @@ namespace LaserStripping{
 		void applyEffects(Bunch* bunch, int index,
 			double* y_in_vct, double* y_out_vct,
 			double t, double t_step,
-			OrbitUtils::BaseFieldSource* fieldSource,
+			BaseFieldSource* fieldSource,
 			RungeKuttaTracker* tracker);
 		
 		private:
@@ -52,7 +53,9 @@ namespace LaserStripping{
 			vector<ExternalEffects*>	ref_finalize;
 
 	};
-};
+	
+
+
 
 
 

@@ -29,8 +29,8 @@
 
 #include "ExtEffectsContainer.hh"
 
-using namespace LaserStripping;
-using namespace OrbitUtils;
+
+
 
 ExtEffectsContainer::ExtEffectsContainer(){
 }

@@ -5,7 +5,6 @@
 #include <iostream>
 #include <ctime>
 
-
 /** A C wrapper around MPI_Init. */
 int ORBIT_MPI_Init(int *len, char ***ch){
   int res = 0;

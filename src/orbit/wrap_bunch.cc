@@ -788,7 +788,7 @@ namespace wrap_orbit_bunch{
 				error("PyBunch - addPartAttr(name, [param_dict]) - param_dict is not a dictionary");
 			}
 			PyObject *key, *value;
-			int pos = 0;
+			Py_ssize_t pos = 0;
 			while (PyDict_Next(py_attrParamsDict, &pos, &key, &value)) {
 				if(!PyString_Check(key) || !PyNumber_Check(value)){
 					error("PyBunch - addPartAttr(name, [param_dict]) - param_dict is not a {str:val} dictionary");

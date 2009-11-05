@@ -58,7 +58,6 @@ public:
   ~part_time();
   
 	
-  int getAttSize();
 	
 private:
 	int size;

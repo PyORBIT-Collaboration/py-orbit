@@ -67,27 +67,27 @@ namespace wrap_orbit_mpi{
 		//------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Comm manipulations
 		//------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_comm_functions.chh"	
+		#include 	"wrap_orbit_mpi_comm_functions.hh"	
 		
 		//------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Group manipulations
 		//------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_group_functions.chh"	
+		#include 	"wrap_orbit_mpi_group_functions.hh"	
 
 		//----------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Intercomm manipulations
 		//----------------------------------------------------------------------
-		#include 	"wrap_orbit_mpi_intercomm_functions.chh"	
+		#include 	"wrap_orbit_mpi_intercomm_functions.hh"	
 	
 		//-------------------------------------------------------------------
 		// Wrappers for MPI functions related to the MPI_Graph manipulations
 		//-------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_graph_functions.chh"			
+		#include 	"wrap_orbit_mpi_graph_functions.hh"			
 		
 		//------------------------------------------------------------------
 		// Wrappers for MPI functions related to the Send-Receive operations
 		//------------------------------------------------------------------		
-		#include 	"wrap_orbit_mpi_send_receive_functions.chh"	
+		#include 	"wrap_orbit_mpi_send_receive_functions.hh"	
 		
 		//Finalizes the execution of program
 		//  the action is depended on the number of arguments

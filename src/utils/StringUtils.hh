@@ -13,10 +13,15 @@ using namespace std;
 //int nTokens = StringUtils::Tokenize("....",vector<string>& tokens);
 //=======================================
 
+/** The string utilits collection. */
 
 namespace OrbitUtils{
 	namespace StringUtils
 	{
+		/** 
+		  The Tokenizer. It returns the vector with tokens. 
+		  The delimiter is optional, and by default it is a space. 
+		*/
 		int Tokenize(const string& str,vector<string>& tokens,  const string& delimiters = " ");
 	};
 };

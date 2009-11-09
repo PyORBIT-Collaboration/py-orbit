@@ -17,6 +17,8 @@
 #include "orbit_mpi.hh"
 #include "MathPolynomial.hh"
 
+using namespace OrbitUtils;
+
 int MathPolynomial::fact_n_max = 30;
 int* MathPolynomial::fact_arr = MathPolynomial::getFactorialArr();
 

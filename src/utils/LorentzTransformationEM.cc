@@ -25,6 +25,8 @@
 #include "OrbitConst.hh"
 #include <cmath>
 
+using namespace OrbitUtils;
+
 void 	LorentzTransformationEM::transform(double mass, 
 	                                      double px, double py, double pz,
 	                                      double& E_x, double& E_y, double& E_z,

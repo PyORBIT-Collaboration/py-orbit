@@ -24,24 +24,45 @@
 ///////////////////////////////////////////////////////////////////////////
 #include "tcomplex.hh"
 
-class  LorentzTransformationEM
-{
-public:
-  static  void 	transform(double mass,
-		                      double px, double py, double pz,
-													double& E_x, double& E_y, double& E_z,
-													double& B_x, double& B_y, double& B_z);
-  
-  static  void 	complex_transform(double mass,
-  		                      double px, double py, double pz,
-  		                    tcomplex& E_x, tcomplex& E_y, tcomplex& E_z,
-  		                    tcomplex& B_x, tcomplex& B_y, tcomplex& B_z);
-  
-  static  void 	complex_electric_transform(double mass,
-  		                      double px, double py, double pz,
-  		                    tcomplex& E_x, tcomplex& E_y, tcomplex& E_z,
-  		                    tcomplex B_x, tcomplex B_y, tcomplex B_z);
-  
+namespace OrbitUtils{
+
+/**  
+   This class provides Lorentz transformations for the electromagnetic field
+   from the laboratory frame to the particle rest frame.
+   mass - mass of the particle in GeV.
+   px,py,pz - momentum of the particle the lab frame in GeV/c.
+   E_x,E_y,E_z - components of the electric field V/m (parameters are replaced in place).
+   B_x,B_y,B_z - components of the magnetic field [T] (parameters are replaced in place). 
+*/
+
+
+  class  LorentzTransformationEM
+	{
+	public:
+		
+		/** Transforms E and B as real numbers. */
+		static  void 	transform(double mass,
+			double px, double py, double pz,
+			double& E_x, double& E_y, double& E_z,
+			double& B_x, double& B_y, double& B_z);
+		
+		/** Transforms E and B as complex numbers. */
+		static  void 	complex_transform(double mass,
+			double px, double py, double pz,
+			tcomplex& E_x, tcomplex& E_y, tcomplex& E_z,
+			tcomplex& B_x, tcomplex& B_y, tcomplex& B_z);
+		
+			/** 
+			Transforms E as complex numbers. The B value does not change. 
+			It is used to speed up calculation for a particular case.
+			*/
+			static  void 	complex_electric_transform(double mass,
+				double px, double py, double pz,
+				tcomplex& E_x, tcomplex& E_y, tcomplex& E_z,
+				tcomplex B_x, tcomplex B_y, tcomplex B_z);
+			
+	};
+
 };
 
 #endif /*LORENTZ_TRANSFORMATION_EM_*/

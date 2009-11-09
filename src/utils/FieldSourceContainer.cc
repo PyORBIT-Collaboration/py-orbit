@@ -1,24 +1,16 @@
 //////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
-//    CppExternalEffects.cc
+//    FieldSourceContainer.cc
 //
 // CREATED
 //    06/27/2008
 //
+// AUTHOR
+//    T. Gorlov
+//
 // DESCRIPTION
-//    The base class for C++ implementation of a external effects
-//    during the transport of particles through the external field.
-//    It should be sub-classed on Python level and implement
-//    setupEffects(Bunch* bunch)
-//    finalizeEffects(Bunch* bunch)
-//    applyEffects(Bunch* bunch, int index,
-//	                            double* y_in_vct, double* y_out_vct,
-//														  double t, double t_step,
-//														  OrbitUtils::BaseFieldSource* fieldSource)
-//    methods.
-//    The results of these methods will be available from the c++ level.
-//    This is an example of embedding Python in C++ Orbit level.
+//    The container for instances of the BaseFieldSource class.
 //
 ///////////////////////////////////////////////////////////////////////////
 #include "orbit_mpi.hh"

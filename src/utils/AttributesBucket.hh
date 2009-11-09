@@ -10,40 +10,24 @@
 //    12/14/2005
 //
 // DESCRIPTION
-//    A class for collection of attributes' . This is a class where user keeps
-//    different data in the form key-value.
-//
-//
+//    A class for collection of int and double attributes in the dictionary. 
 ///////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #ifndef ATTRIBUTES_BUCKET_H
 #define ATTRIBUTES_BUCKET_H
 
-///////////////////////////////////////////////////////////////////////////
-//
-// INCLUDE FILES
-//
-///////////////////////////////////////////////////////////////////////////
 #include <string>
 #include <map>
 #include <vector>
 
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
+namespace OrbitUtils{ 
+	
+/** 
+  A class is a collection of int and double key(string)-value pairs. 
+  Users have to keep in mind that operations with dictionaries are slow. 
+*/
 
-///////////////////////////////////////////////////////////////////////////
-//
-// CLASS NAME
-//    AttributesBucket
-//
-///////////////////////////////////////////////////////////////////////////
-namespace OrbitUtils{
+
 	class AttributesBucket
 	{
 		//--------------------------------------
@@ -51,26 +35,40 @@ namespace OrbitUtils{
 		//--------------------------------------
 	public:
 		
+		/** Constructor for an empty dictinary. */
 		AttributesBucket();
+		
+		/** Destructor. */
 		~AttributesBucket();
 		
+		/** Returns the int value from the dictionary for the key string. */
 		int intVal(const std::string attName);
+		
+		/** Returns the double value from the dictionary for the key string. */
 		double doubleVal(const std::string attName);
 		
+		/** Sets the int value to the dictionary for the key string. */
 		int intVal(const std::string attName, int val);
+		
+		/** Sets the double value to the dictionary for the key string. */
 		double doubleVal(const std::string attName, double val);
 		
-		//returns 0 if there is no attribute associated with this name
+		/** Returns 0 if there is no attribute associated with this name */
 		int hasIntAttribute(const std::string attName);
+		
+		/** Returns 0 if there is no attribute associated with this name */
 		int hasDoubleAttribute(const std::string attName);
 		
+		/** Returns a vector with integer attributes keys. */
 		void getIntAttributeNames(std::vector<std::string>& names);
+		
+		/** Returns a vector with doule attributes keys. */
 		void getDoubleAttributeNames(std::vector<std::string>& names);
 		
-		//add all atributes from one bucket to another
-		void add(AttributesBucket* bckt);
+		/** Adds all atributes from one bucket to another. */
+		void addTo(AttributesBucket* bckt);
 		
-		//removes all values
+		/** Removes all values from the dictionary. */
 		void clear();
 		
 		//-----------------------------------
@@ -83,12 +81,7 @@ namespace OrbitUtils{
 		std::map<std::string,double> doubleAttrMap;
 		
 	};
-	
+
 };
-///////////////////////////////////////////////////////////////////////////
-//
-// END OF FILE
-//
-///////////////////////////////////////////////////////////////////////////
 
 #endif

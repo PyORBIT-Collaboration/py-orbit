@@ -1,8 +1,22 @@
+//////////////////////////////// -*- C++ -*- //////////////////////////////
+//
+// FILE NAME
+//    FieldSourceContainer.hh
+//
+// CREATED
+//    06/27/2008
+//
+// AUTHOR
+//    T. Gorlov
+//
+// DESCRIPTION
+//    The container for instances of the BaseFieldSource class.
+//    It implements a composite pattern.
+//
+///////////////////////////////////////////////////////////////////////////
+
 #ifndef FIELDSOURCECONTAINER_HH_
 #define FIELDSOURCECONTAINER_HH_
-
-
-
 
 #include "Python.h"
 
@@ -10,6 +24,11 @@
 #include <vector>
 
 namespace OrbitUtils{
+	
+	/** 
+	  The container for instances of the BaseFieldSource class.
+		It implements a composite pattern.
+	*/
 	
 	class  FieldSourceContainer: public BaseFieldSource
 	{

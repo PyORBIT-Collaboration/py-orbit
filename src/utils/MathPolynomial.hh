@@ -21,11 +21,17 @@
 #include <cmath>
 #include "tcomplex.hh"
 
+namespace OrbitUtils{
 
-class  MathPolynomial
-{
+/**    
+  This class is a collection of the static methods to calculate 
+  different polynomials.
+*/
+
+  class  MathPolynomial
+	{
 	public:
-	
+		
 		/** The method calculates the Hermite polynomial of order n and value x. */
 		static  double 	ReHermite(int n, double x);
 		
@@ -34,7 +40,7 @@ class  MathPolynomial
 		
 		/** The method calculates the factorial of n = n! */
 		static int Factorial(int n);
-  
+		
 	private:
 		
 		/** The method calculates the array with n! */
@@ -42,8 +48,9 @@ class  MathPolynomial
 		
 		static int fact_n_max;
 		static int* fact_arr;
-	
-};
+		
+	};
 
+};
 
 #endif /*MATHPOLYNOMIAL_HH_*/

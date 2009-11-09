@@ -19,22 +19,29 @@
 
 namespace OrbitUtils{
 	
+  /**    
+	  The base class that provides capability to keep the reference to 
+    the Python class instance that is wrapping the c++ subclassing
+    this class.	
+	*/
+	
 	class  CppPyWrapper
 	{
 		public:
 		
 			/** Constructor of the CppPyWrapper class with reference to Python class instance. */
 			CppPyWrapper(PyObject* py_wrapperIn);
+			
 			/** Constructor of the CppPyWrapper class with NULL reference to Python class. */
 			CppPyWrapper();
 			
 			/** Destrictor. It is empty. */
 			~CppPyWrapper();
 		
-			/** It sets the reference to Python class instance. */
+			/** Sets the reference to Python class instance. */
 			void setPyWrapper(PyObject* py_wrapperIn);
 			
-			/** It returns the reference to Python class instance. */
+			/** Returns the reference to Python class instance. */
 			PyObject* getPyWrapper();
 			
 			private:

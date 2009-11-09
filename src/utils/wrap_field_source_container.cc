@@ -25,80 +25,46 @@ extern "C" {
 
 	//constructor for python class wrapping CppFieldSource instance
 	//It never will be called directly
-	static PyObject* FieldSourceContainer_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
-	{
+	static PyObject* FieldSourceContainer_new(PyTypeObject *type, PyObject *args, PyObject *kwds){
 		pyORBIT_Object* self;
 		self = (pyORBIT_Object *) type->tp_alloc(type, 0);
 		self->cpp_obj = NULL;
 		return (PyObject *) self;
 	}
-
-
+	
   //this is implementation of the __init__ method
   static int FieldSourceContainer_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
-	  
 	  self->cpp_obj =  new  FieldSourceContainer();	  
 	  ((FieldSourceContainer*) self->cpp_obj)->setPyWrapper((PyObject*) self);
-
     return 0;
   }
   
-		
-
   static PyObject* FieldSourceContainer_AddFieldSource(PyObject *self, PyObject *args){
-	  
 	  FieldSourceContainer* cpp_FieldSourceContainer = (FieldSourceContainer*)((pyORBIT_Object*) self)->cpp_obj;
-	 
 	  BaseFieldSource* fs;
 	  PyObject* pyfs;
-
-       
-
-           //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-           if(!PyArg_ParseTuple(	args,"O:",&pyfs))
-             error(" AddEffect(external effect) - parameter is needed");
-           else {
-           fs = (BaseFieldSource*) ((pyORBIT_Object*) pyfs)->cpp_obj;
-           cpp_FieldSourceContainer->AddFieldSource(fs);
-           }
-           
-  		    Py_INCREF(Py_None);
-  		    return Py_None;
-
+		if(!PyArg_ParseTuple(	args,"O:",&pyfs))
+			error(" AddEffect(external effect) - parameter is needed");
+		else {
+			fs = (BaseFieldSource*) ((pyORBIT_Object*) pyfs)->cpp_obj;
+			cpp_FieldSourceContainer->AddFieldSource(fs);
+		}
+		Py_INCREF(Py_None);
+		return Py_None;
   }
-  
-  
   
   static PyObject* FieldSourceContainer_getFields(PyObject *self, PyObject *args){
 	  FieldSourceContainer* cpp_fields = (FieldSourceContainer*)((pyORBIT_Object*) self)->cpp_obj;
-  				       
-  		
-       int nVars = PyTuple_Size(args);
-       
-       double x;
-       double y;
-       double z;
-       double t;
-       double Ex;
-       double Ey;
-       double Ez;
-       double Bx;
-       double By;
-       double Bz;
-       
-
-           //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-           if(!PyArg_ParseTuple(	args,"dddd:",&x,&y,&z,&t))
-             error(" getFields(x,y,z,t) - parameters are needed");
-           else
-           cpp_fields->getElectricMagneticField(x,y,z,t,Ex,Ey,Ez,Bx,By,Bz);
-           
-           return Py_BuildValue("dddddd",Ex,Ey,Ez,Bx,By,Bz);
+		
+		double x,y,z,t,Ex,Ey,Ez,Bx,By,Bz;
+		if(!PyArg_ParseTuple(	args,"dddd:",&x,&y,&z,&t))
+			error(" getFields(x,y,z,t) - parameters are needed");
+		else
+			cpp_fields->getElectricMagneticField(x,y,z,t,Ex,Ey,Ez,Bx,By,Bz);
+		
+		return Py_BuildValue("dddddd",Ex,Ey,Ez,Bx,By,Bz);
   }
   
-  
-  
-	
   //-----------------------------------------------------
   //destructor for python FieldSourceContainer class (__del__ method).
   //-----------------------------------------------------
@@ -107,21 +73,21 @@ extern "C" {
 		delete ((FieldSourceContainer*)self->cpp_obj);
 		self->ob_type->tp_free((PyObject*)self);
   }
-
+	
 	// defenition of the methods of the python FieldSourceContainer wrapper class
 	// they will be vailable from python level
   static PyMethodDef FieldSourceContainerClassMethods[] = {
-		{ "AddFieldSource",				 FieldSourceContainer_AddFieldSource,    	METH_VARARGS,"Adds external effect to container."},
-		{ "getFields",				 		FieldSourceContainer_getFields,    		METH_VARARGS,"Gets superposition of fields in container."},
+		{ "AddFieldSource",				 FieldSourceContainer_AddFieldSource,    	METH_VARARGS,"Adds the field source to the container."},
+		{ "getFields",				 		FieldSourceContainer_getFields,    		METH_VARARGS,"Gets superposition of fields in the container."},
     {NULL}
   };
-
+	
 	// defenition of the memebers of the python FieldSourceContainer wrapper class
 	// they will be vailable from python level
 	static PyMemberDef FieldSourceContainerClassMembers [] = {
 		{NULL}
 	};
-
+	
 	//new python FieldSourceContainer wrapper type definition
 	static PyTypeObject pyORBIT_FieldSourceContainer_Type = {
 		PyObject_HEAD_INIT(NULL)
@@ -164,9 +130,9 @@ extern "C" {
 		0, /* tp_alloc */
 		FieldSourceContainer_new, /* tp_new */
 	};	
-
-
-		
+	
+	
+	
 	//--------------------------------------------------
 	//Initialization function of the pyFieldSourceContainer class
 	//It will be called from Bunch wrapper initialization
@@ -175,7 +141,7 @@ extern "C" {
 		if (PyType_Ready(&pyORBIT_FieldSourceContainer_Type) < 0) return;
 		Py_INCREF(&pyORBIT_FieldSourceContainer_Type);
 		PyModule_AddObject(module, "FieldSourceContainer", (PyObject *)&pyORBIT_FieldSourceContainer_Type);
-				
+		
 	}
 
 #ifdef __cplusplus

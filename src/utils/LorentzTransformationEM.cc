@@ -43,7 +43,7 @@ void 	LorentzTransformationEM::transform(double mass,
 	double vz=_b*pz;
 	
 	double c2=(OrbitConst::c)*(OrbitConst::c);
-	double k=gamma*gamma/(c2*(1+gamma));
+	double k=gamma*gamma/(c2*(1.0+gamma));
 	
 
 	double EK=(E_x*vx + E_y*vy + E_z*vz)*k;
@@ -85,19 +85,19 @@ void 	LorentzTransformationEM::complex_transform(double mass, double px, double 
 	double vz=_b*pz;
 	
 	double c2=pow(OrbitConst::c,2);
-	double k=gamma*gamma/(c2*(1+gamma));
+	double k=gamma*gamma/(c2*(1.0+gamma));
 	
-
-tcomplex EK=(E_x*vx + E_y*vy + E_z*vz)*k;
-tcomplex BK=(B_x*vx + B_y*vy + B_z*vz)*k;
 	
-tcomplex BV1=E_x+B_z*vy-B_y*vz;
-tcomplex BV2=E_y+B_x*vz-B_z*vx;
-tcomplex BV3=E_z+B_y*vx-B_x*vy;
+	tcomplex EK=(E_x*vx + E_y*vy + E_z*vz)*k;
+	tcomplex BK=(B_x*vx + B_y*vy + B_z*vz)*k;
 	
-tcomplex EV1=B_x+(E_y*vz-E_z*vy)/c2;
-tcomplex EV2=B_y+(E_z*vx-E_x*vz)/c2;
-tcomplex EV3=B_z+(E_x*vy-E_y*vx)/c2;
+	tcomplex BV1=E_x+B_z*vy-B_y*vz;
+	tcomplex BV2=E_y+B_x*vz-B_z*vx;
+	tcomplex BV3=E_z+B_y*vx-B_x*vy;
+	
+	tcomplex EV1=B_x+(E_y*vz-E_z*vy)/c2;
+	tcomplex EV2=B_y+(E_z*vx-E_x*vz)/c2;
+	tcomplex EV3=B_z+(E_x*vy-E_y*vx)/c2;
 	
 	
 	// Electric field in the frame of particle	
@@ -130,21 +130,18 @@ void 	LorentzTransformationEM::complex_electric_transform(double mass, double px
 	double c2=pow(OrbitConst::c,2);
 	double k=gamma*gamma/(c2*(1+gamma));
 	
-
-tcomplex EK=(E_x*vx + E_y*vy + E_z*vz)*k;
 	
-tcomplex BV1=E_x+B_z*vy-B_y*vz;
-tcomplex BV2=E_y+B_x*vz-B_z*vx;
-tcomplex BV3=E_z+B_y*vx-B_x*vy;
+	tcomplex EK=(E_x*vx + E_y*vy + E_z*vz)*k;
 	
-		
+	tcomplex BV1=E_x+B_z*vy-B_y*vz;
+	tcomplex BV2=E_y+B_x*vz-B_z*vx;
+	tcomplex BV3=E_z+B_y*vx-B_x*vy;
+	
+	
 	// Electric field in the frame of particle	
 	E_x=gamma*BV1-vx*EK;
 	E_y=gamma*BV2-vy*EK;
 	E_z=gamma*BV3-vz*EK;
-	
-	
-
 }
 
 

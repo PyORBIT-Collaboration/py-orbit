@@ -45,26 +45,39 @@ void ExternalEffects::memorizeInitParams(Bunch* bunch){
 void ExternalEffects::finalizeEffects(Bunch* bunch){
 }
 
-/** It applies the external effects to a particle with certain index. 
+/** 
+    It applies the external effects to a particle with certain index. 
     y_in_vct and y_out_vct are double[6] vectors with initial and final
                            		[r,p] coordinates for particular time step.
 		t, t_step - initial moment and time step
 		fieldSource - electric and magnetic field source 
 		tracker - RungeKuttaTracker instance
 */
-void ExternalEffects::applyEffects(Bunch* bunch, int index, 
-	                                 double* y_in_vct, double* y_out_vct, 
+void ExternalEffects::applyEffectsForEach(
+	                                Bunch* bunch, int index, 
+	                                double* y_in_vct, double* y_out_vct, 
 																	 double t, double t_step, 
 																	 BaseFieldSource* fieldSource,
 																	 RungeKuttaTracker* tracker){
 }
 
+/** 
+    It applies the external effects to the bunch as a whole. 
+		t, t_step - initial moment and time step
+		fieldSource - electric and magnetic field source 
+		tracker - RungeKuttaTracker instance
+*/
+void ExternalEffects::applyEffects(Bunch* bunch, 
+																	  double t, double t_step, 
+																	  BaseFieldSource* fieldSource,
+																	  RungeKuttaTracker* tracker){
+}
+
+
 /** It returns the name of the effect to distinguish them later. */
 std::string ExternalEffects::getName(){
 	return name;
 }
-
-
 
 int ExternalEffects::getRankSetup()	{
 	return rank_setup;
@@ -81,9 +94,6 @@ int ExternalEffects::getRankApply()	{
 int ExternalEffects::getRankFinalize()	{
 	return rank_finalize;
 }
-
-
-
 
 void ExternalEffects::setRankSetup(int i)	{
 	rank_setup = i;

@@ -150,18 +150,24 @@ void ExtEffectsContainer::finalizeEffects(Bunch* bunch) {
 	}
 }
 
-void ExtEffectsContainer::applyEffects(Bunch* bunch, int index,
+void ExtEffectsContainer::applyEffects(Bunch* bunch, 
+                                       double t, double t_step,
+                                       BaseFieldSource* fieldSource,
+                                       RungeKuttaTracker* tracker) {
+	for (int i=0;i<ref_apply.size();i++){
+		ref_apply[i]->applyEffects(bunch, t, t_step, fieldSource, tracker);
+	}
+}
+
+void ExtEffectsContainer::applyEffectsForEach(Bunch* bunch, int index,
                                        double* y_in_vct, double* y_out_vct,
                                        double t, double t_step,
                                        BaseFieldSource* fieldSource,
                                        RungeKuttaTracker* tracker) {
 	for (int i=0;i<ref_apply.size();i++){
-		ref_apply[i]->applyEffects(bunch, index, y_in_vct, y_out_vct, t, t_step, fieldSource, tracker);
+		ref_apply[i]->applyEffectsForEach(bunch, index, y_in_vct, y_out_vct, t, t_step, fieldSource, tracker);
 	}
 }
-
-
-
 
 
 

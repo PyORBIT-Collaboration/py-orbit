@@ -67,7 +67,24 @@ void PyExternalEffects::finalizeEffects(Bunch* bunch){
 	Py_DECREF(res_tuple);	
 }
 
-void PyExternalEffects::applyEffects(Bunch* bunch, int index, 
+void PyExternalEffects::applyEffects(Bunch* bunch,
+														  double t, double t_step, 
+														  BaseFieldSource* fieldSource,
+															RungeKuttaTracker* tracker)
+{
+	PyObject* py_wrp = getPyWrapper();
+	PyObject* py_bunch = bunch->getPyWrapper();
+	PyObject* py_field = fieldSource->getPyWrapper();
+	PyObject* py_tracker = tracker->getPyWrapper();
+	PyObject* res_tuple = PyObject_CallMethod(py_wrp,"applyEffects","OddOO",
+		py_bunch,
+		t,t_step,
+		py_field,
+		py_tracker);
+	Py_DECREF(res_tuple);
+}
+
+void PyExternalEffects::applyEffectsForEach(Bunch* bunch, int index, 
 	                            double* y_in_vct, double* y_out_vct, 
 														  double t, double t_step, 
 														  BaseFieldSource* fieldSource,
@@ -81,7 +98,7 @@ void PyExternalEffects::applyEffects(Bunch* bunch, int index,
 		                                           y_in_vct[3],y_in_vct[4],y_in_vct[5]);
 	PyObject* pyOutVct = Py_BuildValue("(dddddd)",y_out_vct[0],y_out_vct[1],y_out_vct[2],
 		                                           y_out_vct[3],y_out_vct[4],y_out_vct[5]);
-	PyObject* res_tuple = PyObject_CallMethod(py_wrp,"applyEffects","OiOOddOO",
+	PyObject* res_tuple = PyObject_CallMethod(py_wrp,"applyEffectsForEach","OiOOddOO",
 		py_bunch,
 		index,
 		pyInVct,pyOutVct,

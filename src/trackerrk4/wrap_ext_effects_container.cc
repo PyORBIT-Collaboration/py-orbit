@@ -45,40 +45,29 @@ extern "C" {
     return 0;
   }
   
-		
-
   static PyObject* ExtEffectsContainer_AddEffect(PyObject *self, PyObject *args){
 	  
 	  ExtEffectsContainer* cpp_ExtEffectsContainer = (ExtEffectsContainer*)((pyORBIT_Object*) self)->cpp_obj;
-	 
+		
 	  ExternalEffects* extEf;
 	  PyObject* pyExtEffects;
-
-       
-
-           //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-           if(!PyArg_ParseTuple(	args,"O:",&pyExtEffects))
-             error(" AddEffect(external effect) - parameter is needed");
-           else {
-           extEf = (ExternalEffects*) ((pyORBIT_Object*) pyExtEffects)->cpp_obj;
-           cpp_ExtEffectsContainer->AddEffect(extEf);
-           }
-           
-  		    Py_INCREF(Py_None);
-  		    return Py_None;
-
+		
+		if(!PyArg_ParseTuple(	args,"O:",&pyExtEffects))
+			error(" AddEffect(ExternalEffects effect) - parameter is needed");
+		else {
+			extEf = (ExternalEffects*) ((pyORBIT_Object*) pyExtEffects)->cpp_obj;
+			cpp_ExtEffectsContainer->AddEffect(extEf);
+		}
+		
+		Py_INCREF(Py_None);
+		return Py_None;
+		
   }
   
-  
-  
-  
-  
-	
   //-----------------------------------------------------
   //destructor for python ExtEffectsContainer class (__del__ method).
   //-----------------------------------------------------
   static void ExtEffectsContainer_del(pyORBIT_Object* self){
-		//std::cerr<<"The LasStripExternalEffects __del__ has been called!"<<std::endl;
 		delete ((ExtEffectsContainer*)self->cpp_obj);
 		self->ob_type->tp_free((PyObject*)self);
   }
@@ -87,7 +76,6 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef ExtEffectsContainerClassMethods[] = {
 		{ "AddEffect",				 ExtEffectsContainer_AddEffect,    	METH_VARARGS,"Adds external effect to container."},
-
     {NULL}
   };
 
@@ -149,8 +137,7 @@ extern "C" {
   void initExtEffectsContainer(PyObject* module){
 		if (PyType_Ready(&pyORBIT_ExtEffectsContainer_Type) < 0) return;
 		Py_INCREF(&pyORBIT_ExtEffectsContainer_Type);
-		PyModule_AddObject(module, "ExtEffectsContainer", (PyObject *)&pyORBIT_ExtEffectsContainer_Type);
-				
+		PyModule_AddObject(module, "ExtEffectsContainer", (PyObject *)&pyORBIT_ExtEffectsContainer_Type);		
 	}
 
 #ifdef __cplusplus

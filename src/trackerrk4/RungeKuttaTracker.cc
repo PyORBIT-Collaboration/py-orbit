@@ -365,7 +365,7 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 			}		
 			rk4Step(t,t_step,fieldSource);
 			//place to account for external effeects
-			if(extEff != NULL) extEff->applyEffects(bunch, ip, y_in_vct, y_out_vct, t, t_step, fieldSource, this);
+			if(extEff != NULL) extEff->applyEffectsForEach(bunch, ip, y_in_vct, y_out_vct, t, t_step, fieldSource, this);
 			t = t + t_step;
 			if(step_count > nMax){
 				ORBIT_MPI_Finalize("RungeKuttaTracker::trackBunch - particle cannot exit outside.");
@@ -491,10 +491,10 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 			  partCoordArr[ip][3] = y_out_vct[4];
 			  partCoordArr[ip][5] = y_out_vct[5];	
 			}
+			if(extEff != NULL) extEff->applyEffectsForEach(bunch, ip,y_in_vct , y_out_vct, t, t_step, fieldSource, this);
 		}
 		//apply the external effects
-
-		if(extEff != NULL) extEff->applyEffects(bunch, -1, tmp_vct, tmp_vct, t, t_step, fieldSource, this);
+		if(extEff != NULL) extEff->applyEffects(bunch, t, t_step, fieldSource, this);
 		
 	}
 	//------------------------------------------------

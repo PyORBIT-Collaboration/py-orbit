@@ -41,9 +41,6 @@ extern "C" {
     return 0;
   }
   
-  
-  
-	
 	// name([name]) - sets or returns the name of the External Effeects class 
   static PyObject* PyExternalEffects_name(PyObject *self, PyObject *args){
     pyORBIT_Object* pyPyExternalEffects= (pyORBIT_Object*) self;

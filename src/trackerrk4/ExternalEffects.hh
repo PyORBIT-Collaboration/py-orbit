@@ -45,11 +45,18 @@ namespace TrackerRK4{
 		virtual void finalizeEffects(Bunch* bunch);
 
 		/** It applies the external effects to a particle with certain index. */
-		virtual void applyEffects(Bunch* bunch, int index, 
+		virtual void applyEffectsForEach(Bunch* bunch, int index, 
 	                            double* y_in_vct, double* y_out_vct, 
 														  double t, double t_step, 
 														  OrbitUtils::BaseFieldSource* fieldSource,
 															RungeKuttaTracker* tracker);	
+		
+		/** It applies the external effects to the bunch as a whole. */
+		virtual void applyEffects(Bunch* bunch, 
+														  double t, double t_step, 
+														  OrbitUtils::BaseFieldSource* fieldSource,
+															RungeKuttaTracker* tracker);	
+		
 		
 		/** It returns the name of the effect to distinguish them later. */
 		std::string getName();

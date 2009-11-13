@@ -9,7 +9,7 @@
 ## - TypedObject      - Class. Represents an object with a type.
 ## - ParamsDictObject - Class. Represents an object that has a parameters dictionary.
 
-from orbit.utils.multiDimrray    import multiDimDoubleArray
+from orbit.utils.multiDimArray    import multiDimDoubleArray
 from orbit.utils.multiDimArray    import multiDimIntArray
 from orbit.utils.orbitFinalize    import orbitFinalize
 from orbit.utils.NamedObject      import NamedObject

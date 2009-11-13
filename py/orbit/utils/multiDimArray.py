@@ -14,7 +14,7 @@ def multiDimDoubleArray(*dims):
 	else:
 		dims_rest = dims[1:len(dims)]
 		for j in xrange(dims[0]):
-			res.append(multiDimArray(*dims_rest))
+			res.append(multiDimDoubleArray(*dims_rest))
 	return res
 		
 def multiDimIntArray(*dims):
@@ -33,5 +33,5 @@ def multiDimIntArray(*dims):
 	else:
 		dims_rest = dims[1:len(dims)]
 		for j in xrange(dims[0]):
-			res.append(multiDimArray(*dims_rest))
+			res.append(multiDimIntArray(*dims_rest))
 	return res

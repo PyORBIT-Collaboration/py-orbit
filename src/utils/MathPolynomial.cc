@@ -19,8 +19,10 @@
 
 using namespace OrbitUtils;
 
-int MathPolynomial::fact_n_max = 30;
-int* MathPolynomial::fact_arr = MathPolynomial::getFactorialArr();
+int MathPolynomial::fact_n_max = 12;
+int MathPolynomial::fact_double_n_max = 50;
+int* MathPolynomial::fact_arr = NULL;
+double* MathPolynomial::fact_double_arr = NULL;
 
 /** The method calculates the Hermite polynomial of order n and value x. */
 double MathPolynomial::ReHermite(int n, double x){
@@ -66,18 +68,41 @@ tcomplex MathPolynomial::ComplexHermite(int n, tcomplex x){
 
 /** The method calculates the factorial of n = n! */
 int MathPolynomial::Factorial(int n){
-	if(n >= 0 && n <= fact_n_max) return fact_arr[n];
+	if(n >= 0 && n <= fact_n_max) return getFactorialArr()[n];
   ORBIT_MPI_Finalize("pyORBIT Utils: MathPolynomial::Factorial  0<= n <= n_max. Stop.");
 	return 0;
 }
 
+/** The method calculates the factorial of n = n! */
+double MathPolynomial::FactorialDouble(int n){
+	if(n >= 0 && n <= fact_n_max) return getFactorialDoubleArr()[n];
+  ORBIT_MPI_Finalize("pyORBIT Utils: MathPolynomial::FactorialDouble  0<= n <= n_max. Stop.");
+	return 0;
+}
+
+
 /** The method calculates the array with n! */
 int* MathPolynomial::getFactorialArr(){
-	fact_arr = new int[fact_n_max+1];
-	fact_arr[0] = 1;
-	for(int i=1; i<=fact_n_max; i++){
-		fact_arr[i]*=i*fact_arr[i-1];
+	if(fact_arr == NULL){
+		fact_arr = new int[fact_n_max+1];
+		fact_arr[0] = 1;
+		for(int i=1; i<=fact_n_max; i++){
+			fact_arr[i]=i*fact_arr[i-1];
+		}
 	}
 	return fact_arr;
+}
+
+
+/** The method calculates the array with n! */
+double* MathPolynomial::getFactorialDoubleArr(){
+	if(fact_double_arr == NULL){
+		fact_double_arr = new double[fact_double_n_max+1];
+		fact_double_arr[0] = 1.;
+		for(int i=1; i<=fact_double_n_max; i++){
+			fact_double_arr[i]=i*fact_double_arr[i-1];
+		}
+	}
+	return fact_double_arr;
 }
 

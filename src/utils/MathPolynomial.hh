@@ -20,6 +20,7 @@
 #include <complex>
 #include <cmath>
 #include "tcomplex.hh"
+#include <iostream>
 
 namespace OrbitUtils{
 
@@ -31,23 +32,30 @@ namespace OrbitUtils{
   class  MathPolynomial
 	{
 	public:
-		
+
 		/** The method calculates the Hermite polynomial of order n and value x. */
 		static  double 	ReHermite(int n, double x);
 		
 		/** The method calculates the complex Hermite polynomial of order n and value x. */
 		static  tcomplex 	ComplexHermite(int n, tcomplex x);
 		
-		/** The method calculates the factorial of n = n! */
+		/** The method calculates the factorial of n = n! Returns integer. */
 		static int Factorial(int n);
+		
+		/** The method calculates the factorial of n = n! Returns double. */
+		static double FactorialDouble(int n);
 		
 	private:
 		
 		/** The method calculates the array with n! */
 		static int* getFactorialArr();
+		static double* getFactorialDoubleArr();
 		
 		static int fact_n_max;
 		static int* fact_arr;
+		
+		static int fact_double_n_max;
+		static double* fact_double_arr;		
 		
 	};
 

@@ -5,18 +5,18 @@
 		  classes.
 
 ./ext		- source code for external modules. Compilations of this
-		  code should be placed into ./modules.
+		  code should be placed into ./lib.
 
 ./lib  	- .so shared libraries to be used under python interpreter,
 		  pyORBIT.
 
-./examples	- sample pyORBIT scripts.
+./examples	- samples of pyORBIT scripts.
 
 ./doc		- pyORBIT documentation.
 
 ./conf		- configuration information.
 
-./bin		- directory containing pyORBIT executable.
+./bin		- a directory containing the pyORBIT executable.
 
 ============SETTING THE ENVIRONMENT VARIABLES=============
 

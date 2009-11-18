@@ -1,6 +1,10 @@
 import os
 from distutils import sysconfig
 
+#----------------------------------------------------------
+# This is a SCONS file to compile the pyORBIT
+#----------------------------------------------------------
+
 path = os.environ["PATH"]
 
 mpi_cpp = os.environ["MPI_CPP"]

@@ -17,8 +17,7 @@ from teapot import TiltTEAPOT
 
 from teapot import TPB
 
-from matrix_lattice import MATRIX_Lattice
-from matrix_lattice import BaseMATRIX
+from teapot_matrix_lattice import TEAPOT_MATRIX_Lattice
 
 __all__ = []
 __all__.append("TEAPOT_Lattice")
@@ -33,7 +32,6 @@ __all__.append("RingRFTEAPOT")
 __all__.append("FringeFieldTEAPOT")
 __all__.append("TiltTEAPOT")
 __all__.append("TPB")
-__all__.append("MATRIX_Lattice")
-__all__.append("BaseMATRIX")
+__all__.append("TEAPOT_MATRIX_Lattice")
 
 

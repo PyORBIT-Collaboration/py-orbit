@@ -368,6 +368,7 @@ class Stark_calc:
 
 
 
+"""
 
 class WaveFunc:
     
@@ -376,6 +377,7 @@ class WaveFunc:
         mp.dps = max(len(str_Energy),len(str_Gamma),len(str_reZ1),len(str_imZ1),len(str_F))       
         self.psi = WaveFunction(n1,n2,m,maxM,maxN,mp.dps,"("+str_Energy+" "+ str(mpf(str_Gamma)*mpf("-0.5"))+")", "("+str_reZ1+" "+str_imZ1+")",str_F)
         self.mode = self.psi.getMode()
+	    self.switch = 0
         n = n1 + n2 + m + 1
 
 
@@ -383,34 +385,129 @@ class WaveFunc:
             self.sqrt_norm = 1
             self.mode = 0
             mp.dps = 15
-
         else:
             z0 = 1/sqrt(mpf(str_F))
             mp.dps = 15
             
-            if (num == 0):
+            if (num < 2):
                 if (self.mode == 0):
                     self.sqrt_norm = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.psi.getMN(mu, nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
                 else:
-    
+    			
                     sqrt_norm_pert = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.psi.getMN(mu, nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
                     sqrt_norm_num = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.M(mu)*self.N(nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
                     
                     sqrt_norm_num_1 = sqrt_norm_num*sqrt(fac(n1+m)*fac(n2+m)/(fac(n1)*fac(n2)))/(sqrt(pi)*power(n,2+m)*fac(m)*fac(m))
-
+		    self.mode = 0
+		    self.sqrt_norm = sqrt_norm_pert
                     
-                    if (fabs(sqrt_norm_num_1 - sqrt_norm_pert)/sqrt_norm_pert < mpf("1e-5")):
-                        self.mode = 1
-                        self.sqrt_norm = sqrt_norm_num
-                    else:
-                        self.mode = 0
-                        self.sqrt_norm = sqrt_norm_pert
+                    if (fabs(sqrt_norm_num_1 - 1) < mpf("0.01")):
+                        self.switch = 1
+
                         
             else:
                 self.sqrt_norm = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.M(mu)*self.N(nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
                 self.mode = 1
-                        
+"""                        
 
+
+"""
+class WaveFunc:
+    
+    def __init__(self,n1, n2, m, maxM, maxN,str_Energy,str_Gamma,str_reZ1, str_imZ1, str_F, num):
+        
+        mp.dps = max(len(str_Energy),len(str_Gamma),len(str_reZ1),len(str_imZ1),len(str_F))       
+        self.psi = WaveFunction(n1,n2,m,maxM,maxN,mp.dps,"("+str_Energy+" "+ str(mpf(str_Gamma)*mpf("-0.5"))+")", "("+str_reZ1+" "+str_imZ1+")",str_F)
+        self.mode = self.psi.getMode()
+        self.switch = 0
+        n = n1 + n2 + m + 1
+
+
+        if (mpf(str_F) == mpf("0.0")):
+            self.sqrt_norm = 1
+            self.mode = 0
+            mp.dps = 15
+        else:
+            z0 = 1/sqrt(mpf(str_F))
+            mp.dps = 15
+            
+            if (num < 2):
+                if (self.mode == 0):
+                    self.sqrt_norm = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.psi.getMN(mu, nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
+                else:
+                
+                    sqrt_norm_pert = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.psi.getMN(mu, nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
+                    sqrt_norm_num = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.M(mu)*self.N(nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
+                    
+                    sqrt_norm_num_1 = sqrt_norm_num*sqrt(fac(n1+m)*fac(n2+m)/(fac(n1)*fac(n2)))/(sqrt(pi)*power(n,2+m)*fac(m)*fac(m))
+                    self.mode = 0
+                    self.sqrt_norm = sqrt_norm_pert
+                    
+                    if (fabs(sqrt_norm_num_1 - 1) < mpf("0.01")):
+                        self.switch = 1
+
+                        
+            else:
+                self.sqrt_norm = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.M(mu)*self.N(nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
+                self.mode = 1
+                
+"""
+
+class WaveFunc:
+    
+    def __init__(self,n1, n2, m, maxM, maxN,str_Energy,str_Gamma,str_reZ1, str_imZ1, str_F, num):
+        
+        mp.dps = max(len(str_Energy),len(str_Gamma),len(str_reZ1),len(str_imZ1),len(str_F))       
+        self.psi = WaveFunction(n1,n2,m,maxM,maxN,mp.dps,"("+str_Energy+" "+ str(mpf(str_Gamma)*mpf("-0.5"))+")", "("+str_reZ1+" "+str_imZ1+")",str_F)
+        self.mode = self.psi.getMode()
+        self.switch = 0
+        self.mode = 0
+        mp.dps = 15
+
+
+        F_thr = (
+        ((n1,n2,m) == (0,0,0))*mpf("0.000200")+
+        ((n1,n2,m) == (0,0,1))*mpf("0.000040")+
+        ((n1,n2,m) == (0,1,0))*mpf("0.000040")+
+        ((n1,n2,m) == (0,1,1))*mpf("0.000022")+
+        ((n1,n2,m) == (0,2,0))*mpf("0.000021")+
+        ((n1,n2,m) == (0,2,1))*mpf("0.000015")+
+        ((n1,n2,m) == (0,3,0))*mpf("0.000014")+
+        ((n1,n2,m) == (0,3,1))*mpf("0.000011")+
+        ((n1,n2,m) == (0,4,0))*mpf("0.000011")+
+        ((n1,n2,m) == (1,0,0))*mpf("0.000041")+
+        ((n1,n2,m) == (1,0,1))*mpf("0.000026")+
+        ((n1,n2,m) == (1,1,0))*mpf("0.000024")+
+        ((n1,n2,m) == (1,1,1))*mpf("0.000017")+
+        ((n1,n2,m) == (1,2,0))*mpf("0.000017")+
+        ((n1,n2,m) == (1,2,1))*mpf("0.000012")+
+        ((n1,n2,m) == (1,3,0))*mpf("0.000012")+
+        ((n1,n2,m) == (2,0,0))*mpf("0.000027")+
+        ((n1,n2,m) == (2,0,1))*mpf("0.000020")+
+        ((n1,n2,m) == (2,1,0))*mpf("0.000019")+
+        ((n1,n2,m) == (2,1,1))*mpf("0.000013")+
+        ((n1,n2,m) == (2,2,0))*mpf("0.000013")+
+        ((n1,n2,m) == (3,0,0))*mpf("0.000021")+
+        ((n1,n2,m) == (3,0,1))*mpf("0.000016")+
+        ((n1,n2,m) == (3,1,0))*mpf("0.000015")+
+        ((n1,n2,m) == (4,0,0))*mpf("0.000018")
+        )
+           
+                 
+        if (mpf(str_F) == mpf("0.0")):
+            self.sqrt_norm = 1
+        else:
+            z0 = 1/sqrt(mpf(str_F))
+            
+            if (mpf(str_F) > F_thr):     
+                self.mode = 1
+                self.switch = 2
+                self.sqrt_norm = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.M(mu)*self.N(nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
+            else:
+                self.sqrt_norm = sqrt(2*pi*quad(lambda mu: quad(lambda nu:   fabs(self.psi.getMN(mu,nu))**2     *nu*mu*(nu*nu+mu*mu),[0,sqrt(mu*mu+2*z0)]),[0,maxM]))
+    
+    
+    
 
     
     def M(self,mu):

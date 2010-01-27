@@ -1,6 +1,7 @@
 DIRS  = 
 DIRS += ./ecloud
 DIRS += ./laserstripping
+DIRS += ./H0starkeffect
 
 #========rules=========================
 

@@ -169,7 +169,76 @@ def BeamEmittances(bunch,beta):
 
     return exn, eyn 
 
- 
 
+def Freq_spread(bunch,la,n):
+    
+    delta_E = 1./2. - 1./(2.*n*n)
+    m = bunch.mass()
+    
+    op = mpi_op.MPI_SUM
+    data_type = mpi_datatype.MPI_DOUBLE
+    mpi_size = orbit_mpi.MPI_Comm_size(mpi_comm.MPI_COMM_WORLD)
+    
+    N = bunch.getSize()
+    pz = 0
+    for i in range(N):
+        pz += bunch.pz(i)
+    pz = orbit_mpi.MPI_Allreduce(pz,data_type,op,mpi_comm.MPI_COMM_WORLD)
+    pz = pz/(mpi_size*N)
+    
+    
+    E = math.sqrt(pz*pz + m*m)
+    TK = E - m
+
+    
+    la0 = 2*math.pi*5.291772108e-11/7.297352570e-3/delta_E
+    te = TK - m*(la/la0-1)
+    kzz = te/math.sqrt(pz*pz-te*te)
+
+    kx = -1.
+    ky = 0.
+    kz = kzz
+    
+    
+    om = 0
+    om2 = 0
+    
+    for i in range(N):
+        
+        px = bunch.px(i)
+        py = bunch.py(i)
+        pz = bunch.pz(i)
+        
+        P2 = px*px + py*py + pz*pz
+        K = math.sqrt(kx*kx + ky*ky + kz*kz)
+        P = math.sqrt(P2) 
+        
+        E = math.sqrt(P2 + m*m)
+        
+        beta = P/E
+        gamma = E/m
+        
+        cos = (px*kz + py*ky + pz*kz)/(K*P)
+        
+        la0 = la/(gamma*(1-beta*cos))
+        omega = 2*math.pi*5.291772108e-11/7.297352570e-3/la0
+        
+        om += omega
+        om2 += omega*omega
+
+
+#        f = open('bunch_parameters.txt','a')
+#        print >>f, omega
+#        f.close()
+        
+    om = orbit_mpi.MPI_Allreduce(om,data_type,op,mpi_comm.MPI_COMM_WORLD)
+    om = om/(mpi_size*N)     
+    
+    om2 = orbit_mpi.MPI_Allreduce(om2,data_type,op,mpi_comm.MPI_COMM_WORLD)        
+    om2 = om2/(mpi_size*N)
+    
+    sigma_om = math.sqrt(om2 - om**2)    
+
+    return (om, sigma_om)
         
 

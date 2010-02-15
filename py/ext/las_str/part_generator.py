@@ -120,6 +120,9 @@ class BunchGen:
         
         
         E = mass + TK
+        P = math.sqrt(E*E - mass*mass)
+        vz = 299792458*P/E
+        
         beta = math.sqrt(E*E - mass*mass)/E
         gamma = 1./math.sqrt(1-beta*beta)
         
@@ -148,11 +151,12 @@ class BunchGen:
             
             res = 0
             while(res == 0):
-                z = random.gauss(0,sigma_beam)
-                if( abs(z) <  cutOffZ):
+                z = random.gauss(0,sigma_beam*vz)
+                if( abs(z) <  cutOffZ*vz):
                     res = 1
+#            bunch.addParticle(0.,0.,0.,0.,0.,P)
             bunch.addParticle(x,px,y,py,z,pz)
-
+        
         return bunch
 
 

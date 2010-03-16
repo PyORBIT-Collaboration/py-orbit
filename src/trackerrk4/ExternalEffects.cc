@@ -11,12 +11,13 @@
 //    slow changing magnetic and electric fields.
 //
 ///////////////////////////////////////////////////////////////////////////
+#include "RungeKuttaTracker.hh"
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 
 #include "ExternalEffects.hh"
-#include "RungeKuttaTracker.hh"
+
 
 using namespace TrackerRK4;
 using namespace OrbitUtils;

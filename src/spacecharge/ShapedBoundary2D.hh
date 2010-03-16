@@ -1,9 +1,9 @@
 #ifndef SC_SHAPED_BOUNDARY_2D_H
 #define SC_SHAPED_BOUNDARY_2D_H
 
+#include "Grid2D.hh"
 #include <string>
 
-#include "Grid2D.hh"
 #include "BaseBoundary2D.hh"
 
 using namespace std;

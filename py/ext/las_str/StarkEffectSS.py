@@ -294,7 +294,17 @@ class Stark_calcSS:
         
 
             
+def dE_cont(continuum_spectr):
+    
+    lines = open(continuum_spectr).read().splitlines()
+    max = 0
+    for i in xrange(len(lines)):
+        E,DTM = lines[i].split()
+        if(float(DTM) >= max): 
+            max = float(DTM) 
+            dE = float(E)
 
+    return dE
 
 
 

@@ -3,7 +3,7 @@ from orbit_mpi import *
 
 class printf:
 
-    def __init__(self,f_name,*title):
+    def __init__(self,f_name,title):
 
         self.f_name = f_name
         rank = orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
@@ -16,7 +16,7 @@ class printf:
 
 
 
-    def fdata(self,*data):
+    def fdata(self,data):
 
         rank = orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
         if (rank == 0):

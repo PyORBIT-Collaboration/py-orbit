@@ -85,8 +85,8 @@ class Stark_calc:
         (mp.prec, self.err_exp) = self.a.calcPrecisionForM(exp_minG,self.max_err_exp,str(self.F),"("+str(self.Energy)+" "+ str(self.Gamma*mpf("-0.5"))+")", "("+str(re(self.Z1))+" "+ str(im(self.Z1))+")")
         self.find_Z1()
         self.Z2 = fsub(4,self.Z1)
-        self.pointN = self.a.calcPrecisionForN(str(self.F),"("+str(self.Energy)+" "+ str(self.Gamma*mpf("-0.5"))+")", "("+str(re(self.Z2))+" "+ str(im(self.Z2))+")")
         
+        self.pointN = self.a.calcPrecisionForN(str(self.F),"("+str(self.Energy)+" "+ str(self.Gamma*mpf("-0.5"))+")", "("+str(re(self.Z2))+" "+ str(im(self.Z2))+")")
         return
 
 
@@ -113,6 +113,7 @@ class Stark_calc:
         else:
             R = power(-2*self.Energy,fdiv(3,2))/F
             self.Gamma = power(4*R,2*n2+m+1)/(n*n*n*fac(n2)*fac(n2+m))*exp(-2*R/3-(n*n*n*F/4)*(34*n2*n2+34*n2*m+46*n2+7*m*m+23*m+fdiv(53,3)))
+            self.Gamma = mpf("0.0")
         
         
         self.step_E = fabs(-fdiv(1,2)/(n*n) - self.Energy)*mpf("1e-10") 
@@ -249,6 +250,8 @@ class Stark_calc:
         
         self.Energy = args[0]
         self.Gamma = args[1]
+
+
         
         
         self.find_Z1()
@@ -294,7 +297,7 @@ class Stark_calc:
         par = self.a.getB(str(self.F),"("+str(self.Energy)+" "+ str(self.Gamma*mpf("-0.5"))+")", "("+str(re(self.Z2))+" "+ str(im(self.Z2))+")")
         line =  par.replace("(","").replace(")","").rsplit(" ")
         B = mpc(line[0], line[1])
-#        print  "E = ",nstr(self.Energy,100),"   G = ",nstr(self.Gamma,10),"absB = ",nstr(fabs(B),10)
+        print  "E = ",nstr(self.Energy,100),"   G = ",nstr(self.Gamma,10),"absB = ",nstr(fabs(B),10)
         
         if(fabs(self.tempE - self.Energy) < min(self.err_E,self.err_E_out)):
             self.countE += 1

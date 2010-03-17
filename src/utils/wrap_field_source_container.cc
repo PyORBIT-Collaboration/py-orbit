@@ -69,7 +69,7 @@ extern "C" {
   //destructor for python FieldSourceContainer class (__del__ method).
   //-----------------------------------------------------
   static void FieldSourceContainer_del(pyORBIT_Object* self){
-		//std::cerr<<"The LasStripFieldSource __del__ has been called!"<<std::endl;
+		//std::cerr<<"The FieldSourceContainer __del__ has been called!"<<std::endl;
 		delete ((FieldSourceContainer*)self->cpp_obj);
 		self->ob_type->tp_free((PyObject*)self);
   }
@@ -135,7 +135,7 @@ extern "C" {
 	
 	//--------------------------------------------------
 	//Initialization function of the pyFieldSourceContainer class
-	//It will be called from Bunch wrapper initialization
+	//It will be called from utils wrapper initialization
 	//--------------------------------------------------
   void initFieldSourceContainer(PyObject* module){
 		if (PyType_Ready(&pyORBIT_FieldSourceContainer_Type) < 0) return;

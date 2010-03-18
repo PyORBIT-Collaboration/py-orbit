@@ -242,27 +242,29 @@ double Function::getX(double y)
   return xx;
 }
 
-void Function::setConstStep(int info)
+int Function::setConstStep(int info)
 {
   if(info == 0){
     inf_const_step = 0;
     x_step = 0.;
+		return 0;
   }
   else{
     inf_const_step = 1;
 
     if(size < 2){
-      finalize("ORBIT Utils Function class: The Function method  setConstStep(int info)  (size<2)");
+      return 0;
     }
 
     //check that step is const
     x_step = x_arr[1] - x_arr[0];
     for(int i = 0; i < (size-1); i++){
       if(abs(x_step - (x_arr[i+1] - x_arr[i]))/x_step > 1.0e-11){
-	      finalize("ORBIT Utils Function class: The Function method  setConstStep(int info) - step is not const");
+	      return 0;
       }
     }
   }
+	return 1;
 }
 
 //return 1 if step on x is constant and 0 - otherwise
@@ -271,92 +273,97 @@ int Function::isStepConst()
   return inf_const_step;
 }
 
-//sets the inverse Function. The x-coordinates
-//     of f_inv could be defined already
-void Function::setInverse(Function* f_inv)
+// Sets the inverse Function. The x-coordinates
+// of f_inv could be defined already.
+// It will return 1 if it was a success and 0 otherwise
+int Function::setInverse(Function* f_inv)
 {
   //check that inverse function can be made
-
-    if(size < 2){
-      finalize("ORBIT Utils Function class: The Function method  setInverse(Function* f_inv)  (size<2)");
-    }
-
-    //create x-arr if it is not ready
-    if(f_inv->getSize() < 2){
-      f_inv->clean();
-      for(int i = 0; i < size; i++){
-        double xx = getMinY() + i*(getMaxY() - getMinY())/(size - 1);
-        f_inv->add(xx,0.);
-      }
-      f_inv->setConstStep(1);
-    }
-
-
-
-    if(y_arr[1] > y_arr[0]){
-      for(int i = 0; i < (size-1); i++){
-        if(y_arr[i] >= y_arr[i+1]){
-          finalize("ORBIT Utils Function class: The Function method  setInverse(Function* f_inv)  function non-monotonic - >");
+	
+	if(size < 2){
+		f_inv->clean();
+		return 0;
 	}
-      }
-    }
-    else{
-      for(int i = 0; i < (size-1); i++){
-        if(y_arr[i] <= y_arr[i+1]){
-          finalize("ORBIT Utils Function class: The Function method  setInverse(Function* f_inv)  function non-monotonic - <");
+	
+	//create x-arr if it is not ready
+	if(f_inv->getSize() < 2){
+		f_inv->clean();
+		for(int i = 0; i < size; i++){
+			double xx = getMinY() + i*(getMaxY() - getMinY())/(size - 1);
+			f_inv->add(xx,0.);
+		}
+		f_inv->setConstStep(1);
 	}
-      }
-    }
-
-    if(f_inv->getMaxX() > getMaxY()){
-      finalize("ORBIT Utils Function class: The Function method  setInverse(Function* f_inv) f_inv->getMaxX() > getMaxY()");
-    }
-
-    if(f_inv->getMinX() < getMinY()){
-      finalize("ORBIT Utils Function class: The Function method  setInverse(Function* f_inv) f_inv->getMinX() < getMinY()");
-    }
-
-    Function* f_tmp = new Function();
-
-    int nP = f_inv->getSize();
-
-    double xx = 0.;
-    double yy = 0.;
-    double coeff = 0.;
-    int ind = 0;
-
-    for(int i = 0; i < nP; i++){
-      xx = f_inv->x(i);
-      if(y_arr[1] > y_arr[0]){
-	ind = 0;
-	while(ind <  (size-1) && xx >= y_arr[ind]){
-	  ind++;
+	
+	if(y_arr[1] > y_arr[0]){
+		for(int i = 0; i < (size-1); i++){
+			if(y_arr[i] >= y_arr[i+1]){
+				f_inv->clean();
+				return 0;
+			}
+		}
 	}
-	ind--;
-      }
-      else{
+	else{
+		for(int i = 0; i < (size-1); i++){
+			if(y_arr[i] <= y_arr[i+1]){
+				f_inv->clean();
+				return 0;
+			}
+		}
+	}
+	
+	if(f_inv->getMaxX() > getMaxY()){
+		finalize("ORBIT Utils Function class: The Function method  setInverse(Function* f_inv) f_inv->getMaxX() > getMaxY()");
+		return 0;
+	}
+	
+	if(f_inv->getMinX() < getMinY()){
+		finalize("ORBIT Utils Function class: The Function method  setInverse(Function* f_inv) f_inv->getMinX() < getMinY()");
+		return 0;
+	}
+	
+	Function* f_tmp = new Function();
+	
+	int nP = f_inv->getSize();
+	
+	double xx = 0.;
+	double yy = 0.;
+	double coeff = 0.;
+	int ind = 0;
+	
+	for(int i = 0; i < nP; i++){
+		xx = f_inv->x(i);
+		if(y_arr[1] > y_arr[0]){
+			ind = 0;
+			while(ind <  (size-1) && xx >= y_arr[ind]){
+				ind++;
+			}
+			ind--;
+		}
+		else{
     	ind = size-1;
-	while(ind > 0 && xx <= y_arr[ind]){
-	  ind--;
+			while(ind > 0 && xx <= y_arr[ind]){
+				ind--;
+			}
+		}
+		coeff = (xx - y_arr[ind])/(y_arr[ind+1]-y_arr[ind]);
+		yy = x_arr[ind] + (x_arr[ind+1] - x_arr[ind])*coeff;
+		f_tmp->add(xx,yy);
 	}
-      }
-      coeff = (xx - y_arr[ind])/(y_arr[ind+1]-y_arr[ind]);
-      yy = x_arr[ind] + (x_arr[ind+1] - x_arr[ind])*coeff;
-      f_tmp->add(xx,yy);
-    }
-
-    int inf_tmp = f_inv->isStepConst();
-
-    nP = f_tmp->getSize();
-    f_inv->clean();
-    for(int i = 0; i < nP; i++){
-      f_inv->add(f_tmp->x(i),f_tmp->y(i));
-    }
-    f_inv->setConstStep(inf_tmp);
-
-
-    //remove tmp Function
-    delete f_tmp;
+	
+	int inf_tmp = f_inv->isStepConst();
+	
+	nP = f_tmp->getSize();
+	f_inv->clean();
+	for(int i = 0; i < nP; i++){
+		f_inv->add(f_tmp->x(i),f_tmp->y(i));
+	}
+	f_inv->setConstStep(inf_tmp);
+	
+	//remove tmp Function
+	delete f_tmp;
+	
+	return 1;
 }
 
 
@@ -382,7 +389,7 @@ void Function::print(ostream& Out)
   }
 }
 
-void Function::print(char* fileName)
+void Function::print(const char* fileName)
 {
   ofstream F_dump;
   if(rank_MPI == 0)F_dump.open (fileName, ios::out);
@@ -391,18 +398,18 @@ void Function::print(char* fileName)
   return;
 }
 
-//auxilary method to create normalize cumulative function
-//for probability distribution
-//with y_min = 0 and y_max = 1.0
-void Function::normalize()
+//auxiliary method to create normalize cumulative function
+//for probability distribution with y_min = 0 and y_max = 1.0
+//It returns 1 if it was a success and 0 otherwise 
+int Function::normalize()
 {
   if(size < 2){
-    finalize("ORBIT Utils Function class: The Function method normalize() (size<2)");
+    return 0;
   }
 
   for(int i = 0; i < (size-1); i++){
     if(y_arr[i] > y_arr[i+1]){
-      finalize("ORBIT Utils Function class: The Function method  normalize()  function non-monotonic - >");
+      return 0;
     }
   }
 
@@ -419,5 +426,6 @@ void Function::normalize()
     if(y_arr[i] < yMin) yMin = y_arr[i];
     if(y_arr[i] > yMax) yMax = y_arr[i];
   }
+	return 1;
 }
 

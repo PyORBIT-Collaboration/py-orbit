@@ -63,22 +63,24 @@ namespace OrbitUtils{
 		double getX(double y);
 		
 		//set the info variable info=1 const step info=0 non-const
-		void setConstStep(int info);
+		//it will return 1 if the step is const and 0 otherwise 
+		int setConstStep(int info);
 		
 		//return 1 if step on x is constant and 0 - otherwise
 		int isStepConst();
 		
-		//sets the inverse function. The x-coordinates 
-		//     of f_inv could be defined already
-		void setInverse(Function* f_inv);
+		// It sets the inverse function. The x-coordinates 
+		// of f_inv could be defined already.
+		// It will return 1 if it was a success and 0 otherwise
+		int setInverse(Function* f_inv);
 		
 		void print(std::ostream& Out);
-		void print(char* fileName);
+		void print(const char* fileName);
 		
-		//auxilary method to create normalize cumulative function 
-		//for probability distribution
-		//with y_min = 0 and y_max = 1.0
-		void normalize();
+		//auxiliary method to create normalize cumulative function
+		//for probability distribution with y_min = 0 and y_max = 1.0
+		//It returns 1 if it was a success and 0 otherwise 		
+		int normalize();
 		
 		
 	private:

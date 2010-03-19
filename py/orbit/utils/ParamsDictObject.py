@@ -21,6 +21,12 @@ class ParamsDictObject:
 		"""
 		self.__paramsDict[key] = value
 
+	def setParam(self, key, value):
+		"""
+		Method. Sets a parameter to the object.
+		"""
+		self.__paramsDict[key] = value
+
 	def setParamsDict(self, params):
 		"""
 		Method. Sets an external dictionary as a parameter

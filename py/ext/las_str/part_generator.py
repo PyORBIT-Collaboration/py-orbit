@@ -45,7 +45,8 @@ class EnergyGen:
         self.eKin = eKin
         self.relativeSpreadE = relativeSpread
         self.p0 = math.sqrt(math.pow(self.mass+eKin,2) - self.mass*self.mass)
-        self.spreadP = (math.pow((self.mass + eKin),2)/self.p0)*self.relativeSpreadE
+        self.spreadP = ((self.mass + eKin)*eKin/self.p0)*self.relativeSpreadE
+        print "self.spreadP = ",self.spreadP
         
     def getP0(self):
         return self.p0
@@ -57,7 +58,7 @@ class EnergyGen:
         return self.mass
         
     def getP(self):
-        return (self.p0+random.gauss(0.,math.sqrt(0.5))*self.spreadP)
+        return (self.p0+random.gauss(0.,1.)*self.spreadP)
         
 class ParticlesGen:
     """
@@ -127,6 +128,7 @@ class BunchGen:
         gamma = 1./math.sqrt(1-beta*beta)
         
         bg = beta*gamma
+
 
 
         trGenX = TransverseCoordGen(alphaX,betaX,emtX/bg,cutOffX)

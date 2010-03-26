@@ -18,6 +18,8 @@
 #include "orbit_mpi.hh"
 #include "OU_Function.hh"
 
+#include <iomanip>
+
 using namespace OrbitUtils;
 
 Function::Function(): CppPyWrapper(NULL)
@@ -254,8 +256,8 @@ double Function::getY(double x)
 double Function::getX(double y)
 {
 
-  if(size < 2){
-    finalize("ORBIT Utils Function class: The Function method  getX(double y)  (size<2)");
+  if(size < 1){
+    finalize("ORBIT Utils Function class: The Function method  getX(double y)  (size<1)");
   }
 
   if(y <= yMin) return x_arr[0];
@@ -427,6 +429,7 @@ int Function::setInverse(Function* f_inv)
 void Function::print(ostream& Out)
 {
   if(rank_MPI == 0){
+		Out<<std::setprecision(15)<< std::setiosflags(std::ios::scientific);
     Out<<"% size = "<< getSize() <<std::endl
        <<"% minX = "<< getMinX() <<std::endl
        <<"% maxX = "<< getMaxX() <<std::endl

@@ -6,6 +6,7 @@
 #include "wrap_py_base_field_source.hh"
 #include "wrap_field_source_container.hh"
 #include "wrap_function.hh"
+#include "wrap_splinech.hh"
 
 namespace wrap_orbit_utils{
 
@@ -26,6 +27,7 @@ extern "C" {
 		wrap_utils_py_base_field_source::initPyBaseFieldSource(module);
 		wrap_field_source_container::initFieldSourceContainer(module);
 		wrap_function::initFunction(module);
+		wrap_splinech::initSplineCH(module);
   }
 
 	PyObject* getOrbitUtilsType(char* name){

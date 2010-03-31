@@ -265,7 +265,13 @@ class _element:
 		"""
 		Method. It does the first parsing of the initial string.
 		"""
-		type_name = re.compile(r'\A\s*(\S+)\s+([^=\s]+)\s*={1,1}').findall(line_init)[0]
+		type_name_arr = re.compile(r'\A\s*(\S+)\s+([^=\s]+)\s*={1,1}').findall(line_init)
+		if(len(type_name_arr) < 1):
+				print "The SAD file line:",line_init
+				print "The cannot find TYPE ELEMENT_NAME pair at the beginning!"
+				print "Stop."
+				sys.exit (0)			
+		type_name = type_name_arr[0]
 		type = type_name[0]
 		name = type_name[1]
 		self._name = name
@@ -681,7 +687,8 @@ class SAD_Parser:
 				#find the first line name
 				name = re.compile(r'\A\s*\S+\s+(\S+)\s*={1,1}').findall(str0)[0]
 				#cut the LINE from the beggining of the string
-				str_rest = str0[str0.find(name):]
+				str_rest0 = str0[(str0.find(type_name[0])+len(type_name[0])):]
+				str_rest = str_rest0[str_rest0.find(name):]
 				while(str_rest != None and len(str_rest) > 0):
 					#loop through all lines NAME = (...)
 					(ind0,ind1) = StringFunctions.findBracketsPos(str_rest)
@@ -699,7 +706,8 @@ class SAD_Parser:
 				#find the first line name
 				name = re.compile(r'\A\s*\S+\s+(\S+)\s*={1,1}').findall(str0)[0]
 				#cut the LINE from the beggining of the string
-				str_rest = str0[str0.find(name):]
+				str_rest0 = str0[(str0.find(type_name[0])+len(type_name[0])):]
+				str_rest = str_rest0[str_rest0.find(name):]				
 				while(str_rest != None and len(str_rest) > 0):
 					#loop through all lines NAME = (...)
 					(ind0,ind1) = StringFunctions.findBracketsPos(str_rest)

@@ -96,7 +96,7 @@ class SAD_LattLine:
 		""" Create instance with list of lines or elements """
 		self.__name = name
 		self.__items = []
-		self.__signDict = {}
+		self.__sign_arr = []
 
 	def __del__(self):
 		del self.__name
@@ -116,11 +116,11 @@ class SAD_LattLine:
 	def addItem(self,item,sign = +1):
 		""" Adds a line or element to this line with cetain direction."""
 		self.__items.append(item)
-		self.__signDict[item.getName()] = sign
+		self.__sign_arr.append(sign)
 
 	def getItems(self):
 		""" Returns list with elements and lines """
-		return self.__items
+		return self.__items[:]
 
 	def getLinesDict(self):
 		""" Returns the dictionary with all lattice lines inside, recursive. """
@@ -133,8 +133,11 @@ class SAD_LattLine:
 	def getElements(self):
 		""" Returns list of elements """
 		elements = []
-		for item in self.__items:
-			sign = self.__signDict[item.getName()]
+		#print "debug ================= name line = ",self.getName()
+		for i in range(len(self.__items)):
+			item = self.__items[i]
+			sign = self.__sign_arr[i]
+			#print "           debug item=",item.getName()," sign=",sign
 			elems = item.getElements()
 			if(sign == -1): elems.reverse()
 			for el in elems:
@@ -348,6 +351,7 @@ class _accLine:
 		self._expression = lineLine
 		#define names of components (lines or elements)
 		line_names = re.compile(r'\s*(\S+)\s*').findall(lineLine)
+		#print "debug line_names=",line_names
 		#=========================================
 		#deal with the N*name expressions
 		#=========================================
@@ -367,6 +371,7 @@ class _accLine:
 					line_names_new.append((it_new,sign))
 			else:
 				line_names_new.append((it,sign))
+		#print "debug line name=", self._name  ," _components=",line_names_new
 		self._components = line_names_new
 
 class StringFunctions:
@@ -632,6 +637,7 @@ class SAD_Parser:
 			accLine = accLineDict[name]
 			childs = accLine.getComponents()
 			for (child,sign) in childs:
+				#print "debug ????????? name=",name," child=",child," sign=",sign
 				if(lattElemDict.has_key(child) and accLineDict.has_key(child)):
 					print "=========== SAD File Problem ==============="
 					print "Accelerator line and element have the same name:",child
@@ -644,6 +650,7 @@ class SAD_Parser:
 					lattLine.addItem(lattElemDict[child])
 				else:
 					lattLine.addItem(lattLineDict[child], sign)
+					#print "debug ????????????????????????????? child=",lattLineDict[child].getName()," sign=",sign
 
 	def initialize(self,SAD_file_name):
 		""" This method will do the preliminary editing the input file."""

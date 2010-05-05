@@ -159,7 +159,7 @@ namespace OrbitUtils{
 		
 		ind = ind_start;
 		double dx = x_arr[ind+1] - x_arr[ind];	
-		double t = (x - x_arr[ind])/dx0;
+		double t = (x - x_arr[ind])/dx;
 		double t2 = t*t;
 		double t3 = t2*t;
 		double yy = y_arr[ind]*(2*t3-3*t2+1.0) + m_arr[ind]*(t3-2*t2+t)*dx + y_arr[ind+1]*(-2*t3+3*t2) + m_arr[ind+1]*(t3-t2)*dx; 

@@ -1,5 +1,6 @@
 import sys
 import os
+import math
 
 from orbit.utils   import orbitFinalize
 from orbit.utils   import NamedObject
@@ -53,6 +54,19 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		"""
 		Method. Sets the number of body parts of the node.
 		"""
+		if(self.getNumberOfBodyChildren() != 0):
+			msg = "You cannot set the number of AccNode parts after you added children! Class AccNode"
+			msg = msg + os.linesep
+			msg = msg + "Method setnParts(n):"
+			msg = msg + os.linesep
+			msg = msg + "Name of element=" + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element=" + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "nParts =" + str(n)
+			msg = msg + os.linesep
+			msg = msg + "n children =" + str(self.getNumberOfChildren())		
+			orbitFinalize(msg)		
 		self._setPartsLengthEvenly(n)
 		self.initialize()
 
@@ -67,7 +81,7 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		Method. Sets the physical length of a node or a
 		part if index > 0.
 		"""
-		if(abs(L) < 1.0e-36): L = 0.
+		if(math.fabs(L) < 1.0e-36): L = 0.
 		if(index >= 0):
 			self.__lengthArr[index] = L
 			return
@@ -115,6 +129,26 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		distribution of body parts is not uniform.
 		"""
 		pass
+	
+	def getNumberOfChildren(self):
+		"""
+		Returns the total number of direct childrens of this accelerator node.
+		"""
+		nChildren = len(self.__childNodesArr[0])+len(self.__childNodesArr[2])
+		for i in range(len(self.__childNodesArr[1])):
+			arr = self.__childNodesArr[1][i]
+			nChildren = nChildren + len(arr[0]) + len(arr[1])
+		return nChildren
+		
+	def getNumberOfBodyChildren(self):
+		"""
+		Returns the total number of direct childrens of this accelerator node that are inside the element, not before or after.
+		"""
+		nChildren = 0
+		for i in range(len(self.__childNodesArr[1])):
+			arr = self.__childNodesArr[1][i]
+			nChildren = nChildren + len(arr[0]) + len(arr[1])
+		return nChildren
 
 	def addChildNode(self, node, place, part_index = 0, place_in_part = AccActionsContainer.BEFORE):
 		"""

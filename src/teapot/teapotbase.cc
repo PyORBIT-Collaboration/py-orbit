@@ -97,7 +97,7 @@ void rotatexy(Bunch* bunch, double anglexy){
 //  drifti
 //
 // DESCRIPTION
-//  drifts a single particle
+//  drifts a single particle. It could happen that the length will be < 0.
 //
 // PARAMETERS
 //  bunch = reference to the macro-particle bunch
@@ -110,8 +110,6 @@ void rotatexy(Bunch* bunch, double anglexy){
 ///////////////////////////////////////////////////////////////////////////
 
 void drifti(Bunch* bunch, int i, double length){
-
-	if(length <= 0.) return;
 
 	//coordinate array [part. index][x,xp,y,yp,z,dE]
 	double** arr = bunch->coordArr();
@@ -153,8 +151,6 @@ void drifti(Bunch* bunch, int i, double length){
 ///////////////////////////////////////////////////////////////////////////
 
 void drift(Bunch* bunch, double length){
-
-	if(length <= 0.) return;
 
 	double KNL, phifac, dp_p;
 

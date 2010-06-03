@@ -90,6 +90,7 @@ class LinacLatticeFactory():
 		for seq in sequences:
 			#print "debug =========================================== seq=",seq.getName()
 			accSeq = Sequence(seq.getName())
+			accSeq.setLinacAccLattice(linacAccLattice)
 			accSeq.setLength(float(seq.getLength()))
 			accSeq.setPosition(seqPosition)
 			seqPosition = seqPosition + accSeq.getLength()
@@ -108,25 +109,24 @@ class LinacLatticeFactory():
 				if(node.getType() == "QUAD"):
 					accNode = Quad(node.getName())
 					accNode.updateParamsDict(node.getParamsDict())					
-					accNode.setLength(float(node.getLength()))
-					accNode.setParam("dB/dr",float(node.getParam("field")))
-					accNode.setParam("field",float(node.getParam("field")))
+					accNode.setParam("dB/dr",node.getParam("field"))
+					accNode.setParam("field",node.getParam("field"))
 					accSeq.addNode(accNode)
 				#------------RF_Gap-----------------	
 				elif(node.getType() == "RFGAP"):
 					accNode = BaseRF_Gap(node.getName())
 					accNode.updateParamsDict(node.getParamsDict())	
-					accNode.setParam("gapOffset",float(node.getParam("gapOffset")))					
-					accNode.setLength(float(node.getParam("gapLength")))
-					accNode.setParam("amp",float(node.getParam("amp")))
+					accNode.setParam("gapOffset",node.getParam("gapOffset"))					
+					accNode.setLength(node.getParam("gapLength"))
+					accNode.setParam("amp",node.getParam("amp"))
 					#the parameter from XAL in MeV, we use GeV
-					accNode.setParam("E0TL",1.0e-3*float(node.getParam("E0TL")))
-					accNode.setParam("length",float(node.getParam("gapLength")))
-					accNode.setParam("gapLength",float(node.getParam("gapLength")))		
-					accNode.setParam("modePhase",float(node.getParam("modePhase")))
+					accNode.setParam("E0TL",1.0e-3*node.getParam("E0TL"))
+					accNode.setParam("length",node.getParam("gapLength"))
+					accNode.setParam("gapLength",node.getParam("gapLength"))		
+					accNode.setParam("modePhase",node.getParam("modePhase"))
 					rf_cav_name = node.getParam("parentCvaity")
 					if(rf_cav_name not in rf_cav_names):
-						accNode.setParam("firstPhase", (math.pi/180.)*float(accNode.getParam("firstPhase")))
+						accNode.setParam("firstPhase", (math.pi/180.)*accNode.getParam("firstPhase"))
 						rf_cav_names.append(rf_cav_name)
 						accRF_Cav = RF_Cavity(rf_cav_name)
 						accRF_Cavs.append(accRF_Cav)

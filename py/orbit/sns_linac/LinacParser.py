@@ -119,12 +119,14 @@ class SimplifiedLinacParser:
 		domSequences = self._stripDOMtoElements(self.domLinac)
 		for domSeq in domSequences:
 			linacSeq = LinacStructureSeq(name = domSeq.localName)
+			print "debug name=",domSeq.localName
 			seqParamDict = {}
 			for i in range(domSeq.attributes.length):
 				seqParamDict[domSeq.attributes.item(i).name] = domSeq.attributes.item(i).value
-			linacSeq.setLength(float(seqParamDict["length"]))
-			linacSeq.setParam("rfFrequency",float(seqParamDict["rfFrequency"]))
-			linacSeq.setParam("bpmFrequency",float(seqParamDict["bpmFrequency"]))
+			self._transformDict(seqParamDict)
+			linacSeq.setLength(seqParamDict["length"])
+			linacSeq.setParam("rfFrequency",seqParamDict["rfFrequency"])
+			linacSeq.setParam("bpmFrequency",seqParamDict["bpmFrequency"])
 			domNodes = self._stripDOMtoElements(domSeq)
 			for domNode in domNodes:
 				nNodeParam = domNode.attributes.length
@@ -150,8 +152,7 @@ class SimplifiedLinacParser:
 				linacNode.setType(type_in = paramDict["type"])
 				#the type is not in the dictionary of parameters
 				del paramDict["type"]
-				#each node has the length parameter
-				paramDict["length"] = float(paramDict["length"])
+				self._transformDict(paramDict)
 				linacNode.setParamsDict(paramDict)
 				linacSeq.addNode(linacNode)
 			self.linacTree.addSeq(linacSeq)
@@ -167,6 +168,24 @@ class SimplifiedLinacParser:
 			if(child.nodeType == child.ELEMENT_NODE):
 				domChildren.append(child)
 		return domChildren	
+
+	def _transformDict(self, paramDict):
+		"""
+		It will replace {key:string} the float or integer number instead of string if it is possible or
+		it will keep the orginal string.
+		"""
+		for key in paramDict.keys():
+			s_in = paramDict[key]
+			if(isinstance(s_in, basestring)):
+				if(s_in.isdigit()):
+					paramDict[key] = int(s_in)
+				else:
+					try:
+						paramDict[key] = float(s_in)
+					except ValueError:
+						continue 
+				
+
 
 	def getLinacStructureTree(self):
 		"""

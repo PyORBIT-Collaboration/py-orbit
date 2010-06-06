@@ -49,7 +49,6 @@ namespace OrbitUtils{
 		int n; double* z; double* w;
 	} PW;
 	
-	#define SETS 27
 	static PW pws[10] = {
 		{2,z2,w2},
 		{4,z4,w4},
@@ -77,7 +76,7 @@ namespace OrbitUtils{
 extern "C" {
 #endif	
 	
-double gauss_legendre_generator(int n, double a, double b, OrbitUtils::Function* fn)
+	double gauss_legendre_generator(int n, double a, double b, OrbitUtils::Function* fn)
 	{
 		fn->clean();
 		//if a and b have wrong order - fix it!
@@ -94,46 +93,66 @@ double gauss_legendre_generator(int n, double a, double b, OrbitUtils::Function*
 		A = (b-a)/2;
 		B = (a+b)/2;
 		
-		int n_pw = 0;
+		int n_pw = 1;
 		if(n <= 1024 ){
 			
-			int n_2 = 4;
-			int count = 0;
-			for(int ii = 1; ii < 10; ii++){
-				if(n > n_2){
-					arr_ind = count;
-					n_pw = n_2;
-				} else {
-					arr_ind = count + 1;
-					n_pw = n_2*2;
-					break;
+			if( n > pws[0].n){
+				for(int ii = 1; ii < 10; ii++){
+					if(n > pws[ii-1].n && n <= pws[ii].n){
+						n_pw = ii;
+						break;
+					}
 				}
-				arr_ind = count + 1;
-				n_pw = n_2*2;			
 			}
 			
-			z = pws[arr_ind].z;
-			w = pws[arr_ind].w;
+			z = pws[n_pw].z;
+			w = pws[n_pw].w;
 			
-			//fill out Function object
-			//???
+			//redefine number of integration points
+			int n_int = pws[n_pw].n/2;
+			
+			//add integration points to the Function container
+			
+			for(int k = (n_int-1); k >= 0; k--){
+				double y = w[k]*A;			
+				double x = B-A*z[k];
+				fn->add(x,y);				
+			}			
+			
+			for(int k = 0; k < n_int; k++){
+				double y = w[k]*A;			
+				double x = B+A*z[k];
+				fn->add(x,y);			
+			}
 			
 		} else {
 			z = pws[9].z;
 			w = pws[9].w;	
-			n_pw = 1024;
+			int n_int = 512;
 			int n_interv = (int)(n/1024) + 1;
 			double step = (b-a)/n_interv;
 			for(int i_step = 0; i_step < n_interv; i_step++){
 				A = step/2;
 				B= a + i_step*step + 0.5*step;
 				//fill out Function object
-				//???
+				
+				for(int k = (n_int-1); k >= 0; k--){
+					double y = w[k]*A;			
+					double x = B-A*z[k];
+					fn->add(x,y);				
+				}			
+				
+				for(int k = 0; k < n_int; k++){
+					double y = w[k]*A;			
+					double x = B+A*z[k];
+					fn->add(x,y);			
+				}				
+				
 			}
 			
 		}
 	}
-	
+
 #ifdef __cplusplus
 }
 #endif	

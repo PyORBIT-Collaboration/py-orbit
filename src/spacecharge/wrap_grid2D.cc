@@ -189,7 +189,7 @@ extern "C" {
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch) - constructor needs a Bunch.");
+			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch) - method needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
 		cpp_Grid2D->binBunch(cpp_bunch);

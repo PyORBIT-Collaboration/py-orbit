@@ -10,6 +10,7 @@
 #include "wrap_teapotbase.hh"
 #include "wrap_trackerrk4.hh"
 #include "wrap_spacecharge.hh"
+#include "wrap_linacmodule.hh"
 
 /**
  * The main function that will initialize the MPI and will 
@@ -51,6 +52,9 @@ int main (int argc, char **argv)
 	
 	//space-charge package
 	initspacecharge();
+	
+	//linac related classes
+	initlinac();
 	
 	//the python interpreter
 	//It will call Py_Initialize() again, but there is no harm

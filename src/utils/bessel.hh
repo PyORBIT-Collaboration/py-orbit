@@ -12,8 +12,8 @@
 //    VOL.5, 1962.
 //
 ///////////////////////////////////////////////////////////////////////////
-#ifndef ORBIT_UTILS_BESSJ0_H
-#define ORBIT_UTILS_BESSJ0_H
+#ifndef ORBIT_UTILS_BESSEL_H
+#define ORBIT_UTILS_BESSEL_H
 
 #include <cmath>
 

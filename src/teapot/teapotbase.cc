@@ -528,7 +528,7 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl,int skew)
     skewfacp = std::complex<double>(cs,  sn);
   }
 
-  for(int i = 1, n_part =  bunch->getSize(); i < n_part; i++){
+  for(int i = 0, n_part =  bunch->getSize(); i < n_part; i++){
 
 		dp_p = arr[i][5] * dp_p_coeff;
 

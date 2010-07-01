@@ -44,17 +44,14 @@ int main (int argc, char **argv)
   wrap_orbit_mpi::initorbit_mpi();
   wrap_orbit_bunch::initbunch();
 	wrap_orbit_utils::initutils();
-	
 	wrap_teapotbase::initteapotbase();
+	wrap_linac::initlinac();
 	
 	//Runge-Kutta tracker package
 	inittrackerrk4();
 	
 	//space-charge package
 	initspacecharge();
-	
-	//linac related classes
-	initlinac();
 	
 	//the python interpreter
 	//It will call Py_Initialize() again, but there is no harm

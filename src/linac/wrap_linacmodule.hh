@@ -6,9 +6,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-	void initlinac(void);
-	PyObject* getLinacType(char* name);
+  namespace wrap_linac{
+	  void initlinac(void);
+	  PyObject* getLinacType(char* name);
+	}
 	
 #ifdef __cplusplus
 }

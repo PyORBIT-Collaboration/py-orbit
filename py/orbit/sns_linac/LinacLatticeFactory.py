@@ -39,7 +39,23 @@ class LinacLatticeFactory():
 		self.ltree = ltree
 		#We need to compare positions, lengths etc. This is our delta
 		self.zeroDistance = 0.00001
+		#The maximal length of the drift. It will be devided if it is more than that.
+		self.maxDriftLength = 1.
 		
+	def setMaxDriftLength(self, maxDriftLength = 1.0):
+		"""
+		Sets the maximal drift length that is used for 
+		the purpose of the space charge calculations and diagnostics.
+		"""
+		self.maxDriftLength = maxDriftLength
+		
+	def getMaxDriftLength(self):
+		"""
+		Returns the maximal drift length that is used for the purpose 
+		of the space charge calculations and diagnostics.
+		"""
+		return self.maxDriftLength
+	
 	def getLinacAccLattice(self,names):
 		"""
 		Returns the linac accelerator lattice for specified sequence names.
@@ -111,6 +127,7 @@ class LinacLatticeFactory():
 					accNode.updateParamsDict(node.getParamsDict())					
 					accNode.setParam("dB/dr",node.getParam("field"))
 					accNode.setParam("field",node.getParam("field"))
+					accNode.setLength(node.getParam("length"))
 					accSeq.addNode(accNode)
 				#------------RF_Gap-----------------	
 				elif(node.getType() == "RFGAP"):
@@ -120,7 +137,8 @@ class LinacLatticeFactory():
 					accNode.setLength(node.getParam("gapLength"))
 					accNode.setParam("amp",node.getParam("amp"))
 					#the parameter from XAL in MeV, we use GeV
-					accNode.setParam("E0TL",1.0e-3*node.getParam("E0TL"))
+					#accNode.setParam("E0TL",1.0e-3*node.getParam("E0TL"))
+					accNode.setParam("E0TL",0.001*node.getParam("E0TL"))
 					accNode.setParam("length",node.getParam("gapLength"))
 					accNode.setParam("gapLength",node.getParam("gapLength"))		
 					accNode.setParam("modePhase",node.getParam("modePhase"))
@@ -169,10 +187,14 @@ class LinacLatticeFactory():
 					msg = msg + "pos=" + str(firstNode.getParam("pos"))						
 					orbitFinalize(msg)
 				else:
-					drift = Drift(accSeq.getName()+":drift")
-					drift.setLength(firstNode.getParam("pos") - firstNode.getLength()/2.0)
-					drift.setParam("pos",drift.getLength()/2.0)
-					accSeq.addNode(drift, index = 0)	
+					driftLength = firstNode.getParam("pos") - firstNode.getLength()/2.0
+					nDrifts = int(driftLength/self.maxDriftLength) + 1
+					driftLength = driftLength/nDrifts
+					for idrift in range(nDrifts):
+						drift = Drift(accSeq.getName()+":"+firstNode.getName()+":drift")
+						drift.setLength(driftLength)
+						drift.setParam("pos",0.+drift.getLength()*(idrift+0.5))
+						accSeq.addNode(drift, index = 0)
 					#print "debug first node =",firstNode.getName()," pos=",firstNode.getParam("pos")," L=",firstNode.getLength()
 			#insert the drift after the last element if its half length less + position is less then the sequence length
 			if(math.fabs(lastNode.getLength()/2.0 + lastNode.getParam("pos") - accSeq.getLength()) > self.zeroDistance):
@@ -192,14 +214,19 @@ class LinacLatticeFactory():
 					msg = msg + "sequence length=" + str(accSeq.getLength())			
 					orbitFinalize(msg)
 				else:
-					drift = Drift(accSeq.getName()+":drift")
-					drift.setLength(accSeq.getLength() - (lastNode.getParam("pos") + lastNode.getLength()/2.0))
-					drift.setParam("pos",lastNode.getParam("pos")+(lastNode.getLength()+drift.getLength())/2.0)
-					accSeq.addNode(drift)
+					driftLength = accSeq.getLength() - (lastNode.getParam("pos") + lastNode.getLength()/2.0)
+					nDrifts = int(driftLength/self.maxDriftLength) + 1
+					driftLength = driftLength/nDrifts
+					for idrift in range(nDrifts):
+						drift = Drift(accSeq.getName()+":"+lastNode.getName()+":drift")
+						drift.setLength(driftLength)
+						drift.setParam("pos",lastNode.getParam("pos")+lastNode.getLength()/2.0 + drift.getLength()*(idrift+0.5))
+						accSeq.addNode(drift)	
 			#now move on and generate drifts between (i,i+1) nodes from copyAccNodes
 			for node_ind in range(len(copyAccNodes)-1):
 				accNode0 = copyAccNodes[node_ind]
 				accNode1 = copyAccNodes[node_ind+1]
+				ind_of_node =  accSeq.getNodes().index(accNode1)
 				dist = accNode1.getParam("pos") - accNode1.getLength()/2 - (accNode0.getParam("pos") + accNode0.getLength()/2)
 				if(dist < 0.):
 					msg = "The LinacLatticeFactory method getLinacAccLattice(names): two nodes are overlapping!"
@@ -210,13 +237,15 @@ class LinacLatticeFactory():
 					msg = msg + os.linesep
 					msg = msg + "node 1 name=" + accNode1.getName() + " pos="+ str(accNode1.getParam("pos")) + " L="+str(accNode1.getLength())			
 					msg = msg + os.linesep
-					orbitFinalize(msg)
+					orbitFinalize(msg)				
 				elif(dist > self.zeroDistance):
-					drift = Drift(accSeq.getName()+":drift")
-					drift.setLength(dist)
-					drift.setParam("pos",accNode0.getParam("pos")+(accNode0.getLength()+drift.getLength())/2.0)
-					ind_of_node = accSeq.getNodes().index(accNode1)
-					accSeq.addNode(drift, index = ind_of_node)
+					nDrifts = int(dist/self.maxDriftLength) + 1
+					driftLength = dist/nDrifts				
+					for idrift in range(nDrifts):
+						drift = Drift(accSeq.getName()+":"+accNode0.getName()+":drift")
+						drift.setLength(driftLength)
+						drift.setParam("pos",accNode0.getParam("pos")+accNode0.getLength()*0.5+drift.getLength()*(idrift+0.5))
+						accSeq.addNode(drift, index = ind_of_node+idrift)
 				else:
 					pass
 			#insert the drifts ======================stop ===========================		

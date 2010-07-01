@@ -17,6 +17,9 @@ from orbit.lattice import AccNode, AccActionsContainer
 # import teapot base functions from wrapper around C++ functions
 from orbit.teapot_base import TPB
 
+# from linac import the RF gap classes
+from linac import BaseRfGap
+
 class BaseLinacNode(AccNode):
 	""" 
 	The base abstract class of the linac accelerator elements hierarchy. 
@@ -246,54 +249,6 @@ class TiltNode(BaseLinacNode):
 			bunch = paramsDict["bunch"]
 			TPB.rotatexy(bunch,self.__angle)
 
-class MagnetFringeField(BaseLinacNode):
-	"""
-	The class is a base class for the fringe field classes for others magnet elements.
-	"""
-	def __init__(self,  parentNode,  trackFunction = None , name = "fringe field"):
-		"""
-		Constructor. Creates the Magnet Fringe Field Node.
-		"""
-		AccNode.__init__(self,name)
-		self.setParamsDict(parentNode.getParamsDict())
-		self.__trackFunc = trackFunction
-		self.__usage = True
-		self.setType("magnetFringeField")
-
-	def track(self, paramsDict):
-		"""
-		It is tracking the dictionary with parameters through
-		the fringe field node.
-		"""
-		if(self.__trackFunc != None):
-			self.__trackFunc(self,paramsDict)
-
-	def setFringeFieldFunction(self, trackFunction = None):
-		"""
-		Sets the fringe field function that will track the bunch through the fringe.
-		"""
-		self.__trackFunc = trackFunction
-
-	def getFringeFieldFunction(self):
-		"""
-		Returns the fringe field function.
-		"""
-		return self.__trackFunc
-
-	def setUsage(self,usage = True):
-		"""
-		Sets the boolean flag describing if the fringe
-		field will be used in calculation.
-		"""
-		self.__usage = usage
-
-	def getUsage(self):
-		"""
-		Returns the boolean flag describing if the fringe
-		field will be used in calculation.
-		"""
-		return self.__usage
-
 #-----------------------------------------------------
 #    LINAC ABST NODES ELEMENTS
 #-----------------------------------------------------
@@ -335,7 +290,7 @@ class Quad(LinacMagnetNode):
 		
 		# B*rho = 3.335640952*momentum [T*m] if momentum in GeV/c
 		def fringeIN(node,paramsDict):
-			usageIN = node.getUsage()		
+			usageIN = node.getUsage()	
 			if(not usageIN):
 				return
 			bunch = paramsDict["bunch"]	
@@ -381,6 +336,7 @@ class Quad(LinacMagnetNode):
 		self.getNodeTiltOUT().setType("quad tilt out")
 		self.getNodeFringeFieldIN().setType("quad fringe in")
 		self.getNodeFringeFieldOUT().setType("quad fringe out")
+		
 
 	def initialize(self):
 		"""
@@ -415,13 +371,14 @@ class Quad(LinacMagnetNode):
 		"""
 		bunch = paramsDict["bunch"]		
 		momentum = bunch.getSyncParticle().momentum()
-		kq = self.getParam("dB/dr")/(3.33564*momentum)		
+		kq = self.getParam("dB/dr")/(3.335640952*momentum)		
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
+		#print "debug name =",self.getName()," kq=",kq,"  L=",self.getLength()		
 		if(index == 0):
 			TPB.quad1(bunch, length, kq)
 			return
@@ -436,6 +393,7 @@ class Quad(LinacMagnetNode):
 			TPB.quad1(bunch, length, kq)
 			return
 		if(index == (nParts-1)):
+			#print "debug before xp",	bunch.xp(0)
 			TPB.quad2(bunch, length)
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
@@ -444,6 +402,7 @@ class Quad(LinacMagnetNode):
 				TPB.multp(bunch,pole,kl,skew)
 			TPB.quad2(bunch, length)
 			TPB.quad1(bunch, length, kq)
+			#print "debug after xp",	bunch.xp(0)
 		return		
 		
 class DCorrectorH(LinacMagnetNode):
@@ -523,6 +482,7 @@ class BaseRF_Gap(BaseLinacNode):
 		self.setType("baserfgap")	
 		self.__isFirstGap = False
 		self.setnParts(3)	
+		self.cppGapModel = BaseRfGap()
 
 	def initialize(self):
 		"""
@@ -623,10 +583,9 @@ class BaseRF_Gap(BaseLinacNode):
 		else:
 			phase = math.fmod(frequency*(arrival_time - designArrivalTime)*2.0*math.pi+rfPhase,2.0*math.pi)	
 		#------------------------------------------------------
-		# ???? call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
-		eKin = syncPart.kinEnergy()
-		eKin = eKin + E0TL*math.cos(phase)
-		syncPart.kinEnergy(eKin)
+		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
+		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
+		#print "debug RF E0TL=",E0TL," phase=",phase*180./math.pi," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3		
 		
 	def trackDesign(self, paramsDict):
 		"""
@@ -658,12 +617,11 @@ class BaseRF_Gap(BaseLinacNode):
 			phase = math.fmod(frequency*(arrival_time - first_gap_arr_time)*2.0*math.pi+rfPhase,2.0*math.pi)		
 		#print "debug name=",self.getName()," arr_time=",arrival_time," phase=",phase*180./math.pi," E0TL=",E0TL*1.0e+3," freq=",frequency
 		#------------------------------------------------------
-		# ???? call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
-		syncPart = bunch.getSyncParticle()
-		eKin = syncPart.kinEnergy()
-		eKin = eKin + E0TL*math.cos(phase)
-		syncPart.kinEnergy(eKin)
-		#print "debug RF E0TL=",E0TL," phase=",phase*180./math.pi," eKin[MeV]=",syncPart.kinEnergy()*1.0e+3
+		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
+		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
+		#syncPart = bunch.getSyncParticle()
+		#eKin = syncPart.kinEnergy()
+		#print "debug RF E0TL=",E0TL," phase=",phase*180./math.pi," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3
 
 
 class TiltElement(BaseLinacNode):
@@ -710,7 +668,7 @@ class FringeField(BaseLinacNode):
 		AccNode.__init__(self,name)
 		self.setParamsDict(parentNode.getParamsDict())
 		self.__trackFunc = trackFunction
-		self.__usage = True
+		self.__usage = False
 		self.setType("fringeField teapot")
 
 	def track(self, paramsDict):

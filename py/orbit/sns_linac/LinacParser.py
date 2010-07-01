@@ -105,7 +105,7 @@ class SimplifiedLinacParser:
 	RF cavity as an envelop structure.
 	"""
 	def __init__(self,xml_file_name):
-		self.dom_doc = xml.dom.minidom.parse("sns_linac.xml")
+		self.dom_doc = xml.dom.minidom.parse(xml_file_name)
 		if(len(self.dom_doc.childNodes) != 1):
 			msg = "SimplifiedLinacParser: input xml file has a wrong structure!"
 			msg = msg + os.linesep
@@ -119,7 +119,7 @@ class SimplifiedLinacParser:
 		domSequences = self._stripDOMtoElements(self.domLinac)
 		for domSeq in domSequences:
 			linacSeq = LinacStructureSeq(name = domSeq.localName)
-			print "debug name=",domSeq.localName
+			#print "debug name=",domSeq.localName
 			seqParamDict = {}
 			for i in range(domSeq.attributes.length):
 				seqParamDict[domSeq.attributes.item(i).name] = domSeq.attributes.item(i).value

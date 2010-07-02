@@ -55,7 +55,7 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double p
 	//std::cout <<" debug E0TL="<< E0TL << "  kr="<<kr<<"  cappa="<<cappa<< std::endl;	
 	double x,y,r,rp, d_phi;
 	double d_rp = cappa*sin(phase);
-	std::cout<<"debug BaseRfGap::trackBunch eKin_in=     "<< eKin_in*1.e+3 <<"     xp_coeff=      "<<prime_coeff<<"      x_coeff=     "<<d_rp<<"   phase="<< ((phase*180/OrbitConst::PI)+180.)<<std::endl;
+	//std::cout<<"debug BaseRfGap::trackBunch eKin_in=     "<< eKin_in*1.e+3 <<"     xp_coeff=      "<<prime_coeff<<"      x_coeff=     "<<d_rp<<"   phase="<< ((phase*180/OrbitConst::PI)+180.)<<std::endl;
 	double I0, I1;
 	for(int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);

@@ -31,6 +31,7 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double p
 	double mass = bunch->getMass();
 	double charge = bunch->getCharge();
 	double eKin_in = syncPart->getEnergy();
+	double chargeE0TLsin = charge*E0TL*sin(phase);	
 	double delta_eKin = charge*E0TL*cos(phase);
 	//calculate params in the middle of the gap
 	syncPart->setMomentum(syncPart->energyToMomentum(eKin_in + delta_eKin/2.0));
@@ -56,6 +57,7 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double p
 	double x,y,r,rp, d_phi;
 	double d_rp = cappa*sin(phase);
 	//std::cout<<"debug BaseRfGap::trackBunch eKin_in=     "<< eKin_in*1.e+3 <<"     xp_coeff=      "<<prime_coeff<<"      x_coeff=     "<<d_rp<<"   phase="<< ((phase*180/OrbitConst::PI)+180.)<<std::endl;
+  //std::cout<<"debug BaseRfGap::trackBunch eKin_in=     "<< eKin_in*1.e+3 <<"  chargeE0TLsin="<<chargeE0TLsin<<" phase_time_coeff="<<phase_time_coeff<<std::endl;
 	double I0, I1;
 	for(int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);
@@ -66,13 +68,13 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double p
 		//longitudinal-energy part
 		d_phi = bunch->z(i)*phase_time_coeff;
 		//bunch->dE(i) = bunch->dE(i) + charge*E0TL*cos(phase + d_phi)*I0 - delta_eKin;
-		bunch->dE(i) = 0.;
+		bunch->dE(i) = bunch->dE(i) - chargeE0TLsin*d_phi;
 		//transverse focusing 
-		  //d_rp = cappa*sin(phase + d_phi)*2.0*I1/kr;		
-		  bunch->xp(i) = bunch->xp(i)*prime_coeff + d_rp*x;
-		  bunch->yp(i) = bunch->yp(i)*prime_coeff + d_rp*y;
-		  //bunch->xp(i) = bunch->xp(i)*prime_coeff;
-		  //bunch->yp(i) = bunch->yp(i)*prime_coeff;			
+		//d_rp = cappa*sin(phase + d_phi)*2.0*I1/kr;		
+		bunch->xp(i) = bunch->xp(i)*prime_coeff + d_rp*x;
+		bunch->yp(i) = bunch->yp(i)*prime_coeff + d_rp*y;
+		//bunch->xp(i) = bunch->xp(i)*prime_coeff;
+		//bunch->yp(i) = bunch->yp(i)*prime_coeff;			
 	}	
 
 }

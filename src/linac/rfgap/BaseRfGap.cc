@@ -68,7 +68,7 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double p
 		//longitudinal-energy part
 		d_phi = bunch->z(i)*phase_time_coeff;
 		//bunch->dE(i) = bunch->dE(i) + charge*E0TL*cos(phase + d_phi)*I0 - delta_eKin;
-		bunch->dE(i) = bunch->dE(i) - chargeE0TLsin*d_phi;
+		bunch->dE(i) = bunch->dE(i)*beta_out/beta - chargeE0TLsin*d_phi;
 		//transverse focusing 
 		//d_rp = cappa*sin(phase + d_phi)*2.0*I1/kr;		
 		bunch->xp(i) = bunch->xp(i)*prime_coeff + d_rp*x;

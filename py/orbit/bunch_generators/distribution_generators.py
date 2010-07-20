@@ -429,10 +429,10 @@ class TwissAnalysis:
 		gamma = xp2_avg/emitt_rms		
 		return (alpha,beta,gamma,emitt_rms)
 		
-	def getAvgA_AP(self,d):
+	def getAvgU_UP(self,d):
 		"""
-		Returns the (a_avg,ap_avg) parameters in the array 
-		[a,ap] for the dimension d.
+		Returns the (u_avg,up_avg) parameters in the array 
+		[u,up] for the dimension d.
 		"""
 		if(d <  0 or d >= self.nD):
 			print "Dimention n="+str(d)+" does not exist!"
@@ -442,10 +442,10 @@ class TwissAnalysis:
 		xp_avg =  self.xp_avg_v[d]/self.Np	
 		return (x_avg,xp_avg)
 		
-	def getRmsA_AP(self,d):
+	def getRmsU_UP(self,d):
 		"""
-		Returns the (rms a,rms ap) parameters in the array 
-		[a,ap] for the dimension d.
+		Returns the (rms u,rms up) parameters in the array 
+		[u,up] for the dimension d.
 		"""
 		if(d <  0 or d >= self.nD):
 			print "Dimention n="+str(d)+" does not exist!"
@@ -455,10 +455,10 @@ class TwissAnalysis:
 		xp2_rms = math.sqrt(math.fabs((self.xp2_avg_v[d] -  (self.xp_avg_v[d])**2/self.Np)/(self.Np-1))) 
 		return (x2_rms,xp2_rms)
 				
-	def getMaxA_AP(self,d):
+	def getMaxU_UP(self,d):
 		"""
-		Returns the (a_max,ap_max) parameters in the array 
-		[a,ap] for the dimension d.
+		Returns the (u_max,up_max) parameters in the array 
+		[u,up] for the dimension d.
 		"""
 		if(d <  0 or d >= self.nD):
 			print "Dimention n="+str(d)+" does not exist!"
@@ -466,10 +466,10 @@ class TwissAnalysis:
 		if(self.Np == 0): return (0.,0.) 
 		return (self.x_max_v[d],self.xp_max_v[d])
 
-	def getMinA_AP(self,d):
+	def getMinU_UP(self,d):
 		"""
-		Returns the (a_min,ap_min) parameters in the array 
-		[a,ap] for the dimension d.
+		Returns the (u_min,up_min) parameters in the array 
+		[u,up] for the dimension d.
 		"""
 		if(d <  0 or d >= self.nD):
 			print "Dimention n="+str(d)+" does not exist!"

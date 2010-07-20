@@ -18,7 +18,7 @@ from orbit.lattice import AccNode, AccActionsContainer
 from orbit.teapot_base import TPB
 
 # from linac import the RF gap classes
-from linac import BaseRfGap
+from linac import BaseRfGap, MatrixRfGap
 
 class BaseLinacNode(AccNode):
 	""" 
@@ -130,7 +130,6 @@ class LinacNode(BaseLinacNode):
 		Returns the  Tilt Node instance after this node
 		"""
 		return self.__tiltNodeOUT	
-
 
 
 class LinacMagnetNode(LinacNode):
@@ -371,7 +370,7 @@ class Quad(LinacMagnetNode):
 		"""
 		bunch = paramsDict["bunch"]		
 		momentum = bunch.getSyncParticle().momentum()
-		kq = self.getParam("dB/dr")/(3.335640952*momentum)		
+		kq = self.getParam("dB/dr")/(3.335640952*momentum)	
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
@@ -482,8 +481,15 @@ class BaseRF_Gap(BaseLinacNode):
 		self.setType("baserfgap")	
 		self.__isFirstGap = False
 		self.setnParts(3)	
-		self.cppGapModel = BaseRfGap()
+		self.cppGapModel = MatrixRfGap()
 
+	def setCppGapModel(self, cppGapModel = MatrixRfGap):
+		"""
+		This method will set the fast c++ simple model for the RF Gap. 
+		By default it is Matrix RF Gap model which is a linear transport matrix.
+		"""
+		self.cppGapModel = cppGapModel()
+	
 	def initialize(self):
 		"""
 		The Ring RF TEAPOT class implementation

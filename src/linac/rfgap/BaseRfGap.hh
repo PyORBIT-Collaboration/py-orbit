@@ -25,7 +25,7 @@ class BaseRfGap: public OrbitUtils::CppPyWrapper
 {
 public:
 	
-	/** Constructor for E0TL= 0 RF gap*/
+	/** Constructor for Base RF gap*/
   BaseRfGap();
 	
   /** Destructor */

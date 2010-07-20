@@ -2,6 +2,7 @@
 
 #include "wrap_linacmodule.hh"
 #include "wrap_BaseRfGap.hh"
+#include "wrap_MatrixRfGap.hh"
 
 static PyMethodDef linacmoduleMethods[] = { {NULL,NULL} };
 
@@ -14,6 +15,7 @@ extern "C" {
 		 PyObject* module = Py_InitModule("linac",linacmoduleMethods);
 		 //add the other classes init
 		 wrap_linac::initBaseRfGap(module);
+		 wrap_linac::initMatrixRfGap(module);
 	 }
 	 
 	 PyObject* getLinacType(char* name){

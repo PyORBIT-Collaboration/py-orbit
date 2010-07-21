@@ -134,7 +134,7 @@ void MatrixOperations::track(Bunch* bunch,Matrix* mtrx){
 	if( n != m || (m != 6 && m != 7)){
 		ORBIT_MPI_Finalize("MatrixOperations:track(Bunch,Matrix) - Matrix has a wrong size.");
 	}
-	double tmp[5];
+	double tmp[6];
 	double** bunch_arr = bunch->coordArr();
 	double** arr = mtrx->getArray();
 	for(int ip = 0, nParts = bunch->getSize(); ip < nParts; ip++){

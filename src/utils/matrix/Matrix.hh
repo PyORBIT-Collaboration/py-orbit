@@ -28,8 +28,10 @@ namespace OrbitUtils{
 			/** Constructor. */
 			Matrix(int n, int m);
 			
-			/** Destructor */
+			/** Copy constructor. */
 			Matrix(Matrix* mtrx);
+			
+			/** Destructor */
 			~Matrix();
 		
 			/** Returns the pointer to the two dimensional array. */

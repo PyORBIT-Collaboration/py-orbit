@@ -113,12 +113,25 @@ double* BufferStore::getDoubleArr(int index, int size){
 }
 
 double* BufferStore::getFreeDoubleArr(int &index, int size){
+	int local_size_max = 0;
+	int ind_size_max = -1;
 	for(int i = 0; i < getDoubleArrSize(); i++){
 		int used = isInUseDoubleArr(i);
-		if(used == 0){
+		int local_size = getDoubleArrSize(i);
+		if(used == 0 && local_size >= size){
 			index = i;
 			return getDoubleArr(i,size);
 		}
+		if(used == 0){
+			if(local_size_max < local_size){
+				local_size_max = local_size;
+				ind_size_max = i;
+			}
+		}
+	}
+	if(ind_size_max >= 0){
+		index = ind_size_max;
+		return getDoubleArr(ind_size_max,size);
 	}
 	index = getDoubleArrSize();
 	return getDoubleArr(index,size);
@@ -172,13 +185,26 @@ int* BufferStore::getIntArr(int index, int size){
 }
 
 int* BufferStore::getFreeIntArr(int &index, int size){
+	int local_size_max = 0;
+	int ind_size_max = -1;	
 	for(int i = 0; i < getIntArrSize(); i++){
 		int used = isInUseIntArr(i);
-		if(used == 0){
+		int local_size = getIntArrSize(i);
+		if(used == 0 && local_size >= size){
 			index = i;
 			return getIntArr(i,size);
 		}
+		if(used == 0){
+			if(local_size_max < local_size){
+				local_size_max = local_size;
+				ind_size_max = i;
+			}
+		}		
 	}
+	if(ind_size_max >= 0){
+		index = ind_size_max;
+		return getIntArr(ind_size_max,size);
+	}	
 	index = getIntArrSize();
 	return getIntArr(index,size);
 }

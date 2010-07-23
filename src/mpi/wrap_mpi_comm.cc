@@ -170,6 +170,14 @@ extern "C" {
 		Py_DECREF(pyMPI_Comm);
 	}	
 	
+	PyObject* getMPI_CommType(char* name){
+		PyObject* mod = PyImport_ImportModule("orbit_mpi.mpi_comm");
+		PyObject* pyType = PyObject_GetAttrString(mod,name);
+		Py_DECREF(mod);
+		Py_DECREF(pyType);
+		return pyType;
+	}				
+	
 #ifdef __cplusplus
 }
 #endif

@@ -18,6 +18,9 @@ extern "C" {
 		//The function that will be exposed as C/C++ API for MPI_Comm		
 		pyORBIT_MPI_Comm* newMPI_Comm();
 		void freeMPI_Comm(pyORBIT_MPI_Comm* pyMPI_Comm);
+		
+		//Returns the type object for the specified name, like MPI_Comm
+		PyObject* getMPI_CommType(char* name);
   }
 
 #ifdef __cplusplus

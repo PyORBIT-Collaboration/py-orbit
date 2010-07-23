@@ -17,25 +17,27 @@
 
 #include "PhaseVector.hh"
 
+#include <cstdlib>
+
 using namespace OrbitUtils;
 
 PhaseVector::PhaseVector(int n_in)
 {
 	n = n_in;
-  v = new double[n];
+  v = (double* ) malloc (sizeof(double)*n);
 	zero();
 }
 
 PhaseVector::PhaseVector(PhaseVector* vIn)
 {
 	n = vIn->size();
-  v = new double[n];
+  v = (double* ) malloc (sizeof(double)*n);
 	vIn->copyTo(this);
 }
 
 PhaseVector::~PhaseVector()
 {
-  delete [] v;
+  free(v);
 }
 
 void PhaseVector::zero(){

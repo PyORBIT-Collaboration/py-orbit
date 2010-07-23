@@ -18,15 +18,18 @@
 #include "Matrix.hh"
 #include "BufferStore.hh"
 
+#include <cstdlib>
+
 using namespace OrbitUtils;
 
 Matrix::Matrix(int n_in, int m_in)
 {
 	n = n_in;
 	m = m_in;
-  a = new double*[n];
+		
+	a = (double** ) malloc (sizeof(double*)*n);
 	for(int i=0; i < n; i++){
-		a[i] = new double[m];
+		a[i] = (double* ) malloc (sizeof(double)*m);
 	}	
 	zero();
 }
@@ -35,9 +38,9 @@ Matrix::Matrix(Matrix* mtrx)
 {
 	n = mtrx->rows();
 	m = mtrx->columns();
-  a = new double*[n];
+	a = (double** ) malloc (sizeof(double*)*n);
 	for(int i=0; i < n; i++){
-		a[i] = new double[m];
+		a[i] = (double* ) malloc (sizeof(double)*m);
 	}	
 	mtrx->copyTo(this);
 }
@@ -45,9 +48,9 @@ Matrix::Matrix(Matrix* mtrx)
 Matrix::~Matrix()
 {
 	for(int i=0; i < n; i++){
-    delete [] a[i];
+    free(a[i]);
   }
-  delete [] a;
+  free(a);
 }
 
 void Matrix::zero(){

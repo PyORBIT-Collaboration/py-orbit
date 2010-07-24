@@ -1323,7 +1323,7 @@ extern "C" {
 		wrap_orbit_syncpart::initsyncpart(module);
   }
 
-	PyObject* getBunchType(char* name){
+	PyObject* getBunchType(const char* name){
 		PyObject* mod = PyImport_ImportModule("bunch");
 		PyObject* pyType = PyObject_GetAttrString(mod,name);
 		Py_DECREF(mod);

@@ -5,7 +5,8 @@
 #-------------------------------------------------------------------------------
 
 LIBS += $(PYTHON_ROOT_LIB)
-LIBS += -ldl -lreadline -ltermcap -lpthread -lutil -lm -Xlinker -export-dynamic
+#LIBS += -ldl -lreadline -ltermcap -lpthread -lutil -lm -Xlinker -export-dynamic
+LIBS += -ldl -lpthread -lutil -lm -Xlinker -export-dynamic
 
 #FFTW library
 LIBS +=  -L${FFTW3_ROOT}/lib -lfftw3

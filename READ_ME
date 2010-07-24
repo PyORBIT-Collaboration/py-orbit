@@ -7,8 +7,7 @@
 ./ext		- source code for external modules. Compilations of this
 		  code should be placed into ./lib.
 
-./lib  	- .so shared libraries to be used under python interpreter,
-		  pyORBIT.
+./lib  	- .so shared libraries to be used under pyORBIT interpreter.
 
 ./examples	- samples of pyORBIT scripts.
 
@@ -31,6 +30,8 @@ PYTHON_VERSION	- python version, for example: export PYTHON_VERSION = 2.4
 PYTHON_ROOT_LIB	- the name of the python library including the full path.
                   It is usually
 		  /usr/lib/python$(PYTHON_VERSION)/config/libpython$(PYTHON_VERSION).a
+		  or it could be shared python library and in this case
+		  export PYTHON_ROOT_LIB=' -L/usr/lib/python${PYTHON_VERSION}/config -lpython${PYTHON_VERSION}'
 
 PYTHON_ROOT_INC	- location of the python header files.
                   It is usually
@@ -45,4 +46,20 @@ LD_LIBRARY_PATH - location of the shared libraries with extenstions of the pyORB
 			
 FFTW3_ROOT - location of the root directory of the FFTW library, version 3 and above  
 
+MPI_CPP - the name of the MPI c++ compiler (could be mpiCC, mpic++ etc.)
 
+===============TROUBLESHOOTING===============================================
+You can use another build tool - Scons (http://www.scons.org/) by typing 
+>scons
+in the pyORBIT directory. In this case python will figure all locations by itself. 
+
+Another hint.
+If you do not know where your Python libraries are, you can use python itself
+to figure that out
+>python
+>>from distutils import sysconfig
+>>print sysconfig.get_config_var('LIBPL')
+>>print sysconfig.get_config_var('LIBRARY')
+>>sysconfig.get_config_var('INCLUDEPY')
+
+These commands will tell you where they are (library and headers).

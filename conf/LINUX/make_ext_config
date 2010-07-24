@@ -2,6 +2,6 @@
 # Linux g++ for creation of shared libraries
 ######################################################################
 
-CXX             =  mpiCC
+CXX             =  ${MPI_CPP}
 CXXFLAGS       += -g -fPIC -DUSE_MPI=1
 LINKFLAGS      += -fPIC -shared -Wl,--export-dynamic

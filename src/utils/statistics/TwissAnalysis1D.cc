@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cfloat>
 
+using namespace OrbitUtils;
+
 /** Constructor */
 TwissAnalysis1D::TwissAnalysis1D(): StatMoments2D()
 {

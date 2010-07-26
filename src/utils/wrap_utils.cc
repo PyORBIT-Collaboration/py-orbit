@@ -7,6 +7,7 @@
 #include "wrap_field_source_container.hh"
 #include "wrap_function.hh"
 #include "wrap_splinech.hh"
+#include "wrap_statmoments2d.hh"
 
 namespace wrap_orbit_utils{
 
@@ -28,6 +29,7 @@ extern "C" {
 		wrap_field_source_container::initFieldSourceContainer(module);
 		wrap_function::initFunction(module);
 		wrap_splinech::initSplineCH(module);
+		wrap_statmoments2d::initstatmoments2d(module);
   }
 
 	PyObject* getOrbitUtilsType(char* name){

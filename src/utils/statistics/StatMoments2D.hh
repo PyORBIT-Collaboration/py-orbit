@@ -14,8 +14,10 @@ The Moments1D class calculates the arbitrary moments of the (u,up) distribution.
 It is used by other classes to calculate Twiss paraemeters etc.
 */
 
-class StatMoments2D: public OrbitUtils::CppPyWrapper
-{
+namespace OrbitUtils{ 
+	
+	class StatMoments2D: public CppPyWrapper
+	{
 	public:
 		
 		/** Constructor with max order = 2 by default */
@@ -29,9 +31,12 @@ class StatMoments2D: public OrbitUtils::CppPyWrapper
 		
 		/** Sets the maximal order of the moments */   
 		void setMaxOrder(int maxOrder);
-				
+		
+		/** Returns the maximal order of the moments */   
+		int getMaxOrder();
+		
 		/** Initialize all internal arrays to get ready to gather statistical information. */   
-		void init();
+		void clean();
 		
 		/** Takes into account the one point (u,up) */   	
 		void account(double u, double up);
@@ -44,7 +49,7 @@ class StatMoments2D: public OrbitUtils::CppPyWrapper
 		
 		/** Returns the statistical moment of the distribution with particular order for up*/ 	
 		double getStatMomentUP(int order_up);
-			
+		
 		/** Returns the minimal value of u */ 	
 		double getMinU();
 		
@@ -59,7 +64,7 @@ class StatMoments2D: public OrbitUtils::CppPyWrapper
 		
 		/** Returns the number of points in the statistic */ 	
 		int getCount();
-	
+		
 		/** It will synchronize the moments through the MPI communicator */ 	
 		int synchronizeMPI(pyORBIT_MPI_Comm* pyComm);
 		
@@ -83,8 +88,10 @@ class StatMoments2D: public OrbitUtils::CppPyWrapper
 		double u_min;
 		double up_max;
 		double up_min;
-
-};
+		
+	};
+	
+} //end of OrbitUtils{} 
 
 #endif
 //endif for STAT_MOMENTS_2D_H

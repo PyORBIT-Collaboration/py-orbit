@@ -13,13 +13,15 @@ The Moments1D class calculates the arbitrary moments of the (u,up) distribution.
 It is used by other classes to calculate Twiss paraemeters etc.
 */
 
-class TwissAnalysis1D: public StatMoments2D
-{
+namespace OrbitUtils{ 
+	
+	class TwissAnalysis1D: public StatMoments2D
+	{
 	public:
 		
 		/** Constructor with max order = 2 by default */
 		TwissAnalysis1D();
-				
+		
 		/** Destructor */
 		virtual ~TwissAnalysis1D();
 		
@@ -34,14 +36,16 @@ class TwissAnalysis1D: public StatMoments2D
 		
     /** Returns Twiss gamma */
 		double getGamma();		
-
+		
 		/** Returns the rms value of u */ 	
 		double getRmsU();
 		
 		/** Returns the rms value of up */ 	
 		double getRmsUP();			
 		
-};
+	};
+	
+} //end of OrbitUtils{}
 
 #endif
 //endif for TWISS_ANALYSIS_1D_H

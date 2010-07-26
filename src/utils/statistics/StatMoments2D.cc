@@ -6,6 +6,8 @@
 
 #include "BufferStore.hh"
 
+using namespace OrbitUtils;
+
 /** Constructor with max order = 2 by default */
 StatMoments2D::StatMoments2D(): CppPyWrapper(NULL)
 {
@@ -36,7 +38,7 @@ StatMoments2D::~StatMoments2D()
 }
 
 /** Initialize all internal arrays to get ready to gather statistical information. */   
-void StatMoments2D::init() 
+void StatMoments2D::clean() 
 {
 	u_max  =  - DBL_MAX;
 	u_min  =    DBL_MAX;
@@ -65,7 +67,7 @@ void StatMoments2D::makeArrays()
 	for(int iu = 0, iu_max = max_order + 1; iu < iu_max; iu++){
 		stat_arr[iu] = new double[max_order + 1];
 	}		
-	init();
+	clean();
 }
 		
 /** Sets the maximal order of the moments */   
@@ -76,6 +78,12 @@ void StatMoments2D::setMaxOrder(int maxOrder)
 	makeArrays();	
 }
 		
+/** Returns the maximal order of the moments */   
+int StatMoments2D::getMaxOrder()
+{
+	return max_order;
+}
+
 /** Takes into account the one point (u,up) */   	
 void StatMoments2D::account(double u, double up)
 {
@@ -161,7 +169,7 @@ int StatMoments2D::getCount()
 /** It will synchronize the moments through the MPI communicator */ 		
 int StatMoments2D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm)
 {
-	int mpi_size = max_order*max_order;
+	int mpi_size = (max_order+1)*(max_order+1);
 	int buff_index0 = -1;
 	int buff_index1 = -1;	
   double* inArr  = OrbitUtils::BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,mpi_size);
@@ -174,8 +182,12 @@ int StatMoments2D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm)
 			ii += 1;
 		}
 	}
-		
-	ORBIT_MPI_Allreduce(inArr,outArr,mpi_size,MPI_DOUBLE,MPI_SUM,pyComm->comm);
+
+	if(pyComm == NULL) {
+		ORBIT_MPI_Allreduce(inArr,outArr,mpi_size,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+	} else {	
+		ORBIT_MPI_Allreduce(inArr,outArr,mpi_size,MPI_DOUBLE,MPI_SUM,pyComm->comm);
+	}
 		
 	ii = 0;
 	for(int iu = 0, iu_max = max_order + 1; iu < iu_max; iu++){
@@ -186,7 +198,11 @@ int StatMoments2D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm)
 	}	
 	
 	int count_MPI = -1;
-	ORBIT_MPI_Allreduce(&count,&count_MPI,1,MPI_INT,MPI_SUM,pyComm->comm);
+	if(pyComm == NULL) {
+		ORBIT_MPI_Allreduce(&count,&count_MPI,1,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+	}	else {
+		ORBIT_MPI_Allreduce(&count,&count_MPI,1,MPI_INT,MPI_SUM,pyComm->comm);
+	}
 	count = count_MPI;
 	
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);

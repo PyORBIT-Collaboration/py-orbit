@@ -178,6 +178,46 @@ extern "C" {
 		return Py_None; 
   }		
 
+	//------------------------------------------------------------
+	//Twiss functions
+	//------------------------------------------------------------
+ 	/** It returns the emittance */
+  static PyObject* StatMoments2D_getEmittance(PyObject *self, PyObject *args){
+	  StatMoments2D* cpp_StatMoments2D = (StatMoments2D*)((pyORBIT_Object*) self)->cpp_obj;
+		return Py_BuildValue("d",cpp_StatMoments2D->getEmittance());
+  }		
+	
+ 	/** It returns the Twiss alpha */
+  static PyObject* StatMoments2D_getAlpha(PyObject *self, PyObject *args){
+	  StatMoments2D* cpp_StatMoments2D = (StatMoments2D*)((pyORBIT_Object*) self)->cpp_obj;
+		return Py_BuildValue("d",cpp_StatMoments2D->getAlpha());
+  }		
+	
+ 	/** It returns the Twiss beta */
+  static PyObject* StatMoments2D_getBeta(PyObject *self, PyObject *args){
+	  StatMoments2D* cpp_StatMoments2D = (StatMoments2D*)((pyORBIT_Object*) self)->cpp_obj;
+		return Py_BuildValue("d",cpp_StatMoments2D->getBeta());
+  }		
+	
+ 	/** It returns the Twiss gamma */
+  static PyObject* StatMoments2D_getGamma(PyObject *self, PyObject *args){
+	  StatMoments2D* cpp_StatMoments2D = (StatMoments2D*)((pyORBIT_Object*) self)->cpp_obj;
+		return Py_BuildValue("d",cpp_StatMoments2D->getGamma());
+  }		
+	
+ 	/** It returns the rms value of u */
+  static PyObject* StatMoments2D_getRmsU(PyObject *self, PyObject *args){
+	  StatMoments2D* cpp_StatMoments2D = (StatMoments2D*)((pyORBIT_Object*) self)->cpp_obj;
+		return Py_BuildValue("d",cpp_StatMoments2D->getRmsU());
+  }		
+	
+ 	/** It returns the rms value of up */
+  static PyObject* StatMoments2D_getRmsUP(PyObject *self, PyObject *args){
+	  StatMoments2D* cpp_StatMoments2D = (StatMoments2D*)((pyORBIT_Object*) self)->cpp_obj;
+		return Py_BuildValue("d",cpp_StatMoments2D->getRmsUP());
+  }		
+	
+	
   //-----------------------------------------------------
   //destructor for python StatMoments2D class (__del__ method).
   //-----------------------------------------------------
@@ -203,7 +243,13 @@ extern "C" {
  		{ "getCount",			 	     StatMoments2D_getCount,    	    METH_VARARGS,"Returns the number of (u,up) points in the StatMoments2D"},
   	{ "clean",			 	       StatMoments2D_clean,    	      METH_VARARGS,"It will remove all points in the StatMoments2D"},		
   	{ "synchronizeMPI",			 StatMoments2D_synchronizeMPI,   METH_VARARGS,"It will synchronize data over CPUs in specified communicator the StatMoments2D"},
-    {NULL}
+  	{ "getEmittance",			 	 StatMoments2D_getEmittance,    	METH_VARARGS,"Returns the emittance"},		
+  	{ "getAlpha",			 	     StatMoments2D_getAlpha,    	    METH_VARARGS,"Returns Twiss alpha"},		
+  	{ "getBeta",			 	     StatMoments2D_getBeta,    	    METH_VARARGS,"Returns Twiss beta"},		
+  	{ "getGamma",			 	     StatMoments2D_getGamma,    	    METH_VARARGS,"Returns Twiss gamma"},		
+  	{ "getRmsU",			 	     StatMoments2D_getRmsU,    	    METH_VARARGS,"Returns the rms value of u"},		
+  	{ "getRmsUP",			 	     StatMoments2D_getRmsUP,    	    METH_VARARGS,"Returns the rms value of up"},			
+   {NULL}
   };
 	
 	// defenition of the memebers of the python StatMoments2D wrapper class

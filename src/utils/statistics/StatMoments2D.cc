@@ -207,6 +207,82 @@ int StatMoments2D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm)
 	
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);		
-	
 }
+
+
+/** Returns the emittance */
+double StatMoments2D::getEmittance()
+{
+	double x_avg = getStatMomentU(1);
+	double xp_avg = getStatMomentUP(1);
+	double x2_avg = fabs(getStatMomentU(2) - x_avg*x_avg);
+	double xp2_avg = fabs(getStatMomentUP(2) - xp_avg*xp_avg);
+	double x_xp_avg = 	getStatMoment(1,1) - x_avg*xp_avg;
+  double emitt_rms =  sqrt(x2_avg*xp2_avg - x_xp_avg*x_xp_avg);
+	return emitt_rms;
+}
+
+/** Returns Twiss alpha */
+double StatMoments2D::getAlpha()
+{
+	double x_avg = getStatMomentU(1);
+	double xp_avg = getStatMomentUP(1);
+	double x2_avg = fabs(getStatMomentU(2) - x_avg*x_avg);
+	double xp2_avg = fabs(getStatMomentUP(2) - xp_avg*xp_avg);
+	double x_xp_avg = 	getStatMoment(1,1) - x_avg*xp_avg;
+	double emitt2_rms = x2_avg*xp2_avg - x_xp_avg*x_xp_avg;
+	if(	emitt2_rms <= 0.) return 0.;
+  double emitt_rms =  sqrt(emitt2_rms);
+	double alpha = - x_xp_avg/emitt_rms;
+	return alpha;
+}
+
+/** Returns Twiss beta */
+double StatMoments2D::getBeta()
+{
+	double x_avg = getStatMomentU(1);
+	double xp_avg = getStatMomentUP(1);
+	double x2_avg = fabs(getStatMomentU(2) - x_avg*x_avg);
+	double xp2_avg = fabs(getStatMomentUP(2) - xp_avg*xp_avg);
+	double x_xp_avg = 	getStatMoment(1,1) - x_avg*xp_avg;
+	double emitt2_rms = x2_avg*xp2_avg - x_xp_avg*x_xp_avg;
+	if(	emitt2_rms <= 0.) return 0.;
+  double emitt_rms =  sqrt(emitt2_rms);
+	double beta = x2_avg/emitt_rms;
+	return beta;	
+}
+
+/** Returns Twiss gamma */
+double StatMoments2D::getGamma()
+{	
+	double x_avg = getStatMomentU(1);
+	double xp_avg = getStatMomentUP(1);
+	double x2_avg = fabs(getStatMomentU(2) - x_avg*x_avg);
+	double xp2_avg = fabs(getStatMomentUP(2) - xp_avg*xp_avg);
+	double x_xp_avg = 	getStatMoment(1,1) - x_avg*xp_avg;
+	double emitt2_rms = x2_avg*xp2_avg - x_xp_avg*x_xp_avg;
+	if(	emitt2_rms <= 0.) return DBL_MAX;
+  double emitt_rms =  sqrt(emitt2_rms);
+	double gamma = xp2_avg/emitt_rms;
+	return gamma;
+}
+
+/** Returns the rms value of u */ 	
+double StatMoments2D::getRmsU()
+{
+	double x_avg = getStatMomentU(1);
+	double x2_avg = fabs(getStatMomentU(2) - x_avg*x_avg);
+	return sqrt(x2_avg);
+}
+
+/** Returns the rms value of up */ 	
+double StatMoments2D::getRmsUP()
+{
+	double xp_avg = getStatMomentUP(1);
+	double xp2_avg = fabs(getStatMomentUP(2) - xp_avg*xp_avg);
+	return sqrt(xp2_avg);
+}
+
+
+
 

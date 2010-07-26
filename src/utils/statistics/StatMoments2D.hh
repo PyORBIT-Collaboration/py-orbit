@@ -68,6 +68,24 @@ namespace OrbitUtils{
 		/** It will synchronize the moments through the MPI communicator */ 	
 		int synchronizeMPI(pyORBIT_MPI_Comm* pyComm);
 		
+    /** Returns the emittance */
+		double getEmittance();
+		
+    /** Returns Twiss alpha */
+		double getAlpha();
+		
+    /** Returns Twiss beta */
+		double getBeta();
+		
+    /** Returns Twiss gamma */
+		double getGamma();		
+		
+		/** Returns the rms value of u */ 	
+		double getRmsU();
+		
+		/** Returns the rms value of up */ 	
+		double getRmsUP();				
+		
 	private:
 		
 		//make arrays

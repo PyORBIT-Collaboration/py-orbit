@@ -20,7 +20,7 @@ extern "C" {
 		void freeMPI_Comm(pyORBIT_MPI_Comm* pyMPI_Comm);
 		
 		//Returns the type object for the specified name, like MPI_Comm
-		PyObject* getMPI_CommType(char* name);
+		PyObject* getMPI_CommType(const char* name);
   }
 
 #ifdef __cplusplus

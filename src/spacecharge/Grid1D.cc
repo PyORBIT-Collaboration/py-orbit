@@ -11,15 +11,18 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "Grid1D.hh"
+#include "Bunch.hh"
 #include "ParticleMacroSize.hh"
+#include "BufferStore.hh"
 
 #include <iostream>
 
 using namespace OrbitUtils;
+//zBins - grid size [zBins]
+//zSize - geometry parameters [m]
 
 // Constructor
-Grid1D::Grid1D(int zSize): CppPyWrapper(NULL)
-{
+Grid1D::Grid1D(int zSize): CppPyWrapper(NULL){
 	zSize_ = zSize;
 	zMin_ = -1.0; 
 	zMax_ = +1.0; 
@@ -27,8 +30,7 @@ Grid1D::Grid1D(int zSize): CppPyWrapper(NULL)
 	setZero();
 }
 
-Grid1D::Grid1D(int zSize, double zMin, double zMax): CppPyWrapper(NULL)
-{
+Grid1D::Grid1D(int zSize, double zMin, double zMax): CppPyWrapper(NULL){
 	zSize_ = zSize;
 	zMin_ = zMin;
 	zMax_ = zMax;
@@ -36,21 +38,14 @@ Grid1D::Grid1D(int zSize, double zMin, double zMax): CppPyWrapper(NULL)
 	setZero();
 }
 
-void Grid1D::init()
-{
-//MPI
-	int rank = 0;
-	ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	ORBIT_MPI_Finalize();  
-	
+void Grid1D::init(){
 	dz_ = (zMax_ - zMin_)/(zSize_ - 1);
 	arr_ = new double[zSize_];
 }
 
 // Destructor
-Grid1D::~Grid1D()
-{
-	//delete [] arr_;
+Grid1D::~Grid1D(){
+	delete [] arr_;
 }
 /** Sets the value to the one point of the grid  */
 void Grid1D::setValue(double value,int iZ){
@@ -188,26 +183,68 @@ void Grid1D::setZero(){
 
 void Grid1D::getIndAndFracZ(double z, int& ind, double& frac){
 	if(zSize_ > 1){
-		ind  = int ( (z - zMin_)/dz_ + 0.5 );
+	    ind  = int ( (z - zMin_)/dz_ + 0.5 );
 
-		if(zSize_ > 2){
-		//cut off edge for three point interpolation
-			if(ind < 1) ind = 1;
-			if(ind > (zSize_-2))
-				ind =  zSize_ - 2;
-				frac = (z - (zMin_ + ind * dz_))/dz_;
+	    if(zSize_ > 2){
+	        //cut off edge for three point interpolation
+	        if(ind < 1) ind = 1;
+		if(ind > (zSize_-2))
+		    ind =  zSize_ - 2;
+	    	    frac = (z - (zMin_ + ind * dz_))/dz_;
 		}
-		if(zSize_ == 2){
-			frac = (z - zMin_)/dz_;
-			if(ind < 0) {
-				ind = 0; frac = 0.0;
-			}
-			else if(ind > 1){
-				ind = 1; frac = 1.0;
-			}
+	    if(zSize_ == 2){
+		frac = (z - zMin_)/dz_;
+		if(ind < 0) {ind = 0; frac = 0.0;}
+		else if(ind > 1) {ind = 1; frac = 1.0;}
 		}
 	}
-	else{
-		dz_=0.0; ind = 0; frac = 0.0;
+	else {dz_=0.0; ind = 0; frac = 0.0;}
+}
+
+/** Returns the min z in the grid points */ 
+double Grid1D::getMinZ(){return zMin_;};
+
+/** Returns the max z in the grid points */ 
+double Grid1D::getMaxZ(){return zMax_;};
+
+/** Sets z-grid */
+void Grid1D::setGridZ(double zMin, double zMax){
+	zMax_ = zMin;
+	zMax_ = zMax;
+	dz_ = (zMax_ - zMin_)/(zSize_ -1);
+	setZero();
+}
+
+double Grid1D::getGridZ(int index){
+	return zMin_ + index*dz_;
+}
+
+/** Returns the grid size in z-direction */
+int Grid1D::getSizeZ(){
+	return zSize_;
+}
+
+/**synchronizeMPI */
+void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
+//MPI
+	int size_MPI = zSize_ * zSize_;
+	int buff_index0 = 0;
+	int buff_index1 = 0;
+	double* inArr  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,size_MPI);
+	double* outArr = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,size_MPI);
+	
+	for(int i = 0; i < zSize_; i++){
+		inArr[i] = arr_[i];
 	}
+	
+	ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,pyComm->comm);
+
+	for(int i = 0; i < zSize_; i++){
+		arr_[i] = outArr[i];	
+	}
+	
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedIntArr(buff_index0);
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedIntArr(buff_index1);	
+	
+  // ===== MPI end =====
 }

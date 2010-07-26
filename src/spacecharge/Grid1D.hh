@@ -34,6 +34,23 @@ public:
 	/** Returns the interpolated value*/
 	double getValue(double z);
 	
+	/** Returns the min z in the grid points */
+	double getMinZ();
+	
+	/** Returns the max z in the grid points */
+	double getMaxZ();
+	
+	/** Sets z-grid */
+	void setGridZ(double zMin, double zMax);
+	
+	double getGridZ(int index);
+	
+	/** Returns the grid size in z-direction */
+	int getSizeZ();
+	
+	/** synchronizeMPI */
+	void synchronizeMPI(pyORBIT_MPI_Comm* comm);
+	
 	/** Bins the Bunch into the grid. If bunch has a macrosize 
 	    particle attribute it will be used.*/	
 	void binBunch(Bunch* bunch);

@@ -243,8 +243,8 @@ void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
 		arr_[i] = outArr[i];	
 	}
 	
-	OrbitUtils::BufferStore::getBufferStore()->setUnusedIntArr(buff_index0);
-	OrbitUtils::BufferStore::getBufferStore()->setUnusedIntArr(buff_index1);	
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
 	
   // ===== MPI end =====
 }

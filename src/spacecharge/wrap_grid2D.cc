@@ -46,13 +46,13 @@ extern "C" {
 		return 0;
   }
 		
-	//setZero()
-	static PyObject* Grid2D_setZero(PyObject *self, PyObject *args){
+  	//setZero()
+  static PyObject* Grid2D_setZero(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
 		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
 		cpp_Grid2D->setZero();
 		Py_INCREF(Py_None);
-    return Py_None;	
+		return Py_None;	
 	}
 	
 	//getValue(double x, double y)
@@ -75,7 +75,9 @@ extern "C" {
 		if(!PyArg_ParseTuple(args,"dii:setValue",&val,&ix,&iy)){
 			ORBIT_MPI_Finalize("PyGrid2D - setValue(val,ix,iy) - parameters are needed.");
 		}
-		return Py_BuildValue("d",cpp_Grid2D->getValue(ix,iy));
+		cpp_Grid2D->setValue(val,ix,iy);
+		Py_INCREF(Py_None);
+		return Py_None;	
 	}
 	
 	//setGridX(double min, double max, int n)
@@ -88,7 +90,7 @@ extern "C" {
 		}
 		cpp_Grid2D->setGridX(min,max);
 		Py_INCREF(Py_None);
-    return Py_None;	
+		return Py_None;	
 	}
 	
 	//setGridY(double min, double max, int n)
@@ -101,7 +103,7 @@ extern "C" {
 		}
 		cpp_Grid2D->setGridY(min,max);
 		Py_INCREF(Py_None);
-    return Py_None;	
+		return Py_None;	
 	}	
 	
 	//getGridX(ix)

@@ -75,7 +75,9 @@ extern "C" {
 		if(!PyArg_ParseTuple(args,"di:setValue",&val,&iz)){
 			ORBIT_MPI_Finalize("PyGrid1D - setValue(val,iz) - parameters are needed.");
 		}
-		return Py_BuildValue("d",cpp_Grid1D->getValue(iz));
+		cpp_Grid1D->setValue(val,iz);
+		Py_INCREF(Py_None);
+		return Py_None;	
 	}
   //binBunch(Bunch* bunch)
   static PyObject* Grid1D_binBunch(PyObject *self, PyObject *args){
@@ -105,7 +107,7 @@ extern "C" {
 		}
 		cpp_Grid1D->binValue(val,z);
 		Py_INCREF(Py_None);
-    return Py_None;	
+		return Py_None;	
 	}	
 	
   //calcGradient(double z)
@@ -118,7 +120,7 @@ extern "C" {
 			ORBIT_MPI_Finalize("PyGrid1D - calcGradient(z) - parameters are needed.");
 		}
 		cpp_Grid1D->calcGradient(z,ez);
-		return Py_BuildValue("(d)",ez);
+		return Py_BuildValue("d",ez);
 	}	
 		
   //getMinZ()
@@ -145,7 +147,7 @@ extern "C" {
 		}
 		cpp_Grid1D->setGridZ(min,max);
 		Py_INCREF(Py_None);
-    return Py_None;	
+		return Py_None;	
 	}
 	
   //getGridZ(iz)

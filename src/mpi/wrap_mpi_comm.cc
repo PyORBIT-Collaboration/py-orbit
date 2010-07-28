@@ -163,7 +163,7 @@ extern "C" {
 	pyORBIT_MPI_Comm* newMPI_Comm(){
 		pyORBIT_MPI_Comm* pyMPI_Comm = PyObject_New(pyORBIT_MPI_Comm,&pyORBIT_MPI_Comm_Type);
 		pyMPI_Comm->comm = MPI_COMM_WORLD;
-    return pyMPI_Comm;
+		return pyMPI_Comm;
 	}
 	
 	void freeMPI_Comm(pyORBIT_MPI_Comm* pyMPI_Comm){

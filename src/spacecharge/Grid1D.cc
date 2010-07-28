@@ -47,6 +47,7 @@ void Grid1D::init(){
 Grid1D::~Grid1D(){
 	delete [] arr_;
 }
+
 /** Sets the value to the one point of the grid  */
 void Grid1D::setValue(double value,int iZ){
 	arr_[iZ] = value;
@@ -79,7 +80,7 @@ double Grid1D::getValue(double z){
 // (== local average macroPart density per rad / average density)
 	//calc value
 	double value= Wzm * arr_[iZ-1] + Wz0 * arr_[iZ] + Wzp * arr_[iZ+1];
-	
+	return value;
 }
 
 void Grid1D::binBunch(Bunch* bunch){
@@ -138,12 +139,11 @@ void Grid1D::binValue(double macroSize,double z){
 	  }
 }
 
-double Grid1D::calcGradient(double z,double& gradZ){
+void Grid1D::calcGradient(double z,double& ez){
 	double Wzm, Wz0, Wzp;
 	double dWzm, dWz0, dWzp;
 	int iZ;
 	double zFrac,zFrac2;
-	double ez;
 	Wzm = Wz0 = Wzp = 0.0;
 	dWzm = dWz0 = dWzp = 0.0;
 	
@@ -168,7 +168,6 @@ double Grid1D::calcGradient(double z,double& gradZ){
 	}
 	//calculate gradient
 	ez = Wzm * dWzm * arr_[iZ-1] + Wz0 * dWz0 * arr_[iZ] + Wzp * dWzp * arr_[iZ+1];
-	return ez;
 }
 
 

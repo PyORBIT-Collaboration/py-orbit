@@ -59,7 +59,7 @@ public:
 	void binValue(double macroSize,double z);
 	
 	/** Calculates gradient at a position (z) */
-	double calcGradient(double z,double& gradZ);
+	void calcGradient(double z,double& ez);
 	
 	/** Sets all grid points to zero */
 	void setZero();

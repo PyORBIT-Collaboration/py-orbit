@@ -982,7 +982,6 @@ namespace wrap_orbit_bunch{
     return Py_BuildValue("i",size);
   }
 
-
   //Sets or returns a particles' attributes' value
   //  the action is depended on the number of arguments
   //  (attr_name,part_index, attr_index) - returns double-value
@@ -1000,22 +999,21 @@ namespace wrap_orbit_bunch{
     int attr_index = 0;
     double val = 0.;
 
-    if(nVars == 3 ||  nVars == 4){
+    if(nVars == 3 ||  nVars == 4){        
+       if(!PyArg_ParseTuple(	args,"sii|d:partAttrValue",&attr_name,&part_index ,&attr_index,&val)){
+          error("PyBunch - partAttrValue(attr_name,part_index,atr_index,[val]) - params. are needed");
+       }
+			 std::string attr_name_str(attr_name);			 
+			 int bunch_size = cpp_bunch->getSize();
+			 int attr_size = cpp_bunch->getParticleAttributes(attr_name_str)->getAttSize();
+			 if(part_index >=  bunch_size || attr_size <= attr_index){
+				 error("PyBunch - partAttrValue(attr_name,part_index,atr_index,[val]) - indexes out of limits! Stop!");
+			 }
       if(nVars == 3){
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"sii:partAttrValue",&attr_name,&part_index ,&attr_index)){
-          error("PyBunch - partAttrValue(attr_name,part_index,atr_index) - params. are needed");
-        }
-        std::string attr_name_str(attr_name);
         val = cpp_bunch->getParticleAttributes(attr_name_str)->attValue(part_index,attr_index);
         return Py_BuildValue("d",val);
       }
       else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"siid:",&attr_name,&part_index ,&attr_index,&val)){
-          error("PyBunch - partAttrValue(attr_name,part_index,atr_index,value) - params. are needed");
-        }
-        std::string attr_name_str(attr_name);
         cpp_bunch->getParticleAttributes(attr_name_str)->attValue(part_index,attr_index) = val;
 				return Py_BuildValue("d",val);
       }

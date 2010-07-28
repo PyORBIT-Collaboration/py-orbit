@@ -1,8 +1,6 @@
 #ifndef BUNCH_TWISS_ANALYSIS_1D_H
 #define BUNCH_TWISS_ANALYSIS_1D_H
 
-#include "TwissAnalysis1D.hh"
-
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 

@@ -144,13 +144,13 @@ extern "C" {
 		return Py_BuildValue("d",cpp_Grid1D->getStepZ());
 	}	
 
-	//setGridZ()	
+  //setGridZ()	
   static PyObject* Grid1D_setGridZ(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
 		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
 		double min,max;
-		if(!PyArg_ParseTuple(args,"dd:setGridX",&min,&max)){
-			ORBIT_MPI_Finalize("PyGrid1D - setGridX(min,max) - parameters are needed.");
+		if(!PyArg_ParseTuple(args,"dd:setGridZ",&min,&max)){
+			ORBIT_MPI_Finalize("PyGrid1D - setGridZ(min,max) - parameters are needed.");
 		}
 		cpp_Grid1D->setGridZ(min,max);
 		Py_INCREF(Py_None);
@@ -193,7 +193,18 @@ extern "C" {
 		}
 	 	Py_INCREF(Py_None);
 		return Py_None; 
-  }	
+  }
+  
+  //getValueOnGrid(int index)
+  static PyObject* Grid1D_getValueOnGrid(PyObject *self, PyObject *args){
+     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
+		int index;
+		if(!PyArg_ParseTuple(args,"i:getValueOnGrid",&index)){
+			ORBIT_MPI_Finalize("PyGrid1D - getValueOnGrid(index) - parameters are needed.");
+		}
+		return Py_BuildValue("d",cpp_Grid1D->getValueOnGrid(index));
+  }
   //-----------------------------------------------------
   //destructor for python Grid1D class (__del__ method).
   //-----------------------------------------------------

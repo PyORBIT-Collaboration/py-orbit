@@ -115,7 +115,10 @@ public:
 
   /** Sets y-grid */
   void setGridY(double yMin, double yMax);
-	
+  
+  /** Returns the interpolated value on grid*/
+  double getValueOnGrid(int iX, int iY);
+  
   private:
 	
 		//memory allocation and step calculation for dx_ and dy_ 

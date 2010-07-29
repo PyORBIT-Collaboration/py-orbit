@@ -223,8 +223,17 @@ extern "C" {
 		}
 		cpp_Grid2D->calcGradient(x,y,ex,ey);
 		return Py_BuildValue("(dd)",ex,ey);
+	}
+	//getValueOnGrid(int ix, int iy)
+  static PyObject* Grid2D_getValueOnGrid(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		int ix,iy;
+		if(!PyArg_ParseTuple(args,"ii:getValueOnGrid",&ix,&iy)){
+			ORBIT_MPI_Finalize("PyGrid2D - getValueOnGrid(ix,iy) - parameters are needed.");
+		}
+		return Py_BuildValue("d",cpp_Grid2D->getValueOnGrid(ix,iy));
 	}	
-	
   //-----------------------------------------------------
   //destructor for python Grid2D class (__del__ method).
   //-----------------------------------------------------

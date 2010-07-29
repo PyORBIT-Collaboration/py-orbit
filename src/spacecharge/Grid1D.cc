@@ -100,8 +100,8 @@ void Grid1D::binBunch(Bunch* bunch){
 		for(int i = 0, n = bunch->getSize(); i < n; i++){
 			binValue(m_size,part_coord_arr[i][4]);
 		}
-	}
-	synchronizeMPI(NULL);
+	}	
+	synchronizeMPI(bunch->getMPI_Comm_Local());
 }
 
 void Grid1D::binValue(double macroSize,double z){
@@ -255,4 +255,10 @@ void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
 	
   // ===== MPI end =====
+}
+
+/** Returns the interpolated value on grid*/
+double Grid1D::getValueOnGrid(int index){
+	double z = zMin_ + index*dz_;
+	return getValue(z);
 }

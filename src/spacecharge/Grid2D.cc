@@ -314,4 +314,10 @@ int Grid2D::isInside(double x,double y){
 	if(y < yMin_ || y > yMax_) return 0;
 	return 1;
 }
-	
+
+/** Returns the interpolated value on grid*/
+double Grid2D::getValueOnGrid(int iX, int iY){
+	double x = xMin_ + iX*dx_;
+	double y = yMin_ + iY*dy_;
+	return getValue(x,y);
+}	

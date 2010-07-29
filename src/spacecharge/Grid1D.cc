@@ -95,13 +95,13 @@ void Grid1D::binBunch(Bunch* bunch){
 			m_size = macroSizeAttr->macrosize(i);
 			binValue(m_size,part_coord_arr[i][4]);
 		}	
-		return;
+	} else {
+		double m_size = bunch->getMacroSize();
+		for(int i = 0, n = bunch->getSize(); i < n; i++){
+			binValue(m_size,part_coord_arr[i][4]);
+		}
 	}
-	
-	double m_size = bunch->getMacroSize();
-	for(int i = 0, n = bunch->getSize(); i < n; i++){
-		binValue(m_size,part_coord_arr[i][4]);	
-	}
+	synchronizeMPI(NULL);
 }
 
 void Grid1D::binValue(double macroSize,double z){
@@ -125,16 +125,17 @@ void Grid1D::binValue(double macroSize,double z){
 	}
 
 	//Add weight of particle
-	  if( zSize_ >= 3){
+	  if(zSize_ >= 3){
 	  	arr_[iZ-1] += Wzm * macroSize;
 	  	arr_[iZ] += Wz0 * macroSize;
 	  	arr_[iZ+1] += Wzp * macroSize;
+	  	std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
 	  }
-	  else if( zSize_ == 2){
+	  else if(zSize_ == 2){
 	  	arr_[0] += Wzm * macroSize;
 	  	arr_[1] += Wzp * macroSize;	  	  
 	  }
-	  else if( zSize_ == 1){
+	  else if(zSize_ == 1){
 	  	arr_[0] += Wz0 * macroSize;
 	  }
 }
@@ -167,6 +168,8 @@ void Grid1D::calcGradient(double z,double& ez){
 		dWzp = (-1.0)* -1.0/dz_; // for zInd=1		
 	}
 	//calculate gradient
+	std::cerr<<"calculate gradient.\n";
+	std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
 	ez = Wzm * dWzm * arr_[iZ-1] + Wz0 * dWz0 * arr_[iZ] + Wzp * dWzp * arr_[iZ+1];
 }
 
@@ -187,15 +190,14 @@ void Grid1D::getIndAndFracZ(double z, int& ind, double& frac){
 	    if(zSize_ > 2){
 	        //cut off edge for three point interpolation
 	        if(ind < 1) ind = 1;
-		if(ind > (zSize_-2))
-		    ind =  zSize_ - 2;
-	    	    frac = (z - (zMin_ + ind * dz_))/dz_;
-		}
+		if(ind > (zSize_-2))ind =  zSize_ - 2;
+		frac = (z - (zMin_ + ind * dz_))/dz_;
+	    }
 	    if(zSize_ == 2){
 		frac = (z - zMin_)/dz_;
 		if(ind < 0) {ind = 0; frac = 0.0;}
 		else if(ind > 1) {ind = 1; frac = 1.0;}
-		}
+	    }
 	}
 	else {dz_=0.0; ind = 0; frac = 0.0;}
 }
@@ -206,9 +208,12 @@ double Grid1D::getMinZ(){return zMin_;};
 /** Returns the max z in the grid points */ 
 double Grid1D::getMaxZ(){return zMax_;};
 
+/** Returns the grid step along x-axis */
+double Grid1D::getStepZ(){return dz_;};
+
 /** Sets z-grid */
 void Grid1D::setGridZ(double zMin, double zMax){
-	zMax_ = zMin;
+	zMin_ = zMin;
 	zMax_ = zMax;
 	dz_ = (zMax_ - zMin_)/(zSize_ -1);
 	setZero();
@@ -236,7 +241,11 @@ void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
 		inArr[i] = arr_[i];
 	}
 	
-	ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,pyComm->comm);
+	if(pyComm == NULL) {
+		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+	} else {
+		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,pyComm->comm);
+	}
 
 	for(int i = 0; i < zSize_; i++){
 		arr_[i] = outArr[i];	

@@ -40,6 +40,9 @@ public:
 	/** Returns the max z in the grid points */
 	double getMaxZ();
 	
+	/** Returns the grid step along x-axis */
+	double getStepZ();
+	
 	/** Sets z-grid */
 	void setGridZ(double zMin, double zMax);
 	

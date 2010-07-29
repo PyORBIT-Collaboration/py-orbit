@@ -135,9 +135,16 @@ extern "C" {
     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
 		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;	
 		return Py_BuildValue("d",cpp_Grid1D->getMaxZ());
-	}	
+	}
 	
-  //setGridZ()	
+  //getStepZ()
+  static PyObject* Grid1D_getStepZ(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;	
+		return Py_BuildValue("d",cpp_Grid1D->getStepZ());
+	}	
+
+	//setGridZ()	
   static PyObject* Grid1D_setGridZ(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
 		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
@@ -208,6 +215,7 @@ extern "C" {
 		{ "getSizeZ",     Grid1D_getSizeZ,    METH_VARARGS,"returns the size of grid in Z dir."},
 		{ "getMinZ",      Grid1D_getMinZ,     METH_VARARGS,"returns the min grid point in Z dir."},
 		{ "getMaxZ",      Grid1D_getMaxZ,     METH_VARARGS,"returns the max grid point in Z dir."},
+		{ "getStepZ",     Grid1D_getStepZ,     METH_VARARGS,"returns the step in Z dir."},
 		{ "binValue",     Grid1D_binValue,    METH_VARARGS,"bins the value into the 1D mesh"},
 		{ "binBunch",     Grid1D_binBunch,    METH_VARARGS,"bins the Bunch instance into the 1D mesh"},
 		{ "calcGradient", Grid1D_calcGradient,METH_VARARGS,"returns gradient as (gz) for point (z)"},

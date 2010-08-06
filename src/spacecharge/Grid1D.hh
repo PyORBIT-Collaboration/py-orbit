@@ -31,6 +31,9 @@ public:
 	/** Sets the value to the one point*/		
 	void setValue(double value,int iZ);
 	
+	/** Returns the value on grid*/
+	double getValueOnGrid(int iZ);
+	
 	/** Returns the interpolated value*/
 	double getValue(double z);
 	
@@ -73,9 +76,7 @@ public:
 	    The fraction will be : 0 <= frac <= 1.0
 	*/
 	void getIndAndFracZ(double z, int& ind, double& frac);
-	
-	/** Returns the interpolated value on grid*/
-	double getValueOnGrid(int index);
+
 private:
 	//memory allocation and step calculation for dx_ and dy_ 
 	void init();

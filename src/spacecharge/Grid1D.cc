@@ -53,6 +53,12 @@ void Grid1D::setValue(double value,int iZ){
 	arr_[iZ] = value;
 }
 
+/** Returns the value on grid*/
+double Grid1D::getValueOnGrid(int iZ){	
+	return arr_[iZ];
+}
+
+/** Returns the interpolated value on grid*/	
 double Grid1D::getValue(double z){
 	int iZ;
 	double Wzm, Wz0, Wzp;
@@ -255,10 +261,4 @@ void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
 	
   // ===== MPI end =====
-}
-
-/** Returns the interpolated value on grid*/
-double Grid1D::getValueOnGrid(int index){
-	double z = zMin_ + index*dz_;
-	return getValue(z);
 }

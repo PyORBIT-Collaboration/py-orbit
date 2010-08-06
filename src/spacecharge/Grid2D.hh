@@ -26,13 +26,13 @@ class Grid2D: public OrbitUtils::CppPyWrapper
 {
 public:
 	
-	/** Constructor with just grid sizes*/
+  /** Constructor with just grid sizes*/
   Grid2D(int xSize, int ySize);
 	
-	/** Constructor with grid limits and sizes*/
-	Grid2D(int xSize, int ySize,
-		     double xMin, double xMax,     
-	       double yMin, double yMax);
+  /** Constructor with grid limits and sizes*/
+  Grid2D(int xSize, int ySize,
+  	 double xMin, double xMax,     
+         double yMin, double yMax);
 
   /** Destructor */
   virtual ~Grid2D();
@@ -40,16 +40,19 @@ public:
 	/** Sets all grid points to zero */	
 	void setZero();
 	
-  /** Returns the reference to the 2D array */	
+	/** Returns the reference to the 2D array */	
 	double** getArr();
 	
 	/** Returns the interpolated value from the 2D grid */	
 	double getValue(double x, double y);
+		  
+	/** Returns the interpolated value on grid*/
+	double getValueOnGrid(int ix, int iy);
 	
 	/** Sets the value to the one point of the 2D grid  */	
 	void setValue(double value, int ix, int iy);
-		
-	/** Bins the Bunch into the 2D grid. If bunch has a macrosize 
+
+  	/** Bins the Bunch into the 2D grid. If bunch has a macrosize 
 	    particle attribute it will be used. 
 	*/	
 	void binBunch(Bunch* bunch);	
@@ -69,8 +72,8 @@ public:
   /** Returns the grid size in y-direction */
   int getSizeY();
 	
-	/** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */
-	int isInside(double x,double y);
+  /** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */
+  int isInside(double x,double y);
 
   /** Returns the index and the fraction of the grid's point for particular x.
       The index is a central point in three point interpolation:
@@ -116,21 +119,18 @@ public:
   /** Sets y-grid */
   void setGridY(double yMin, double yMax);
   
-  /** Returns the interpolated value on grid*/
-  double getValueOnGrid(int iX, int iY);
-  
   private:
 	
 		//memory allocation and step calculation for dx_ and dy_ 
 		void init();
 		
-	protected:
+  protected:
 		
 		double** arr_;
 		
-  //Grid size
-  int xSize_;
-  int ySize_;
+	//Grid size
+	int xSize_;
+	int ySize_;
 	
 	//Grid steps
 	double dx_;
@@ -138,7 +138,7 @@ public:
 	
 	//grid limits
 	double xMin_,xMax_;
-  double yMin_,yMax_; 
+	double yMin_,yMax_; 
 	
 };
 

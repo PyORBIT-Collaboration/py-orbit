@@ -79,6 +79,18 @@ extern "C" {
 		Py_INCREF(Py_None);
 		return Py_None;	
 	}
+  
+  //getValueOnGrid(int iz)
+  static PyObject* Grid1D_getValueOnGrid(PyObject *self, PyObject *args){
+     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
+		int iz;
+		if(!PyArg_ParseTuple(args,"i:getValueOnGrid",&iz)){
+			ORBIT_MPI_Finalize("PyGrid1D - getValueOnGrid(iz) - parameters are needed.");
+		}
+		return Py_BuildValue("d",cpp_Grid1D->getValueOnGrid(iz));
+  }
+
   //binBunch(Bunch* bunch)
   static PyObject* Grid1D_binBunch(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
@@ -194,17 +206,7 @@ extern "C" {
 	 	Py_INCREF(Py_None);
 		return Py_None; 
   }
-  
-  //getValueOnGrid(int index)
-  static PyObject* Grid1D_getValueOnGrid(PyObject *self, PyObject *args){
-     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
-		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
-		int index;
-		if(!PyArg_ParseTuple(args,"i:getValueOnGrid",&index)){
-			ORBIT_MPI_Finalize("PyGrid1D - getValueOnGrid(index) - parameters are needed.");
-		}
-		return Py_BuildValue("d",cpp_Grid1D->getValueOnGrid(index));
-  }
+
   //-----------------------------------------------------
   //destructor for python Grid1D class (__del__ method).
   //-----------------------------------------------------
@@ -221,12 +223,13 @@ extern "C" {
 		{ "setZero",      Grid1D_setZero,     METH_VARARGS,"sets all points on the grid to zero"},
 		{ "getValue",     Grid1D_getValue,    METH_VARARGS,"returns value for (z) point"},
 		{ "setValue",     Grid1D_setValue,    METH_VARARGS,"sets value for (iz) point"},
+		{ "getValueOnGrid",Grid1D_getValueOnGrid,METH_VARARGS,"returns the value on grid with index iz"},
 		{ "setGridZ",     Grid1D_setGridZ,    METH_VARARGS,"sets the Z grid with min,max"},
 		{ "getGridZ",     Grid1D_getGridZ,    METH_VARARGS,"returns the z-grid point with index ind"},
 		{ "getSizeZ",     Grid1D_getSizeZ,    METH_VARARGS,"returns the size of grid in Z dir."},
 		{ "getMinZ",      Grid1D_getMinZ,     METH_VARARGS,"returns the min grid point in Z dir."},
 		{ "getMaxZ",      Grid1D_getMaxZ,     METH_VARARGS,"returns the max grid point in Z dir."},
-		{ "getStepZ",     Grid1D_getStepZ,     METH_VARARGS,"returns the step in Z dir."},
+		{ "getStepZ",     Grid1D_getStepZ,    METH_VARARGS,"returns the step in Z dir."},
 		{ "binValue",     Grid1D_binValue,    METH_VARARGS,"bins the value into the 1D mesh"},
 		{ "binBunch",     Grid1D_binBunch,    METH_VARARGS,"bins the Bunch instance into the 1D mesh"},
 		{ "calcGradient", Grid1D_calcGradient,METH_VARARGS,"returns gradient as (gz) for point (z)"},
@@ -285,7 +288,7 @@ extern "C" {
 
 	//--------------------------------------------------
 	//Initialization function of the pyGrid1D class
-	//It will be called from Bunch wrapper initialization
+	//It will be called from SpaceCharge wrapper initialization
 	//--------------------------------------------------
   void initGrid1D(PyObject* module){
 		if (PyType_Ready(&pyORBIT_Grid1D_Type) < 0) return;

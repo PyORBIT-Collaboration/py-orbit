@@ -355,7 +355,7 @@ void BaseBoundary2D::addBoundaryPotential(Grid2D* rhoGrid,Grid2D*  phiGrid){
 	}
 	
 	
-	//check that the boindary is inside the grids
+	//check that the boundary is inside the grids
   if( rhoGrid->getMinX() > xMin_ || rhoGrid->getMaxX() < xMax_ ||
 			rhoGrid->getMinY() > yMin_ || rhoGrid->getMaxY() < yMax_){
 		int rank = 0;

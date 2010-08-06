@@ -202,7 +202,7 @@ extern "C" {
 
 	//--------------------------------------------------
 	//Initialization function of the pyPoissonSolverFFT2D class
-	//It will be called from Bunch wrapper initialization
+	//It will be called from SpaceCharge wrapper initialization
 	//--------------------------------------------------
   void initPoissonSolverFFT2D(PyObject* module){
 		if (PyType_Ready(&pyORBIT_PoissonSolverFFT2D_Type) < 0) return;

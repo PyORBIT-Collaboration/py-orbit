@@ -79,6 +79,17 @@ extern "C" {
 		Py_INCREF(Py_None);
 		return Py_None;	
 	}
+
+	//getValueOnGrid(int ix, int iy)
+  static PyObject* Grid2D_getValueOnGrid(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		int ix,iy;
+		if(!PyArg_ParseTuple(args,"ii:getValueOnGrid",&ix,&iy)){
+			ORBIT_MPI_Finalize("PyGrid2D - getValueOnGrid(ix,iy) - parameters are needed.");
+		}
+		return Py_BuildValue("d",cpp_Grid2D->getValueOnGrid(ix,iy));
+	}
 	
 	//setGridX(double min, double max, int n)
   static PyObject* Grid2D_setGridX(PyObject *self, PyObject *args){
@@ -224,16 +235,7 @@ extern "C" {
 		cpp_Grid2D->calcGradient(x,y,ex,ey);
 		return Py_BuildValue("(dd)",ex,ey);
 	}
-	//getValueOnGrid(int ix, int iy)
-  static PyObject* Grid2D_getValueOnGrid(PyObject *self, PyObject *args){
-    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
-		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
-		int ix,iy;
-		if(!PyArg_ParseTuple(args,"ii:getValueOnGrid",&ix,&iy)){
-			ORBIT_MPI_Finalize("PyGrid2D - getValueOnGrid(ix,iy) - parameters are needed.");
-		}
-		return Py_BuildValue("d",cpp_Grid2D->getValueOnGrid(ix,iy));
-	}	
+	
   //-----------------------------------------------------
   //destructor for python Grid2D class (__del__ method).
   //-----------------------------------------------------
@@ -318,7 +320,7 @@ extern "C" {
 
 	//--------------------------------------------------
 	//Initialization function of the pyGrid2D class
-	//It will be called from Bunch wrapper initialization
+	//It will be called from SpaceCharge wrapper initialization
 	//--------------------------------------------------
   void initGrid2D(PyObject* module){
 		if (PyType_Ready(&pyORBIT_Grid2D_Type) < 0) return;

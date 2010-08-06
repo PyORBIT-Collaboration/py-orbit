@@ -8,7 +8,7 @@
 using namespace OrbitUtils;
 
 // Constructor
-Grid2D::Grid2D(int xSize,    int ySize): CppPyWrapper(NULL)
+Grid2D::Grid2D(int xSize, int ySize): CppPyWrapper(NULL)
 {
 	xSize_ = xSize;
 	ySize_ = ySize;
@@ -20,9 +20,9 @@ Grid2D::Grid2D(int xSize,    int ySize): CppPyWrapper(NULL)
 	setZero();
 }
 
-Grid2D::Grid2D( int xSize, int ySize, 
-	             double xMin, double xMax,    
-	             double yMin, double yMax): CppPyWrapper(NULL)
+Grid2D::Grid2D(int xSize, int ySize, 
+	       double xMin, double xMax,    
+	       double yMin, double yMax): CppPyWrapper(NULL)
 {
 	xSize_ = xSize;
 	ySize_ = ySize; 
@@ -70,6 +70,11 @@ Grid2D::~Grid2D()
 /** Sets the value to the one point of the 2D grid  */	
 void Grid2D::setValue(double value, int ix, int iy){
 	arr_[ix][iy] = value;
+}
+
+/** Returns the value on grid*/
+double Grid2D::getValueOnGrid(int ix, int iy){
+	return arr_[ix][iy];
 }
 
 /** Returns the interpolated value from the 2D grid */	
@@ -314,10 +319,4 @@ int Grid2D::isInside(double x,double y){
 	if(y < yMin_ || y > yMax_) return 0;
 	return 1;
 }
-
-/** Returns the interpolated value on grid*/
-double Grid2D::getValueOnGrid(int iX, int iY){
-	double x = xMin_ + iX*dx_;
-	double y = yMin_ + iY*dy_;
-	return getValue(x,y);
-}	
+	

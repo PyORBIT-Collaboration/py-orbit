@@ -38,13 +38,24 @@ extern "C" {
   	int xSize,ySize,zSize;
   	double xy_ratio;
   	double xMin = -1.0, yMin = -1.0 , zMin = -1.0 , xMax = +1.0 , yMax = +1.0, zMax = +1.0;
-	if(!PyArg_ParseTuple(args,"iiid|dddddd:__init__",&xSize,&ySize,&zSize,&xy_ratio,&xMin,&xMax,&yMin,&yMax,&zMin,&zMax)){
-		ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D - SpaceChargeCalc2p5D(xSize,ySize,xzSize,xy_ratio[,xMin,xMax,yMin,yMax,zMin,zMax]) - constructor needs parameters.");
-	}		
-	self->cpp_obj = new SpaceChargeCalc2p5D(xSize,ySize,zSize,xy_ratio,xMin,xMax,yMin,yMax,zMin,zMax);	
+	//if nVars == 4 this is SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xy_ratio)
+	//if nVars == 7 this is SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xMin, double xMax, double yMin, double yMax)
+	int nVars = PyTuple_Size(args);
+	if(nVars == 4){
+		if(!PyArg_ParseTuple(args,"iiid:__init__",&xSize,&ySize,&zSize,&xy_ratio)){
+		ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D - SpaceChargeCalc2p5D(xSize,ySize,xzSize,xy_ratio]) - constructor needs parameters.");
+		}
+		self->cpp_obj = new SpaceChargeCalc2p5D(xSize,ySize,zSize,xy_ratio);
+	}
+	if(nVars == 7){
+		if(!PyArg_ParseTuple(args,"iiidddd:__init__",&xSize,&ySize,&zSize,&xMin,&xMax,&yMin,&yMax)){
+		ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D - SpaceChargeCalc2p5D(xSize,ySize,xzSize,xMin,xMax,yMin,yMax) - constructor needs parameters.");
+		}
+		self->cpp_obj = new SpaceChargeCalc2p5D(xSize,ySize,zSize,xMin,xMax,yMin,yMax);
+	}
 	((SpaceChargeCalc2p5D*) self->cpp_obj)->setPyWrapper((PyObject*) self);
-	std::cerr<<"The SpaceChargeCalc2p5D __init__ has been called!"<<std::endl;
-	return 0;
+	//std::cerr<<"The SpaceChargeCalc2p5D __init__ has been called!"<<std::endl;
+	return 0;	
   }
   
   //trackBunch(Bunch* bunch, BaseBoundary2D* boundary, double length)

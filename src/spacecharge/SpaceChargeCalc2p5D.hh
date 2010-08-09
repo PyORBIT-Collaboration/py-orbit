@@ -30,16 +30,16 @@ public:
 	/** Constructor */
 	SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xy_ratio);
 
-	SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xy_ratio,
+	SpaceChargeCalc2p5D(int xSize, int ySize, int zSize,
 	             double xMin, double xMax,
-	             double yMin, double yMax,
-	             double zMin, double zMax);
+	             double yMin, double yMax);
 	
 	/** Destructor */
 	virtual ~SpaceChargeCalc2p5D();
 	
 	void trackBunch(Bunch* bunch, BaseBoundary2D* boundary, double length);
-
+	void getBoundaryXY(Bunch* bunch);
+	void getBoundaryZ(Bunch* bunch);
 	
 private:
 	//memory allocation and step calculation for dx_ and dy_ 
@@ -60,6 +60,8 @@ protected:
 	double xMin_,xMax_;
 	double yMin_,yMax_;
 	double zMin_,zMax_;
+	
+	double xy_ratio;
 };
 //end of SC_SPACECHARGE_CALC_2P5D_H
 #endif

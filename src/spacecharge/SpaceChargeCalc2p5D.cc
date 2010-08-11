@@ -17,11 +17,12 @@
 #include "PoissonSolverFFT2D.hh"
 #include "SpaceChargeCalc2p5D.hh"
 #include "ParticleMacroSize.hh"
+#include "ParticleMacroSize.hh"
 
 #include "BaseBoundary2D.hh"
 
 #include <iostream>
-
+#include <cmath>
 using namespace OrbitUtils;
 
 // Constructor
@@ -78,7 +79,8 @@ SpaceChargeCalc2p5D::~SpaceChargeCalc2p5D(){
 void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, BaseBoundary2D* boundary, double length){
 	double x,y,z;
 	double fx, fy, dx_, dy_, ex, ey;
-	double Factor;
+	double _lambda, _perveance, factor, Lfactor;
+	SyncPart* syncPart = bunch->getSyncPart();
 	
 	if (boundary == NULL){
 		getBoundaryXY(bunch);
@@ -100,9 +102,24 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, BaseBoundary2D* boundary, dou
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
 	
-	//calculate phiGrid
+//calculate phiGrid
 	poissonSolver->findPotential(rhoGrid,phiGrid);
+	//include perveance to phisc
+	_lambda = bunch->getSizeGlobal() / (zMax_ - zMin_);
 	
+	_perveance = bunch->getCharge() * _lambda * bunch->getClassicalRadius() / (2. * pow(syncPart->getBeta(),2) * pow(syncPart->getGamma(),3) * bunch->getMass());
+        
+        factor = 4 * _perveance / (bunch->getSizeGlobal() * xSize_* ySize_);
+        
+        double** phisc = phiGrid->getArr();
+        
+        for (int i = 0; i < xSize_; i++)
+        	for (int j = 0; j < ySize_; j++)
+        	{
+        	   phisc[i][j] = phisc[i][j] * factor;
+        	}
+        //phiGrid->setArr(phisc);
+		
 	if (boundary != NULL){ 
 		//update potential with boundary condition
 		boundary->addBoundaryPotential(rhoGrid,phiGrid);	
@@ -112,17 +129,16 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, BaseBoundary2D* boundary, dou
 	dx_ = phiGrid->getStepX();
 	dy_ = phiGrid->getStepY();
 	
-	//formular **is used here
 	for (int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);
 		y = bunch->y(i);
 		z = bunch->z(i);
 		
 		phiGrid->calcGradient(x,y,ex,ey);		
-		Factor = zGrid->getValue(z);
+		Lfactor = zGrid->getValue(z);
 		
-		bunch->xp(i) += ex * dx_ * length * Factor;
-		bunch->yp(i) += ey * dy_ * length * Factor;
+		bunch->xp(i) += ex * dx_ * length * Lfactor;
+		bunch->yp(i) += ey * dy_ * length * Lfactor;
 		std::cerr<<"xp="<<bunch->xp(i)<<"\n";
 		std::cerr<<"yp="<<bunch->yp(i)<<"\n";
 	}

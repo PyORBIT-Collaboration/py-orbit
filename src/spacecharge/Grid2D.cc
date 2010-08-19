@@ -299,7 +299,7 @@ double Grid2D::getMinY(){return yMin_;};
 
 /** Sets x-grid */
 void Grid2D::setGridX(double xMin, double xMax){
-	xMax_ = xMin;
+	xMin_ = xMin;
 	xMax_ = xMax;
 	dx_ = (xMax_ - xMin_)/(xSize_ -1);
 	setZero();
@@ -307,7 +307,7 @@ void Grid2D::setGridX(double xMin, double xMax){
 
 /** Sets y-grid */
 void Grid2D::setGridY(double yMin, double yMax){
-	yMax_ = yMin;
+	yMin_ = yMin;
 	yMax_ = yMax;
 	dy_ = (yMax_ - yMin_)/(ySize_ -1);		
 	setZero();

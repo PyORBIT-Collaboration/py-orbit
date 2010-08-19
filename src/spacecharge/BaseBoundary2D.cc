@@ -362,11 +362,11 @@ void BaseBoundary2D::addBoundaryPotential(Grid2D* rhoGrid,Grid2D*  phiGrid){
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){
 			std::cerr << "BaseBoundary2D (or subclass) addBoundaryPotential(...):" 
-			<< "The some boindary points are outside the grids:"<< std::endl 
-								<< "boindary xMin ="<< xMin_ <<std::endl
-								<< "boindary xMax ="<< xMax_ <<std::endl
-								<< "boindary yMin ="<< yMin_ <<std::endl
-								<< "boindary yMax ="<< yMax_ <<std::endl
+			<< "The some boundary points are outside the grids:"<< std::endl 
+								<< "boundary xMin ="<< xMin_ <<std::endl
+								<< "boundary xMax ="<< xMax_ <<std::endl
+								<< "boundary yMin ="<< yMin_ <<std::endl
+								<< "boundary yMax ="<< yMax_ <<std::endl
 								<< "rhoGrid xMin ="<< rhoGrid->getMinX() <<std::endl
 								<< "rhoGrid yMin ="<< rhoGrid->getMinY() <<std::endl
 								<< "rhoGrid xMax ="<< rhoGrid->getMaxX() <<std::endl

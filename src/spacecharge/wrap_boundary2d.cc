@@ -204,7 +204,7 @@ extern "C" {
 		{ "isInitialized",       Boundary2D_isInitialized,       METH_VARARGS,"returns 1 if initialized and 0 if not"},
 		{ "initialize",          Boundary2D_initialize,          METH_VARARGS,"initializes all boundary arrays"},
 		{ "getBoundaryPoint",    Boundary2D_getBoundaryPoint,    METH_VARARGS,"returns tuple (x,y) - a boundary point with index"},
-		{ "setBoundaryPoint",    Boundary2D_setBoundaryPoint,    METH_VARARGS,"sets a boindary point (ind,x,y)"},
+		{ "setBoundaryPoint",    Boundary2D_setBoundaryPoint,    METH_VARARGS,"sets a boundary point (ind,x,y)"},
 		{ "addBoundaryPotential",Boundary2D_addBoundaryPotential,METH_VARARGS,"addBoundaryPotential(Grid2D rhoGrid2D,Grid2D phiGrid2D)"},
     {NULL}
   };

@@ -97,6 +97,7 @@ void Grid1D::binBunch(Bunch* bunch){
 	if(has_msize > 0){
 		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
 		double m_size = 0.;
+		
 		for(int i = 0, n = bunch->getSize(); i < n; i++){
 			m_size = macroSizeAttr->macrosize(i);
 			binValue(m_size,part_coord_arr[i][4]);
@@ -135,7 +136,7 @@ void Grid1D::binValue(double macroSize,double z){
 	  	arr_[iZ-1] += Wzm * macroSize;
 	  	arr_[iZ] += Wz0 * macroSize;
 	  	arr_[iZ+1] += Wzp * macroSize;
-	  	std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
+	  	//std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
 	  }
 	  else if(zSize_ == 2){
 	  	arr_[0] += Wzm * macroSize;
@@ -174,8 +175,8 @@ void Grid1D::calcGradient(double z,double& ez){
 		dWzp = (-1.0)* -1.0/dz_; // for zInd=1		
 	}
 	//calculate gradient
-	std::cerr<<"calculate gradient.\n";
-	std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
+	//std::cerr<<"calculate gradient.\n";
+	//std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
 	ez = Wzm * dWzm * arr_[iZ-1] + Wz0 * dWz0 * arr_[iZ] + Wzp * dWzp * arr_[iZ+1];
 }
 
@@ -249,6 +250,7 @@ void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
 	
 	if(pyComm == NULL) {
 		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+		std::cerr<<size_MPI<<"\n";
 	} else {
 		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,pyComm->comm);
 	}

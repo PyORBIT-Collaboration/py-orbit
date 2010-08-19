@@ -37,7 +37,9 @@ public:
 	/** Destructor */
 	virtual ~SpaceChargeCalc2p5D();
 	
-	void trackBunch(Bunch* bunch, BaseBoundary2D* boundary, double length);
+	void trackBunch(Bunch* bunch, double length);
+	void trackBunch(Bunch* bunch, double length, BaseBoundary2D* boundary);
+	double calcMomentumFactor(Bunch* bunch, double length);
 	void getBoundaryXY(Bunch* bunch);
 	void getBoundaryZ(Bunch* bunch);
 	

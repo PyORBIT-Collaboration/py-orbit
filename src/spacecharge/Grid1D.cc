@@ -237,8 +237,8 @@ int Grid1D::getSizeZ(){
 
 /**synchronizeMPI */
 void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
-//MPI
-	int size_MPI = zSize_ * zSize_;
+  // ====== MPI  start ========
+	int size_MPI = zSize_;
 	int buff_index0 = 0;
 	int buff_index1 = 0;
 	double* inArr  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,size_MPI);
@@ -250,7 +250,6 @@ void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
 	
 	if(pyComm == NULL) {
 		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
-		std::cerr<<size_MPI<<"\n";
 	} else {
 		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,pyComm->comm);
 	}

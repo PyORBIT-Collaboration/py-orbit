@@ -2,6 +2,7 @@
 
 #include "Grid2D.hh"
 #include "ParticleMacroSize.hh"
+#include "BufferStore.hh"
 
 #include <iostream>
 
@@ -124,6 +125,7 @@ void Grid2D::binBunch(Bunch* bunch){
 	for(int i = 0, n = bunch->getSize(); i < n; i++){
 		binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);	
 	}
+  synchronizeMPI(bunch->getMPI_Comm_Local());
 }
 
 /** Bins the value into the 2D grid */	
@@ -320,3 +322,40 @@ int Grid2D::isInside(double x,double y){
 	return 1;
 }
 	
+/**synchronizeMPI */
+void Grid2D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm){
+  // ====== MPI  start ========
+	int size_MPI = xSize_ * ySize_;
+	int buff_index0 = 0;
+	int buff_index1 = 0;
+	double* inArr  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,size_MPI);
+	double* outArr = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,size_MPI);
+	
+	int count = 0;
+	for(int ix = 0; ix < xSize_; ix++){
+	  for(int iy = 0; iy < ySize_; iy++){
+			inArr[count] = arr_[ix][iy];
+			count += 1;
+		}
+	}
+	
+	if(pyComm == NULL) {
+		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+	} else {
+		ORBIT_MPI_Allreduce(inArr,outArr,size_MPI,MPI_DOUBLE,MPI_SUM,pyComm->comm);
+	}
+
+	count = 0;
+	for(int ix = 0; ix < xSize_; ix++){
+	  for(int iy = 0; iy < ySize_; iy++){
+			arr_[ix][iy] = outArr[count];
+			count += 1;
+		}
+	}	
+
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
+	
+  // ===== MPI end =====
+}
+

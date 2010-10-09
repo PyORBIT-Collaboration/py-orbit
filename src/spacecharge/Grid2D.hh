@@ -72,6 +72,9 @@ public:
   /** Returns the grid size in y-direction */
   int getSizeY();
 	
+	/** synchronizeMPI */
+	void synchronizeMPI(pyORBIT_MPI_Comm* comm);	
+	
   /** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */
   int isInside(double x,double y);
 

@@ -44,6 +44,7 @@ class PoissonSolverFFT2D: public PoissonSolver2D
 		
 	  void setGridX(double xMin, double xMax); 	
 	  void setGridY(double yMin, double yMax);
+		void setGridXY(double xMin, double xMax, double yMin, double yMax);
 		
 		/** Solves the Poisson problem for an external charge distribution and
 		puts results into an external potential grid

@@ -100,6 +100,16 @@ void PoissonSolverFFT2D::setGridY(double yMin, double yMax){
 	_defineGreenF();
 }
 
+void PoissonSolverFFT2D::setGridXY(double xMin, double xMax, double yMin, double yMax){
+	xMin_ = xMin;
+	xMax_ = xMax;
+	dx_ = (xMax_ - xMin_)/(xSize_ -1);	
+	yMin_ = yMin;
+	yMax_ = yMax;
+	dy_ = (yMax_ - yMin_)/(ySize_ -1);
+	_defineGreenF();
+}
+
 // Defines the FFT of the Green Function
 void PoissonSolverFFT2D::_defineGreenF()
 {

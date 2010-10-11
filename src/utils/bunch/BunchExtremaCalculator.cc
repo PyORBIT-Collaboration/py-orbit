@@ -67,16 +67,16 @@ void BunchExtremaCalculator::getExtremaXYZ(Bunch* bunch,
 	
 	ORBIT_MPI_Allreduce(gridLimArr,gridLimArr_out,6,MPI_DOUBLE,MPI_MAX,bunch->getMPI_Comm_Local()->comm);
 	
-	gridLimArr[0] = - gridLimArr[0];
-	gridLimArr[2] = - gridLimArr[2];
-	gridLimArr[4] = - gridLimArr[4];
+	gridLimArr_out[0] = - gridLimArr_out[0];
+	gridLimArr_out[2] = - gridLimArr_out[2];
+	gridLimArr_out[4] = - gridLimArr_out[4];
 	
-  xMin = gridLimArr[0];
-  xMax = gridLimArr[1];	
-  yMin = gridLimArr[2];
-  yMax = gridLimArr[3];	
-  zMin = gridLimArr[4];
-  zMax = gridLimArr[5];	
+  xMin = gridLimArr_out[0];
+  xMax = gridLimArr_out[1];	
+  yMin = gridLimArr_out[2];
+  yMax = gridLimArr_out[3];	
+  zMin = gridLimArr_out[4];
+  zMax = gridLimArr_out[5];	
 		
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	

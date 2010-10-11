@@ -19,6 +19,7 @@
 
 //pyORBIT utils
 #include "CppPyWrapper.hh"
+#include "BunchExtremaCalculator.hh"
 
 #include "Grid1D.hh"
 #include "Grid2D.hh"
@@ -53,6 +54,7 @@ protected:
 	Grid2D* rhoGrid;
 	Grid2D* phiGrid;
 	Grid1D* zGrid;
+	OrbitUtils::BunchExtremaCalculator* bunchExtremaCalc;
 	
 	double xy_ratio;
 };

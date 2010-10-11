@@ -3,6 +3,10 @@
 // FILE NAME
 //   SpaceChargeCalc2p5Drb.cc
 //
+// AUTHOR
+//    A. Shishlo
+//
+// Created:
 //   10/09/10
 //
 // DESCRIPTION
@@ -16,7 +20,6 @@
 #include "Grid2D.hh"
 #include "PoissonSolverFFT2D.hh"
 #include "SpaceChargeCalc2p5Drb.hh"
-#include "ParticleMacroSize.hh"
 #include "BufferStore.hh"
 
 #include <iostream>
@@ -32,6 +35,7 @@ SpaceChargeCalc2p5Drb::SpaceChargeCalc2p5Drb(int xSize, int ySize, int zSize, do
 	rhoGrid = new Grid2D(xSize, ySize);
 	phiGrid = new Grid2D(xSize, ySize);
 	zGrid = new Grid1D(zSize);
+	bunchExtremaCalc = new BunchExtremaCalculator();
 }
 
 SpaceChargeCalc2p5Drb::SpaceChargeCalc2p5Drb(int xSize, int ySize, int zSize): CppPyWrapper(NULL)
@@ -41,12 +45,14 @@ SpaceChargeCalc2p5Drb::SpaceChargeCalc2p5Drb(int xSize, int ySize, int zSize): C
 	rhoGrid = new Grid2D(xSize, ySize);
 	phiGrid = new Grid2D(xSize, ySize);
 	zGrid = new Grid1D(zSize);
+	bunchExtremaCalc = new BunchExtremaCalculator();	
 }
 
 SpaceChargeCalc2p5Drb::~SpaceChargeCalc2p5Drb(){
 	delete poissonSolver;
 	delete rhoGrid, phiGrid;
 	delete zGrid;
+	delete bunchExtremaCalc;
 }
 
 void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_radius){
@@ -88,64 +94,53 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 
 double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize, double& x_c, double& y_c, double& a_bunch){
 
-	int buff_index0 = 0;
-	int buff_index1 = 0;
-	double* gridLimArr  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,6);
-	double* gridLimArr_out = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,6);
-	for (int i = 0; i < 3; i++){
-		gridLimArr[2*i] = DBL_MAX;
-		gridLimArr[2*i+1] = -DBL_MAX;
-	}
+	double xMin, xMax, yMin, yMax, zMin, zMax;
 	
-	double** partArr=bunch->coordArr();
-	double* coordArr = NULL;
-	for (int ip = 0, n = bunch->getSize(); ip < n; ip++){
-		coordArr = coordArr;
-		if(coordArr[0] < gridLimArr[0]) gridLimArr[0] = coordArr[0];
-		if(coordArr[0] > gridLimArr[1]) gridLimArr[1] = coordArr[0];
-		if(coordArr[2] < gridLimArr[2]) gridLimArr[2] = coordArr[2];
-		if(coordArr[2] > gridLimArr[3]) gridLimArr[3] = coordArr[2];	
-		if(coordArr[4] < gridLimArr[4]) gridLimArr[4] = coordArr[4];
-		if(coordArr[4] > gridLimArr[5]) gridLimArr[5] = coordArr[4];		
-	}
+	bunchExtremaCalc->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);
 	
-	gridLimArr[0] = - gridLimArr[0];
-	gridLimArr[2] = - gridLimArr[2];
-	gridLimArr[4] = - gridLimArr[4];
+	//check if the beam size is not zero 
+  if( xMin >=  xMax || yMin >=  yMax || zMin >=  zMax){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "SpaceChargeCalc2p5Drb::bunchAnalysis(bunch,...) \n" 
+         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge! \n" 
+								<< "x min ="<< xMin <<" max="<< xMax << std::endl
+								<< "y min ="<< yMin <<" max="<< yMax << std::endl
+								<< "z min ="<< zMin <<" max="<< zMax << std::endl
+								<< "Stop."<< std::endl;
+		}
+		ORBIT_MPI_Finalize();
+  }
 	
-	ORBIT_MPI_Allreduce(gridLimArr,gridLimArr_out,6,MPI_DOUBLE,MPI_MAX,bunch->getMPI_Comm_Local()->comm);
-	
-	gridLimArr[0] = - gridLimArr[0];
-	gridLimArr[2] = - gridLimArr[2];
-	gridLimArr[4] = - gridLimArr[4];
-	
-	//check if the beam size is not zero ???
-	
-	double xy_ratio_beam = (gridLimArr[1] - gridLimArr[0])/(gridLimArr[3] - gridLimArr[2]);
+	double xy_ratio_beam = (xMax - xMin)/(yMax - yMin);
+	double width, center;
 	if(xy_ratio_beam > xy_ratio){
-		gridLimArr[3] = (xy_ratio_beam/xy_ratio)*gridLimArr[3];
-		gridLimArr[2] = (xy_ratio_beam/xy_ratio)*gridLimArr[2];
+		center = (yMax + yMin)/2.0;
+		width = (yMax - yMin)*(xy_ratio_beam/xy_ratio);
+		yMin = center - width;
+		yMax = center + width;
 	} else {
-		gridLimArr[0] = gridLimArr[0]/(xy_ratio_beam/xy_ratio);
-		gridLimArr[1] = gridLimArr[1]/(xy_ratio_beam/xy_ratio);
+		center = (xMax + xMin)/2.0;
+		width = (xMax - xMin)/(xy_ratio_beam/xy_ratio);		
+		xMin = center - width;
+		xMax = center + width;
 	}
 
-	//setGrid
-	rhoGrid->setGridX(gridLimArr[0],gridLimArr[1]);
-	rhoGrid->setGridY(gridLimArr[2],gridLimArr[3]);	
+	//setGrids' limits
+	rhoGrid->setGridX(xMin,xMax);
+	rhoGrid->setGridY(yMin,yMax);	
 	
-	phiGrid->setGridX(gridLimArr[0],gridLimArr[1]);
-	phiGrid->setGridY(gridLimArr[2],gridLimArr[3]);
+	phiGrid->setGridX(xMin,xMax);
+	phiGrid->setGridY(yMin,yMax);
 	
-	zGrid->setGridZ(gridLimArr[4],gridLimArr[5]);	
-	
-	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
-	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
-	
+	zGrid->setGridZ(zMin,zMax);	
+
 	//sizes of the grids are set up
 	//bin rho&z Bunch to the Grid
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
+	
 	
 	//calculate x_avg, x2_avg, y_avg, y2_avg
 	double x_avg = 0., x2_avg = 0., y_avg = 0., y2_avg = 0.;

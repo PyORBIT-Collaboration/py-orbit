@@ -112,6 +112,7 @@ void Grid1D::binBunch(Bunch* bunch){
 }
 
 void Grid1D::binValue(double macroSize,double z){
+	if(z < zMin_ || z > zMax_ ) return;
 	int iZ;
 	double zFrac,zFrac2;
 	double Wzm,Wz0,Wzp;

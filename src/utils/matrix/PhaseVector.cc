@@ -21,14 +21,14 @@
 
 using namespace OrbitUtils;
 
-PhaseVector::PhaseVector(int n_in)
+PhaseVector::PhaseVector(int n_in): CppPyWrapper(NULL)
 {
 	n = n_in;
   v = (double* ) malloc (sizeof(double)*n);
 	zero();
 }
 
-PhaseVector::PhaseVector(PhaseVector* vIn)
+PhaseVector::PhaseVector(PhaseVector* vIn): CppPyWrapper(NULL)
 {
 	n = vIn->size();
   v = (double* ) malloc (sizeof(double)*n);

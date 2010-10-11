@@ -22,7 +22,7 @@
 
 using namespace OrbitUtils;
 
-Matrix::Matrix(int n_in, int m_in)
+Matrix::Matrix(int n_in, int m_in): CppPyWrapper(NULL)
 {
 	n = n_in;
 	m = m_in;
@@ -34,7 +34,7 @@ Matrix::Matrix(int n_in, int m_in)
 	zero();
 }
 
-Matrix::Matrix(Matrix* mtrx)
+Matrix::Matrix(Matrix* mtrx): CppPyWrapper(NULL)
 {
 	n = mtrx->rows();
 	m = mtrx->columns();

@@ -153,6 +153,27 @@ extern "C" {
 		return Py_BuildValue("i",cpp_Grid2D->getSizeY());
 	}	
 	
+  //It will synchronize through the MPI communicator
+  static PyObject* Grid2D_synchronizeMPI(PyObject *self, PyObject *args){
+     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		int nVars = PyTuple_Size(args);
+		if(nVars == 0){
+			cpp_Grid2D->synchronizeMPI(NULL);
+		}
+		else {
+			PyObject* py_mpi_comm_type = wrap_orbit_mpi_comm::getMPI_CommType("MPI_Comm");
+			PyObject* pyMPIComm = PyTuple_GetItem(args,0);			
+			if((!PyObject_IsInstance(pyMPIComm,py_mpi_comm_type))){
+				ORBIT_MPI_Finalize("Grid2D.synchronizeMPI(MPI_Comm) - input parameter is not MPI_Comm");
+			}					
+			cpp_Grid2D->synchronizeMPI((pyORBIT_MPI_Comm*) pyMPIComm);
+		}
+	 	Py_INCREF(Py_None);
+		return Py_None; 
+  }	
+	
+	
 	//getMinX()
   static PyObject* Grid2D_getMinX(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
@@ -249,23 +270,24 @@ extern "C" {
 	// defenition of the methods of the python Grid2D wrapper class
 	// they will be vailable from python level
   static PyMethodDef Grid2DClassMethods[] = {
-		{ "setZero",      Grid2D_setZero,     METH_VARARGS,"sets all points on the grid to zero"},
-		{ "getValue",     Grid2D_getValue,    METH_VARARGS,"returns value for (x,y) point"},
-		{ "setValue",     Grid2D_setValue,    METH_VARARGS,"sets value for (ix,iy) point"},
-		{ "setGridX",     Grid2D_setGridX,    METH_VARARGS,"sets the X grid with min,max"},
-		{ "setGridY",     Grid2D_setGridY,    METH_VARARGS,"sets the Y grid with min,max"},
-		{ "getGridX",     Grid2D_getGridX,    METH_VARARGS,"returns the x-grid point with index ind"},
-		{ "getGridY",     Grid2D_getGridY,    METH_VARARGS,"returns the x-grid point with index ind"},
-		{ "getSizeX",     Grid2D_getSizeX,    METH_VARARGS,"returns the size of grid in X dir."},
-		{ "getSizeY",     Grid2D_getSizeY,    METH_VARARGS,"returns the size of grid in Y dir."},
-		{ "getMinX",      Grid2D_getMinX,     METH_VARARGS,"returns the min grid point in X dir."},
-		{ "getMaxX",      Grid2D_getMaxX,     METH_VARARGS,"returns the max grid point in X dir."},
-		{ "getMinY",      Grid2D_getMinY,     METH_VARARGS,"returns the min grid point in Y dir."},
-		{ "getMaxY",      Grid2D_getMaxY,     METH_VARARGS,"returns the max grid point in Y dir."},
-		{ "isInside",     Grid2D_isInside,    METH_VARARGS,"returns 1 or 0 if (x,y) inside grid or not"},
-		{ "binValue",     Grid2D_binValue,    METH_VARARGS,"bins the value into the 2D mesh"},
-		{ "binBunch",     Grid2D_binBunch,    METH_VARARGS,"bins the Bunch instance into the 2D mesh"},
-		{ "calcGradient", Grid2D_calcGradient,METH_VARARGS,"returns gradient as (gx,gy) for point (x,y)"},
+		{ "setZero",       Grid2D_setZero,       METH_VARARGS,"sets all points on the grid to zero"},
+		{ "getValue",      Grid2D_getValue,      METH_VARARGS,"returns value for (x,y) point"},
+		{ "setValue",      Grid2D_setValue,      METH_VARARGS,"sets value for (ix,iy) point"},
+		{ "setGridX",      Grid2D_setGridX,      METH_VARARGS,"sets the X grid with min,max"},
+		{ "setGridY",      Grid2D_setGridY,      METH_VARARGS,"sets the Y grid with min,max"},
+		{ "getGridX",      Grid2D_getGridX,      METH_VARARGS,"returns the x-grid point with index ind"},
+		{ "getGridY",      Grid2D_getGridY,      METH_VARARGS,"returns the x-grid point with index ind"},
+		{ "getSizeX",      Grid2D_getSizeX,      METH_VARARGS,"returns the size of grid in X dir."},
+		{ "getSizeY",      Grid2D_getSizeY,      METH_VARARGS,"returns the size of grid in Y dir."},
+		{ "getMinX",       Grid2D_getMinX,       METH_VARARGS,"returns the min grid point in X dir."},
+		{ "getMaxX",       Grid2D_getMaxX,       METH_VARARGS,"returns the max grid point in X dir."},
+		{ "getMinY",       Grid2D_getMinY,       METH_VARARGS,"returns the min grid point in Y dir."},
+		{ "getMaxY",       Grid2D_getMaxY,       METH_VARARGS,"returns the max grid point in Y dir."},
+		{ "isInside",      Grid2D_isInside,      METH_VARARGS,"returns 1 or 0 if (x,y) inside grid or not"},
+		{ "binValue",      Grid2D_binValue,      METH_VARARGS,"bins the value into the 2D mesh"},
+		{ "binBunch",      Grid2D_binBunch,      METH_VARARGS,"bins the Bunch instance into the 2D mesh"},
+		{ "calcGradient",  Grid2D_calcGradient,  METH_VARARGS,"returns gradient as (gx,gy) for point (x,y)"},
+		{ "synchronizeMPI",Grid2D_synchronizeMPI,METH_VARARGS,"synchronize through the MPI communicator"},		
     {NULL}
   };
 

@@ -8,6 +8,7 @@
 #include "wrap_function.hh"
 #include "wrap_splinech.hh"
 #include "wrap_statmoments2d.hh"
+#include "wrap_bunch_extrema_calculator.hh"
 
 namespace wrap_orbit_utils{
 
@@ -30,6 +31,7 @@ extern "C" {
 		wrap_function::initFunction(module);
 		wrap_splinech::initSplineCH(module);
 		wrap_statmoments2d::initstatmoments2d(module);
+		wrap_utils_bunch::initBunchExtremaCalculator(module);
   }
 
 	PyObject* getOrbitUtilsType(char* name){

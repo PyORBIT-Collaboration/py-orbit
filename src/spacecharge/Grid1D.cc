@@ -39,6 +39,19 @@ Grid1D::Grid1D(int zSize, double zMin, double zMax): CppPyWrapper(NULL){
 }
 
 void Grid1D::init(){
+	
+  if( zSize_ < 2){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "Grid1D::Grid1D - CONSTRUCTOR" << std::endl
+         				<< "The grid size too small (should be more than 1)!" << std::endl
+								<< "number of bins ="<< zSize_ << std::endl
+								<< "Stop." << std::endl;
+		}
+		ORBIT_MPI_Finalize();
+  }		
+	
 	dz_ = (zMax_ - zMin_)/(zSize_ - 1);
 	arr_ = new double[zSize_];
 }
@@ -70,23 +83,13 @@ double Grid1D::getValue(double z){
 		Wzm = 0.5 * (0.25 - zFrac + zFrac2);
 		Wz0 = 0.75 - zFrac2;
 		Wzp = 0.5 * (0.25 + zFrac + zFrac2);
+		return (Wzm * arr_[iZ-1] + Wz0 * arr_[iZ] + Wzp * arr_[iZ+1]);
 	}
-	else if(zSize_ == 2){
-		Wzm = 1.0 - zFrac; // for zInd=0
-		Wz0 = 0.0;
-		Wzp = zFrac;       // for zInd=1
-	}
-	else if(zSize_ == 1){
-		Wzm = 0.0;
-		Wz0 = 1.0;
-		Wzp = 0.0; 
-	}
-// Calculate a longitudinal weighting factor(LPosFactor) for Transverse
-// space charge calculations: 
-// (== local average macroPart density per rad / average density)
-	//calc value
-	double value= Wzm * arr_[iZ-1] + Wz0 * arr_[iZ] + Wzp * arr_[iZ+1];
-	return value;
+	
+	Wzm = 1.0 - zFrac; // for zInd=0
+	Wz0 = 0.0;
+	Wzp = zFrac;       // for zInd=1
+	return (Wzm * arr_[0] + Wzp * arr_[1]);
 }
 
 void Grid1D::binBunch(Bunch* bunch){
@@ -149,36 +152,22 @@ void Grid1D::binValue(double macroSize,double z){
 }
 
 void Grid1D::calcGradient(double z,double& ez){
-	double Wzm, Wz0, Wzp;
+	if(zSize_ == 2){
+		ez = (arr_[1] - arr_[0])/dz_;
+		return;
+	}
+
 	double dWzm, dWz0, dWzp;
 	int iZ;
-	double zFrac,zFrac2;
-	Wzm = Wz0 = Wzp = 0.0;
+	double zFrac;
 	dWzm = dWz0 = dWzp = 0.0;
 	
 	getIndAndFracZ(z,iZ,zFrac);
-	zFrac2 = zFrac * zFrac; 
-	
-	if(zSize_ > 2){
-		Wzm = 0.5 * (0.25 - zFrac + zFrac2);
-		Wz0 = 0.75 - zFrac2;
-		Wzp = 0.5 * (0.25 + zFrac + zFrac2);
-		dWzm = (-1.0)*  (0.5 - zFrac)/dz_;
-		dWz0 = (-1.0)*    2. * zFrac /dz_;
-		dWzp = (-1.0)* -(0.5 + zFrac)/dz_;
-	}
-	else if(zSize_ == 2){
-		Wzm = 1.0 - zFrac; // for zInd=0
-		Wz0 = 0.0;
-		Wzp = zFrac;       // for zInd=1
-		dWzm = (-1.0)*  1.0/dz_; // for zInd=0
-		dWz0 =  0.0;
-		dWzp = (-1.0)* -1.0/dz_; // for zInd=1		
-	}
-	//calculate gradient
-	//std::cerr<<"calculate gradient.\n";
-	//std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
-	ez = Wzm * dWzm * arr_[iZ-1] + Wz0 * dWz0 * arr_[iZ] + Wzp * dWzp * arr_[iZ+1];
+
+	dWzm = (-1.0)*  (0.5 - zFrac)/dz_;
+	dWz0 = (-1.0)*    2. * zFrac /dz_;
+	dWzp = (-1.0)*(-(0.5 + zFrac))/dz_;
+	ez = (dWzm * arr_[iZ-1] + dWz0 * arr_[iZ] + dWzp * arr_[iZ+1]);
 }
 
 
@@ -192,22 +181,18 @@ void Grid1D::setZero(){
 	
 
 void Grid1D::getIndAndFracZ(double z, int& ind, double& frac){
-	if(zSize_ > 1){
-	    ind  = int ( (z - zMin_)/dz_ + 0.5 );
-
-	    if(zSize_ > 2){
-	        //cut off edge for three point interpolation
-	        if(ind < 1) ind = 1;
+	ind  = int ( (z - zMin_)/dz_ + 0.5 );
+	if(zSize_ > 2){
+		//cut off edge for three point interpolation
+		if(ind < 1) ind = 1;
 		if(ind > (zSize_-2))ind =  zSize_ - 2;
 		frac = (z - (zMin_ + ind * dz_))/dz_;
-	    }
-	    if(zSize_ == 2){
+	}
+	if(zSize_ == 2){
 		frac = (z - zMin_)/dz_;
 		if(ind < 0) {ind = 0; frac = 0.0;}
 		else if(ind > 1) {ind = 1; frac = 1.0;}
-	    }
 	}
-	else {dz_=0.0; ind = 0; frac = 0.0;}
 }
 
 /** Returns the min z in the grid points */ 

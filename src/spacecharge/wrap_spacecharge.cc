@@ -6,6 +6,7 @@
 #include "wrap_boundary2d.hh"
 #include "wrap_spacecharge.hh"
 #include "wrap_spacechargecalc2p5d.hh"
+#include "wrap_spacechargecalc2p5d_rb.hh"
 
 static PyMethodDef spacechargeMethods[] = { {NULL,NULL} };
 
@@ -22,6 +23,7 @@ extern "C" {
 		wrap_spacecharge::initPoissonSolverFFT2D(module);
 		wrap_spacecharge::initBoundary2D(module);
 		wrap_spacecharge::initSpaceChargeCalc2p5D(module);
+		wrap_spacecharge::initSpaceChargeCalc2p5Drb(module);
   }
 	
 	PyObject* getSpaceChargeType(char* name){

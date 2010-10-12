@@ -77,18 +77,35 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 	factor = factor/(z_step*totalMacrosize);
 	
 	double Lfactor = 0.;
-	double x,y,z,ex,ey,ez;
+	double x,y,z,ex,ey,ez, r2;
+	
+	double long_sc_coeff = 0.;
+	double long_sc_factor_in = 1.0+2*log(pipe_radius/a_bunch);
+	double long_sc_factor_out = 2*log(pipe_radius);
+	double a_bunch_2 = a_bunch*a_bunch;
+	double long_sc_factor = - length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2) * bunch->getMass()/(pow(syncPart->getGamma(),2));
+	
 	for (int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);
 		y = bunch->y(i);
 		z = bunch->z(i);
+		r2 = (x - x_center)*(x -x_center)  + (y - y_center)*(y - y_center);
 		
-		phiGrid->calcGradient(x,y,ex,ey);		
-
+		phiGrid->calcGradient(x,y,ex,ey);	
+    zGrid->calcGradient(z,ez);
+		//std::cout<<"debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;
+		
 		Lfactor = zGrid->getValue(z) * factor;
 	
 		bunch->xp(i) += ex * Lfactor;
 		bunch->yp(i) += ey * Lfactor;
+		
+		if(r2 <= a_bunch_2){
+			long_sc_coeff = long_sc_factor_in - r2/a_bunch_2;
+		} else {
+			long_sc_coeff = long_sc_factor_out - log(r2);
+		}
+		bunch->dE(i) += ez*long_sc_factor*long_sc_coeff;
 	}
 }
 
@@ -103,8 +120,8 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 		int rank = 0;
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){
-			std::cerr << "SpaceChargeCalc2p5Drb::bunchAnalysis(bunch,...) \n" 
-         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge! \n" 
+			std::cerr << "SpaceChargeCalc2p5Drb::bunchAnalysis(bunch,...)" << std::endl
+         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
 								<< "x min ="<< xMin <<" max="<< xMax << std::endl
 								<< "y min ="<< yMin <<" max="<< yMax << std::endl
 								<< "z min ="<< zMin <<" max="<< zMax << std::endl
@@ -117,12 +134,12 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 	double width, center;
 	if(xy_ratio_beam > xy_ratio){
 		center = (yMax + yMin)/2.0;
-		width = (yMax - yMin)*(xy_ratio_beam/xy_ratio);
+		width = ((yMax - yMin)*(xy_ratio_beam/xy_ratio))/2.0;
 		yMin = center - width;
 		yMax = center + width;
 	} else {
 		center = (xMax + xMin)/2.0;
-		width = (xMax - xMin)/(xy_ratio_beam/xy_ratio);		
+		width = ((xMax - xMin)/(xy_ratio_beam/xy_ratio))/2.0;		
 		xMin = center - width;
 		xMax = center + width;
 	}
@@ -135,7 +152,8 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 	phiGrid->setGridY(yMin,yMax);
 	
 	zGrid->setGridZ(zMin,zMax);	
-
+	
+	
 	//sizes of the grids are set up
 	//bin rho&z Bunch to the Grid
 	rhoGrid->binBunch(bunch);

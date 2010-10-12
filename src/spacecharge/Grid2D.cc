@@ -174,7 +174,7 @@ void Grid2D::calcGradient(double x, double y, double& ex, double& ey){
 	Wy0 = 0.75 - yFract2;
 	Wyp = 0.5 * (0.25 + yFract + yFract2);	
   dWxm = (-1.0)*(0.5 - xFract); 
-	dWx0 = (-1.0)*(-2.) * xFract; 
+	dWx0 = (-1.0)*(+2.) * xFract; 
 	dWxp = (-1.0)*(-(0.5 + xFract)); 
 	dWym = (-1.0)*(0.5 - yFract); 
 	dWy0 = (-1.0)*(+2.) * yFract; 

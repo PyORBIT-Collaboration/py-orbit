@@ -15,6 +15,7 @@
 
 //pyORBIT utils
 #include "CppPyWrapper.hh"
+#include "BunchExtremaCalculator.hh"
 
 #include "Grid1D.hh"
 #include "Grid2D.hh"
@@ -38,10 +39,9 @@ public:
 	virtual ~SpaceChargeCalc2p5D();
 	
 	void trackBunch(Bunch* bunch, double length);
-	void trackBunch(Bunch* bunch, double length, BaseBoundary2D* boundary);
-	double calcMomentumFactor(Bunch* bunch, double length);
-	void getBoundaryXY(Bunch* bunch);
-	void getBoundaryZ(Bunch* bunch);
+	virtual void trackBunch(Bunch* bunch, double length, BaseBoundary2D* boundary);
+	void calcMomentumFactor(Bunch* bunch, double length, double& factor);
+	void bunchAnalysis(Bunch* bunch);
 	
 private:
 	//memory allocation and step calculation for dx_ and dy_ 
@@ -52,6 +52,7 @@ protected:
 	Grid2D* rhoGrid;
 	Grid2D* phiGrid;
 	Grid1D* zGrid;
+	OrbitUtils::BunchExtremaCalculator* bunchExtremaCalc;
 	
 	//Grid size
 	int xSize_;
@@ -63,7 +64,7 @@ protected:
 	double yMin_,yMax_;
 	double zMin_,zMax_;
 	
-	double xy_ratio;
+	double xy_ratio_;
 };
 //end of SC_SPACECHARGE_CALC_2P5D_H
 #endif

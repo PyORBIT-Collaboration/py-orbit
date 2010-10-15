@@ -15,8 +15,8 @@
 #include "PoissonSolverFFT2D.hh"
 #include "SpaceChargeCalc2p5D.hh"
 #include "ParticleMacroSize.hh"
-#include "ParticleMacroSize.hh"
 
+#include "BufferStore.hh"
 #include "BaseBoundary2D.hh"
 
 #include <iostream>
@@ -33,26 +33,31 @@ SpaceChargeCalc2p5D::SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double
 	rhoGrid = new Grid2D(xSize, ySize);
 	phiGrid = new Grid2D(xSize, ySize);
 	zGrid = new Grid1D(zSize);
-
+	bunchExtremaCalc = new BunchExtremaCalculator();
+	
 	xSize_ = xSize;
 	ySize_ = ySize;
 	zSize_ = zSize;
 	xMin_ = -1.0;
 	xMax_ = +1.0;
-	yMin_ = -1.0; 
-	yMax_ = +1.0;
+	yMin_ = -one_xy_ratio; 
+	yMax_ = one_xy_ratio;
 	zMin_ = -1.0;
 	zMax_ = +1.0;
+	
+	xy_ratio_ = xy_ratio;
 }
 SpaceChargeCalc2p5D::SpaceChargeCalc2p5D(int xSize, int ySize, int zSize,
 	             double xMin, double xMax,
 	             double yMin, double yMax): CppPyWrapper(NULL)
 {
 	double xy_ratio = (xMax-xMin)/(yMax-yMin);
+	
 	poissonSolver = new PoissonSolverFFT2D(xSize, ySize, xMin, xMax, yMin, yMax);
 	rhoGrid = new Grid2D(xSize, ySize, xMin, xMax, yMin, yMax);
 	phiGrid = new Grid2D(xSize, ySize, xMin, xMax, yMin, yMax);
 	zGrid = new Grid1D(zSize);
+	bunchExtremaCalc = new BunchExtremaCalculator();
 
 	xSize_ = xSize;
 	ySize_ = ySize;
@@ -63,6 +68,8 @@ SpaceChargeCalc2p5D::SpaceChargeCalc2p5D(int xSize, int ySize, int zSize,
 	yMax_ = yMax;	
 	zMin_ = -1.0;
 	zMax_ = +1.0;
+
+	xy_ratio_ = xy_ratio;
 }
 
 // Destructor
@@ -70,31 +77,35 @@ SpaceChargeCalc2p5D::~SpaceChargeCalc2p5D(){
 	delete poissonSolver;
 	delete rhoGrid, phiGrid;
 	delete zGrid;
+	delete bunchExtremaCalc;
 }
-/*void SpaceChargeCalc2p5D::init(){
+//void SpaceChargeCalc2p5D::init(){
  
-}
-*/
+//}
+
 void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length){
 	double x,y,z,_dz;
 	double ex,ey;
 	double factor, Lfactor;
 	
-	//getBoundary		
-	getBoundaryXY(bunch);
-	getBoundaryZ(bunch);
+	//getBoundary
+	bunchExtremaCalc->getExtremaXYZ(bunch,xMin_,xMax_,yMin_,yMax_,zMin_,zMax_);
 	
-	factor = calcMomentumFactor(bunch,length);
-	
-	for (int i = 0, n = bunch->getSize(); i < n; i++){
+	bunchAnalysis(bunch);	
+  	calcMomentumFactor(bunch,length,factor);
+  	
+  	//calculate phiGrid
+	poissonSolver->findPotential(rhoGrid,phiGrid);
+  	
+  for (int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);
 		y = bunch->y(i);
 		z = bunch->z(i);
 		
-		phiGrid->calcGradient(x,y,ex,ey);		
-		//?
+		phiGrid->calcGradient(x,y,ex,ey);
+		//std::cerr<<"START: x="<<x<<" y="<<y<<" z="<<z<<"\n";
 		Lfactor = zGrid->getValue(z) * factor / bunch->getSizeGlobal();
-	
+		//std::cerr<<"Lfactor"<<Lfactor<<"\n";
 		bunch->xp(i) += ex * Lfactor;
 		bunch->yp(i) += ey * Lfactor;
 		//std::cerr<<"xp="<<bunch->xp(i)<<" yp="<<bunch->yp(i)<<"\n";
@@ -107,13 +118,13 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, BaseBoundary2D
 	double factor,Lfactor;
 	
 	//getBoundary	
-	xMax_ = boundary->getMaxX();
-	xMin_ = boundary->getMinX();
-	yMax_ = boundary->getMaxY();
-	yMin_ = boundary->getMinY();		
-	getBoundaryZ(bunch);
+	bunchExtremaCalc->getExtremaXYZ(bunch,xMin_,xMax_,yMin_,yMax_,zMin_,zMax_);
 	
-	factor = calcMomentumFactor(bunch,length);
+	bunchAnalysis(bunch);
+	calcMomentumFactor(bunch,length,factor);
+	
+	//calculate phiGrid
+	poissonSolver->findPotential(rhoGrid,phiGrid);
 	
 	//update potential with boundary condition
 	boundary->addBoundaryPotential(rhoGrid,phiGrid);	
@@ -123,112 +134,77 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, BaseBoundary2D
 		y = bunch->y(i);
 		z = bunch->z(i);
 		
-		phiGrid->calcGradient(x,y,ex,ey);		
-		//?
+		phiGrid->calcGradient(x,y,ex,ey);
+		
+		//std::cerr<<"START: x="<<x<<" y="<<y<<" z="<<z<<"\n";
 		Lfactor = zGrid->getValue(z) * factor / bunch->getSizeGlobal();
-	
+		//std::cerr<<"Lfactor="<<Lfactor<<" ex="<<ex<<" ey="<<ey<<"\n";
 		bunch->xp(i) += ex * Lfactor;
 		bunch->yp(i) += ey * Lfactor;
 		//std::cerr<<"xp="<<bunch->xp(i)<<" yp="<<bunch->yp(i)<<"\n";
 	}
 }
 
-double SpaceChargeCalc2p5D::calcMomentumFactor(Bunch* bunch, double length){
-	double _dz, _lambda, factor;
+void SpaceChargeCalc2p5D::calcMomentumFactor(Bunch* bunch, double length, double& factor){
+		
+	double _dz, _lambda;
 	SyncPart* syncPart = bunch->getSyncPart();	
+	
+	//xp={2rL(lambda)/beta^2*gamma^3}*protential/nSize
+	_dz = zGrid->getStepZ();
+	factor = zGrid->getValue(0);
+	//std::cerr<<"dz="<<_dz<<" ratio="<<xy_ratio_<<" value="<<factor<<"\n";
+	_lambda = bunch->getSizeGlobal() / _dz;	
+	factor = 2. * length * _lambda * bunch->getClassicalRadius() / (bunch->getCharge() * pow(syncPart->getBeta(),2) * pow(syncPart->getGamma(),3));	
+	//std::cerr<<"lambda = "<<_lambda<<" R = "<<bunch->getClassicalRadius()<<" charge = "<<bunch->getCharge()<<" beta^2 = "<<pow(syncPart->getBeta(),2)<<" gamma^3 = "<<pow(syncPart->getGamma(),3)<<"\n";        
+	//std::cerr<<"calc factor. factor = "<<factor<<"\n";
+}
+
+void SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch){	
+
+	//check if the beam size is not zero 
+  if( xMin_ >=  xMax_ || yMin_ >=  yMax_ || zMin_ >=  zMax_){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "SpaceChargeCalc2p5Drb::bunchAnalysis(bunch,...) \n" 
+         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge! \n" 
+								<< "x min ="<< xMin_ <<" max="<< xMax_ << std::endl
+								<< "y min ="<< yMin_ <<" max="<< yMax_ << std::endl
+								<< "z min ="<< zMin_ <<" max="<< zMax_ << std::endl
+								<< "Stop."<< std::endl;
+		}
+		ORBIT_MPI_Finalize();
+  }
+  
+	//clac boundary by xy_ratio
+	double delta_ = (xMax_ - xMin_) - (yMax_ - yMin_)*xy_ratio_;;
+	if(delta_ > 0){
+		yMax_ = yMax_ + 0.5*delta_/xy_ratio_;
+		yMin_ = yMin_ - 0.5*delta_/xy_ratio_;
+	} else if(delta_ < 0){
+		xMax_ = xMax_ + 0.5*delta_;
+		xMin_ = xMin_ - 0.5*delta_;
+		std::cerr<<" delta="<<delta_<<"\n";
+	}
 	
 	//setGrid
 	rhoGrid->setGridX(xMin_,xMax_);
 	rhoGrid->setGridY(yMin_,yMax_);	
+	
 	phiGrid->setGridX(xMin_,xMax_);
 	phiGrid->setGridY(yMin_,yMax_);	
-	zGrid->setGridZ(zMin_,zMax_);	
+	
+	zGrid->setGridZ(zMin_,zMax_);
+	
 	poissonSolver->setGridX(xMin_,xMax_);
 	poissonSolver->setGridY(yMin_,yMax_);
 	
 	std::cerr<<"checkGrid:"<<rhoGrid->getMaxX()<<":"<<rhoGrid->getMinX()<<":"<<rhoGrid->getMaxY()<<":"<<rhoGrid->getMinY()<<":"<<zGrid->getMaxZ()<<":"<<zGrid->getMinZ()<<"\n";
-	std::cerr<<"final grid:"<<xMax_<<":"<<xMin_<<":"<<yMax_<<":"<<yMin_<<":"<<zMax_<<":"<<zMin_<<"\n";
+	std::cerr<<"get grid:"<<xMax_<<":"<<xMin_<<":"<<yMax_<<":"<<yMin_<<":"<<zMax_<<":"<<zMin_<<"\n";
 	
 	//bin rho&z Bunch to the Grid
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
-	
-	//calculate phiGrid
-	poissonSolver->findPotential(rhoGrid,phiGrid);
-
-	//xp={2rL(lambda)/beta^2*gamma^3}*protential/nSize
-	_dz = zGrid->getStepZ();
-	_lambda = bunch->getSizeGlobal() / _dz;	
-	factor = 2. * length * _lambda * bunch->getClassicalRadius() / (bunch->getCharge() * pow(syncPart->getBeta(),2) * pow(syncPart->getGamma(),3));	
-	std::cerr<<"lambda = "<<_lambda<<" R = "<<bunch->getClassicalRadius()<<" charge = "<<bunch->getCharge()<<" beta^2 = "<<pow(syncPart->getBeta(),2)<<" gamma^3 = "<<pow(syncPart->getGamma(),3)<<"\n";        
-	std::cerr<<"calc factor. factor = "<<factor<<"\n";	
-	return factor;
 }
 
-void SpaceChargeCalc2p5D::getBoundaryXY(Bunch* bunch){	
-	xMax_ = -DBL_MAX;
-	yMax_ = -DBL_MAX;
-	xMin_ =  DBL_MAX;
-	yMin_ =  DBL_MAX;
-
-	double** partArr=bunch->coordArr();
-	for (int i = 0, n = bunch->getSize(); i < n; i++){
-		if(partArr[i][0] > xMax_) xMax_ = partArr[i][0];
-		if(partArr[i][2] > yMax_) yMax_ = partArr[i][2];
-		if(partArr[i][0] < xMin_) xMin_ = partArr[i][0];
-		if(partArr[i][2] < yMin_) yMin_ = partArr[i][2];
-	}
-	std::cerr<<"grid before mpi:"<<xMax_<<":"<<xMin_<<":"<<yMax_<<":"<<yMin_<<"\n";
-	pyORBIT_MPI_Comm* pyComm = bunch->getMPI_Comm_Local();
-	
-	double* gridArr;
-	double* gridArr_global;
-	gridArr = new double[4];
-	gridArr_global = new double[4];
-	gridArr[0] = xMax_;
-	gridArr[1] = yMax_;
-	gridArr[2] = -xMin_;
-	gridArr[3] = -yMin_;
-	
-	for(int i = 0; i < 4; i++){
-		gridArr_global[i] = gridArr[i];
-	}
-	std::cerr<<"grid in arr:"<<gridArr[0]<<":"<<gridArr[2]<<":"<<gridArr[1]<<":"<<gridArr[3]<<"\n";
-	
-	ORBIT_MPI_Allreduce(gridArr,gridArr_global,4,MPI_DOUBLE,MPI_MAX,pyComm->comm);
-
-	xMax_ = gridArr_global[0];
-	yMax_ = gridArr_global[1];
-	xMin_ = -gridArr_global[2];
-	yMin_ = -gridArr_global[3];
-	std::cerr<<"grid after mpi:"<<xMax_<<":"<<xMin_<<":"<<yMax_<<":"<<yMin_<<"\n";
-	
-	//clac boundary by xy_ratio
-	double delta_ = (xMax_ - xMin_) > (yMax_ - yMin_)*xy_ratio;
-	if(delta_ > 0){		 
-		yMax_ = yMax_ + delta_;
-		yMin_ = yMin_ - delta_;
-	} else{		
-		xMax_ = xMax_ - delta_;
-		xMin_ = xMin_ + delta_;
-	}
-	std::cerr<<"final grid:"<<xMax_<<":"<<xMin_<<":"<<yMax_<<":"<<yMin_<<"\n";
-}
-void SpaceChargeCalc2p5D::getBoundaryZ(Bunch* bunch){
-	double zMax_global,zMin_global;
-	zMax_ = -DBL_MAX;
-	zMin_ =  DBL_MAX;	
-	
-	double** partArr=bunch->coordArr();
-	for (int i = 0, n = bunch->getSize(); i < n; i++){
-		if(partArr[i][4] > zMax_) zMax_ = partArr[i][4];
-		if(partArr[i][4] < zMin_) zMin_ = partArr[i][4];
-	}
-	pyORBIT_MPI_Comm* pyComm = bunch->getMPI_Comm_Local();
-
-	ORBIT_MPI_Allreduce(&zMax_,&zMax_global,1,MPI_DOUBLE,MPI_MAX,pyComm->comm);
-	ORBIT_MPI_Allreduce(&zMin_,&zMin_global,1,MPI_DOUBLE,MPI_MIN,pyComm->comm);
-
-	zMax_ = zMax_global;
-	zMin_ = zMin_global;	
-}

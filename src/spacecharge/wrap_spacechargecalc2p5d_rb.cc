@@ -83,7 +83,7 @@ extern "C" {
   // defenition of the methods of the python SpaceChargeCalc2p5Drb wrapper class
   // they will be vailable from python level
   static PyMethodDef SpaceChargeCalc2p5DrbClassMethods[] = {
-		{ "trackBunch", SpaceChargeCalc2p5Drb_trackBunch, METH_VARARGS,"track the Bunch"},
+		{ "trackBunch", SpaceChargeCalc2p5Drb_trackBunch, METH_VARARGS,"track the bunch - trackBunch(pyBunch,length,pipe_radius)"},
 		{NULL}
   };
   

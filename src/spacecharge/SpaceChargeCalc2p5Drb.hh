@@ -44,6 +44,16 @@ public:
 	    longitudinal SC kicks to the macro-particles in the bunch. */
 	void trackBunch(Bunch* bunch, double length, double pipe_radius);
 		
+	/** Returns the 2D rho grid with a transverse density distribution. **/
+	Grid2D* getRhoGrid();
+
+	/** Returns the 2D phi grid with a transverse potential. **/
+	Grid2D* getPhiGrid();
+
+	/** Returns the 1D grid with a longitudinal density . **/
+	Grid1D* getLongGrid();
+	
+	
 private:
 	
 	/** Analyses the bunch and does bining. */

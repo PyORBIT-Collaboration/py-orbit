@@ -55,6 +55,18 @@ SpaceChargeCalc2p5Drb::~SpaceChargeCalc2p5Drb(){
 	delete bunchExtremaCalc;
 }
 
+Grid2D* SpaceChargeCalc2p5Drb::getRhoGrid(){
+	return rhoGrid;
+}
+
+Grid2D* SpaceChargeCalc2p5Drb::getPhiGrid(){
+	return phiGrid;
+}
+
+Grid1D* SpaceChargeCalc2p5Drb::getLongGrid(){
+	return zGrid;
+}
+
 void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_radius){
 
 	int nPartsGlobal = bunch->getSizeGlobal();
@@ -153,12 +165,10 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 	
 	zGrid->setGridZ(zMin,zMax);	
 	
-	
 	//sizes of the grids are set up
 	//bin rho&z Bunch to the Grid
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
-	
 	
 	//calculate x_avg, x2_avg, y_avg, y2_avg
 	double x_avg = 0., x2_avg = 0., y_avg = 0., y2_avg = 0.;

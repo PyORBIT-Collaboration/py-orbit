@@ -40,19 +40,19 @@ Grid1D::Grid1D(int zSize, double zMin, double zMax): CppPyWrapper(NULL){
 
 void Grid1D::init(){
 	
-  if( zSize_ < 2){
+  if( zSize_ < 1){
 		int rank = 0;
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){
 			std::cerr << "Grid1D::Grid1D - CONSTRUCTOR" << std::endl
-         				<< "The grid size too small (should be more than 1)!" << std::endl
+         				<< "The grid size too small (should be more than 0)!" << std::endl
 								<< "number of bins ="<< zSize_ << std::endl
 								<< "Stop." << std::endl;
 		}
 		ORBIT_MPI_Finalize();
   }		
 	
-	dz_ = (zMax_ - zMin_)/(zSize_ - 1);
+	dz_ = (zMax_ - zMin_)/zSize_;
 	arr_ = new double[zSize_];
 }
 
@@ -73,23 +73,22 @@ double Grid1D::getValueOnGrid(int iZ){
 
 /** Returns the interpolated value on grid*/	
 double Grid1D::getValue(double z){
-	int iZ;
+	double zFrac;	
 	double Wzm, Wz0, Wzp;
-	double zFrac, zFrac2;
-	getIndAndFracZ(z,iZ,zFrac);
-	zFrac2 = zFrac * zFrac;
-	
+	int iZ;
+	getIndAndFracZ(z,iZ,zFrac);	
 	if(zSize_ > 2){
+		double zFrac2 = zFrac * zFrac;
 		Wzm = 0.5 * (0.25 - zFrac + zFrac2);
 		Wz0 = 0.75 - zFrac2;
 		Wzp = 0.5 * (0.25 + zFrac + zFrac2);
 		return (Wzm * arr_[iZ-1] + Wz0 * arr_[iZ] + Wzp * arr_[iZ+1]);
+	} else if(zSize_ == 2){
+		Wzm = 1.0 - zFrac; // for zInd=0
+		Wzp = zFrac;       // for zInd=1
+		return (Wzm * arr_[0] + Wzp * arr_[1]);		
 	}
-	
-	Wzm = 1.0 - zFrac; // for zInd=0
-	Wz0 = 0.0;
-	Wzp = zFrac;       // for zInd=1
-	return (Wzm * arr_[0] + Wzp * arr_[1]);
+	return arr_[0];
 }
 
 void Grid1D::binBunch(Bunch* bunch){
@@ -100,14 +99,15 @@ void Grid1D::binBunch(Bunch* bunch){
 	if(has_msize > 0){
 		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
 		double m_size = 0.;
-		
 		for(int i = 0, n = bunch->getSize(); i < n; i++){
 			m_size = macroSizeAttr->macrosize(i);
 			binValue(m_size,part_coord_arr[i][4]);
 		}	
 	} else {
 		double m_size = bunch->getMacroSize();
-		for(int i = 0, n = bunch->getSize(); i < n; i++){
+	  int nParts = bunch->getSize();
+	  if(nParts > 0) m_size = m_size/nParts;
+		for(int i = 0; i < nParts; i++){
 			binValue(m_size,part_coord_arr[i][4]);
 		}
 	}	
@@ -116,44 +116,19 @@ void Grid1D::binBunch(Bunch* bunch){
 
 void Grid1D::binValue(double macroSize,double z){
 	if(z < zMin_ || z > zMax_ ) return;
-	int iZ;
-	double zFrac,zFrac2;
-	double Wzm,Wz0,Wzp;
-	Wzm = Wz0 = Wzp = 0.0;
-	
-	getIndAndFracZ(z,iZ,zFrac);
-	zFrac2 = zFrac * zFrac;
-	  
-	if(zSize_ > 2){
-		Wzm = 0.5 * (0.25 - zFrac + zFrac2);
-		Wz0 = 0.75 - zFrac2;
-		Wzp = 0.5 * (0.25 + zFrac + zFrac2);
-	}
-	else if(zSize_ == 2){
-		Wzm = 1.0 - zFrac; // for zInd=0
-		Wz0 = 0.0;
-		Wzp = zFrac;       // for zInd=1
-	}
-
-	//Add weight of particle
-	  if(zSize_ >= 3){
-	  	arr_[iZ-1] += Wzm * macroSize;
-	  	arr_[iZ] += Wz0 * macroSize;
-	  	arr_[iZ+1] += Wzp * macroSize;
-	  	//std::cerr<<"arr_["<<iZ-1<<"]="<<arr_[iZ-1]<<"arr_["<<iZ<<"]="<<arr_[iZ]<<"arr_["<<iZ+1<<"]="<<arr_[iZ+1]<<"\n";
-	  }
-	  else if(zSize_ == 2){
-	  	arr_[0] += Wzm * macroSize;
-	  	arr_[1] += Wzp * macroSize;	  	  
-	  }
-	  else if(zSize_ == 1){
-	  	arr_[0] += Wz0 * macroSize;
-	  }
+	int iZ = int ( (z - zMin_)/dz_ );
+	if(iZ < 0) iZ = 0;
+	if(iZ >= zSize_) iZ = zSize_ - 1;
+	arr_[iZ] += macroSize;
 }
 
 void Grid1D::calcGradient(double z,double& ez){
+	
 	if(zSize_ == 2){
 		ez = (arr_[1] - arr_[0])/dz_;
+		return;
+	} else if(zSize_ == 1){
+		ez = 0.;
 		return;
 	}
 
@@ -181,18 +156,21 @@ void Grid1D::setZero(){
 	
 
 void Grid1D::getIndAndFracZ(double z, int& ind, double& frac){
-	ind  = int ( (z - zMin_)/dz_ + 0.5 );
 	if(zSize_ > 2){
+	  ind  = int ( (z - zMin_)/dz_ );		
 		//cut off edge for three point interpolation
 		if(ind < 1) ind = 1;
 		if(ind > (zSize_-2))ind =  zSize_ - 2;
-		frac = (z - (zMin_ + ind * dz_))/dz_;
+		frac = (z - (zMin_ + ind * dz_))/dz_ - 0.5;
+		return;
 	}
 	if(zSize_ == 2){
-		frac = (z - zMin_)/dz_;
-		if(ind < 0) {ind = 0; frac = 0.0;}
-		else if(ind > 1) {ind = 1; frac = 1.0;}
+		ind = 0;
+		frac = (z - zMin_)/dz_ - 0.5;
+		return;
 	}
+	frac = 1.0;
+	ind = 0;
 }
 
 /** Returns the min z in the grid points */ 
@@ -208,12 +186,12 @@ double Grid1D::getStepZ(){return dz_;};
 void Grid1D::setGridZ(double zMin, double zMax){
 	zMin_ = zMin;
 	zMax_ = zMax;
-	dz_ = (zMax_ - zMin_)/(zSize_ -1);
+	dz_ = (zMax_ - zMin_)/zSize_;
 	setZero();
 }
 
 double Grid1D::getGridZ(int index){
-	return zMin_ + index*dz_;
+	return zMin_ + (index + 0.5)*dz_;
 }
 
 /** Returns the grid size in z-direction */

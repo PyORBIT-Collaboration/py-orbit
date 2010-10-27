@@ -70,18 +70,21 @@ public:
 	/** Sets all grid points to zero */
 	void setZero();
 	
-	/** Returns the index and the fraction of the grid's point for particular z.
+private:
+
+  /** Returns the index and the fraction of the grid's point for particular z.
 	    The index is a central point in three point interpolation:
 	    1 <= ind <= (nBins-2)
 	    The fraction will be : 0 <= frac <= 1.0
 	*/
-	void getIndAndFracZ(double z, int& ind, double& frac);
-
-private:
+	void getIndAndFracZ(double z, int& ind, double& frac);	
+	
+	
 	//memory allocation and step calculation for dx_ and dy_ 
 	void init();
 
 protected:
+	
 	double* arr_;
 	
 	//Grid size

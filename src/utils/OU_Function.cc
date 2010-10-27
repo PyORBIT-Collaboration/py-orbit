@@ -120,7 +120,7 @@ void Function::add(double x, double y)
 							ind_stop =  ind;
 					}
 					if(count > 200){
-						finalize("ORBIT Utils Function class: The Function method  getX(double y) has unlimited loop. Check data.");
+						finalize("ORBIT Utils Function class: The Function method  add(double x, double y) has unlimited loop. Check data.");
 					}
 				}
 			ind = ind_stop;				
@@ -197,6 +197,17 @@ void Function::clean()
   xMax = -1.0e+300;
   yMin = 1.0e+300;
   yMax = -1.0e+300;
+}
+
+void Function::cleanMemory()
+{
+  inf_const_step = 0;
+  x_step = 0.;
+  size = 0;
+  xMin = 1.0e+300;
+  xMax = -1.0e+300;
+  yMin = 1.0e+300;
+  yMax = -1.0e+300;
 	
   if(x_arr != NULL) delete [] x_arr;
   if(y_arr != NULL) delete [] y_arr;
@@ -214,6 +225,10 @@ void Function::clean()
 
 double Function::getY(double x)
 {
+  if(size < 1){
+    finalize("ORBIT Utils Function class: The Function method  getY(double x)  (size<1)");
+  }	
+	
   if(x <= xMin) return y_arr[0];
   if(x >= xMax) return y_arr[size-1];
 

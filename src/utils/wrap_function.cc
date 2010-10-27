@@ -118,6 +118,14 @@ extern "C" {
 		cpp_Function->clean();
 	 	Py_INCREF(Py_None);
 		return Py_None; 
+  }	
+	
+ 	/** It will free the memeory and will remove all points in the Function */
+  static PyObject* Function_cleanMemory(PyObject *self, PyObject *args){
+	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
+		cpp_Function->cleanMemory();
+	 	Py_INCREF(Py_None);
+		return Py_None; 
   }		
 	
  	/** It will return y for a specified x value */
@@ -228,6 +236,7 @@ extern "C" {
  		{ "getMinY",		 	 Function_getMinY,    	METH_VARARGS,"Returns the minimal y value in the Function"},
  		{ "getMaxY",		 	 Function_getMaxY,    	METH_VARARGS,"Returns the maximal y value in the Function"},
  		{ "clean",			 	 Function_clean,    	  METH_VARARGS,"It will remove all points in the Function"},
+ 		{ "cleanMemory",	 Function_cleanMemory, METH_VARARGS,"It will free the memory and remove all points in the Function"},
  		{ "getY",				 	 Function_getY,    	    METH_VARARGS,"Returns y for a specified x value "},
  		{ "getX",				 	 Function_getX,    	    METH_VARARGS,"Returns x for a specified y value "},
  		{ "setConstStep", Function_setConstStep, METH_VARARGS,"It will set the constant step flag to 1 if it is possible"},

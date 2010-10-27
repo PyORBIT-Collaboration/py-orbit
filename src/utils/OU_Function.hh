@@ -54,7 +54,11 @@ namespace OrbitUtils{
 		double getMaxX();
 		double getMaxY();
 		
+		/** It will set the number of points to 0 */
 		void clean(); 
+		
+		/** It will free the mmemory and set the number of points to 0 */
+		void cleanMemory(); 
 		
 		double getY(double x);
 		

@@ -314,7 +314,8 @@ int Function::setConstStep(int info)
     //check that step is const
     x_step = x_arr[1] - x_arr[0];
     for(int i = 0; i < (size-1); i++){
-      if(abs(x_step - (x_arr[i+1] - x_arr[i]))/x_step > 1.0e-11){
+      if(abs((x_step - (x_arr[i+1] - x_arr[i]))/x_step) > 1.0e-11){
+				inf_const_step = 0;
 	      return 0;
       }
     }

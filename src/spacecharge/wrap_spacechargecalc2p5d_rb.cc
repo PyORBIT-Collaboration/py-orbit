@@ -113,6 +113,27 @@ extern "C" {
 		return pyGrid1D;
   }			
 	
+  //Grid1D* getLongDerivativeGrid() returns the 1D grid with the derivative of the longitudinal density
+  static PyObject* SpaceChargeCalc2p5Drb_getLongDerivativeGrid(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5Drb = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5Drb* cpp_SpaceChargeCalc2p5Drb = (SpaceChargeCalc2p5Drb*) pySpaceChargeCalc2p5Drb->cpp_obj;
+		Grid1D* cpp_grid1d = cpp_SpaceChargeCalc2p5Drb->getLongDerivativeGrid();
+		if(cpp_grid1d->getPyWrapper() != NULL){
+			Py_INCREF(cpp_grid1d->getPyWrapper());
+			return cpp_grid1d->getPyWrapper();
+		}
+		//It will create a pyGrid2D object
+		PyObject* mod = PyImport_ImportModule("spacecharge");
+		PyObject* pyGrid1D = PyObject_CallMethod(mod,"Grid1D","i",cpp_grid1d->getSizeZ());		
+		//delete the c++ reference to the internal Grid1D inside pyGrid1D and assign the new one
+		delete ((Grid1D*)((pyORBIT_Object*) pyGrid1D)->cpp_obj);
+		((pyORBIT_Object*) pyGrid1D)->cpp_obj = cpp_grid1d;
+		cpp_grid1d->setPyWrapper(pyGrid1D);
+		Py_INCREF(cpp_grid1d->getPyWrapper());
+		Py_DECREF(mod);
+		return pyGrid1D;
+  }			
+	
   //trackBunch(Bunch* bunch, double length, double pipe_radius)
   static PyObject* SpaceChargeCalc2p5Drb_trackBunch(PyObject *self, PyObject *args){
 		pyORBIT_Object* pySpaceChargeCalc2p5Drb = (pyORBIT_Object*) self;
@@ -132,6 +153,26 @@ extern "C" {
 		return Py_None;
   }
 
+	//setLongAveragingPointsN(int n_points) sets the number of smoothing points for derivative calculation
+  static PyObject* SpaceChargeCalc2p5Drb_setLongAveragingPointsN(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5Drb = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5Drb* cpp_SpaceChargeCalc2p5Drb = (SpaceChargeCalc2p5Drb*) pySpaceChargeCalc2p5Drb->cpp_obj;
+		int n_long_smoothing;
+		if(!PyArg_ParseTuple(args,"i:setLongAveragingPointsN",&n_long_smoothing)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5Drb.setLongAveragingPointsN(nPoints) - method needs a parameter.");
+		}
+		cpp_SpaceChargeCalc2p5Drb->setLongAveragingPointsN(n_long_smoothing);
+		return Py_BuildValue("i",n_long_smoothing);;
+  }	
+	
+	//getLongAveragingPointsN() returns the number of smoothing points for derivative calculation
+  static PyObject* SpaceChargeCalc2p5Drb_getLongAveragingPointsN(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5Drb = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5Drb* cpp_SpaceChargeCalc2p5Drb = (SpaceChargeCalc2p5Drb*) pySpaceChargeCalc2p5Drb->cpp_obj;
+		int n_long_smoothing = cpp_SpaceChargeCalc2p5Drb->getLongAveragingPointsN();
+		return Py_BuildValue("i",n_long_smoothing);;
+  }		
+	
   //-----------------------------------------------------
   //destructor for python SpaceChargeCalc2p5Drb class (__del__ method).
   //-----------------------------------------------------
@@ -150,6 +191,9 @@ extern "C" {
 		{ "getRhoGrid",  SpaceChargeCalc2p5Drb_getRhoGrid, METH_VARARGS,"returns the Grid2D with a space charge density"},
 		{ "getPhiGrid",  SpaceChargeCalc2p5Drb_getPhiGrid, METH_VARARGS,"returns the Grid2D with a space charge potential"},
 		{ "getLongGrid", SpaceChargeCalc2p5Drb_getLongGrid, METH_VARARGS,"returns the Grid1D with a longitudinal space charge density"},
+		{ "getLongDerivativeGrid", 	SpaceChargeCalc2p5Drb_getLongDerivativeGrid, METH_VARARGS,"returns the Grid1D with a derivative of longitudinal space charge density"},
+		{ "setLongAveragingPointsN",	SpaceChargeCalc2p5Drb_setLongAveragingPointsN, METH_VARARGS,"sets the number of smoothing points for derivative calculation."},
+		{ "getLongAveragingPointsN",	SpaceChargeCalc2p5Drb_getLongAveragingPointsN, METH_VARARGS,"returns the number of smoothing points for derivative calculation."},
 		{NULL}
   };
   

@@ -35,7 +35,14 @@ SpaceChargeCalc2p5Drb::SpaceChargeCalc2p5Drb(int xSize, int ySize, int zSize, do
 	rhoGrid = new Grid2D(xSize, ySize);
 	phiGrid = new Grid2D(xSize, ySize);
 	zGrid = new Grid1D(zSize);
+	zDerivGrid = new Grid1D(zSize);
 	bunchExtremaCalc = new BunchExtremaCalculator();
+	//we will use 3 points by default to calculate the longitudinal density derivative
+	n_long_avg = 3;
+	S_arr = new double*[5];
+	for(int i = 0; i < 5; i++){
+		S_arr[i] = new double[2];
+	}
 }
 
 SpaceChargeCalc2p5Drb::SpaceChargeCalc2p5Drb(int xSize, int ySize, int zSize): CppPyWrapper(NULL)
@@ -45,7 +52,14 @@ SpaceChargeCalc2p5Drb::SpaceChargeCalc2p5Drb(int xSize, int ySize, int zSize): C
 	rhoGrid = new Grid2D(xSize, ySize);
 	phiGrid = new Grid2D(xSize, ySize);
 	zGrid = new Grid1D(zSize);
+	zDerivGrid = new Grid1D(zSize);
 	bunchExtremaCalc = new BunchExtremaCalculator();	
+	//we will use 3 points by default to calculate the longitudinal density derivative
+	n_long_avg = 3;
+	S_arr = new double*[5];
+	for(int i = 0; i < 5; i++){
+		S_arr[i] = new double[2];
+	}	
 }
 
 SpaceChargeCalc2p5Drb::~SpaceChargeCalc2p5Drb(){
@@ -65,7 +79,16 @@ SpaceChargeCalc2p5Drb::~SpaceChargeCalc2p5Drb(){
 	} else {
 		delete zGrid;
 	}
+	if(zDerivGrid->getPyWrapper() != NULL){
+		Py_DECREF(zDerivGrid->getPyWrapper());
+	} else {
+		delete zDerivGrid;
+	}	
 	delete bunchExtremaCalc;
+	for(int i = 0; i < 5; i++){
+		delete [] S_arr[i];
+	}	
+	delete [] S_arr; 
 }
 
 Grid2D* SpaceChargeCalc2p5Drb::getRhoGrid(){
@@ -78,6 +101,10 @@ Grid2D* SpaceChargeCalc2p5Drb::getPhiGrid(){
 
 Grid1D* SpaceChargeCalc2p5Drb::getLongGrid(){
 	return zGrid;
+}
+
+Grid1D* SpaceChargeCalc2p5Drb::getLongDerivativeGrid(){
+	return zDerivGrid;
 }
 
 void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_radius){
@@ -122,7 +149,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 		r2 = (x - x_center)*(x -x_center)  + (y - y_center)*(y - y_center);
 		
 		phiGrid->calcGradient(x,y,ex,ey);	
-    zGrid->calcGradient(z,ez);
+    ez = zDerivGrid->getValue(z);
 		//std::cout<<"debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;
 		
 		Lfactor = zGrid->getValue(z) * factor;
@@ -182,11 +209,15 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 	phiGrid->setGridY(yMin,yMax);
 	
 	zGrid->setGridZ(zMin,zMax);	
+	zDerivGrid->setGridZ(zMin,zMax);	
 	
 	//sizes of the grids are set up
 	//bin rho&z Bunch to the Grid
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
+	
+	//calculate the derivative of the longitudinal density that inside the zDerivGrid (Grid1D)
+	this->calculateLongDerivative();
 	
 	//calculate x_avg, x2_avg, y_avg, y2_avg
 	double x_avg = 0., x2_avg = 0., y_avg = 0., y2_avg = 0.;
@@ -217,4 +248,61 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 	a_bunch = sqrt(2*(x2_avg + y2_avg));
 }
 
+void SpaceChargeCalc2p5Drb::calculateLongDerivative(){
+	int nZ = zGrid->getSizeZ();
+	
+	if(nZ == 1){
+		zDerivGrid->setValue(zGrid->getValueOnGrid(0),0);
+		return;
+	} else if(nZ == 2){
+		double zDeriv = 0.;
+		zGrid->calcGradient((zGrid->getGridZ(0)+zGrid->getGridZ(1))*0.5,zDeriv);
+		zDerivGrid->setValue(zDeriv,0);
+		zDerivGrid->setValue(zDeriv,1);
+		return;
+	}
+	
+	int nAvg = n_long_avg;
+	if(nZ < nAvg) nAvg = nZ;
+	int iStart, iStop;
+	double a,b,c;
+	double x,y,z, det;
+	double** S = S_arr;
+	for(int iz = 0; iz < nZ; iz++){
+		z = zGrid->getGridZ(iz);
+		
+		iStart = iz - nAvg/2;
+		if(iStart < 0) iStart = 0;
+		if((iStart + nAvg) >= nZ) iStart = nZ - nAvg;
+		iStop = iStart + nAvg;
+		for(int j = 0; j < 5; j++){
+			for(int k = 0; k < 2; k++){
+				S[j][k] = 0.;
+				for(int i = iStart; i < iStop; i++){
+					x = zGrid->getGridZ(i);
+					y = zGrid->getValueOnGrid(i);
+					S[j][k] += pow(x,j)*pow(y,k);
+				}
+			}
+		}
+		det = (S[0][0]*S[2][0]*S[4][0] - S[1][0]*S[1][0]*S[4][0] - S[0][0]*S[3][0]*S[3][0] + 2*S[1][0]*S[2][0]*S[3][0] - S[2][0]*S[2][0]*S[2][0]);
+		a = (S[0][1]*S[1][0]*S[3][0] - S[1][1]*S[0][0]*S[3][0] - S[0][1]*S[2][0]*S[2][0]
+       + S[1][1]*S[1][0]*S[2][0] + S[2][1]*S[0][0]*S[2][0] - S[2][1]*S[1][0]*S[1][0])/det;
+    b = (S[1][1]*S[0][0]*S[4][0] - S[0][1]*S[1][0]*S[4][0] + S[0][1]*S[2][0]*S[3][0]
+       - S[2][1]*S[0][0]*S[3][0] - S[1][1]*S[2][0]*S[2][0] + S[2][1]*S[1][0]*S[2][0])/det;
+    c = (S[0][1]*S[2][0]*S[4][0] - S[1][1]*S[1][0]*S[4][0] - S[0][1]*S[3][0]*S[3][0]
+       + S[1][1]*S[2][0]*S[3][0] + S[2][1]*S[1][0]*S[3][0] - S[2][1]*S[2][0]*S[2][0])/det;
+    y = 2*a*z + b;
+		zDerivGrid->setValue(y,iz);
+	}
+}
 
+/** Sets the number of smoothing points to calculate the derivative of the longitudinal density. */
+void SpaceChargeCalc2p5Drb::setLongAveragingPointsN(int n_points){
+	n_long_avg = n_points;
+}
+
+/** Returns the number of smoothing points to calculate the derivative of the longitudinal density. */
+int SpaceChargeCalc2p5Drb::getLongAveragingPointsN(){
+	return n_long_avg;
+}

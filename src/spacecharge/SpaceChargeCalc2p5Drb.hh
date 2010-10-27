@@ -50,23 +50,39 @@ public:
 	/** Returns the 2D phi grid with a transverse potential. **/
 	Grid2D* getPhiGrid();
 
-	/** Returns the 1D grid with a longitudinal density . **/
+	/** Returns the 1D grid with a longitudinal density. **/
 	Grid1D* getLongGrid();
 	
+	/** Returns the 1D grid with a derivative of the longitudinal density. **/
+	Grid1D* getLongDerivativeGrid();
+	
+	/** Sets the number of smoothing points to calculate the derivative of the longitudinal density. */
+	void setLongAveragingPointsN(int n_points);
+	
+	/** Returns the number of smoothing points to calculate the derivative of the longitudinal density. */
+	int getLongAveragingPointsN();
 	
 private:
 	
 	/** Analyses the bunch and does bining. */
  double bunchAnalysis(Bunch* bunch, double& totalMacrosize, double& x_c, double& y_c, double& a_bunch);	
+ 
+ /** Calculates the derivative of the longitudinal density by using Quadratic Curve Fitting */
+ void calculateLongDerivative();
 	
 protected:
 	PoissonSolverFFT2D* poissonSolver;
 	Grid2D* rhoGrid;
 	Grid2D* phiGrid;
 	Grid1D* zGrid;
+	Grid1D* zDerivGrid;
 	OrbitUtils::BunchExtremaCalculator* bunchExtremaCalc;
 	
 	double xy_ratio;
+	int n_long_avg;
+	
+	//auxiliary 5x2 array for Quadratic Curve Fitting
+	double** S_arr;
 };
 //end of SC_SPACECHARGE_CALC_2P5D_RB_H
 #endif

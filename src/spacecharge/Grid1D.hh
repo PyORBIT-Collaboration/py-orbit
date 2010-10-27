@@ -49,6 +49,7 @@ public:
 	/** Sets z-grid */
 	void setGridZ(double zMin, double zMax);
 	
+	/** Returns the grid point for index */
 	double getGridZ(int index);
 	
 	/** Returns the grid size in z-direction */

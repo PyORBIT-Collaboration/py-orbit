@@ -50,8 +50,21 @@ SpaceChargeCalc2p5Drb::SpaceChargeCalc2p5Drb(int xSize, int ySize, int zSize): C
 
 SpaceChargeCalc2p5Drb::~SpaceChargeCalc2p5Drb(){
 	delete poissonSolver;
-	delete rhoGrid, phiGrid;
-	delete zGrid;
+	if(rhoGrid->getPyWrapper() != NULL){
+		Py_DECREF(rhoGrid->getPyWrapper());
+	} else {
+		delete rhoGrid;
+	}
+	if(phiGrid->getPyWrapper() != NULL){
+		Py_DECREF(phiGrid->getPyWrapper());
+	} else {
+		delete phiGrid;
+	}	
+	if(zGrid->getPyWrapper() != NULL){
+		Py_DECREF(zGrid->getPyWrapper());
+	} else {
+		delete zGrid;
+	}
 	delete bunchExtremaCalc;
 }
 
@@ -78,7 +91,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 	double x_center = 0.;
 	double y_center = 0.;	
 	double totalMacrosize = 0.;
-	bunchAnalysis(bunch, totalMacrosize, x_center, y_center, a_bunch);
+	this->bunchAnalysis(bunch, totalMacrosize, x_center, y_center, a_bunch);
 	double z_step = zGrid->getStepZ();
 	
 	//calculate phiGrid
@@ -86,8 +99,13 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
 	double factor =  2*length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
+	//std::cout<<" debug totalMacrosize="<<totalMacrosize<<" factor="<<factor<<" z_step="<< z_step <<std::endl;	
+	//std::cout<<" debug z = 0 rpho_z="<<  zGrid->getValue(0.)/z_step <<std::endl;	
+	//std::cout<<" debug z = z_min ="<<zGrid->getMinZ()  <<" rpho_z="<<  zGrid->getValue(zGrid->getMinZ()*0.9)/z_step <<std::endl;	
+	//std::cout<<" debug z = z_max ="<<zGrid->getMaxZ()  <<" rpho_z="<<  zGrid->getValue(zGrid->getMaxZ()*0.9)/z_step <<std::endl;	
+
 	factor = factor/(z_step*totalMacrosize);
-	
+
 	double Lfactor = 0.;
 	double x,y,z,ex,ey,ez, r2;
 	
@@ -156,7 +174,7 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 		xMax = center + width;
 	}
 
-	//setGrids' limits
+	//set Grids' limits
 	rhoGrid->setGridX(xMin,xMax);
 	rhoGrid->setGridY(yMin,yMax);	
 	

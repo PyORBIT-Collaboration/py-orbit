@@ -110,7 +110,8 @@ void PoissonSolverFFT2D::setGridXY(double xMin, double xMax, double yMin, double
 	_defineGreenF();
 }
 
-// Defines the FFT of the Green Function
+// Defines the FFT of the Green Function: field = lambda/distance, potential = lambda*ln(abs(r))
+// Please, keep in mind that the field of point like string 2*lambda*ln(abs(r)) in CGS
 void PoissonSolverFFT2D::_defineGreenF()
 {
 	

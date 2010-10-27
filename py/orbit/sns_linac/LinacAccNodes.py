@@ -12,7 +12,7 @@ import math
 from orbit.utils import orbitFinalize, NamedObject, ParamsDictObject
 
 # import general accelerator elements and lattice
-from orbit.lattice import AccNode, AccActionsContainer
+from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
 
 # import teapot base functions from wrapper around C++ functions
 from orbit.teapot_base import TPB
@@ -20,7 +20,7 @@ from orbit.teapot_base import TPB
 # from linac import the RF gap classes
 from linac import BaseRfGap, MatrixRfGap
 
-class BaseLinacNode(AccNode):
+class BaseLinacNode(AccNodeBunchTracker):
 	""" 
 	The base abstract class of the linac accelerator elements hierarchy. 
 	It cannot be tilted. The direct subclasses of this class will be markers, 
@@ -30,7 +30,7 @@ class BaseLinacNode(AccNode):
 		"""
 		Constructor. Creates the base linac element. This is a superclass for all linac elements.
 		"""
-		AccNode.__init__(self,name)
+		AccNodeBunchTracker.__init__(self,name)
 		self.setType("baseLinacNode")
 		self.__linacSeqence = None
 		
@@ -51,28 +51,6 @@ class BaseLinacNode(AccNode):
 		Returns the seqence.
 		"""
 		return self.__linacSeqence
-		
-	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
-		"""
-		It tracks the bunch through the BaseLinacNode instance.
-		"""
-		if(actionContainer == None): actionContainer = AccActionsContainer("Linac Bunch Tracking")
-		paramsDict["bunch"] = bunch
-		
-		def track(paramsDict):
-			node = paramsDict["node"]
-			node.track(paramsDict)
-			
-		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
-		actionContainer.removeAction(track, AccActionsContainer.BODY)		
-		
-	def track(self, paramsDict):
-		"""
-		It is tracking the bunch through the element. Each element 
-		should implement this method.
-		"""
-		pass	
 
 	def trackDesign(self, paramsDict):
 		"""

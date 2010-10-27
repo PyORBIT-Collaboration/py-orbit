@@ -17,7 +17,7 @@ from bunch import Bunch
 from orbit.utils import orbitFinalize
 
 # import general accelerator elements and lattice
-from orbit.lattice import AccLattice, AccNode, AccActionsContainer
+from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunchTracker
 
 # import matrix class and generators
 from orbit.teapot_base import MatrixGenerator

@@ -14,7 +14,7 @@ from orbit.teapot_base import TPB
 from orbit.utils import orbitFinalize
 
 # import general accelerator elements and lattice
-from orbit.lattice import AccLattice, AccNode, AccActionsContainer
+from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunchTracker
 
 # import the MAD parser to construct lattices of TEAPOT elements.
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement
@@ -298,37 +298,15 @@ class _teapotFactory:
 	getElements = classmethod(getElements)
 
 
-class BaseTEAPOT(AccNode):
+class BaseTEAPOT(AccNodeBunchTracker):
 	""" The base abstract class of the TEAPOT accelerator elements hierarchy. """
 	def __init__(self, name = "no name"):
 		"""
 		Constructor. Creates the base TEAPOT element. This is a superclass for all TEAPOT elements.
 		"""
-		AccNode.__init__(self,name)
+		AccNodeBunchTracker.__init__(self,name)
 		self.setType("base teapot")
 		
-	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
-		"""
-		It tracks the bunch through the BaseTEAPOT instance.
-		"""
-		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
-		paramsDict["bunch"] = bunch
-		
-		def track(paramsDict):
-			node = paramsDict["node"]
-			node.track(paramsDict)
-			
-		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
-		actionContainer.removeAction(track, AccActionsContainer.BODY)		
-		
-	def track(self, paramsDict):
-		"""
-		It is tracking the bunch through the element. Each element 
-		should implement this method.
-		"""
-		pass	
-
 class NodeTEAPOT(BaseTEAPOT):
 	def __init__(self, name = "no name"):
 		"""
@@ -460,7 +438,7 @@ class DriftTEAPOT(NodeTEAPOT):
 
 	def track(self, paramsDict):
 		"""
-		The drift class implementation of the AccNode class track(probe) method.
+		The drift class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
 		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
@@ -494,7 +472,7 @@ class SolenoidTEAPOT(NodeTEAPOT):
 
 	def track(self, paramsDict):
 		"""
-		The Solenoid TEAPOT  class implementation of the AccNode class track(probe) method.
+		The Solenoid TEAPOT  class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
@@ -584,7 +562,7 @@ class MultipoleTEAPOT(NodeTEAPOT):
 	def track(self, paramsDict):
 		"""
 		The Multipole Combined Function TEAPOT  class
-		implementation of the AccNode class track(probe) method.
+		implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
@@ -705,7 +683,7 @@ class QuadTEAPOT(NodeTEAPOT):
 	def track(self, paramsDict):
 		"""
 		The Quad Combined Function TEAPOT  class implementation
-		of the AccNode class track(probe) method.
+		of the AccNodeBunchTracker class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
@@ -866,7 +844,7 @@ class BendTEAPOT(NodeTEAPOT):
 	def track(self, paramsDict):
 		"""
 		The Bend Combined Functions TEAPOT  class implementation of
-		the AccNode class track(probe) method.
+		the AccNodeBunchTracker class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
@@ -961,7 +939,7 @@ class RingRFTEAPOT(NodeTEAPOT):
 	def track(self, paramsDict):
 		"""
 		The Ring RF TEAPOT class implementation
-		of the AccNode class track(probe) method.
+		of the AccNodeBunchTracker class track(probe) method.
 		"""
 		harmArr = self.getParam("harmonics")
 		voltArr = self.getParam("voltages")
@@ -1018,7 +996,7 @@ class KickTEAPOT(NodeTEAPOT):
 	def track(self, paramsDict):
 		"""
 		The Kick TEAPOT  class implementation of
-		the AccNode class track(probe) method.
+		the AccNodeBunchTracker class track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()

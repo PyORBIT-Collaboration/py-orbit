@@ -122,7 +122,9 @@ void Grid2D::binBunch(Bunch* bunch){
 		return;
 	}
 	double m_size = bunch->getMacroSize();
-	for(int i = 0, n = bunch->getSize(); i < n; i++){
+	int nParts = bunch->getSize();
+	if(nParts > 0) m_size = m_size/nParts;
+	for(int i = 0; i < nParts; i++){
 		binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);	
 	}
   synchronizeMPI(bunch->getMPI_Comm_Local());

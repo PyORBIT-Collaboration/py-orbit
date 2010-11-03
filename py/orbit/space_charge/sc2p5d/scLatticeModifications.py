@@ -33,7 +33,7 @@ def setSC2p5D_General_AccNodes(lattice, sc_path_length_min, space_charge_calcula
 		for ip in range(nParts):
 			part_length = accNode.getLength(ip)
 			if(running_path > sc_path_length_min):
-				nodes_arr.append((accNode,ip,length_total,running_path)
+				nodes_arr.append((accNode,ip,length_total,running_path))
 				running_path = 0.
 			running_path += part_length
 			length_total += part_length
@@ -78,7 +78,7 @@ def setSC2p5DrbAccNodes(lattice, sc_path_length_min, space_charge_calculator, pi
 	"""
 	It will put a set of a space charge SC2p5Drb_AccNode into the lattice as child nodes of the first level accelerator nodes.
 	The SC nodes will be inserted at the beginning of a particular part of the first level AccNode element.
-	The distance between SC nodes should be more than sc_path_length_min, and the boundary is optional.
+	The distance between SC nodes should be more than sc_path_length_min, and the pipe radius is needed.
 	The function will return the array of SC nodes as a convenience for the user.
 	"""
 	scNodes_arr = setSC2p5D_General_AccNodes(lattice, sc_path_length_min, space_charge_calculator, SC2p5Drb_AccNode)

@@ -4,8 +4,8 @@
 ## Classes:
 ## 
 
-from orbit.space_charge.sc2p5d.SC2p5Drb_AccNode import SC2p5Drb_AccNode
-from orbit.space_charge.sc2p5d.SC2p5D_AccNode import SC2p5D_AccNode
+from orbit.space_charge.sc2p5d.scAccNodes import SC2p5Drb_AccNode
+from orbit.space_charge.sc2p5d.scAccNodes import SC2p5D_AccNode
 from orbit.space_charge.sc2p5d.scLatticeModifications import setSC2p5DAccNodes
 from orbit.space_charge.sc2p5d.scLatticeModifications import setSC2p5DrbAccNodes
 

@@ -56,6 +56,12 @@ class SC2p5D_Base_AccNode(AccNodeBunchTracker):
 		"""
 		return self.sc_calculator
 		
+	def trackDesign(self, paramsDict):
+		"""
+		This method is for Linac Nodes compatibility. It is empty and should not be used for Space Charge calculations.
+		"""
+		pass	
+		
 	def track(self, paramsDict):
 		"""
 		It is tracking the bunch through the Space Charge calculator. Each subclass should implement this method.
@@ -126,6 +132,7 @@ class SC2p5Drb_AccNode(SC2p5D_Base_AccNode):
 		"""
 		It is tracking the bunch through the Space Charge calculator.
 		"""
+		#print "debug ????????????? SC node=",self.getName()," scL=",self.getLengthOfSC()," pipe_r=",self.pipe_radius
 		if(self.switcher != True): return
 		bunch = paramsDict["bunch"]
 		self.sc_calculator.trackBunch(bunch,self.sc_length,self.pipe_radius)

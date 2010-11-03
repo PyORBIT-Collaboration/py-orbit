@@ -127,9 +127,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 	SyncPart* syncPart = bunch->getSyncPart();	
 	double factor =  2*length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
 	//std::cout<<" debug totalMacrosize="<<totalMacrosize<<" factor="<<factor<<" z_step="<< z_step <<std::endl;	
-	//std::cout<<" debug z = 0 rpho_z="<<  zGrid->getValue(0.)/z_step <<std::endl;	
-	//std::cout<<" debug z = z_min ="<<zGrid->getMinZ()  <<" rpho_z="<<  zGrid->getValue(zGrid->getMinZ()*0.9)/z_step <<std::endl;	
-	//std::cout<<" debug z = z_max ="<<zGrid->getMaxZ()  <<" rpho_z="<<  zGrid->getValue(zGrid->getMaxZ()*0.9)/z_step <<std::endl;	
+	
 
 	factor = factor/(z_step*totalMacrosize);
 
@@ -141,7 +139,10 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 	double long_sc_factor_out = 2*log(pipe_radius);
 	double a_bunch_2 = a_bunch*a_bunch;
 	double long_sc_factor = - length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2) * bunch->getMass()/(pow(syncPart->getGamma(),2));
-	
+	//std::cout<<" debug pipe_radius="<<pipe_radius<<" a_bunch="<<a_bunch<<std::endl;	
+	//std::cout<<" debug long_sc_factor_in="<<long_sc_factor_in<<" long_sc_factor_out="<<long_sc_factor_out<<std::endl;	
+	//std::cout<<" debug long_sc_factor="<<long_sc_factor<<std::endl;
+	//std::cout<<" debug z="<<zGrid->getMaxZ()*0.5<<" derivat="<<zDerivGrid->getValue(zGrid->getMaxZ()*0.5)<<std::endl;	
 	for (int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);
 		y = bunch->y(i);
@@ -152,7 +153,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
     ez = zDerivGrid->getValue(z);
 		//std::cout<<"debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;
 		
-		Lfactor = zGrid->getValue(z) * factor;
+		Lfactor = - zGrid->getValue(z) * factor;
 	
 		bunch->xp(i) += ex * Lfactor;
 		bunch->yp(i) += ey * Lfactor;
@@ -250,18 +251,20 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 
 void SpaceChargeCalc2p5Drb::calculateLongDerivative(){
 	int nZ = zGrid->getSizeZ();
+	double z_step = zGrid->getStepZ();
 	
 	if(nZ == 1){
-		zDerivGrid->setValue(zGrid->getValueOnGrid(0),0);
+		zDerivGrid->setValue(0.,0);
 		return;
 	} else if(nZ == 2){
 		double zDeriv = 0.;
 		zGrid->calcGradient((zGrid->getGridZ(0)+zGrid->getGridZ(1))*0.5,zDeriv);
-		zDerivGrid->setValue(zDeriv,0);
-		zDerivGrid->setValue(zDeriv,1);
+		zDerivGrid->setValue(zDeriv/z_step,0);
+		zDerivGrid->setValue(zDeriv/z_step,1);
 		return;
 	}
 	
+	//smoothing the derivative by Quadratic Curve Fitting
 	int nAvg = n_long_avg;
 	if(nZ < nAvg) nAvg = nZ;
 	int iStart, iStop;
@@ -293,7 +296,7 @@ void SpaceChargeCalc2p5Drb::calculateLongDerivative(){
     c = (S[0][1]*S[2][0]*S[4][0] - S[1][1]*S[1][0]*S[4][0] - S[0][1]*S[3][0]*S[3][0]
        + S[1][1]*S[2][0]*S[3][0] + S[2][1]*S[1][0]*S[3][0] - S[2][1]*S[2][0]*S[2][0])/det;
     y = 2*a*z + b;
-		zDerivGrid->setValue(y,iz);
+		zDerivGrid->setValue(y/z_step,iz);
 	}
 }
 

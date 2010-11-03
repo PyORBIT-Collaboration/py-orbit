@@ -123,7 +123,6 @@ void Grid2D::binBunch(Bunch* bunch){
 	}
 	double m_size = bunch->getMacroSize();
 	int nParts = bunch->getSize();
-	if(nParts > 0) m_size = m_size/nParts;
 	for(int i = 0; i < nParts; i++){
 		binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);	
 	}

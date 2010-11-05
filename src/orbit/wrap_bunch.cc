@@ -10,6 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////
 #include "wrap_bunch.hh"
 #include "wrap_syncpart.hh"
+#include "wrap_bunch_twiss_analysis.hh"
 
 #include "pyORBIT_Object.hh"
 
@@ -1319,6 +1320,7 @@ extern "C" {
 		PyModule_AddObject(module, "Bunch", (PyObject *)&pyORBIT_Bunch_Type);			
 		//add the SyncParticle python class
 		wrap_orbit_syncpart::initsyncpart(module);
+		wrap_bunch_twiss_analysis::initbunchtwissanalysis(module);
   }
 
 	PyObject* getBunchType(const char* name){

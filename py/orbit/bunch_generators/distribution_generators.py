@@ -334,6 +334,7 @@ class TwissAnalysis:
 	""" 
 	Calculates the rms twiss parameters for 1D,2D, and 3D distributions by 
 	using the set of (x,xp), (x,xp,y,yp), and (x,xp,y,yp,z,zp) points.
+	There is a c++ replacement for this class BunchTwissAnalysis in the orbit/BunchDiagnostics dir.
 	"""
 	
 	def __init__(self, nD):

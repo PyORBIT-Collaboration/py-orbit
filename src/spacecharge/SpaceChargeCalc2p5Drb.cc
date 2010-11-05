@@ -163,7 +163,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 		} else {
 			long_sc_coeff = long_sc_factor_out - log(r2);
 		}
-		bunch->dE(i) += ez*long_sc_factor*long_sc_coeff;
+		bunch->dE(i) += - ez*long_sc_factor*long_sc_coeff;
 	}
 }
 

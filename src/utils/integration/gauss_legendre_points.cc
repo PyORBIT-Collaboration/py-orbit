@@ -109,13 +109,12 @@ extern "C" {
 			w = pws[n_pw].w;
 			
 			//redefine number of integration points
-			int n_int = pws[n_pw].n/2;
-			
+			int n_int = pws[n_pw].n/2;			
 			//add integration points to the Function container
 			
 			for(int k = (n_int-1); k >= 0; k--){
 				double y = w[k]*A;			
-				double x = B-A*z[k];
+				double x = B-A*z[k];	
 				fn->add(x,y);				
 			}			
 			

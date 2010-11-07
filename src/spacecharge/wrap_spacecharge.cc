@@ -2,11 +2,13 @@
 
 #include "wrap_grid1D.hh"
 #include "wrap_grid2D.hh"
+#include "wrap_grid3D.hh"
 #include "wrap_poissonsolverfft2d.hh"
 #include "wrap_boundary2d.hh"
 #include "wrap_spacecharge.hh"
 #include "wrap_spacechargecalc2p5d.hh"
 #include "wrap_spacechargecalc2p5d_rb.hh"
+#include "wrap_uniform_ellipsoid_field_calculator.hh"
 
 static PyMethodDef spacechargeMethods[] = { {NULL,NULL} };
 
@@ -20,10 +22,12 @@ extern "C" {
 		//add the other classes init
 		wrap_spacecharge::initGrid1D(module);
 		wrap_spacecharge::initGrid2D(module);
+		wrap_spacecharge::initGrid3D(module);		
 		wrap_spacecharge::initPoissonSolverFFT2D(module);
 		wrap_spacecharge::initBoundary2D(module);
 		wrap_spacecharge::initSpaceChargeCalc2p5D(module);
 		wrap_spacecharge::initSpaceChargeCalc2p5Drb(module);
+		wrap_spacecharge::initUniformEllipsoidFieldCalculator(	module);	
   }
 	
 	PyObject* getSpaceChargeType(char* name){

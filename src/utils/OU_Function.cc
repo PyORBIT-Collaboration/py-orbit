@@ -27,7 +27,7 @@ Function::Function(): CppPyWrapper(NULL)
 	x_arr = NULL;
 	y_arr = NULL;
 	sizeChunk = 10;
-  clean();
+  cleanMemory();
 
   //MPI stuffs
   rank_MPI = 0;

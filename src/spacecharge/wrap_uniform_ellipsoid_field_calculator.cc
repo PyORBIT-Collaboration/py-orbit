@@ -38,15 +38,15 @@ extern "C" {
 		return 0;
   }
 		
-	/** Sets the half-axis of the ellipsoid and maximal values of x,y,z */
+	/** Sets the half-axis of the ellipsoid and maximal values of radius*/
 	static PyObject* UniformEllipsoidFieldCalculator_setEllipsoid(PyObject *self, PyObject *args){
 		pyORBIT_Object* pyUniformEllipsoidFieldCalculator = (pyORBIT_Object*) self;
 		UniformEllipsoidFieldCalculator* cpp_UniformEllipsoidFieldCalculator = (UniformEllipsoidFieldCalculator*) pyUniformEllipsoidFieldCalculator->cpp_obj;
-		double a,b,c,x_max,y_max,z_max;
-		if(!PyArg_ParseTuple(args,"dddddd:setEllipsoid",&a,&b,&c,&x_max,&y_max,&z_max)){		
-			ORBIT_MPI_Finalize("PyUniformEllipsoidFieldCalculator.setEllipsoid(a,b,c,x_max,y_max,z_max) - method needs parameters.");
+		double a,b,c,r_max;
+		if(!PyArg_ParseTuple(args,"dddd:setEllipsoid",&a,&b,&c,&r_max)){		
+			ORBIT_MPI_Finalize("PyUniformEllipsoidFieldCalculator.setEllipsoid(a,b,c,r_max) - method needs parameters.");
 		}			
-		cpp_UniformEllipsoidFieldCalculator->setEllipsoid(a,b,c,x_max,y_max,z_max);
+		cpp_UniformEllipsoidFieldCalculator->setEllipsoid(a,b,c,r_max);
 		Py_INCREF(Py_None);
     return Py_None;
 	}
@@ -80,7 +80,7 @@ extern "C" {
 	// defenition of the methods of the python UniformEllipsoidFieldCalculator wrapper class
 	// they will be vailable from python level
   static PyMethodDef UniformEllipsoidFieldCalculatorClassMethods[] = {
-		{ "setEllipsoid",        UniformEllipsoidFieldCalculator_setEllipsoid,        METH_VARARGS,"sets the half-axis of the ellipsoid and maximal values of x,y,z"},
+		{ "setEllipsoid",        UniformEllipsoidFieldCalculator_setEllipsoid,        METH_VARARGS,"sets the half-axis of the ellipsoid and maximal values of radius"},
 		{ "calcField",           UniformEllipsoidFieldCalculator_calcField,           METH_VARARGS,"returns (ex,ey,ez) for (x,y,z) input"},
     {NULL}
   };

@@ -1,7 +1,7 @@
 /**
  This class calculates the space charge kicks for bunch using 2.5D approach in transverse direction
- and Rick Baartman's approach (RB) to the longitudinal kicks. There is a hope that will be simular to
- the true 3D discription of space charge. 
+ and Rick Baartman's approach (RB) to the longitudinal kicks. It is not sutable for short bunches, but can be used in 
+ rings. 
 */
 
 #ifndef SC_SPACECHARGE_CALC_2P5D_RB_H

@@ -12,7 +12,7 @@ from orbit.utils import orbitFinalize
 # import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunchTracker
 
-class SC2p5D_Base_AccNode(AccNodeBunchTracker):
+class SC_Base_AccNode(AccNodeBunchTracker):
 	"""
 	The subclass of the AccNodeBunchTracker class. It is a base class for SC 2.5D nodes. It uses the c++ space charge calculator to calculate the .
 	"""
@@ -69,7 +69,7 @@ class SC2p5D_Base_AccNode(AccNodeBunchTracker):
 		pass
 	
 
-class SC2p5D_AccNode(SC2p5D_Base_AccNode):
+class SC2p5D_AccNode(SC_Base_AccNode):
 	"""
 	The subclass of the AccNodeBunchTracker class. It uses SpaceChargeCalc2p5D wrapper for the c++ space charge calculator.
 	"""
@@ -77,7 +77,7 @@ class SC2p5D_AccNode(SC2p5D_Base_AccNode):
 		"""
 		Constructor. Creates the 2p5 SC accelerator node element.
 		"""
-		SC2p5D_Base_AccNode.__init__(self, sc_calculator, name)
+		SC_Base_AccNode.__init__(self, sc_calculator, name)
 		self.setType("SC2p5D")
 		self.boundary = None
 		
@@ -104,7 +104,7 @@ class SC2p5D_AccNode(SC2p5D_Base_AccNode):
 		else:
 			self.sc_calculator.trackBunch(bunch,self.sc_length)
 		
-class SC2p5Drb_AccNode(SC2p5D_Base_AccNode):
+class SC2p5Drb_AccNode(SC_Base_AccNode):
 	"""
 	The subclass of the AccNodeBunchTracker class. It uses SpaceChargeCalc2p5Drb wrapper for the c++ space charge calculator.
 	"""
@@ -112,7 +112,7 @@ class SC2p5Drb_AccNode(SC2p5D_Base_AccNode):
 		"""
 		Constructor. Creates the 2p5 SC accelerator node element.
 		"""
-		SC2p5D_Base_AccNode.__init__(self, sc_calculator, name)
+		SC_Base_AccNode.__init__(self, sc_calculator, name)
 		self.setType("SC2p5Drb")
 		self.pipe_radius = 1.0
 		
@@ -136,4 +136,27 @@ class SC2p5Drb_AccNode(SC2p5D_Base_AccNode):
 		if(self.switcher != True): return
 		bunch = paramsDict["bunch"]
 		self.sc_calculator.trackBunch(bunch,self.sc_length,self.pipe_radius)
+		
+
+class SC_UniformEllipses_AccNode(SC_Base_AccNode):
+	"""
+	The subclass of the AccNodeBunchTracker class. It uses SpaceChargeCalcUnifEllipse wrapper for the c++ space charge calculator.
+	"""
+	def __init__(self, sc_calculator, name = "no name"):			
+		"""
+		Constructor. Creates the Uniform Ellipses SC accelerator node element.
+		"""
+		SC_Base_AccNode.__init__(self, sc_calculator, name)
+		self.setType("UnifEllsSC")
+		self.pipe_radius = 1.0
+						
+	def track(self, paramsDict):
+		"""
+		It is tracking the bunch through the Uniform Ellipses Space Charge calculator.
+		"""
+		#print "debug ????????????? SC node=",self.getName()," scL=",self.getLengthOfSC()
+		if(self.switcher != True): return
+		bunch = paramsDict["bunch"]
+		self.sc_calculator.trackBunch(bunch,self.sc_length)		
+		
 

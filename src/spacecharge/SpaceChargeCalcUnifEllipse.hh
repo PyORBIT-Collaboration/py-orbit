@@ -42,8 +42,14 @@ public:
   void bunchAnalysis(Bunch* bunch);
 	
 	/** Calculates the electric filed in the center of the bunch sytem. */
-	void calculaField(double x,  double y,  double z, double& ex, double& ey, double& ez)	;
+	void calculateField(double x,  double y,  double z, double& ex, double& ey, double& ez)	;
+	
+	/** Returns the UniformEllipsoidFieldCalculator class instance with a particular index */ 
+	UniformEllipsoidFieldCalculator* getEllipsFieldCalculator(int ellipse_index);
 
+	/** Returns the number of UniformEllipsoidFieldCalculator class instances */
+	int getNEllipses();	
+	
 private:
 	
 protected:
@@ -51,10 +57,13 @@ protected:
 	//number of uniform ellipses 
 	int nEllipses;
 	
+	//total macrosize
+	double total_macrosize;
+	
 	//parameters of the distribution
 	double x_center, y_center, z_center;
 	double x2_avg, y2_avg, z2_avg;
- double xMin, xMax, yMin, yMax, zMin, zMax;	
+  double xMin, xMax, yMin, yMax, zMin, zMax;	
 
 	//sizes of the biggest ellipsoid
 	double a_ellips, b_ellips, c_ellips;

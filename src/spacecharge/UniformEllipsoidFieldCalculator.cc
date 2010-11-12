@@ -175,7 +175,7 @@ void UniformEllipsoidFieldCalculator::setEllipsoid(double a_in, double b_in, dou
 void UniformEllipsoidFieldCalculator::calcField(double x,   double y,   double z, 
 	double x2,  double y2,  double z2,
 	double& ex, double& ey, double& ez)
-{
+{	
 	if((x2/a2+y2/b2+z2/c2) <= 1.){
 		ex = Q_total*x*intFuncX0->y(0);
 		ey = Q_total*y*intFuncY0->y(0);

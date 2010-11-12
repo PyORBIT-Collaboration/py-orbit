@@ -62,6 +62,54 @@ extern "C" {
 		return Py_None;
   }
 
+  //UniformEllipsoidFieldCalculator* EllipsFieldCalculatorget(ellipse_index) returns the ellipse field object
+  static PyObject* SpaceChargeCalcUnifEllipse_getEllipsFieldCalculator(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalcUnifEllipse = (pyORBIT_Object*) self;
+		SpaceChargeCalcUnifEllipse* cpp_SpaceChargeCalcUnifEllipse = (SpaceChargeCalcUnifEllipse*) pySpaceChargeCalcUnifEllipse->cpp_obj;
+		int index;
+		if(!PyArg_ParseTuple(args,"i:getEllipsFieldCalculator",&index)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalcUnifEllipse.getEllipsFieldCalculator([index=0]) - method needs parameter.");
+		}		
+		UniformEllipsoidFieldCalculator* cpp_ellipseFieldCalc = cpp_SpaceChargeCalcUnifEllipse->getEllipsFieldCalculator(index);
+		if(cpp_ellipseFieldCalc == NULL) {
+			Py_INCREF(Py_None);
+			return Py_None;			
+		}
+		if(cpp_ellipseFieldCalc->getPyWrapper() != NULL){
+			Py_INCREF(cpp_ellipseFieldCalc->getPyWrapper());
+			return cpp_ellipseFieldCalc->getPyWrapper();
+		}
+		//It will create a pyUniformEllipsoidFieldCalculator object
+		PyObject* mod = PyImport_ImportModule("spacecharge");
+		PyObject* pyUniformEllipsoidFieldCalculator = PyObject_CallMethod(mod,"UniformEllipsoidFieldCalculator","");		
+		//delete the c++ reference to the internal UniformEllipsoidFieldCalculator inside pyUniformEllipsoidFieldCalculator and assign the new one
+		delete ((UniformEllipsoidFieldCalculator*)((pyORBIT_Object*) pyUniformEllipsoidFieldCalculator)->cpp_obj);
+		((pyORBIT_Object*) pyUniformEllipsoidFieldCalculator)->cpp_obj = cpp_ellipseFieldCalc;
+		cpp_ellipseFieldCalc->setPyWrapper(pyUniformEllipsoidFieldCalculator);
+		Py_INCREF(cpp_ellipseFieldCalc->getPyWrapper());
+		Py_DECREF(mod);
+		return pyUniformEllipsoidFieldCalculator;
+  }		
+	
+  //getNEllipses() - returns the number of ellipses inside the Space Charge calculator
+  static PyObject* SpaceChargeCalcUnifEllipse_getNEllipses(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalcUnifEllipse = (pyORBIT_Object*) self;
+		SpaceChargeCalcUnifEllipse* cpp_SpaceChargeCalcUnifEllipse = (SpaceChargeCalcUnifEllipse*) pySpaceChargeCalcUnifEllipse->cpp_obj;
+		return Py_BuildValue("i",cpp_SpaceChargeCalcUnifEllipse->getNEllipses());
+  }	
+	
+	//calculateField(x,y,z) - calculates the fileds from all ellipses
+  static PyObject* SpaceChargeCalcUnifEllipse_calculateField(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalcUnifEllipse = (pyORBIT_Object*) self;
+		SpaceChargeCalcUnifEllipse* cpp_SpaceChargeCalcUnifEllipse = (SpaceChargeCalcUnifEllipse*) pySpaceChargeCalcUnifEllipse->cpp_obj;
+		double x,y,z,ex,ey,ez;
+		if(!PyArg_ParseTuple(args,"ddd:calculateField",&x,&y,&z)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalcUnifEllipse.calculateField(x,y,z) - method needs parameters.");
+		}
+		cpp_SpaceChargeCalcUnifEllipse->calculateField(x,y,z,ex,ey,ez);
+		return Py_BuildValue("(ddd)",ex,ey,ez);;
+  }		
+	
   //-----------------------------------------------------
   //destructor for python SpaceChargeCalcUnifEllipse class (__del__ method).
   //-----------------------------------------------------
@@ -76,7 +124,10 @@ extern "C" {
   // defenition of the methods of the python SpaceChargeCalcUnifEllipse wrapper class
   // they will be vailable from python level
   static PyMethodDef SpaceChargeCalcUnifEllipseClassMethods[] = {
-		{ "trackBunch",  SpaceChargeCalcUnifEllipse_trackBunch, METH_VARARGS,"track the bunch - trackBunch(pyBunch,length)"},
+		{ "trackBunch",                SpaceChargeCalcUnifEllipse_trackBunch,               METH_VARARGS,"track the bunch - trackBunch(pyBunch,length)"},
+		{ "getNEllipses",              SpaceChargeCalcUnifEllipse_getNEllipses,             METH_VARARGS,"returns the number of ellipses inside the Space Charge calculator"},
+		{ "getEllipsFieldCalculator",  SpaceChargeCalcUnifEllipse_getEllipsFieldCalculator, METH_VARARGS,"returns the ellipse field object with particular index"},
+		{ "calculateField",            SpaceChargeCalcUnifEllipse_calculateField,           METH_VARARGS,"calculates the fileds ex,ey,ez from all ellipses"},
 		{NULL}
   };
   

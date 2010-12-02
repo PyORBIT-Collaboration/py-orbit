@@ -186,7 +186,6 @@ void Grid1D::setGridZ(double zMin, double zMax){
 	zMin_ = zMin;
 	zMax_ = zMax;
 	dz_ = (zMax_ - zMin_)/zSize_;
-	setZero();
 }
 
 double Grid1D::getGridZ(int index){

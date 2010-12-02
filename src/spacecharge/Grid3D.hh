@@ -40,7 +40,7 @@ public:
 	
   virtual ~Grid3D();
 	
-	/** Returns the reference to the inner 3D array */
+	/** Returns the reference to the inner 3D array. The array is val[z][x][y].*/
   double*** getArr3D();
 	
 	/** Returns the reference to one 2D slice of the inner 3D array */

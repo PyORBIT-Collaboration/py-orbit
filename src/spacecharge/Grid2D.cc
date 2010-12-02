@@ -305,7 +305,6 @@ void Grid2D::setGridX(double xMin, double xMax){
 	xMin_ = xMin;
 	xMax_ = xMax;
 	dx_ = (xMax_ - xMin_)/(xSize_ -1);
-	setZero();
 }
 
 /** Sets y-grid */
@@ -313,7 +312,6 @@ void Grid2D::setGridY(double yMin, double yMax){
 	yMin_ = yMin;
 	yMax_ = yMax;
 	dy_ = (yMax_ - yMin_)/(ySize_ -1);		
-	setZero();
 }
 
 /** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */

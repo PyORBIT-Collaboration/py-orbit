@@ -137,7 +137,6 @@ void Grid3D::setGridX(double xMin, double xMax){
 	xMin_ = xMin;
 	xMax_ = xMax;
 	dx_ = (xMax_ - xMin_)/(nX_ -1);
-	setZero();
 }
 
 /** Sets the limits for the y-grid */
@@ -145,7 +144,6 @@ void Grid3D::setGridY(double yMin, double yMax){
 	yMin_ = yMin;
 	yMax_ = yMax;
 	dy_ = (yMax_ - yMin_)/(nY_ -1);		
-	setZero();
 }
 
 /** Sets the limits for the z-grid */
@@ -159,7 +157,6 @@ void Grid3D::setGridZ(double zMin, double zMax)
   else{
    dz_ = zMax_-zMin_;
   }
-	setZero();	
 }
 
 /** Set all array values to zero */

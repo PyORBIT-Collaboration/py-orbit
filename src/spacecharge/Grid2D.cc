@@ -126,7 +126,6 @@ void Grid2D::binBunch(Bunch* bunch){
 	for(int i = 0; i < nParts; i++){
 		binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);	
 	}
-  synchronizeMPI(bunch->getMPI_Comm_Local());
 }
 
 /** Bins the value into the 2D grid */	

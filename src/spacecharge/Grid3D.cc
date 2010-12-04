@@ -260,7 +260,6 @@ void Grid3D::binBunch(Bunch* bunch){
 	for(int i = 0; i < nParts; i++){
 		this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],part_coord_arr[i][4]);	
 	}
-  this->synchronizeMPI(bunch->getMPI_Comm_Local());
 }
 
 

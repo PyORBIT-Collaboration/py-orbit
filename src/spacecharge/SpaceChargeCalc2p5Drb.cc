@@ -214,8 +214,12 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 	
 	//sizes of the grids are set up
 	//bin rho&z Bunch to the Grid
+	rhoGrid->setZero();
+	zGrid->setZero();
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
+	rhoGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
+	zGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 	
 	//calculate the derivative of the longitudinal density that inside the zDerivGrid (Grid1D)
 	this->calculateLongDerivative();

@@ -110,7 +110,6 @@ void Grid1D::binBunch(Bunch* bunch){
 			binValue(m_size,part_coord_arr[i][4]);
 		}
 	}	
-	synchronizeMPI(bunch->getMPI_Comm_Local());
 }
 
 void Grid1D::binValue(double macroSize,double z){

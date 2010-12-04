@@ -9,6 +9,7 @@
 #include "wrap_spacecharge.hh"
 #include "wrap_spacechargecalc2p5d.hh"
 #include "wrap_spacechargecalc2p5d_rb.hh"
+#include "wrap_spacechargecalc3d.hh"
 #include "wrap_uniform_ellipsoid_field_calculator.hh"
 #include "wrap_spacechargecalc_uniform_ellipse.hh"
 
@@ -30,6 +31,7 @@ extern "C" {
 		wrap_spacecharge::initBoundary2D(module);
 		wrap_spacecharge::initSpaceChargeCalc2p5D(module);
 		wrap_spacecharge::initSpaceChargeCalc2p5Drb(module);
+		wrap_spacecharge::initSpaceChargeCalc3D(module);
 		wrap_spacecharge::initUniformEllipsoidFieldCalculator(	module);
 		wrap_spacecharge::initSpaceChargeCalcUniformEllipse(	module);
   }

@@ -1,5 +1,5 @@
 """
-Module. Includes classes for all 2.5D space charge accelerator nodes.
+Module. Includes classes for all 3D space charge accelerator nodes.
 """
 
 import sys
@@ -21,7 +21,7 @@ class SC3D_AccNode(SC_Base_AccNode):
 	"""
 	def __init__(self, sc_calculator, name = "no name"):			
 		"""
-		Constructor. Creates the 2p5 SC accelerator node element.
+		Constructor. Creates the 3D SC accelerator node element.
 		"""
 		SC_Base_AccNode.__init__(self, sc_calculator, name)
 		self.setType("SC3D")

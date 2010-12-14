@@ -216,6 +216,7 @@ double SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize
 	//bin rho&z Bunch to the Grid
 	rhoGrid->setZero();
 	zGrid->setZero();
+	zDerivGrid->setZero();
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
 	rhoGrid->synchronizeMPI(bunch->getMPI_Comm_Local());

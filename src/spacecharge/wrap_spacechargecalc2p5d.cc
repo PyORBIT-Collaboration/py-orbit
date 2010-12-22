@@ -34,76 +34,169 @@ extern "C" {
 	}
 	
   //initializator for python SpaceChargeCalc2p5D class
-  //this is implementation of the __init__ method
+  //this is implementation of the __init__ method VSpaceChargeCalc2p5D(int xSize, int ySize, int zSize [, double xy_ratio_in])
   static int SpaceChargeCalc2p5D_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
   	int xSize,ySize,zSize;
-  	double xy_ratio;
-  	double xMin = -1.0, yMin = -1.0, xMax = +1.0, yMax = +1.0;
-	//if nVars == 4 this is SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xy_ratio)
-	//if nVars == 7 this is SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xMin, double xMax, double yMin, double yMax)
-	int nVars = PyTuple_Size(args);
-	if(nVars == 4){
-		if(!PyArg_ParseTuple(args,"iiid:__init__",&xSize,&ySize,&zSize,&xy_ratio)){
-		ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D - SpaceChargeCalc2p5D(xSize,ySize,xzSize,xy_ratio]) - constructor needs parameters.");
+  	double xy_ratio = -1.0;
+		if(!PyArg_ParseTuple(args,"iii|d:__init__",&xSize,&ySize,&zSize,&xy_ratio)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D - SpaceChargeCalc2p5D(xSize,ySize,xzSize[,xy_ratio = 1.0]) - constructor needs parameters.");
 		}
-		self->cpp_obj = new SpaceChargeCalc2p5D(xSize,ySize,zSize,xy_ratio);	
-	}
-	if(nVars == 7){
-		if(!PyArg_ParseTuple(args,"iiidddd:__init__",&xSize,&ySize,&zSize,&xMin,&xMax,&yMin,&yMax)){
-		ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D - SpaceChargeCalc2p5D(xSize,ySize,xzSize,xMin,xMax,yMin,yMax) - constructor needs parameters.");
+		if(xy_ratio > 0.){
+			self->cpp_obj = new SpaceChargeCalc2p5D(xSize,ySize,zSize,xy_ratio);
+		} else {
+			self->cpp_obj = new SpaceChargeCalc2p5D(xSize,ySize,zSize);
 		}
-		self->cpp_obj = new SpaceChargeCalc2p5D(xSize,ySize,zSize,xMin,xMax,yMin,yMax);
+		((SpaceChargeCalc2p5D*) self->cpp_obj)->setPyWrapper((PyObject*) self);
+		return 0;
 	}
-	((SpaceChargeCalc2p5D*) self->cpp_obj)->setPyWrapper((PyObject*) self);
-	//std::cerr<<"The SpaceChargeCalc2p5D __init__ has been called!"<<std::endl;
-	return 0;
-  }
   
-  //trackBunch(Bunch* bunch, double length, BaseBoundary2D* boundary)
+  //Grid2D* getRhoGrid() returns the 2D grid with charge density
+  static PyObject* SpaceChargeCalc2p5D_getRhoGrid(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
+		Grid2D* cpp_grid2d = cpp_SpaceChargeCalc2p5D->getRhoGrid();
+		if(cpp_grid2d->getPyWrapper() != NULL){
+			Py_INCREF(cpp_grid2d->getPyWrapper());
+			return cpp_grid2d->getPyWrapper();
+		}
+		//It will create a pyGrid2D object
+		PyObject* mod = PyImport_ImportModule("spacecharge");
+		PyObject* pyGrid2D = PyObject_CallMethod(mod,"Grid2D","ii",cpp_grid2d->getSizeX(),cpp_grid2d->getSizeY());		
+		//delete the c++ reference to the internal Grid2D inside pyGrid2D and assign the new one
+		delete ((Grid2D*)((pyORBIT_Object*) pyGrid2D)->cpp_obj);
+		((pyORBIT_Object*) pyGrid2D)->cpp_obj = cpp_grid2d;
+		cpp_grid2d->setPyWrapper(pyGrid2D);
+		Py_INCREF(cpp_grid2d->getPyWrapper());
+		Py_DECREF(mod);
+		return pyGrid2D;
+  }	
+	
+  //Grid2D* getPhiGrid() returns the 2D grid with potential
+  static PyObject* SpaceChargeCalc2p5D_getPhiGrid(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
+		Grid2D* cpp_grid2d = cpp_SpaceChargeCalc2p5D->getPhiGrid();
+		if(cpp_grid2d->getPyWrapper() != NULL){
+			Py_INCREF(cpp_grid2d->getPyWrapper());
+			return cpp_grid2d->getPyWrapper();
+		}
+		//It will create a pyGrid2D object
+		PyObject* mod = PyImport_ImportModule("spacecharge");
+		PyObject* pyGrid2D = PyObject_CallMethod(mod,"Grid2D","ii",cpp_grid2d->getSizeX(),cpp_grid2d->getSizeY());		
+		//delete the c++ reference to the internal Grid2D inside pyGrid2D and assign the new one
+		delete ((Grid2D*)((pyORBIT_Object*) pyGrid2D)->cpp_obj);
+		((pyORBIT_Object*) pyGrid2D)->cpp_obj = cpp_grid2d;
+		cpp_grid2d->setPyWrapper(pyGrid2D);
+		Py_INCREF(cpp_grid2d->getPyWrapper());
+		Py_DECREF(mod);
+		return pyGrid2D;
+  }		
+	
+  //Grid1D* getLongGrid() returns the 1D grid with longitudinal density
+  static PyObject* SpaceChargeCalc2p5D_getLongGrid(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
+		Grid1D* cpp_grid1d = cpp_SpaceChargeCalc2p5D->getLongGrid();
+		if(cpp_grid1d->getPyWrapper() != NULL){
+			Py_INCREF(cpp_grid1d->getPyWrapper());
+			return cpp_grid1d->getPyWrapper();
+		}
+		//It will create a pyGrid2D object
+		PyObject* mod = PyImport_ImportModule("spacecharge");
+		PyObject* pyGrid1D = PyObject_CallMethod(mod,"Grid1D","i",cpp_grid1d->getSizeZ());		
+		//delete the c++ reference to the internal Grid1D inside pyGrid1D and assign the new one
+		delete ((Grid1D*)((pyORBIT_Object*) pyGrid1D)->cpp_obj);
+		((pyORBIT_Object*) pyGrid1D)->cpp_obj = cpp_grid1d;
+		cpp_grid1d->setPyWrapper(pyGrid1D);
+		Py_INCREF(cpp_grid1d->getPyWrapper());
+		Py_DECREF(mod);
+		return pyGrid1D;
+  }			
+	
+  //Grid1D* getLongDerivativeGrid() returns the 1D grid with the derivative of the longitudinal density
+  static PyObject* SpaceChargeCalc2p5D_getLongDerivativeGrid(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
+		Grid1D* cpp_grid1d = cpp_SpaceChargeCalc2p5D->getLongDerivativeGrid();
+		if(cpp_grid1d->getPyWrapper() != NULL){
+			Py_INCREF(cpp_grid1d->getPyWrapper());
+			return cpp_grid1d->getPyWrapper();
+		}
+		//It will create a pyGrid2D object
+		PyObject* mod = PyImport_ImportModule("spacecharge");
+		PyObject* pyGrid1D = PyObject_CallMethod(mod,"Grid1D","i",cpp_grid1d->getSizeZ());		
+		//delete the c++ reference to the internal Grid1D inside pyGrid1D and assign the new one
+		delete ((Grid1D*)((pyORBIT_Object*) pyGrid1D)->cpp_obj);
+		((pyORBIT_Object*) pyGrid1D)->cpp_obj = cpp_grid1d;
+		cpp_grid1d->setPyWrapper(pyGrid1D);
+		Py_INCREF(cpp_grid1d->getPyWrapper());
+		Py_DECREF(mod);
+		return pyGrid1D;
+  }			
+	
+  
+    //trackBunch(Bunch* bunch, double length, double pipe_radius[,BaseBoundary2D* boundary])
   static PyObject* SpaceChargeCalc2p5D_trackBunch(PyObject *self, PyObject *args){
-  	  pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
-  	  SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
-  	  PyObject* pyBunch;
-  	  PyObject* pyBoundary;
-  	  double length;
-  	  //std::cerr<<"trackBunch begin in wrapper.";
-  	  int nVars = PyTuple_Size(args);
-  	  if(nVars == 2 || nVars == 3){
-  	    if(nVars == 2){
-		if(!PyArg_ParseTuple(args,"Od:trackBunch",&pyBunch,&length)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length) - constructor needs parameters.");
+		int nVars = PyTuple_Size(args);
+		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
+		PyObject* pyBunch;
+		double length, pipe_radius;
+		
+		if(nVars == 3 ||  nVars == 4){
+		  if (nVars == 3){
+		    if(!PyArg_ParseTuple(args,"Odd:trackBunch",&pyBunch,&length,&pipe_radius)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius) - method needs parameters.");
+		    }
+		    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius) - pyBunch is not Bunch.");
+		    }
+		    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
+		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius);
+		  }
+		  else{
+		    BaseBoundary2D* boundary = (BaseBoundary2D*) pySpaceChargeCalc2p5D->cpp_obj;
+		    if(!PyArg_ParseTuple(args,"Odd:trackBunch",&pyBunch,&length,&pipe_radius,&boundary)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,boundary) - method needs parameters.");
+		    }
+		    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,boundary) - pyBunch is not Bunch.");
+		    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
+		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius,boundary);		
+		    }
+		  }
 		}
-		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
-		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length) - method needs parameters.");
-		}
-		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
-		cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length);
-	    } else{
-		if(!PyArg_ParseTuple(args,"OdO:trackBunch",&pyBunch,&length,&pyBoundary)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pyBoundary) - constructor needs parameters.");
-		}
-		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
-		PyObject* pyORBIT_Boundary_Type = getSpaceChargeType("Boundary2D");
-		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type) || !PyObject_IsInstance(pyBoundary,pyORBIT_Boundary_Type)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,pyBoundary,length) - method needs parameters.");
-		}
-		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		BaseBoundary2D* cpp_boundary = (BaseBoundary2D*) ((pyORBIT_Object*)pyBoundary)->cpp_obj;
-		cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,cpp_boundary);
-	    }  	
-	} else{
-	    ORBIT_MPI_Finalize("PyBoundary. You should call trackBunch(pyBunch,length) or trackBunch(pyBunch,pyBoundary,length)");    
-	  }
-	Py_INCREF(Py_None);
-	return Py_None;
+		Py_INCREF(Py_None);
+		return Py_None;
   }
 
+
+	//setLongAveragingPointsN(int n_points) sets the number of smoothing points for derivative calculation
+  static PyObject* SpaceChargeCalc2p5D_setLongAveragingPointsN(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
+		int n_long_smoothing;
+		if(!PyArg_ParseTuple(args,"i:setLongAveragingPointsN",&n_long_smoothing)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.setLongAveragingPointsN(nPoints) - method needs a parameter.");
+		}
+		cpp_SpaceChargeCalc2p5D->setLongAveragingPointsN(n_long_smoothing);
+		return Py_BuildValue("i",n_long_smoothing);;
+  }	
+	
+	//getLongAveragingPointsN() returns the number of smoothing points for derivative calculation
+  static PyObject* SpaceChargeCalc2p5D_getLongAveragingPointsN(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
+		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
+		int n_long_smoothing = cpp_SpaceChargeCalc2p5D->getLongAveragingPointsN();
+		return Py_BuildValue("i",n_long_smoothing);;
+  }		
+	
   //-----------------------------------------------------
   //destructor for python SpaceChargeCalc2p5D class (__del__ method).
   //-----------------------------------------------------
   static void SpaceChargeCalc2p5D_del(pyORBIT_Object* self){
-		//std::cerr<<"The SpaceChargeCalc2p5D __del__ has been called!"<<std::endl;
 		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) self->cpp_obj;
 		if(cpp_SpaceChargeCalc2p5D != NULL){
 			delete cpp_SpaceChargeCalc2p5D;
@@ -114,7 +207,13 @@ extern "C" {
   // defenition of the methods of the python SpaceChargeCalc2p5D wrapper class
   // they will be vailable from python level
   static PyMethodDef SpaceChargeCalc2p5DClassMethods[] = {
-		{ "trackBunch", SpaceChargeCalc2p5D_trackBunch, METH_VARARGS,"track the Bunch"},
+		{ "trackBunch",  SpaceChargeCalc2p5D_trackBunch, METH_VARARGS,"track the bunch - trackBunch(pyBunch,length,pipe_radius)"},
+		{ "getRhoGrid",  SpaceChargeCalc2p5D_getRhoGrid, METH_VARARGS,"returns the Grid2D with a space charge density"},
+		{ "getPhiGrid",  SpaceChargeCalc2p5D_getPhiGrid, METH_VARARGS,"returns the Grid2D with a space charge potential"},
+		{ "getLongGrid", SpaceChargeCalc2p5D_getLongGrid, METH_VARARGS,"returns the Grid1D with a longitudinal space charge density"},
+		{ "getLongDerivativeGrid", 	SpaceChargeCalc2p5D_getLongDerivativeGrid, METH_VARARGS,"returns the Grid1D with a derivative of longitudinal space charge density"},
+		{ "setLongAveragingPointsN",	SpaceChargeCalc2p5D_setLongAveragingPointsN, METH_VARARGS,"sets the number of smoothing points for derivative calculation."},
+		{ "getLongAveragingPointsN",	SpaceChargeCalc2p5D_getLongAveragingPointsN, METH_VARARGS,"returns the number of smoothing points for derivative calculation."},
 		{NULL}
   };
   
@@ -175,7 +274,6 @@ extern "C" {
 		if (PyType_Ready(&pyORBIT_SpaceChargeCalc2p5D_Type) < 0) return;
 		Py_INCREF(&pyORBIT_SpaceChargeCalc2p5D_Type);
 		PyModule_AddObject(module, "SpaceChargeCalc2p5D", (PyObject *)&pyORBIT_SpaceChargeCalc2p5D_Type);
-		//std::cout<<"debug SpaceChargeCalc2p5D added! "<<std::endl;
 	}
 
 #ifdef __cplusplus

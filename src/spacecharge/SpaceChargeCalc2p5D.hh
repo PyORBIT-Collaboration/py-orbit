@@ -29,42 +29,54 @@ class SpaceChargeCalc2p5D: public OrbitUtils::CppPyWrapper
 public:
 	
 	/** Constructor */
-	SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xy_ratio);
+	SpaceChargeCalc2p5D(int xSize, int ySize, int zSize, double xy_ratio_in);
 
-	SpaceChargeCalc2p5D(int xSize, int ySize, int zSize,
-	             double xMin, double xMax,
-	             double yMin, double yMax);
+	SpaceChargeCalc2p5D(int xSize, int ySize, int zSize);
 	
 	/** Destructor */
 	virtual ~SpaceChargeCalc2p5D();
 	
-	void trackBunch(Bunch* bunch, double length);
-	virtual void trackBunch(Bunch* bunch, double length, BaseBoundary2D* boundary);
-	void calcMomentumFactor(Bunch* bunch, double length, double& factor);
-	void bunchAnalysis(Bunch* bunch);
+	void trackBunch(Bunch* bunch, double length,double pipe_radius);
+	virtual void trackBunch(Bunch* bunch, double length, double pipe_radius, BaseBoundary2D* boundary);
+	
+	/** Returns the 2D rho grid with a transverse density distribution. **/
+	Grid2D* getRhoGrid();
+
+	/** Returns the 2D phi grid with a transverse potential. **/
+	Grid2D* getPhiGrid();
+
+	/** Returns the 1D grid with a longitudinal density. **/
+	Grid1D* getLongGrid();
+	
+	/** Returns the 1D grid with a derivative of the longitudinal density. **/
+	Grid1D* getLongDerivativeGrid();
+	
+	/** Sets the number of smoothing points to calculate the derivative of the longitudinal density. */
+	void setLongAveragingPointsN(int n_points);
+	
+	/** Returns the number of smoothing points to calculate the derivative of the longitudinal density. */
+	int getLongAveragingPointsN();
 	
 private:
-	//memory allocation and step calculation for dx_ and dy_ 
-	void init();
+	/** Analyses the bunch and does bining. */
+ double bunchAnalysis(Bunch* bunch, double& totalMacrosize, double& x_c, double& y_c, double& a_bunch);	
+ 
+ /** Calculates the derivative of the longitudinal density by using Quadratic Curve Fitting */
+ void calculateLongDerivative();
 	
 protected:
 	PoissonSolverFFT2D* poissonSolver;
 	Grid2D* rhoGrid;
 	Grid2D* phiGrid;
 	Grid1D* zGrid;
+	Grid1D* zDerivGrid;
 	OrbitUtils::BunchExtremaCalculator* bunchExtremaCalc;
 	
-	//Grid size
-	int xSize_;
-	int ySize_;
-	int zSize_;
+	double xy_ratio;
+	int n_long_avg;
 	
-	//Grid limits
-	double xMin_,xMax_;
-	double yMin_,yMax_;
-	double zMin_,zMax_;
-	
-	double xy_ratio_;
+	//auxiliary 5x2 array for Quadratic Curve Fitting
+	double** S_arr;
 };
 //end of SC_SPACECHARGE_CALC_2P5D_H
 #endif

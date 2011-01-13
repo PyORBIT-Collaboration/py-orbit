@@ -142,37 +142,41 @@ extern "C" {
 		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
 		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
 		PyObject* pyBunch;
+		PyObject* pyBoundary;
 		double length, pipe_radius;
 		
 		if(nVars == 3 ||  nVars == 4){
 		  if (nVars == 3){
 		    if(!PyArg_ParseTuple(args,"Odd:trackBunch",&pyBunch,&length,&pipe_radius)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius) - method needs parameters.");
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,NULL) - method needs parameters.");
 		    }
 		    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius) - pyBunch is not Bunch.");
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,NULL) - pyBunch is not Bunch.");
 		    }
 		    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
-		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius);
+		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius,NULL);
 		  }
-		  else{
-		    std::cerr<<"The boundary has been calling!"<<std::endl;
-		    BaseBoundary2D* boundary = (BaseBoundary2D*) pySpaceChargeCalc2p5D->cpp_obj;
-		    if(!PyArg_ParseTuple(args,"OddO:trackBunch",&pyBunch,&length,&pipe_radius,&boundary)){
+		  else{		    
+		    if(!PyArg_ParseTuple(args,"OddO:trackBunch",&pyBunch,&length,&pipe_radius,&pyBoundary)){
 			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,boundary) - method needs parameters.");
 		    }
 		    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
-		    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+		    PyObject* pyORBIT_Boundary_Type = getSpaceChargeType("Boundary2D");
+		    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type) || !PyObject_IsInstance(pyBoundary,pyORBIT_Boundary_Type)){
 			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,boundary) - pyBunch is not Bunch.");
-		    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
-		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius,boundary);	
-		    std::cerr<<"The boundary has been called!"<<std::endl;
 		    }
+		    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
+		    BaseBoundary2D* cpp_boundary = (BaseBoundary2D*) ((pyORBIT_Object*)pyBoundary)->cpp_obj;
+		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius,cpp_boundary);	
+		    //std::cerr<<"The boundary has been called!"<<std::endl;
 		  }
 		}
+		else{
+		  ORBIT_MPI_Finalize("PyBoundary. You should call trackBunch(pyBunch,length,pipe_radius) or trackBunch(pyBunch,length,pipe_radius,boundary)");  
+		}		
 		Py_INCREF(Py_None);
-		return Py_None;
+		return Py_None;  
   }
 
 

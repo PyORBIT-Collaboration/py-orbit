@@ -36,8 +36,9 @@ public:
 	/** Destructor */
 	virtual ~SpaceChargeCalc2p5D();
 	
-	void trackBunch(Bunch* bunch, double length,double pipe_radius);
-	virtual void trackBunch(Bunch* bunch, double length, double pipe_radius, BaseBoundary2D* boundary);
+	/** Calculates space charge and applies the transverse and 
+	longitudinal SC kicks to the macro-particles in the bunch. */
+	void trackBunch(Bunch* bunch, double length, double pipe_radius, BaseBoundary2D* boundary);
 	
 	/** Returns the 2D rho grid with a transverse density distribution. **/
 	Grid2D* getRhoGrid();

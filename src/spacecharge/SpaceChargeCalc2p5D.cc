@@ -101,66 +101,6 @@ Grid1D* SpaceChargeCalc2p5D::getLongDerivativeGrid(){
 	return zDerivGrid;
 }
 
-void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_radius){
-
-	int nPartsGlobal = bunch->getSizeGlobal();
-	if(nPartsGlobal < 2) return;
-	
-	//calculate max and min of X,Y,Z coordinates, a_bunch**2 = 2*<r^2> for the bunch
-	//bin paricles and set up limits for rhoGrid, phiGrid, zGrid 
-	double a_bunch = 0.;
-	double x_center = 0.;
-	double y_center = 0.;	
-	double totalMacrosize = 0.;
-	this->bunchAnalysis(bunch, totalMacrosize, x_center, y_center, a_bunch);
-	double z_step = zGrid->getStepZ();
-	
-	//calculate phiGrid
-	poissonSolver->findPotential(rhoGrid,phiGrid);
-	
-	SyncPart* syncPart = bunch->getSyncPart();	
-	double factor =  2*length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
-	//std::cout<<" debug totalMacrosize="<<totalMacrosize<<" factor="<<factor<<" z_step="<< z_step <<std::endl;	
-	
-
-	factor = factor/(z_step*totalMacrosize);
-
-	double Lfactor = 0.;
-	double x,y,z,ex,ey,ez, r2;
-	
-	double long_sc_coeff = 0.;
-	double long_sc_factor_in = 1.0+2*log(pipe_radius/a_bunch);
-	double long_sc_factor_out = 2*log(pipe_radius);
-	double a_bunch_2 = a_bunch*a_bunch;
-	double long_sc_factor = - length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2) * bunch->getMass()/(pow(syncPart->getGamma(),2));
-	//std::cout<<" debug pipe_radius="<<pipe_radius<<" a_bunch="<<a_bunch<<std::endl;	
-	//std::cout<<" debug long_sc_factor_in="<<long_sc_factor_in<<" long_sc_factor_out="<<long_sc_factor_out<<std::endl;	
-	//std::cout<<" debug long_sc_factor="<<long_sc_factor<<std::endl;
-	//std::cout<<" debug z="<<zGrid->getMaxZ()*0.5<<" derivat="<<zDerivGrid->getValue(zGrid->getMaxZ()*0.5)<<std::endl;	
-	for (int i = 0, n = bunch->getSize(); i < n; i++){
-		x = bunch->x(i);
-		y = bunch->y(i);
-		z = bunch->z(i);
-		r2 = (x - x_center)*(x -x_center)  + (y - y_center)*(y - y_center);
-		
-		phiGrid->calcGradient(x,y,ex,ey);	
-		ez = zDerivGrid->getValue(z);
-		//std::cout<<"debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;
-		
-		Lfactor = - zGrid->getValue(z) * factor;
-	
-		bunch->xp(i) += ex * Lfactor;
-		bunch->yp(i) += ey * Lfactor;
-		
-		if(r2 <= a_bunch_2){
-			long_sc_coeff = long_sc_factor_in - r2/a_bunch_2;
-		} else {
-			long_sc_coeff = long_sc_factor_out - log(r2);
-		}
-		bunch->dE(i) += - ez*long_sc_factor*long_sc_coeff;
-	}
-}
-
 void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_radius, BaseBoundary2D* boundary){
 
 	int nPartsGlobal = bunch->getSizeGlobal();
@@ -178,8 +118,11 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_ra
 	//calculate phiGrid
 	poissonSolver->findPotential(rhoGrid,phiGrid);
 	
-	//update potential with boundary condition
-	boundary->addBoundaryPotential(rhoGrid,phiGrid);
+	if(boundary != NULL){
+		//update potential with boundary condition
+		boundary->addBoundaryPotential(rhoGrid,phiGrid);
+		//std::cerr<<"Boundary ADDED."<<std::endl;
+	}
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
 	double factor =  2*length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	

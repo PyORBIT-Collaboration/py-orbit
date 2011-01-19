@@ -60,7 +60,7 @@ public:
 	
 private:
 	/** Analyses the bunch and does bining. */
- double bunchAnalysis(Bunch* bunch, double& totalMacrosize, double& x_c, double& y_c, double& a_bunch);	
+ double bunchAnalysis(Bunch* bunch, double& totalMacrosize, BaseBoundary2D* boundary);	
  
  /** Calculates the derivative of the longitudinal density by using Quadratic Curve Fitting */
  void calculateLongDerivative();

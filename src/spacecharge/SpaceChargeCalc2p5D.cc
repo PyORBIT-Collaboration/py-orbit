@@ -104,24 +104,20 @@ Grid1D* SpaceChargeCalc2p5D::getLongDerivativeGrid(){
 void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_radius, BaseBoundary2D* boundary){
 
 	int nPartsGlobal = bunch->getSizeGlobal();
-	if(nPartsGlobal < 2) return;
+	if(nPartsGlobal < 2) return;	
 	
-	//calculate max and min of X,Y,Z coordinates, a_bunch**2 = 2*<r^2> for the bunch
-	//bin paricles and set up limits for rhoGrid, phiGrid, zGrid 
-	double a_bunch = 0.;
-	double x_center = 0.;
-	double y_center = 0.;	
 	double totalMacrosize = 0.;
-	this->bunchAnalysis(bunch, totalMacrosize, x_center, y_center, a_bunch);
+	this->bunchAnalysis(bunch, totalMacrosize, boundary);
+	//std::cerr<<"totalMacrosize="<<totalMacrosize;
 	double z_step = zGrid->getStepZ();
 	
 	//calculate phiGrid
 	poissonSolver->findPotential(rhoGrid,phiGrid);
 	
-	if(boundary != NULL){
-		//update potential with boundary condition
+	if(boundary != NULL){        
+		//update potential with boundary condition		
 		boundary->addBoundaryPotential(rhoGrid,phiGrid);
-		//std::cerr<<"Boundary ADDED."<<std::endl;
+		//std::cerr<<"Boundary ADDED."<<std::endl;		
 	}
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
@@ -129,45 +125,29 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_ra
 	//std::cout<<" debug totalMacrosize="<<totalMacrosize<<" factor="<<factor<<" z_step="<< z_step <<std::endl;	
 	
 
-	factor = factor/(z_step*totalMacrosize);
+	factor = factor/(z_step*totalMacrosize);	
 
 	double Lfactor = 0.;
-	double x,y,z,ex,ey,ez, r2;
-	
-	double long_sc_coeff = 0.;
-	double long_sc_factor_in = 1.0+2*log(pipe_radius/a_bunch);
-	double long_sc_factor_out = 2*log(pipe_radius);
-	double a_bunch_2 = a_bunch*a_bunch;
-	double long_sc_factor = - length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2) * bunch->getMass()/(pow(syncPart->getGamma(),2));
-	//std::cout<<" debug pipe_radius="<<pipe_radius<<" a_bunch="<<a_bunch<<std::endl;	
-	//std::cout<<" debug long_sc_factor_in="<<long_sc_factor_in<<" long_sc_factor_out="<<long_sc_factor_out<<std::endl;	
-	//std::cout<<" debug long_sc_factor="<<long_sc_factor<<std::endl;
-	//std::cout<<" debug z="<<zGrid->getMaxZ()*0.5<<" derivat="<<zDerivGrid->getValue(zGrid->getMaxZ()*0.5)<<std::endl;	
+	double x,y,z,ex,ey,ez;	
+		
 	for (int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);
 		y = bunch->y(i);
-		z = bunch->z(i);
-		r2 = (x - x_center)*(x -x_center)  + (y - y_center)*(y - y_center);
+		z = bunch->z(i);		
 		
-		phiGrid->calcGradient(x,y,ex,ey);	
-		ez = zDerivGrid->getValue(z);
-		//std::cout<<"debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;
+		phiGrid->calcGradient(x,y,ex,ey);		
+		//std::cout<<" debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;
 		
 		Lfactor = - zGrid->getValue(z) * factor;
-	
-		bunch->xp(i) += ex * Lfactor;
-		bunch->yp(i) += ey * Lfactor;
+		//std::cerr<<" debug zgrid="<<zGrid->getValue(z)<<" lfactor="<<Lfactor;
 		
-		if(r2 <= a_bunch_2){
-			long_sc_coeff = long_sc_factor_in - r2/a_bunch_2;
-		} else {
-			long_sc_coeff = long_sc_factor_out - log(r2);
-		}
-		bunch->dE(i) += - ez*long_sc_factor*long_sc_coeff;
+		bunch->xp(i) += ex * Lfactor;
+		bunch->yp(i) += ey * Lfactor;	
+		//std::cerr<<" debug xp="<<bunch->xp(i)<<" yp="<<bunch->yp(i);
 	}
 }
 
-double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, double& x_c, double& y_c, double& a_bunch){
+double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, BaseBoundary2D* boundary){
 
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	
@@ -212,6 +192,12 @@ double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, 
 		std::cerr<<" delta="<<delta_<<"\n";
 	}
 */	
+	if(boundary != NULL){   
+		xMax = boundary->getMaxX();
+		xMin = boundary->getMinX();
+		yMax = boundary->getMaxY();
+		yMin = boundary->getMinY(); 
+	}
 	//set Grids' limits
 	rhoGrid->setGridX(xMin,xMax);
 	rhoGrid->setGridY(yMin,yMax);	
@@ -220,8 +206,11 @@ double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, 
 	phiGrid->setGridY(yMin,yMax);
 	
 	zGrid->setGridZ(zMin,zMax);	
-	zDerivGrid->setGridZ(zMin,zMax);	
+	zDerivGrid->setGridZ(zMin,zMax);
 	
+	poissonSolver->setGridX(xMin,xMax);
+        poissonSolver->setGridY(yMin,yMax);
+
 	//sizes of the grids are set up
 	//bin rho&z Bunch to the Grid
 	rhoGrid->setZero();
@@ -232,36 +221,14 @@ double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, 
 	rhoGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 	zGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 	
-	//calculate the derivative of the longitudinal density that inside the zDerivGrid (Grid1D)
-	this->calculateLongDerivative();
-	
-	//calculate x_avg, x2_avg, y_avg, y2_avg
-	double x_avg = 0., x2_avg = 0., y_avg = 0., y2_avg = 0.;
-	totalMacrosize = 0.;
-	double val = 0., x = 0., y = 0.;
+	totalMacrosize = 0.;	
 	int nX = rhoGrid->getSizeX();
 	int nY = rhoGrid->getSizeY();
 	for(int ix = 0; ix < nX; ix++){
 		for(int iy = 0; iy < nY; iy++){
-			val = rhoGrid->getValueOnGrid(ix,iy);
-			x = rhoGrid->getGridX(ix);
-			y = rhoGrid->getGridX(iy);
-			totalMacrosize += val;
-			x_avg += x*val;
-			x2_avg += x*x*val;
-			y_avg += y*val;
-			y2_avg += y*y*val;			
+			totalMacrosize += rhoGrid->getValueOnGrid(ix,iy);
 		}
 	}
-	x_avg /= totalMacrosize;
-	x2_avg /= totalMacrosize;
-	y_avg /= totalMacrosize;
-	y2_avg /= totalMacrosize;	
-	x_c = x_avg;
-	y_c = y_avg;
-	x2_avg = fabs(x2_avg - x_avg*x_avg);
-	y2_avg = fabs(y2_avg - y_avg*y_avg);
-	a_bunch = sqrt(2*(x2_avg + y2_avg));
 }
 
 void SpaceChargeCalc2p5D::calculateLongDerivative(){

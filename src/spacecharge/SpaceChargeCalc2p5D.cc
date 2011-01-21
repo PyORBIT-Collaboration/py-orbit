@@ -101,7 +101,7 @@ Grid1D* SpaceChargeCalc2p5D::getLongDerivativeGrid(){
 	return zDerivGrid;
 }
 
-void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_radius, BaseBoundary2D* boundary){
+void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, BaseBoundary2D* boundary){
 
 	int nPartsGlobal = bunch->getSizeGlobal();
 	if(nPartsGlobal < 2) return;	
@@ -122,9 +122,8 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_ra
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
 	double factor =  2*length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
-	//std::cout<<" debug totalMacrosize="<<totalMacrosize<<" factor="<<factor<<" z_step="<< z_step <<std::endl;	
+	std::cout<<" debug totalMacrosize="<<totalMacrosize<<" factor="<<factor<<" z_step="<< z_step <<std::endl;	
 	
-
 	factor = factor/(z_step*totalMacrosize);	
 
 	double Lfactor = 0.;
@@ -143,7 +142,7 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, double pipe_ra
 		
 		bunch->xp(i) += ex * Lfactor;
 		bunch->yp(i) += ey * Lfactor;	
-		//std::cerr<<" debug xp="<<bunch->xp(i)<<" yp="<<bunch->yp(i);
+		//std::cerr<<" xp="<<bunch->xp(i)<<" yp="<<bunch->yp(i);
 	}
 }
 
@@ -151,10 +150,12 @@ double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, 
 
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	
+    if(boundary == NULL){
+		
 	bunchExtremaCalc->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);
 	
 	//check if the beam size is not zero 
-  if( xMin >=  xMax || yMin >=  yMax || zMin >=  zMax){
+	if( xMin >=  xMax || yMin >=  yMax || zMin >=  zMax){
 		int rank = 0;
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){
@@ -166,7 +167,7 @@ double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, 
 								<< "Stop."<< std::endl;
 		}
 		ORBIT_MPI_Finalize();
-  }
+	}
 	
 	double xy_ratio_beam = (xMax - xMin)/(yMax - yMin);
 	double width, center;
@@ -192,12 +193,29 @@ double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, 
 		std::cerr<<" delta="<<delta_<<"\n";
 	}
 */	
-	if(boundary != NULL){   
-		xMax = boundary->getMaxX();
-		xMin = boundary->getMinX();
-		yMax = boundary->getMaxY();
-		yMin = boundary->getMinY(); 
+    }
+    else{   
+	xMax = boundary->getMaxX();
+	xMin = boundary->getMinX();
+	yMax = boundary->getMaxY();
+	yMin = boundary->getMinY();
+	
+	bunchExtremaCalc->getExtremaZ(bunch, zMin, zMax);
+	
+	//check if the beam size is not zero 
+	if(zMin >=  zMax){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "SpaceChargeCalc2p5D::bunchAnalysis(bunch,...)" << std::endl
+         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
+								<< "z min ="<< zMin <<" max="<< zMax << std::endl
+								<< "Stop."<< std::endl;
+		}
+		ORBIT_MPI_Finalize();
 	}
+    }
+    
 	//set Grids' limits
 	rhoGrid->setGridX(xMin,xMax);
 	rhoGrid->setGridY(yMin,yMax);	

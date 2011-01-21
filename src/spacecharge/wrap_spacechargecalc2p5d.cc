@@ -136,44 +136,44 @@ extern "C" {
   }			
 	
   
-    //trackBunch(Bunch* bunch, double length, double pipe_radius[,BaseBoundary2D* boundary])
+    //trackBunch(Bunch* bunch, double length[,BaseBoundary2D* boundary])
   static PyObject* SpaceChargeCalc2p5D_trackBunch(PyObject *self, PyObject *args){
 		int nVars = PyTuple_Size(args);
 		pyORBIT_Object* pySpaceChargeCalc2p5D = (pyORBIT_Object*) self;
 		SpaceChargeCalc2p5D* cpp_SpaceChargeCalc2p5D = (SpaceChargeCalc2p5D*) pySpaceChargeCalc2p5D->cpp_obj;
 		PyObject* pyBunch;
 		PyObject* pyBoundary;
-		double length, pipe_radius;
+		double length;
 		
-		if(nVars == 3 ||  nVars == 4){
-		  if (nVars == 3){
-		    if(!PyArg_ParseTuple(args,"Odd:trackBunch",&pyBunch,&length,&pipe_radius)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,NULL) - method needs parameters.");
+		if(nVars == 2 ||  nVars == 3){
+		  if (nVars == 2){
+		    if(!PyArg_ParseTuple(args,"Od:trackBunch",&pyBunch,&length)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,NULL) - method needs parameters.");
 		    }
 		    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,NULL) - pyBunch is not Bunch.");
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,NULL) - pyBunch is not Bunch.");
 		    }
 		    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
-		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius,NULL);
+		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,NULL);
 		  }
 		  else{		    
-		    if(!PyArg_ParseTuple(args,"OddO:trackBunch",&pyBunch,&length,&pipe_radius,&pyBoundary)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,boundary) - method needs parameters.");
+		    if(!PyArg_ParseTuple(args,"OdO:trackBunch",&pyBunch,&length,&pyBoundary)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,boundary) - method needs parameters.");
 		    }
 		    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		    PyObject* pyORBIT_Boundary_Type = getSpaceChargeType("Boundary2D");
 		    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type) || !PyObject_IsInstance(pyBoundary,pyORBIT_Boundary_Type)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,pipe_radius,boundary) - pyBunch is not Bunch.");
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5D.trackBunch(pyBunch,length,boundary) - pyBunch is not Bunch.");
 		    }
 		    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
 		    BaseBoundary2D* cpp_boundary = (BaseBoundary2D*) ((pyORBIT_Object*)pyBoundary)->cpp_obj;
-		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,pipe_radius,cpp_boundary);	
+		    cpp_SpaceChargeCalc2p5D->trackBunch(cpp_bunch,length,cpp_boundary);	
 		    //std::cerr<<"The boundary has been called!"<<std::endl;
 		  }
 		}
 		else{
-		  ORBIT_MPI_Finalize("PyBoundary. You should call trackBunch(pyBunch,length,pipe_radius) or trackBunch(pyBunch,length,pipe_radius,boundary)");  
+		  ORBIT_MPI_Finalize("PyBoundary. You should call trackBunch(pyBunch,length) or trackBunch(pyBunch,length,boundary)");  
 		}		
 		Py_INCREF(Py_None);
 		return Py_None;  
@@ -214,7 +214,7 @@ extern "C" {
   // defenition of the methods of the python SpaceChargeCalc2p5D wrapper class
   // they will be vailable from python level
   static PyMethodDef SpaceChargeCalc2p5DClassMethods[] = {
-		{ "trackBunch",  SpaceChargeCalc2p5D_trackBunch, METH_VARARGS,"track the bunch - trackBunch(pyBunch,length,pipe_radius)"},
+		{ "trackBunch",  SpaceChargeCalc2p5D_trackBunch, METH_VARARGS,"track the bunch - trackBunch(pyBunch,length,boundary)"},
 		{ "getRhoGrid",  SpaceChargeCalc2p5D_getRhoGrid, METH_VARARGS,"returns the Grid2D with a space charge density"},
 		{ "getPhiGrid",  SpaceChargeCalc2p5D_getPhiGrid, METH_VARARGS,"returns the Grid2D with a space charge potential"},
 		{ "getLongGrid", SpaceChargeCalc2p5D_getLongGrid, METH_VARARGS,"returns the Grid1D with a longitudinal space charge density"},

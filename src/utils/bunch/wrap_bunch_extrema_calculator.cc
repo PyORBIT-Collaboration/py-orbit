@@ -56,7 +56,24 @@ extern "C" {
 		cpp_BunchExtremaCalculator->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);	
 		return Py_BuildValue("(d,d,d,d,d,d)", xMin, xMax, yMin, yMax, zMin, zMax);
   }
-
+  
+	//Calculates zMin,zMax
+  static PyObject* BunchExtremaCalculator_extremaZ(PyObject *self, PyObject *args){
+		PyObject *pyIn;
+		if(!PyArg_ParseTuple(args,"O:extremaZ",&pyIn)){
+			error("PyBunchExtremaCalculator - extremaZ(Bunch) - Bunch is needed.");
+		}			
+		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
+		if((!PyObject_IsInstance(pyIn,pyBunchType))){
+			error("PyBunchExtremaCalculator - extremaZ(Bunch) - input parameter is not Bunch");
+		}		
+		Bunch* bunch = (Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj;
+		BunchExtremaCalculator* cpp_BunchExtremaCalculator = (BunchExtremaCalculator*) (((pyORBIT_Object*) self)->cpp_obj);
+		double zMin,zMax;
+		cpp_BunchExtremaCalculator->getExtremaZ(bunch, zMin, zMax);	
+		return Py_BuildValue("(d,d)", zMin, zMax);
+  }
+  
   //-----------------------------------------------------
   //destructor for python BunchExtremaCalculator class (__del__ method).
   //-----------------------------------------------------
@@ -69,6 +86,7 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef BunchExtremaCalculatorClassMethods[] = {
     { "extremaXYZ",   BunchExtremaCalculator_extremaXYZ  ,METH_VARARGS,"Returns tuple with (xMin, xMax, yMin, yMax, zMin, zMax)"},
+    { "extremaZ",   BunchExtremaCalculator_extremaZ  ,METH_VARARGS,"Returns tuple with (zMin, zMax)"},
     {NULL}
   };
 

@@ -21,6 +21,7 @@ def setSC_General_AccNodes(lattice, sc_path_length_min, space_charge_calculator,
 	nodes_arr = []
 	length_total = 0.
 	running_path = 0.
+	rest_length = 0.
 	for accNode in accNodes:
 		nParts = accNode.getnParts()
 		for ip in range(nParts):
@@ -30,7 +31,10 @@ def setSC_General_AccNodes(lattice, sc_path_length_min, space_charge_calculator,
 				running_path = 0.
 			running_path += part_length
 			length_total += part_length
-	rest_length = length_total - nodes_arr[len(nodes_arr) - 1][2]
+	if(len(nodes_arr) > 0):
+		rest_length = length_total - nodes_arr[len(nodes_arr) - 1][2]
+	else:
+		rest_length = length_total
 	#the first SC node in the beginning of the lattice
 	nodes_arr.insert(0,(accNodes[0],0,0.,rest_length))
 	#---------------------------------------------------

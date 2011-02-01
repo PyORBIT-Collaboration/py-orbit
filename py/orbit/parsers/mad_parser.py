@@ -138,6 +138,7 @@ class MAD_LattLine:
 		"""
 		self.__name = name
 		self.__items = []
+		self.__sign_arr = []
 		
 	def __del__(self):
 		"""
@@ -158,11 +159,12 @@ class MAD_LattLine:
 		"""
 		return "LINE"
 
-	def addItem(self, item):
+	def addItem(self, item, sign = +1):
 		"""
 		Method. Adds a line or element to this line.
 		"""
 		self.__items.append(item)
+		self.__sign_arr.append(sign)
 
 	def getItems(self):
 		"""
@@ -182,12 +184,15 @@ class MAD_LattLine:
 		return dict
 
 	def getElements(self):
-		"""
-		Method. Returns list of elements.
-		"""
+		""" Returns list of elements """
 		elements = []
-		for item in self.__items:
+		#print "debug ================= name line = ",self.getName()
+		for i in range(len(self.__items)):
+			item = self.__items[i]
+			sign = self.__sign_arr[i]
+			#print "           debug item=",item.getName()," sign=",sign
 			elems = item.getElements()
+			if(sign == -1): elems.reverse()
 			for el in elems:
 				elements.append(el)
 		return elements
@@ -386,6 +391,8 @@ class _element:
 class _accLine:
 	"""
 	The MAD accelerator class. It also keeps initial string (line) from MAD file.
+	The component lines could have reverse order of element. We keep sign in
+	compSign array.	
 	"""
 
 	def __init__(self):
@@ -416,7 +423,9 @@ class _accLine:
 
 	def getComponents(self):
 		"""
-		Method. It returns the set with components' names
+		Method. It returns the set with tuples (components name, sign)
+		The sign define the order of elements from sub-line.
+		The sign +- 1. The -1 means the revers order.
 		"""
 		return self._components
 
@@ -424,6 +433,8 @@ class _accLine:
 		"""
 		Method. It does the first parsing of the initial string.
 		Parses the MAD file line with lattice line definition.
+		The sign is +- 1. The -1 means the revers order for the elements
+		inside the component.
 		"""
 		#define name of new line
 		patt = re.compile(r'[\w]+(?=:)')
@@ -438,7 +449,12 @@ class _accLine:
 		#deal with the N*name expressions
 		#=========================================
 		item_names_new = []
-		for it in item_names:
+		for it_in in item_names:
+			sign = +1
+			it = it_in
+			if(it.find("-") == 0):
+				sign = -1
+				it = it_in[1:]			
 			patt = re.compile(r'[\d]+?(?=\*)')
 			n_rep = re.findall(patt,it)
 			if len(n_rep) > 0:
@@ -447,9 +463,9 @@ class _accLine:
 				s=re.findall(patt,it)
 				s=s[0]
 				for i in range(1,n_rep+1):
-					item_names_new.append(s)
+					item_names_new.append((s,sign))
 			else:
-				item_names_new.append(it)
+				item_names_new.append((it,sign))
 		self._components = item_names_new
 
 class StringFunctions:
@@ -705,19 +721,23 @@ class MAD_Parser:
 			name = lattLine.getName()
 			accLine = accLineDict[name]
 			childs = accLine.getComponents()
-			for child in childs:
+			for (child,sign) in childs:
 				if(lattElemDict.has_key(child) and accLineDict.has_key(child)):
 					print "=========== MAD File Problem ==============="
 					print "Accelerator line and element have the same name:",child
 					print "=================STOP======================="
+					print "Lattice Line name=",name
+					sys.exit(1)
 				if((not lattElemDict.has_key(child)) and (not accLineDict.has_key(child))):
 					print "=========== MAD File Problem ==============="
 					print "Can not find Accelerator line and element with name:",child
+					print "Lattice Line name=",name
 					print "=================STOP======================="
+					sys.exit(1)
 				if(lattElemDict.has_key(child)):
-					lattLine.addItem(lattElemDict[child])
+					lattLine.addItem(lattElemDict[child],sign)
 				else:
-					lattLine.addItem(lattLineDict[child])
+					lattLine.addItem(lattLineDict[child],sign)
 
 	def initialize(self,mad_file_name):
 		fl = open(os.path.join(self.__madFilePath, mad_file_name))

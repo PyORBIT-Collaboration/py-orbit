@@ -109,10 +109,6 @@ class SAD_LattLine:
 		""" Returns name of the line """
 		return self.__name
 
-	def getDirection(self,item):
-		""" Returns direction for particular Item. """
-		return self.__signDict[item.getName()]
-
 	def addItem(self,item,sign = +1):
 		""" Adds a line or element to this line with cetain direction."""
 		self.__items.append(item)
@@ -647,7 +643,7 @@ class SAD_Parser:
 					print "Can not find Accelerator line and element with name:",child
 					print "=================STOP======================="
 				if(lattElemDict.has_key(child)):
-					lattLine.addItem(lattElemDict[child])
+					lattLine.addItem(lattElemDict[child], sign)
 				else:
 					lattLine.addItem(lattLineDict[child], sign)
 					#print "debug ????????????????????????????? child=",lattLineDict[child].getName()," sign=",sign

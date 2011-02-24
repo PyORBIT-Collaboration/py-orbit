@@ -1387,6 +1387,7 @@ int Bunch::readParticleAttributesNames(const char* fileName,
 	part_attr_dicts.clear();
 	std::vector<std::string> v_str_dict;
 	for(int i = 0; i < nDicts; i++){
+		int nT = StringUtils::Tokenize(v_str_part_attr[i],v_str_dict);		
 		int dict_size = (v_str_dict.size() - 3)/2;
 		map<std::string,double> attr_dict;
 		for(int k = 0; k < dict_size; k++){

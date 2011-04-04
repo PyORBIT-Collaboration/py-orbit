@@ -5,11 +5,17 @@ import math
 from orbit.utils import NamedObject, TypedObject
 
 class Waveform(NamedObject, TypedObject):
+	"""
+	The base abstract class of waveforms hierarchy.
+	"""
 	def __init__(self, name = "no name"):
 		NamedObject.__init__(self, name)
 		TypedObject.__init__(self, "base waveform")
 		
 class KickerWaveform(Waveform):
+	"""
+	The subclass of Waveform class. The abstract class of kicker waveforms.
+	"""
 	def __init__(self, name = "no name"):
 		Waveform.__init__(self, name)
 		self.setType("kicker waveform")
@@ -29,6 +35,9 @@ class KickerWaveform(Waveform):
 		return self.ky
 
 class ConstantKickerWaveform(KickerWaveform):
+	"""
+	The kicker waveform of constant strength.
+	"""
 	def __init__(self, name = "no name"):
 		KickerWaveform.__init__(self, name)
 		
@@ -40,6 +49,9 @@ class ConstantKickerWaveform(KickerWaveform):
 		pass
 		
 class SquareRootKickerWaveform(KickerWaveform):
+	"""
+	Square Root Waveform of Kicker.
+	"""
 	def __init__(self, name = "no name"):
 		KickerWaveform.__init__(self, name)
 		self.__initial = []
@@ -57,6 +69,9 @@ class SquareRootKickerWaveform(KickerWaveform):
 		self.setKy(self.getKy()*(1-dt)+dy)		
 		
 class MagnetWaveform(Waveform):
+	"""
+	The subclass of Waveform class. The abstract class of the magnet waveforms.
+	"""
 	def __init__(self, name = "no name"):
 		Waveform.__init__(self, name)
 		self.setType("magnet waveform")
@@ -69,6 +84,9 @@ class MagnetWaveform(Waveform):
 		return self.strength
 
 class ConstantMagnetWaveform(MagnetWaveform):
+	"""
+	The magnet waveform of constant strength.
+	"""
 	def __init__(self, name = "no name"):
 		MagnetWaveform.__init__(self, name)
 		
@@ -79,6 +97,9 @@ class ConstantMagnetWaveform(MagnetWaveform):
 		pass
 
 class LinearMagnetWaveform(MagnetWaveform):
+	"""
+	Linear lattice strength variation between t1 and t2 
+	"""
 	def __init__(self, name = "no name"):
 		MagnetWaveform.__init__(self, name)
 		self.__initial = []

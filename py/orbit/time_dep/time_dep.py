@@ -12,6 +12,9 @@ from orbit.time_dep import waveform
 
 class TIME_DEP_Lattice(TEAPOT_Lattice):
 	"""
+	The subclass of the TEAPOT_Lattice.
+	TIME_DEP_Lattice has the ability to set time dependent parameters to the Lattice.
+	Multi-turn track also available. 
 	"""
 	def __init__(self, name = "no name"):
 		TEAPOT_Lattice.__init__(self,name)		
@@ -19,7 +22,10 @@ class TIME_DEP_Lattice(TEAPOT_Lattice):
 		self.__TDNodeDict = {}
 		self.__turns = 1
 		
-	def setLatticeOrder(self):	
+	def setLatticeOrder(self):
+		"""
+		Sets the time dependent lattice names to the lattice. 
+		"""
 		accNodes = self.getNodes()
 		elemInLine = {}
 		for i in range(len(accNodes)):
@@ -33,22 +39,28 @@ class TIME_DEP_Lattice(TEAPOT_Lattice):
 			#node.setParam("sequence",i+1)
 			#print "debug node",node.getName(),node.getParamsDict()
      
-        def setTimeDepNode(self, TPName, waveform):
+	def setTimeDepNode(self, TPName, waveform):
+		"""
+		Sets the waveform function to the TP node before track.
+		"""
         	flag = 0
                 for node in self.getNodes():
                         if (TPName == node.getParam("TPName")):
                                 flag = 1
-                                node.setParam("wavaform",waveform)
+                                node.setParam("waveform",waveform)
                                 self.__TDNodeDict[TPName] = node
                 if not flag:
                         print "The",TPName,"is not found."
                         sys.exit(1)
                
 	def setTimeDepStrength(self, time):
+		"""
+		Set strength to the TP node while running. 
+		"""
 		NodeDict = self.__TDNodeDict		
 		for i in NodeDict.keys():
 			node = NodeDict[i]
-			waveform = node.getParam("wavaform")			
+			waveform = node.getParam("waveform")			
 			waveform.calc(time)		
 			waveformType = waveform.getType()
 			if waveformType == "kicker waveform":
@@ -79,6 +91,9 @@ class TIME_DEP_Lattice(TEAPOT_Lattice):
 			node.setParam(Kparam,paramval)
 
 	def trackBunchTurns(self, bunch):
+		"""
+		It tracks the bunch through the lattice with multi-turn.
+		"""
 		turns = self.__turns
 		#start
 		for i in range(turns-1):			
@@ -91,6 +106,9 @@ class TIME_DEP_Lattice(TEAPOT_Lattice):
 		#sublattice.trackBunch(bunch)
 		
 	def setTurns(self, turns, startPosition = 0, endPosition = -1):
+		"""
+		Sets the turns and start end position before track.
+		"""
 		startNode = StartNode("start node")
 		endNode = EndNode("end node")	
 		self.addNode(startNode, startPosition)

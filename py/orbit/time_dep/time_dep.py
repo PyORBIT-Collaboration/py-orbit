@@ -7,7 +7,7 @@ import math
 
 from orbit.teapot import TEAPOT_Lattice
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattLine
-from orbit.lattice import AccNode
+from orbit.lattice import AccNode, AccActionsContainer
 from orbit.time_dep import waveform
 
 class TIME_DEP_Lattice(TEAPOT_Lattice):
@@ -15,59 +15,57 @@ class TIME_DEP_Lattice(TEAPOT_Lattice):
 	"""
 	def __init__(self, name = "no name"):
 		TEAPOT_Lattice.__init__(self,name)		
-		self.__mad_file = None
-		self.__mad_line = None
 		self.__latticeDict = {}
+		self.__TDNodeDict = {}
+		self.__turns = 1
 		
-	def readMAD(self,mad_file_name,linename):
-		TEAPOT_Lattice.readMAD(self,mad_file_name,linename)
-		self.__mad_file = mad_file_name
-		self.__mad_line = linename
-			
-	def setLatticeOrder(self):		
-		parser = MAD_Parser()
-		parser.parse(self.__mad_file)
-		accLines = parser.getMAD_LinesDict()	
-		accMAD_Line = accLines[self.__mad_line]
-		accMADElements = accMAD_Line.getElements()
+	def setLatticeOrder(self):	
+		accNodes = self.getNodes()
 		elemInLine = {}
-		for i in range(len(accMADElements)):
-			elem = accMADElements[i]			
+		for i in range(len(accNodes)):
+			elem = accNodes[i]			
 			elemname = elem.getName()
 			if(elemInLine.has_key(elemname)):
 				elemInLine[elemname] += 1
 			else:	elemInLine[elemname] = 1
 			node = self.getNodes()[i]
-			node.setParam("order",elemInLine[elemname])
-			
-	def getTimeDepNode(self, elem, order):
-		flag = 0
-		for node in self.getNodes():
-			if (elem == node.getName()) and (order == node.getParam("order")):
-				flag = 1
-				return node
-		if not flag:
-			print "The",order,"th element",elem,"is not found."
-			sys.exit(1)
-		
-	def setTimeDepNode(self, elem, order, waveform):
-		node = self.getTimeDepNode(elem, order)	
-		waveformType = waveform.getType()		
-		if waveformType == "kicker waveform":
-			if node.getType() == "kick teapot":
-				self.setParam(node,"kx",waveform.getKx())
-				self.setParam(node,"ky",waveform.getKy())
-			else: print "No kicker waveform added. Please check node type."
-		elif waveformType == "magnet waveform":
-			strength = waveform.getStrength()
-			if node.getType() == "multipole teapot":		
-				self.setParam(node,"kls",strength)
-			elif node.getType() == "quad teapot":
-				self.setParam(node,"kls",strength)
-				self.setParam(node,"kq",strength)
-			elif node.getType() == "solenoid teapot":
-				self.setParam(node,"B",strength)
-			else: print "No magnet waveform added. Please check node type."  
+			node.setParam("TPName",node.getName()+"_"+str(elemInLine[elemname]))
+			#node.setParam("sequence",i+1)
+			#print "debug node",node.getName(),node.getParamsDict()
+     
+        def setTimeDepNode(self, TPName, waveform):
+        	flag = 0
+                for node in self.getNodes():
+                        if (TPName == node.getParam("TPName")):
+                                flag = 1
+                                node.setParam("wavaform",waveform)
+                                self.__TDNodeDict[TPName] = node
+                if not flag:
+                        print "The",TPName,"is not found."
+                        sys.exit(1)
+               
+	def setTimeDepStrength(self, time):
+		NodeDict = self.__TDNodeDict		
+		for i in NodeDict.keys():
+			node = NodeDict[i]
+			waveform = node.getParam("wavaform")			
+			waveform.calc(time)		
+			waveformType = waveform.getType()
+			if waveformType == "kicker waveform":
+				if node.getType() == "kick teapot":
+					self.setParam(node,"kx",waveform.getKx())
+					self.setParam(node,"ky",waveform.getKy())
+				else: print "No kicker waveform added. Please check node type."
+			elif waveformType == "magnet waveform":				
+				strength = waveform.getStrength()				
+				if node.getType() == "multipole teapot":		
+					self.setParam(node,"kls",strength)
+				elif node.getType() == "quad teapot":
+					self.setParam(node,"kls",strength)
+					self.setParam(node,"kq",strength)
+				elif node.getType() == "solenoid teapot":
+					self.setParam(node,"B",strength)
+				else: print "No magnet waveform added. Please check node type."				
 
 	def setParam(self, node, Kparam, strength):
 		if node.hasParam(Kparam):	
@@ -79,3 +77,40 @@ class TIME_DEP_Lattice(TEAPOT_Lattice):
 				paramval = newparamval
 			else:paramval = paramval*strength
 			node.setParam(Kparam,paramval)
+
+	def trackBunchTurns(self, bunch):
+		turns = self.__turns
+		#start
+		for i in range(turns-1):			
+			self.trackBunch(bunch)	
+			syncPart = bunch.getSyncParticle()
+			time = syncPart.time()
+			self.setTimeDepStrength(time)
+			print "debug trackBunchTurns time",time,"in",i,"turn"
+		#getsublattice
+		#sublattice.trackBunch(bunch)
+		
+	def setTurns(self, turns, startPosition = 0, endPosition = -1):
+		startNode = StartNode("start node")
+		endNode = EndNode("end node")	
+		self.addNode(startNode, startPosition)
+		self.addNode(endNode, endPosition)
+		self.__turns = turns	
+		#print self.getNodes()
+
+class StartNode(AccNode):
+	def __init__(self, name = "no name"):
+		AccNode.__init__(self,name)
+		self.setType("start node")
+		
+	def track(self, paramsDict):
+		bunch = paramsDict["bunch"]
+		#bunch.getSyncParticle().time(0.)		
+		
+class EndNode(AccNode):
+	def __init__(self, name = "no name"):
+		AccNode.__init__(self,name)
+		self.setType("end node")
+		
+	def track(self, paramsDict):
+		pass

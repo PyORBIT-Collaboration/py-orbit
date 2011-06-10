@@ -190,7 +190,8 @@ class LinacLatticeFactory():
 					driftLength = firstNode.getParam("pos") - firstNode.getLength()/2.0
 					nDrifts = int(driftLength/self.maxDriftLength) + 1
 					driftLength = driftLength/nDrifts
-					for idrift in range(nDrifts):
+					for idrift_reverse in range(nDrifts):
+						idrift = (nDrifts-1) - idrift_reverse
 						drift = Drift(accSeq.getName()+":"+firstNode.getName()+":"+str(idrift+1)+":drift")
 						drift.setLength(driftLength)
 						drift.setParam("pos",0.+drift.getLength()*(idrift+0.5))
@@ -308,10 +309,13 @@ class LinacLatticeFactory():
 						accSeq.addNode(accNode, index = ind_insertion+1)	
 					else:
 						#we replace this drift with two new
-						drift0 = Drift(accSeq.getName()+":drift")
+						drift_node_name = driftNode.getName()
+						ind_name_pos = drift_node_name.find(":drift")
+						drift_node_name = drift_node_name[0:ind_name_pos]
+						drift0 = Drift(drift_node_name+":1:drift")
 						drift0.setLength(position - (pos - L/2.0))
 						drift0.setParam("pos",(pos - L/2.0) + drift0.getLength()/2.0)
-						drift1 = Drift(accSeq.getName()+":drift")
+						drift1 = Drift(drift_node_name+":2:drift")
 						drift1.setLength((pos + L/2.0) - position)
 						drift1.setParam("pos",(pos + L/2.0) - drift1.getLength()/2.0)
 						accSeq.getNodes().remove(driftNode)
@@ -332,10 +336,8 @@ class LinacLatticeFactory():
 				pos = accNode.getParam("pos")
 				L = accNode.getLength()
 				L_total += L
-				#print "debug ==== node=",accNode.getName()," pos=",pos," pos-L/2=",(pos-L/2.0)," pos+L/2=",(pos+L/2.0)
 				linacAccLattice.addNode(accNode)
 			linacAccLattice.addSequence(accSeq)
-			#print "debug total length = ",L_total
 		# zero length elements insertion ========== stop ======================	
 		for accRF_Cav in accRF_Cavs:
 		 linacAccLattice.addRF_Cavity(accRF_Cav)

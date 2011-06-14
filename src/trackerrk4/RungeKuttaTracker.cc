@@ -449,10 +449,6 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 	double** partCoordArr = bunch->coordArr();
 	int flag = 0;
 	double t = t_begin;
-	double tmp_vct[6];
-	for(int i = 0 ; i < 6; i++){
-		tmp_vct[i] = 0.;
-	}
 	//------------------------------------------------
 	//performs the necessary actions before tracking
 	if(extEff != NULL) extEff->setupEffects(bunch);	

@@ -12,7 +12,7 @@ import math
 # import the linac structure tree with all sequences and nodes, but without drifts
 from LinacParser import LinacStructureTree
 
-from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode, MarkerLinacNode, Drift,Quad, BaseRF_Gap
+from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode, MarkerLinacNode, Drift, Quad, BaseRF_Gap
 from LinacAccNodes import DCorrectorH, DCorrectorV
 from LinacAccNodes import RF_Cavity, Sequence
 

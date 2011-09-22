@@ -11,7 +11,7 @@ from laserstripping import *
 from orbit_utils import *
 
 from orbit_mpi import mpi_comm,mpi_datatype,mpi_op
-from ext.las_str.StarkEffectSS  import *
+#from ext.las_str.StarkEffectSS  import *
 
 
 
@@ -150,7 +150,7 @@ class SchredingerFunc:
         la0 = 2*math.pi*5.291772108e-11/7.297352570e-3/delta_E
         te = TK - bunch.mass()*(la/la0-1)
         kz = te/math.sqrt(P*P-te*te)
-#        print math.atan2(1,-kz)*360/2/math.pi
+        print "angle = ",math.atan2(1,-kz)*360/2/math.pi
 
     
 

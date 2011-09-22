@@ -46,6 +46,8 @@ class EnergyGen:
         self.relativeSpreadE = relativeSpread
         self.p0 = math.sqrt(math.pow(self.mass+eKin,2) - self.mass*self.mass)
         self.spreadP = ((self.mass + eKin)*eKin/self.p0)*self.relativeSpreadE
+        print self.spreadP/self.p0
+
         
     def getP0(self):
         return self.p0
@@ -82,7 +84,7 @@ class ParticlesGen:
         (x,xp) = self.trGenX.getCoords()
         (y,yp) = self.trGenY.getCoords()
         x = x + dx
-        px = (xp - dpx)*p0
+        px = (xp + dpx)*p0
         py = yp*p0
         return (x,px,y,py,0.,pz)
         

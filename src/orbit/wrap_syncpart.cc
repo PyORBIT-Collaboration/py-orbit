@@ -119,6 +119,10 @@ extern "C" {
   //  mass() - returns mass in GeV
   static PyObject* SyncPart_mass(PyObject *self, PyObject *args){
     pyORBIT_Object* pySyncPart = (pyORBIT_Object*) self;
+    int nVars = PyTuple_Size(args);
+		if(nVars > 0){
+			error("PySyncPart - mass() - you should use bunch.mass(mass_value) instead!");
+		}
     double val = 0.;
 		SyncPart* cpp_SyncPart = (SyncPart*) pySyncPart->cpp_obj;
 		val = cpp_SyncPart->getMass();

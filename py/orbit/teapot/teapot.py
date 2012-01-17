@@ -196,7 +196,7 @@ class _teapotFactory:
 			k3 = 0.
 			if(params.has_key("k3")):
 				k3 = params["k3"]
-			params["k2l"] = length*k3
+			params["k3l"] = length*k3
 			if(tilt):
 				if(tiltAngle == None):
 					tiltAngle = math.math.pi/8.0

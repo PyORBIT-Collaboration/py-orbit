@@ -23,6 +23,7 @@
 #include "pq_coordinates.hh"
 #include "part_time.hh"
 #include "Evolution.hh"
+#include "LostParticleAttributes.hh"
 
 ParticleAttributesFactory::ParticleAttributesFactory()
 {
@@ -58,10 +59,14 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
   if(name == "macrosize"){
     part_atrs = new ParticleMacroSize(bunch);
   }
-
+  
+  if(name == "LostParticleAttributes"){
+	part_atrs = new LostParticleAttributes(bunch);
+  }
+  
   if(name == "Amplitudes"){
 		if(params_dict.size() == 0){
-			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
+			cout<<"dictionary Amplitudes(dict) should be defined "<<"\n";
 		} else {
 			if(params_dict.count("size") == 1){
 				part_atrs = new WaveFunctionAmplitudes(bunch,(int) params_dict["size"]);
@@ -160,6 +165,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			}
 		}
   }
+  	
   
   if(part_atrs == NULL) {
     if(rank_MPI == 0){
@@ -189,6 +195,7 @@ void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& 
   names.push_back("pq_coords");
   names.push_back("part_time");
   names.push_back("Evolution");
+  names.push_back("LostParticleAttributes");
 }
 
 

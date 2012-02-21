@@ -11,6 +11,8 @@
 #include "wrap_trackerrk4.hh"
 #include "wrap_spacecharge.hh"
 #include "wrap_linacmodule.hh"
+#include "wrap_collimator.hh"
+#include "wrap_foil.hh"
 
 /**
  * The main function that will initialize the MPI and will 
@@ -46,6 +48,8 @@ int main (int argc, char **argv)
 	wrap_orbit_utils::initutils();
 	wrap_teapotbase::initteapotbase();
 	wrap_linac::initlinac();
+	wrap_collimator::initcollimator();
+	wrap_foil::initfoil();
 	
 	//Runge-Kutta tracker package
 	inittrackerrk4();

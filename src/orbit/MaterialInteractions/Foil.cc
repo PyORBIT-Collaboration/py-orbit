@@ -545,7 +545,7 @@ void Foil::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost, int&
 	lostbunch->addParticle(coords[ip][0], coords[ip][1], coords[ip][2], coords[ip][3], coords[ip][4], coords[ip][5]);
 	bunch->deleteParticleFast(ip);
 	nLost++;
-	foil_flag == 0;
+	foil_flag = 0;
 	zrl = -1.;
 	
 }

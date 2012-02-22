@@ -251,7 +251,6 @@ int Collimator::checkCollFlag(double x, double y){
 	if(shape==1)
     {
 		if((pow(x, 2) + pow(y, 2)) >= pow(a, 2)) return 1;
-		else return 0;
     }
 	
 	if(shape==2)
@@ -262,7 +261,6 @@ int Collimator::checkCollFlag(double x, double y){
 			ytemp = -sin(angle*PI/180.)*x + cos(angle*PI/180.)*y;
 		}
 		if((pow(xtemp/a, 2.0)+pow(ytemp/b, 2.0) >= 1.)) return 1;
-		else return 0;
     }
 	
 	if(shape==3)
@@ -273,7 +271,6 @@ int Collimator::checkCollFlag(double x, double y){
 			ytemp = -sin(angle*PI/180.)*x + cos(angle*PI/180.)*y;
 		}
 		if(xtemp >= a) return 1;
-		else return 0;
     }
 	
 	if(shape==4)
@@ -284,7 +281,6 @@ int Collimator::checkCollFlag(double x, double y){
 			ytemp = -sin(angle*PI/180.)*x + cos(angle*PI/180.)*y;
 		}
 		if(xtemp <= a || xtemp >= b) return 1;
-		else return 0;
     }
 	
 	if(shape==5)
@@ -298,7 +294,6 @@ int Collimator::checkCollFlag(double x, double y){
 		   xtemp >=  b ||
 		   ytemp <=  c ||
 		   ytemp >=  d ) return 1;
-		else return 0;
     }
 	
 	if(shape==6)
@@ -313,9 +308,8 @@ int Collimator::checkCollFlag(double x, double y){
 		   xtemp <=  b &&
 		   ytemp >=  c &&
 		   ytemp <=  d ) return 1;
-		else return 0; 
     }
-
+    return 0; 
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -760,7 +754,7 @@ void Collimator::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost
 	}
 	bunch->deleteParticleFast(ip);
 	nLost++;
-	coll_flag == 0;
+	coll_flag = 0;
 	zrl = -1.;
 	
 }

@@ -20,7 +20,7 @@ namespace OrbitUtils{
 extern "C" {
 #endif	
 		
-double gauss_legendre_generator(int n, double a, double b, OrbitUtils::Function* fn);
+void gauss_legendre_generator(int n, double a, double b, OrbitUtils::Function* fn);
 
 #ifdef __cplusplus
 }

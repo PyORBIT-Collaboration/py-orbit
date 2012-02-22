@@ -76,7 +76,7 @@ namespace OrbitUtils{
 extern "C" {
 #endif	
 	
-	double gauss_legendre_generator(int n, double a, double b, OrbitUtils::Function* fn)
+	void gauss_legendre_generator(int n, double a, double b, OrbitUtils::Function* fn)
 	{
 		fn->clean();
 		//if a and b have wrong order - fix it!

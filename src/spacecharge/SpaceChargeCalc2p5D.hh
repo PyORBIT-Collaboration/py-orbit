@@ -51,7 +51,7 @@ public:
 	
 private:
 	/** Analyses the bunch and does bining. */
- double bunchAnalysis(Bunch* bunch, double& totalMacrosize, BaseBoundary2D* boundary); 
+ void bunchAnalysis(Bunch* bunch, double& totalMacrosize, BaseBoundary2D* boundary); 
 	
 protected:
 	PoissonSolverFFT2D* poissonSolver;

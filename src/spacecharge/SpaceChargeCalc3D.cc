@@ -111,7 +111,7 @@ void SpaceChargeCalc3D::trackBunch(Bunch* bunch, double length){
 	
 }
 
-double SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
+void SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
 	
 	double width, center;
 	

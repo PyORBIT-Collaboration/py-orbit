@@ -117,7 +117,7 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, BaseBoundary2D
 	}
 }
 
-double SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, BaseBoundary2D* boundary){
+void SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, BaseBoundary2D* boundary){
 
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	

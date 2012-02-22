@@ -56,7 +56,7 @@ public:
 private:
 	
 	/** Analyses the bunch and does bining. */
- double bunchAnalysis(Bunch* bunch);	
+ void bunchAnalysis(Bunch* bunch);	
 	
 protected:
 	PoissonSolverFFT3D* poissonSolver;

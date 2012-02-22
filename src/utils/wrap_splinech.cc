@@ -38,7 +38,7 @@ extern "C" {
     return 0;
   }
   
-	/** It will add (x,y) pair to the SplineCH instance */
+	/** It will caluclate the SplineCH instance for the function */
   static PyObject* SplineCH_compile(PyObject *self, PyObject *args){
 	  SplineCH* cpp_SplineCH = (SplineCH*)((pyORBIT_Object*) self)->cpp_obj;
 	  PyObject* pyF;

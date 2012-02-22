@@ -67,14 +67,14 @@ namespace OrbitUtils{
 		size = f->getSize();
 		if(size < 3){
 			size = 0;
-			return 0;
+			return -1;
 		}
 		
 		//check the x_arr
 		for(int i = 0; i < (size-1); i++){
 			if(f->x(i) >= f->x(i+1)){
 				size = 0;
-				return 0;
+				return -1;
 			}
 		}
 		
@@ -93,7 +93,8 @@ namespace OrbitUtils{
 		for(int i = 1, n = size-1; i < n; i++){
 			m_arr[i] = 0.5*((y_arr[i+1] - y_arr[i])/(x_arr[i+1] - x_arr[i]) + 
 			           (y_arr[i] - y_arr[i-1])/(x_arr[i] - x_arr[i-1])); 
-		}				
+		}	
+		return 1;
 	}
 	
 	void SplineCH::finalize(const char* message)

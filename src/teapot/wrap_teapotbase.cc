@@ -290,32 +290,6 @@ extern "C" {
 			return Py_None;
 		}
 
-		//Hard edge fringe field for a solenoid IN
-    static PyObject* wrap_solnfringeIN(PyObject *self, PyObject *args) {
-			PyObject* pyBunch;
-			double B;
-			if(!PyArg_ParseTuple(	args,"Od:solnfringeIN",&pyBunch,&B)){
-				error("teapotbase - solnfringeIN - cannot parse arguments!");
-			}
-			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-			teapot_base::solnfringeIN(cpp_bunch,B);		
-			Py_INCREF(Py_None);
-			return Py_None;
-		}
-
-		//Hard edge fringe field for a solenoid OUT
-    static PyObject* wrap_solnfringeOUT(PyObject *self, PyObject *args) {
-			PyObject* pyBunch;
-			double B;
-			if(!PyArg_ParseTuple(	args,"Od:solnfringeOUT",&pyBunch,&B)){
-				error("teapotbase - solnfringeOUT - cannot parse arguments!");
-			}
-			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-			teapot_base::solnfringeOUT(cpp_bunch,B);
-			Py_INCREF(Py_None);
-			return Py_None;
-		}
-
 		//Straight bends particles through wedge for Combined Function non-SBEND
     static PyObject* wrap_wedgebendCF(PyObject *self, PyObject *args) {
 			PyObject* pyBunch;
@@ -413,8 +387,6 @@ extern "C" {
     {"bendfringeIN",     wrap_bendfringeIN,   METH_VARARGS, "Hard edge fringe field for a bend IN"},
     {"bendfringeOUT",    wrap_bendfringeOUT,  METH_VARARGS, "Hard edge fringe field for a bend OUT"},
     {"soln",             wrap_soln,           METH_VARARGS, "Integration through a solenoid "},
-    {"solnfringeIN",     wrap_solnfringeIN,   METH_VARARGS, "Hard edge fringe field for a solenoid IN "},
-    {"solnfringeOUT",    wrap_solnfringeOUT,  METH_VARARGS, "Hard edge fringe field for a solenoid OUT "},
     {"wedgebendCF",      wrap_wedgebendCF,    METH_VARARGS, "Straight bends particles through wedge for Combined Function non-SBEND "},
     {"RingRF",           wrap_RingRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
     { NULL, NULL }

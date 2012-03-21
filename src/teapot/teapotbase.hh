@@ -4,14 +4,18 @@
 //   teapotbase.hh
 //
 // AUTHOR
+//   Jeff Holmes, ORNL, jzh@ornl.gov
 //   Joshua Abrams, Knox College, jabrams@knox.edu
 //   Steven Bunch, University of Tennessee, sbunch2@utk.edu
 //
-// modified by Andrei Shishlo
+// Modified by Andrei Shishlo
 //   12/30/05
 //
+// Checked by Jeff Holmes
+//   02/2012
+//
 // DESCRIPTION
-//   define elementary function for different elements
+//   Define elementary functions for different elements
 //
 /////////////////////////////////////////////////////////////////////////////
 #ifndef TEAPOT_BASE_H
@@ -21,12 +25,12 @@
 
 namespace teapot_base{
 
-	void init_factorial();
-
+    void init_factorial();
 	void delete_factorial();
-
-  void rotatexy(Bunch* bunch, double anglexy);
-  void drifti(Bunch* bunch, int i, double length);
+    
+    void rotatexy(Bunch* bunch, double anglexy);
+    
+    void drifti(Bunch* bunch, int i, double length);
 	void drift(Bunch* bunch, double length);
 
 	void multpi(Bunch* bunch, int i, int pole, double kl, int skew);
@@ -56,9 +60,6 @@ namespace teapot_base{
 	void bendfringeOUT(Bunch* bunch, double rho);
 
 	void soln(Bunch* bunch, double length, double B);
-	void solnfringeIN(Bunch* bunch, double B);
-	void solnfringeOUT(Bunch* bunch, double B);
-
 
 	void wedgebendCF(Bunch* bunch, double e, int inout,
                  double rho,
@@ -68,7 +69,7 @@ namespace teapot_base{
                  std::vector<int>& skew,
                  int nsteps);
 
- void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s);
+    void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s);
 
 }
 

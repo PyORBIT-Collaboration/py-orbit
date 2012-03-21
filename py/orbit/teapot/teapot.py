@@ -454,20 +454,6 @@ class SolenoidTEAPOT(NodeTEAPOT):
 		"""
 		NodeTEAPOT.__init__(self,name)
 		self.setType("solenoid teapot")
-
-		def fringeIN(node,paramsDict):
-			B = node.getParam("B")
-			bunch = paramsDict["bunch"]
-			TPB.solnfringeIN(bunch,B)
-
-		def fringeOUT(node,paramsDict):
-			B = node.getParam("B")
-			bunch = paramsDict["bunch"]
-			TPB.solnfringeOUT(bunch,B)
-
-		self.setFringeFieldFunctionIN(fringeIN)
-		self.setFringeFieldFunctionOUT(fringeOUT)
-
 		self.addParam("B",0.)
 
 	def track(self, paramsDict):

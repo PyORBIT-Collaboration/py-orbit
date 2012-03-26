@@ -1,13 +1,15 @@
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-  namespace wrap_teapotbase{
 
+namespace wrap_teapotbase
+{
     void initteapotbase(void);
-		PyObject* getBaseTEAPOTType(char* name);
-
-  }
+    PyObject* getBaseTEAPOTType(char* name);
+}
 
 #ifdef __cplusplus
 }
 #endif
+

@@ -4,15 +4,18 @@
 #include "Python.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-  namespace wrap_teapotbase_matrix_generator{
+namespace wrap_teapotbase_matrix_generator
+{
     void initMatrixGenerator(PyObject* module);
-  }
+}
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

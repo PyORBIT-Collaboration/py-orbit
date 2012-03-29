@@ -16,7 +16,7 @@ def multiDimDoubleArray(*dims):
 		for j in xrange(dims[0]):
 			res.append(multiDimDoubleArray(*dims_rest))
 	return res
-		
+
 def multiDimIntArray(*dims):
 	"""
 	Method. Creates multi-dimensional arrays with integers, such as a[i][k][j].

@@ -14,7 +14,7 @@ class AccLattice(NamedObject, TypedObject):
 	"""
 	Class. The accelerator lattice class contains child nodes.
 	"""
-	
+
 	ENTRANCE = AccActionsContainer.ENTRANCE
 	BODY     = AccActionsContainer.BODY
 	EXIT     = AccActionsContainer.EXIT
@@ -53,17 +53,17 @@ class AccLattice(NamedObject, TypedObject):
 				res_dict[node] = None
 			node.initialize()
 		del res_dict
-		
+
 		paramsDict = {}
 		actions = AccActionsContainer()
 		d = [0.]
 		posn = {}
-		
+
 		def accNodeExitAction(paramsDict):
 			"""
-			Nonbound function. Sets lattice length and node positions. 
-			This is a Closures (well, may be not exactly). It uses external 
-			objects.
+			Nonbound function. Sets lattice length and node
+			positions. This is a closure (well, maybe not
+			exactly). It uses external objects.
 			"""
 			node = paramsDict["node"]
 			parentNode = paramsDict["parentNode"]
@@ -87,8 +87,9 @@ class AccLattice(NamedObject, TypedObject):
 
 	def addNode(self, node, index = -1):
 		"""
-		Method. Adds a child node into the lattice. If the user specifies the index >= 0 the 
-		element will be inserted in the specified position into the children array
+		Method. Adds a child node into the lattice. If the user
+		specifies the index >= 0 the element will be inserted in
+		the specified position into the children array
 		"""
 		if(isinstance(node, AccNode) == True): 
 			if(index < 0): 
@@ -99,7 +100,8 @@ class AccLattice(NamedObject, TypedObject):
 
 	def getNodes(self):
 		"""
-		Method. Returns a list of all children of the first level in the lattice.
+		Method. Returns a list of all children
+		of the first level in the lattice.
 		"""
 		return self.__children
 
@@ -119,9 +121,9 @@ class AccLattice(NamedObject, TypedObject):
 
 	def _getSubLattice(self, accLatticeNew, index_start = -1, index_stop = -1,):
 		"""
-		It returns the sub-accelerator lattice with children with indexes 
-		between index_start and index_stop inclusive. The subclasses of 
-		AccLattice should NOT override this method.
+		It returns the sub-accelerator lattice with children with
+		indexes between index_start and index_stop, inclusive. The
+		subclasses of AccLattice should NOT override this method.
 		"""
 		if(index_start < 0): index_start = 0
 		if(index_stop < 0): index_stop = len(self.__children) - 1 
@@ -131,13 +133,13 @@ class AccLattice(NamedObject, TypedObject):
 			accLatticeNew.addNode(node)
 		accLatticeNew.initialize()
 		return accLatticeNew
-		
+
 	def getSubLattice(self, index_start = -1, index_stop = -1,):
 		"""
-		It returns the sub-accelerator lattice with children with indexes 
-		between index_start and index_stop inclusive. The subclasses of 
-		AccLattice should override this method to replace AccLattice() constructor 
-		by the sub-class type constructor
+		It returns the sub-accelerator lattice with children with
+		indexes between index_start and index_stop inclusive. The
+		subclasses of AccLattice should override this method to replace
+		AccLattice() constructor by the sub-class type constructor
 		"""
 		return self._getSubLattice( AccLattice(),index_start,index_stop)
 		

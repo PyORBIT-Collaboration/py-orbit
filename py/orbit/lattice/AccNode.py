@@ -103,7 +103,7 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		Method. Returns the active part index of the node.
 		"""
 		return self.__activePartIndex
-		
+
 	def setActivePartIndex(self,activePartIndex):
 		"""
 		Method. Sets the active part index of the node. 
@@ -111,7 +111,7 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		intended for a routine use.
 		"""
 		self.__activePartIndex = activePartIndex
-		
+
 	def _setPartsLengthEvenly(self, n = 1):
 		"""
 		Method. Sets lengths of all parts evenly.
@@ -129,20 +129,23 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		distribution of body parts is not uniform.
 		"""
 		pass
-	
+
 	def getNumberOfChildren(self):
 		"""
-		Returns the total number of direct childrens of this accelerator node.
+		Returns the total number of direct children
+		of this accelerator node.
 		"""
 		nChildren = len(self.__childNodesArr[0])+len(self.__childNodesArr[2])
 		for i in range(len(self.__childNodesArr[1])):
 			arr = self.__childNodesArr[1][i]
 			nChildren = nChildren + len(arr[0]) + len(arr[1])
 		return nChildren
-		
+
 	def getNumberOfBodyChildren(self):
 		"""
-		Returns the total number of direct childrens of this accelerator node that are inside the element, not before or after.
+		Returns the total number of direct childrens of this
+		accelerator node that are inside the element,
+		not before or after.
 		"""
 		nChildren = 0
 		for i in range(len(self.__childNodesArr[1])):

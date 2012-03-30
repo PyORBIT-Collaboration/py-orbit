@@ -8,7 +8,7 @@ class ParamsDictObject:
 	"""
 	Class. Object that has a parameters dictionary.
 	"""
-	
+
 	def __init__(self):
 		"""
 		Constructor. Object that has a parameters dictionary.
@@ -67,7 +67,7 @@ class ParamsDictObject:
 
 	def hasParam(self, key):
 		"""
-		Method. Returns True if the object has a parameter for this key.
-		Returns False otherwise.
+		Method. Returns True if the object has a parameter
+		for this key. Returns False otherwise.
 		"""
 		return self.__paramsDict.has_key(key)

@@ -455,6 +455,7 @@ class BaseRF_Gap(BaseLinacNode):
 		"""
 		BaseLinacNode.__init__(self,name)
 		self.addParam("E0TL",0.)
+		self.addParam("modePhase",0.)		
 		self.addParam("rfCavity", None)
 		self.setType("baserfgap")	
 		self.__isFirstGap = False

@@ -106,7 +106,7 @@ void SpaceChargeCalc3D::trackBunch(Bunch* bunch, double length){
 		//calculate momentum kicks
 		bunch->xp(i) += -ex * trans_factor;
 		bunch->yp(i) += -ey * trans_factor;
-		bunch->dE(i) += ez * long_factor;
+		bunch->dE(i) += -ez * long_factor;
 	}
 	
 }

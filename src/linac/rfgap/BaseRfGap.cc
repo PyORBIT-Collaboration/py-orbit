@@ -66,7 +66,7 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double p
     I0 = bessi0(kr*r);
 		I1 = bessi1(kr*r);
 		//longitudinal-energy part
-		d_phi = bunch->z(i)*phase_time_coeff;
+		d_phi = - bunch->z(i)*phase_time_coeff;
 		bunch->z(i) = bunch->z(i)*beta_out/beta;
 		//bunch->dE(i) = bunch->dE(i) + charge*E0TL*cos(phase + d_phi)*I0 - delta_eKin;
 		//bunch->dE(i) = (bunch->dE(i)/beta - chargeE0TLsin*d_phi/beta_gap)*beta_out;

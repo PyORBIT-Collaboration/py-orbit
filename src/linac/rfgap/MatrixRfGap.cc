@@ -58,7 +58,7 @@ void MatrixRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double
 	double d_rp = cappa*sin(phase);
 	for(int i = 0, n = bunch->getSize(); i < n; i++){
 		//longitudinal-energy part
-		bunch->dE(i) =bunch->dE(i)  - chargeE0TLsin*phase_time_coeff*bunch->z(i);		
+		bunch->dE(i) =bunch->dE(i)  + chargeE0TLsin*phase_time_coeff*bunch->z(i);		
 		bunch->z(i) = bunch->z(i)*beta_out/beta;
 		//transverse focusing 
 		bunch->xp(i) = bunch->xp(i)*prime_coeff + d_rp*bunch->x(i);

@@ -456,6 +456,7 @@ class BaseRF_Gap(BaseLinacNode):
 		BaseLinacNode.__init__(self,name)
 		self.addParam("E0TL",0.)
 		self.addParam("modePhase",0.)		
+		self.addParam("gap_phase",0.)
 		self.addParam("rfCavity", None)
 		self.setType("baserfgap")	
 		self.__isFirstGap = False
@@ -523,6 +524,18 @@ class BaseRF_Gap(BaseLinacNode):
 		"""
 		return self.getParam("rfCavity")
 	
+	def setGapPhase(self, gap_phase):
+		"""
+		Sets the rf gap phase.
+		"""
+		self.setParam("gap_phase",gap_phase)
+
+	def getGapPhase(self):
+		"""
+		Returns the rf gap phase.
+		"""
+		return self.getParam("gap_phase")
+		
 	def track(self, paramsDict):
 		"""
 		The simplest RF gap class implementation of
@@ -548,7 +561,9 @@ class BaseRF_Gap(BaseLinacNode):
 		designArrivalTime = rfCavity.getDesignArrivalTime()
 		if(self.__isFirstGap):
 			if(rfCavity.isDesignSetUp()):
+				#print "debug RF =",self.getName(),"  phase=",(phase*180./math.pi - 180.)
 				phase = math.fmod(frequency*(arrival_time - designArrivalTime)*2.0*math.pi + rfPhase,2.0*math.pi)
+				#print "debug RF =",self.getName(),"  phase=",(phase*180./math.pi - 180.)
 			else:
 				sequence = self.getSequence()
 				accLattice = sequence.getLinacAccLattice()
@@ -570,7 +585,9 @@ class BaseRF_Gap(BaseLinacNode):
 		#------------------------------------------------------
 		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
 		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
-		#print "debug RF E0TL=",E0TL," phase=",phase*180./math.pi," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3		
+		self.setGapPhase(phase)
+		#print "debug delta_time in deg=",frequency*(arrival_time - designArrivalTime)*380.
+		#print "debug RF =",self.getName()," E0TL=",E0TL," phase=",(phase*180./math.pi - 180.)," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3		
 		
 	def trackDesign(self, paramsDict):
 		"""
@@ -590,12 +607,14 @@ class BaseRF_Gap(BaseLinacNode):
 		rfCavity = self.getRF_Cavity()
 		modePhase = self.getParam("modePhase")*math.pi	
 		arrival_time = bunch.getSyncParticle().time()
-		frequency = rfCavity.getFrequency()	
-		rfPhase = rfCavity.getDesignPhase() + modePhase
+		frequency = rfCavity.getFrequency()
+		rfPhase = rfCavity.getPhase() + modePhase
 		phase = rfPhase
 		if(self.__isFirstGap):
 			rfCavity.setDesignArrivalTime(arrival_time)
-			rfCavity.setDesignSetUp(True)			
+			rfCavity.setDesignSetUp(True)		
+			rfCavity._setDesignPhase(rfCavity.getPhase())
+			rfCavity._setDesignAmp(rfCavity.getAmp())
 		else:
 			first_gap_arr_time = rfCavity.getDesignArrivalTime()
 			#print "debug name=",self.getName()," delta_phase=",frequency*(arrival_time - first_gap_arr_time)*360.0," rfPhase=",rfPhase*180/math.pi
@@ -604,9 +623,10 @@ class BaseRF_Gap(BaseLinacNode):
 		#------------------------------------------------------
 		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
 		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
+		self.setGapPhase(phase)
 		#syncPart = bunch.getSyncParticle()
 		#eKin = syncPart.kinEnergy()
-		#print "debug RF E0TL=",E0TL," phase=",phase*180./math.pi," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3
+		#print "debug design RF=",self.getName()," E0TL=",E0TL," phase=",(phase*180./math.pi- 180.)," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3
 
 
 class TiltElement(BaseLinacNode):
@@ -727,16 +747,16 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 		""" Returns the design arrival time for the first RF gap. """
 		return self.getParam("designArrivalTime")
 		
-	def setDesignPhase(self,phase):
-		""" Sets the design phase for the first RF gap. """
+	def _setDesignPhase(self,phase):
+		""" Sets the design phase for the first RF gap. This method is called from the design tracking. """
 		self.setParam("designPhase",phase)
 		
 	def getDesignPhase(self):
 		""" Returns the design phase for the first RF gap. """
 		return self.getParam("designPhase")
 
-	def setDesignAmp(self,Amp):
-		""" Sets the design Amp for the RF cavity. """
+	def _setDesignAmp(self,Amp):
+		""" Sets the design Amp for the RF cavity. This method is called from the design tracking."""
 		self.setParam("designAmp",Amp)
 		
 	def getDesignAmp(self):

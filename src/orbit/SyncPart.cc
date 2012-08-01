@@ -440,9 +440,9 @@ void SyncPart::readSyncPart(const char* fileName){
 				val_arr[0] = 0.;
 				val_arr[1] = 0.;
 				val_arr[2] = 0.;
-        sscanf( v_str[3].c_str(),"%lf",&val_arr[0]);
-				sscanf( v_str[4].c_str(),"%lf",&val_arr[1]);
-				sscanf( v_str[5].c_str(),"%lf",&val_arr[2]);
+				sscanf( v_str[2].c_str(),"%lf",&val_arr[0]);
+				sscanf( v_str[3].c_str(),"%lf",&val_arr[1]);
+				sscanf( v_str[4].c_str(),"%lf",&val_arr[2]);
 				setXYZ(val_arr);
       }
 
@@ -452,9 +452,9 @@ void SyncPart::readSyncPart(const char* fileName){
 				val_arr[0] = 0.;
 				val_arr[1] = 0.;
 				val_arr[2] = 0.;
-        sscanf( v_str[3].c_str(),"%lf",&val_arr[0]);
-				sscanf( v_str[4].c_str(),"%lf",&val_arr[1]);
-				sscanf( v_str[5].c_str(),"%lf",&val_arr[2]);
+				sscanf( v_str[2].c_str(),"%lf",&val_arr[0]);
+				sscanf( v_str[3].c_str(),"%lf",&val_arr[1]);
+				sscanf( v_str[4].c_str(),"%lf",&val_arr[2]);
 				setPXYZ(val_arr);
       }
 
@@ -464,16 +464,16 @@ void SyncPart::readSyncPart(const char* fileName){
 				val_arr[0] = 0.;
 				val_arr[1] = 0.;
 				val_arr[2] = 0.;
-        sscanf( v_str[3].c_str(),"%lf",&val_arr[0]);
-				sscanf( v_str[4].c_str(),"%lf",&val_arr[1]);
-				sscanf( v_str[5].c_str(),"%lf",&val_arr[2]);
+				sscanf( v_str[2].c_str(),"%lf",&val_arr[0]);
+				sscanf( v_str[3].c_str(),"%lf",&val_arr[1]);
+				sscanf( v_str[4].c_str(),"%lf",&val_arr[2]);
 				setNormalX(val_arr[0],val_arr[1],val_arr[2]);
       }
 			
 			//set time
       if(v_str.size() > 3 && v_str[1] == "SYNC_PART_TIME"){
         double val = 0.;
-        sscanf( v_str[3].c_str(),"%lf",&val);
+        sscanf( v_str[2].c_str(),"%lf",&val);
         setTime(val);
       }
     }

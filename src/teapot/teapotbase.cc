@@ -260,11 +260,10 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew)
     double** arr = bunch->coordArr();
 
     kl1 = kl / factorial[pole];
-
-    z = (arr[i][0], arr[i][2]);
+    z = std::complex<double>(arr[i][0], arr[i][2]);
 
     // take power of z to the n
-    zn = (1.0, 0.0);
+    zn = std::complex<double>(1.0, 0.0);
     for (int k = 0; k < pole; k++)
     {
         zn *= z;
@@ -313,10 +312,10 @@ void multp(Bunch* bunch, int pole, double kl, int skew)
     
     for(int i = 0; i < bunch->getSize(); i++)
     {
-        z = (arr[i][0], arr[i][2]);
+        z = std::complex<double>(arr[i][0], arr[i][2]);
 
         // take power of z to the n
-        zn = (1.0, 0.0);
+        zn = std::complex<double>(1.0, 0.0);
         for (int k = 0; k < pole; k++)
         {
             zn *= z;

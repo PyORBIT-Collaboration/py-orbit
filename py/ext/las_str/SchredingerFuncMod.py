@@ -49,7 +49,7 @@ class SchredingerFunc:
         self.count = 0
         
         self.cut_par = 1000
-        self.n_states = 2
+        self.n_states = 3
         
         if (self.method == 2):
             self.St = Stark(os.environ["ORBIT_ROOT"] + "/ext/laserstripping/Hydrogen_data/",self.n_states)

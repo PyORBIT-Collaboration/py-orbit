@@ -148,9 +148,9 @@ class LinacLatticeFactory():
 						rf_cav_names.append(rf_cav_name)
 						accRF_Cav = RF_Cavity(rf_cav_name)
 						accRF_Cavs.append(accRF_Cav)
-						accRF_Cav.setDesignPhase(accNode.getParam("firstPhase"))
+						accRF_Cav._setDesignPhase(accNode.getParam("firstPhase"))
 						accRF_Cav.setPhase(accNode.getParam("firstPhase"))
-						accRF_Cav.setDesignAmp(1.)
+						accRF_Cav._setDesignAmp(1.)
 						accRF_Cav.setAmp(1.)
 						accRF_Cav.setFrequency(seq.getParam("rfFrequency"))
 					accRF_Cav = accRF_Cavs[len(accRF_Cavs) - 1] 

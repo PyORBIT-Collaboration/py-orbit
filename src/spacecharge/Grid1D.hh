@@ -62,6 +62,12 @@ public:
 	    particle attribute it will be used.*/	
 	void binBunch(Bunch* bunch);
 	
+	/** Bins the Bunch into the grid, ignores macrosize.*/	
+	void binBunchByParticleCount(Bunch* bunch);
+	
+	/** Bins the Bunch into a grid of size length [m] with a smoothing algorithm. Ignores macrosize.*/	
+	void binBunchSmoothedCount(Bunch* bunch, double length);
+	
 	/** Bins the value into the grid */
 	void binValue(double macroSize,double z);
 	

@@ -42,6 +42,9 @@ public:
 
   //elementary charge (CGS system)
   const static double elementary_charge_CGS;
+	
+	//elementary charge (MKS system)
+	const static double elementary_charge_MKS;
 
   //coeffitient for magnetic field strength
   //to shift from Tesla to H(CGS)/e(SGS) in 1/m^2

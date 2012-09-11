@@ -76,7 +76,7 @@ double Grid1D::getValue(double z){
 	double zFrac;	
 	double Wzm, Wz0, Wzp;
 	int iZ;
-	getIndAndFracZ(z,iZ,zFrac);	
+	getIndAndFracZ(z,iZ,zFrac); 
 	if(zSize_ > 2){
 		double zFrac2 = zFrac * zFrac;
 		Wzm = 0.5 * (0.25 - zFrac + zFrac2);
@@ -105,12 +105,64 @@ void Grid1D::binBunch(Bunch* bunch){
 		}	
 	} else {
 		double m_size = bunch->getMacroSize();
-	  int nParts = bunch->getSize();
+		int nParts = bunch->getSize();
 		for(int i = 0; i < nParts; i++){
 			binValue(m_size,part_coord_arr[i][4]);
 		}
 	}	
 }
+
+void Grid1D::binBunchByParticleCount(Bunch* bunch){
+	bunch->compress();
+	
+	double** part_coord_arr = bunch->coordArr();
+	int has_msize = bunch->hasParticleAttributes("macrosize");
+	if(has_msize > 0){
+		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
+		for(int i = 0, n = bunch->getSize(); i < n; i++){
+			binValue(1.0, part_coord_arr[i][4]);
+		}	
+	} else {
+		int nParts = bunch->getSize();
+		for(int i = 0; i < nParts; i++){
+			binValue(1.0, part_coord_arr[i][4]);
+		}
+	}	
+}
+
+void Grid1D::binBunchSmoothedCount(Bunch* bunch, double length){
+	
+	bunch->compress();
+	double** part_coord_arr = bunch->coordArr();
+		
+	for(int i = 0, n = bunch->getSize(); i < n; i++){
+		double z = part_coord_arr[i][4];
+		double dz = length/double(zSize_);
+		
+		//double zpos = (z - zMin_)/dz_ ;
+		double zpos = (z + length/2.0)/dz;
+		int ilocal = int(zpos + 0.5);
+		double position = zpos - double(ilocal);
+		//ilocal += 1;
+		if(ilocal < 0) 
+			ilocal = zSize_ - 1;
+		
+		if(ilocal > (zSize_ - 1))
+			ilocal = 0;
+		
+		int im = ilocal - 1;
+		if(im < 0) im = zSize_ - 1;
+		int ip = ilocal + 1;
+		if(ip > (zSize_ - 1)) ip = 0;
+	
+		arr_[im] += 0.5 * (0.5 - position) * (0.5 - position);
+		arr_[ilocal] += 0.75 - position * position;
+		arr_[ip] += 0.5 * (0.5 + position) * (0.5 + position);
+		
+	}
+}
+	
+
 
 void Grid1D::binValue(double macroSize,double z){
 	if(z < zMin_ || z > zMax_ ) return;
@@ -119,6 +171,7 @@ void Grid1D::binValue(double macroSize,double z){
 	if(iZ >= zSize_) iZ = zSize_ - 1;
 	arr_[iZ] += macroSize;
 }
+
 
 void Grid1D::calcGradient(double z,double& ez){
 	
@@ -155,10 +208,10 @@ void Grid1D::setZero(){
 
 void Grid1D::getIndAndFracZ(double z, int& ind, double& frac){
 	if(zSize_ > 2){
-	  ind  = int ( (z - zMin_)/dz_ );		
+	  ind  = int ( (z - zMin_)/dz_ );	
 		//cut off edge for three point interpolation
 		if(ind < 1) ind = 1;
-		if(ind > (zSize_-2))ind =  zSize_ - 2;
+		if(ind > (zSize_-2)) ind =  zSize_ - 2;
 		frac = (z - (zMin_ + ind * dz_))/dz_ - 0.5;
 		return;
 	}

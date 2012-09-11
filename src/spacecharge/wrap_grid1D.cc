@@ -94,17 +94,54 @@ extern "C" {
   //binBunch(Bunch* bunch)
   static PyObject* Grid1D_binBunch(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+    Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
+    PyObject* pyBunch;
+    if(!PyArg_ParseTuple(args,"O:binBunch",&pyBunch)){
+      ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch) - parameter are needed.");
+    }
+    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+      ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch) - constructor needs a Bunch.");
+    }
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+    cpp_Grid1D->binBunch(cpp_bunch);
+    Py_INCREF(Py_None);
+    return Py_None; 
+  }	
+	
+	//binBunchSmoothedCount(Bunch* bunch, double length)
+	static PyObject* Grid1D_binBunchSmoothedCount(PyObject *self, PyObject *args){
+		pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
 		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
 		PyObject* pyBunch;
-		if(!PyArg_ParseTuple(args,"O:binBunch",&pyBunch)){
-			ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch) - parameter are needed.");
+		double length;
+		if(!PyArg_ParseTuple(args,"Od:binBunchSmoothedCount",&pyBunch, &length)){
+			ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothedCount(Bunch* bunch, double length) - parameter are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch) - constructor needs a Bunch.");
+			ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothedCount(Bunch* bunch, double length) - constructor needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_Grid1D->binBunch(cpp_bunch);
+		cpp_Grid1D->binBunchSmoothedCount(cpp_bunch, length);
+		Py_INCREF(Py_None);
+		return Py_None;	
+	}	
+	
+  //binBunchByParticleCount(Bunch* bunch)
+  static PyObject* Grid1D_binBunchByParticleCount(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+		Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
+		PyObject* pyBunch;
+		if(!PyArg_ParseTuple(args,"O:binBunchByParticleCount",&pyBunch)){
+			ORBIT_MPI_Finalize("PyGrid1D - binBunchByParticleCount(Bunch* bunch) - parameter are needed.");
+		}
+		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("PyGrid1D - binBunchByParticleCount(Bunch* bunch) - constructor needs a Bunch.");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+		cpp_Grid1D->binBunchByParticleCount(cpp_bunch);
 		Py_INCREF(Py_None);
 		return Py_None;	
 	}	
@@ -232,6 +269,8 @@ extern "C" {
 		{ "getStepZ",     Grid1D_getStepZ,    METH_VARARGS,"returns the step in Z dir."},
 		{ "binValue",     Grid1D_binValue,    METH_VARARGS,"bins the value into the 1D mesh"},
 		{ "binBunch",     Grid1D_binBunch,    METH_VARARGS,"bins the Bunch instance into the 1D mesh"},
+		{ "binBunchByParticleCount", Grid1D_binBunchByParticleCount, METH_VARARGS,"bins the Bunch instance into the 1D mesh ignoring macrosize"},
+		{ "binBunchSmoothedCount", Grid1D_binBunchSmoothedCount, METH_VARARGS,"bins the Bunch instance smoothely into the 1D mesh, ignoring macrosize"},
 		{ "calcGradient", Grid1D_calcGradient,METH_VARARGS,"returns gradient as (gz) for point (z)"},
 		{ "synchronizeMPI",Grid1D_synchronizeMPI,METH_VARARGS,"synchronize through the MPI communicator"},
     {NULL}

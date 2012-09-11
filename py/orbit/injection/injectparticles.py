@@ -3,8 +3,6 @@
 """
 This is not a parallel version! 
 """
-
-
 import math
 import random
 import sys
@@ -16,25 +14,26 @@ class InjectParts:
 	functions.
 	"""
 	
-	def __init__(self, nparts, bunch, lostfoilbunch, foilparams, xDistFunc, yDistFunc, lDistFunc):
+	def __init__(self, nparts, bunch, lostbunch, injectregion, xDistFunc, yDistFunc, lDistFunc):
 		self.nparts = nparts
 		self.bunch = bunch
-		self.lostfoilbunch = lostfoilbunch
-		self.foilparams = foilparams
+		self.lostbunch = lostbunch
+		self.injectregion = injectregion
 		self.xDistFunc = xDistFunc
 		self.yDistFunc = yDistFunc
 		self.lDistFunc = lDistFunc
-		self.(xmin,xmax,ymin,ymax) = foilparams
-
+            
 	def addParticles(self):
-		(x,px) = self.xDistFunc
-		(y,py) = self.yDistFunc
-		(z,dE) = self.lDistFunc
+		(xmin,xmax,ymin,ymax) = self.injectregion
 		
-		for i in xrange(nParts):
-			if((x > self.xmin) && (x < self.xmax) && (y > self.ymin) && (y < self.ymax)): 
+		for i in xrange(self.nparts):
+			(x,px) = self.xDistFunc.getCoordinates()
+			(y,py) = self.yDistFunc.getCoordinates()
+			(z,dE) = self.lDistFunc.getCoordinates()
+			if((x > xmin) & (x < xmax) & (y > ymin) & (y < ymax)):	
 				self.bunch.addParticle(x,px,y,py,z,dE)
 			else:
-				print 'paticle outside of foil aperture '
-			
+				self.lostbunch.addParticle(x,px,y,py,z,dE)
+				
 		self.bunch.compress()
+		self.lostbunch.compress()

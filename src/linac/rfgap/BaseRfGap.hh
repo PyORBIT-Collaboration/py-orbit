@@ -1,4 +1,6 @@
-//This class repersents a simple RF gap. For this RF gap we know the E0TL parameter only.
+// This class represents a simple RF gap.
+// For this RF gap we know the E0TL parameter only.
+
 #ifndef BASE_RF_GAP_H
 #define BASE_RF_GAP_H
 
@@ -18,26 +20,26 @@
 using namespace std;
 
 /** 
-  This class repersents a 2D rectangular grid.
+  This class represents a 2D rectangular grid.
 */
-    
+
 class BaseRfGap: public OrbitUtils::CppPyWrapper
 {
 public:
-	
-	/** Constructor for Base RF gap*/
+
+  /** Constructor for Base RF gap*/
   BaseRfGap();
-	
+
   /** Destructor */
   virtual ~BaseRfGap();
-	
-	/** Tracks the Bunch trough the RF gap. */	
-	void trackBunch(Bunch* bunch, double frequency, double E0TL, double phase);	
-		
-  private:
-		
-	protected:
-			
+
+  /** Tracks the Bunch trough the RF gap. */
+  void trackBunch(Bunch* bunch, double frequency, double E0TL, double phase);
+
+private:
+
+protected:
+
 };
 
 #endif

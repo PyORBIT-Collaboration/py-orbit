@@ -13,6 +13,7 @@
 #include "wrap_linacmodule.hh"
 #include "wrap_collimator.hh"
 #include "wrap_foil.hh"
+#include "wrap_rfcavities.hh"
 
 /**
  * The main function that will initialize the MPI and will 
@@ -40,25 +41,26 @@ int main (int argc, char **argv)
 
 
   //we need this to initialize the extra ORBIT modules
-	Py_Initialize();
+  Py_Initialize();
 
-  //ORBIT modules initializations
+  //ORBIT module initializations
   wrap_orbit_mpi::initorbit_mpi();
   wrap_orbit_bunch::initbunch();
-	wrap_orbit_utils::initutils();
-	wrap_teapotbase::initteapotbase();
-	wrap_linac::initlinac();
-	wrap_collimator::initcollimator();
-	wrap_foil::initfoil();
+  wrap_orbit_utils::initutils();
+  wrap_teapotbase::initteapotbase();
+  wrap_linac::initlinac();
+  wrap_collimator::initcollimator();
+  wrap_foil::initfoil();
+  wrap_rfcavities::initrfcavities();
+
+  //Runge-Kutta tracker package
+  inittrackerrk4();
+
+  //space-charge package
+  initspacecharge();
 	
-	//Runge-Kutta tracker package
-	inittrackerrk4();
-	
-	//space-charge package
-	initspacecharge();
-	
-	//the python interpreter
-	//It will call Py_Initialize() again, but there is no harm
+  //the python interpreter
+  //It will call Py_Initialize() again, but there is no harm
   Py_Main(argc,argv);
 
   //std::cout << "MPI - stopped" << std::endl;

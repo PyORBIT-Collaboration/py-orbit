@@ -26,7 +26,7 @@ class InjectParts:
 	def addParticles(self):
 		(xmin,xmax,ymin,ymax) = self.injectregion
 		
-		for i in xrange(self.nparts):
+		for i in xrange(int(self.nparts)):
 			(x,px) = self.xDistFunc.getCoordinates()
 			(y,py) = self.yDistFunc.getCoordinates()
 			(z,dE) = self.lDistFunc.getCoordinates()

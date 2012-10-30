@@ -43,8 +43,6 @@ class TeapotFoilNode(DriftTEAPOT):
 			self.foil.traverseFoilFullScatter(bunch, lostbunch)
 		else:
 			self.foil.traverseFoilSimpleScatter(bunch)
-		#put the track method here
-		print "debug tracking the bunch through the foil name=",self.getName()," part ind=",self.getActivePartIndex()," length=",length
 	
 	
 	def setScatterChoice(self, choice):

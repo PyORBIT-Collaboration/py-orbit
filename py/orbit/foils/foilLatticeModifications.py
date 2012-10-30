@@ -36,9 +36,9 @@ def addTeapotFoilNode(lattice, position, foil_node):
 		if(not isinstance(node,DriftTEAPOT)):
 			print "Non-drift node=",node.getName()," type=",node.getType()," L=",node.getLength()
 			orbitFinalize("We have non-drift element at the place of the foil! Stop!")
-		if(node.getNumberOfChildren() != 4):
-			print "Node=",node.getName()," type=",node.getType()," L=",node.getLength()," N children nodes=",node.getNumberOfChildren()
-			orbitFinalize("Drift element was modified with additional functionality (SC or something else)! Add collimation first! Stop!")
+			#if(node.getNumberOfChildren() != 4):
+			#print "Node=",node.getName()," type=",node.getType()," L=",node.getLength()," N children nodes=",node.getNumberOfChildren()
+			#orbitFinalize("Drift element was modified with additional functionality (SC or something else)! Add collimation first! Stop!")
 	# make array of nodes from foil in the center and possible two drifts if their length is more than length_tollerance [m]
 	nodes_new_arr = [foil_node,]
 	drift_node_start = lattice.getNodes()[node_start_ind]

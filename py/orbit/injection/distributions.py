@@ -161,8 +161,7 @@ class SNSESpreadDist():
 		pmax = 1.
 		ec = 0.
 		
-		ecdrift = ecdrifti + (ecdriftf - ecdrifti) + self.sp.time() / drifttime
-		
+		ecdrift = ecdrifti + (ecdriftf - ecdrifti) * self.sp.time() / drifttime
 				
 		if(ectrunc != 0):
 			if(ecmin >= ecmean):

@@ -36,9 +36,4 @@ class TeapotInjectionNode(DriftTEAPOT):
 		The injection-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
 		length = self.getLength(self.getActivePartIndex())
-		bunch = paramsDict["bunch"]
-		lostbunch = paramsDict["lostbunch"]
-		#put the track method here
 		self.injectparts.addParticles()		
-		print "debug tracking the bunch through the foil name=",self.getName()," part ind=",self.getActivePartIndex()," length=",length
-	

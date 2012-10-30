@@ -37,8 +37,7 @@ class SC1D_AccNode(DriftTEAPOT):
 		"""
 		length = self.getLength(self.getActivePartIndex())
 		self.lspacecharge.trackBunch(bunch)		#put the track method here
-		print "debug tracking the bunch through the sc node name=",self.getName()," part ind=",self.getActivePartIndex()," length=",length
-
+		
 	def track(self, paramsDict):
 		"""
 			The foil-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
@@ -46,7 +45,6 @@ class SC1D_AccNode(DriftTEAPOT):
 		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
 		self.lspacecharge.trackBunch(bunch)		#put the track method here
-		print "debug tracking the bunch through the sc node name=",self.getName()," part ind=",self.getActivePartIndex()," length=",length
 
 	def assignImpedance(self, py_cmplx_arr):
 		#size = size(py_cmplx_arr);

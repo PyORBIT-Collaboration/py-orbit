@@ -38,8 +38,6 @@ class TeapotCollimatorNode(DriftTEAPOT):
 		bunch = paramsDict["bunch"]
 		lostbunch = paramsDict["lostbunch"]
 		self.collimator.collimateBunch(bunch, lostbunch)
-		#put the track method here
-		print "debug tracking the bunch through the collimator name=",self.getName()," part ind=",self.getActivePartIndex()," length=",length
-	
-	
+		
+			
 

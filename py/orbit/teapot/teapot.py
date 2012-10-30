@@ -68,8 +68,7 @@ class TEAPOT_Lattice(AccLattice):
 		ringRF_Node = RingRFTEAPOT()
 		for node in self.getNodes():
 			if(node.getType() == ringRF_Node.getType()):
-				node.getParamsDict()["ring_length"] = self.getLength()		
-	
+				node.getParamsDict()["ring_length"] = self.getLength()
 
 	def getSubLattice(self, index_start = -1, index_stop = -1,):
 		"""
@@ -92,7 +91,97 @@ class TEAPOT_Lattice(AccLattice):
 		actionContainer.addAction(track, AccActionsContainer.BODY)
 		self.trackActions(actionContainer,paramsDict)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
+
+
+class TEAPOT_Ring(AccLattice):
+	"""
+		The subclass of the AccLattice class. Shell class for the TEAPOT nodes collection for rings.
+		TEAPOT has the ability to read MAD files.
+		"""
+	def __init__(self, name = "no name"):
+		AccLattice.__init__(self,name)
+	
+	def readMAD(self, mad_file_name, lineName):
+		"""
+			It creates the teapot lattice from MAD file.
+			"""
+		parser = MAD_Parser()
+		parser.parse(mad_file_name)
+		accLines = parser.getMAD_LinesDict()
+		if(not accLines.has_key(lineName)):
+			print "==============================="
+			print "MAD file: ", mad_file_name
+			print "Can not find accelerator line: ", lineName
+			print "STOP."
+			sys.exit(1)
+		# accelerator lines and elements from mad_parser package
+		accMAD_Line = accLines[lineName]
+		self.setName(lineName)
+		accMADElements = accMAD_Line.getElements()
+		# make TEAPOT lattice elements by using TEAPOT
+		# element factory
+		for madElem in accMADElements:
+			elems = _teapotFactory.getElements(madElem)
+			for elem in elems:
+				self.addNode(elem)
+		self.addChildren()
+		self.initialize()
+	
+	def addChildren(self):
+		AccLattice.initialize(self)
+		for node in self.getNodes():
+			bunchwrapper = BunchWrapTEAPOT("Bunch Wrap")
+			bunchwrapper.getParamsDict()["ring_length"] = self.getLength()
+			node.addChildNode(bunchwrapper, AccNode.BODY)
+			
+	def initialize(self):
+		AccLattice.initialize(self)
+		#set up ring length for RF nodes
+		ringRF_Node = RingRFTEAPOT()
+		bunchwrap_Node = BunchWrapTEAPOT()
+		for node in self.getNodes():
+			if(node.getType() == ringRF_Node.getType()):
+				node.getParamsDict()["ring_length"] = self.getLength()
+			
+		paramsDict = {}
+		actions = AccActionsContainer()
+
+		def accSetWrapLengthAction(paramsDict):
+			"""
+			Nonbound function. Sets lattice length for wrapper nodes
+			"""
+			node = paramsDict["node"]
+			bunchwrap_node = BunchWrapTEAPOT()
+			if(node.getType() == bunchwrap_Node.getType()):
+				node.getParamsDict()["ring_length"] = self.getLength()
+
+		actions.addAction(accSetWrapLengthAction, AccNode.EXIT)
+		self.trackActions(actions, paramsDict)
+		actions.removeAction(accSetWrapLengthAction, AccNode.EXIT)
+
+
+	def getSubLattice(self, index_start = -1, index_stop = -1,):
+		"""
+			It returns the new TEAPOT_Lattice with children with indexes
+			between index_start and index_stop inclusive
+			"""
+		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
+	
+	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
+		"""
+			It tracks the bunch through the lattice.
+			"""
+		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
+		paramsDict["bunch"] = bunch
 		
+		def track(paramsDict):
+			node = paramsDict["node"]
+			node.track(paramsDict)
+		
+		actionContainer.addAction(track, AccActionsContainer.BODY)
+		self.trackActions(actionContainer,paramsDict)
+		actionContainer.removeAction(track, AccActionsContainer.BODY)
+
 
 class _teapotFactory:
 	"""
@@ -443,6 +532,27 @@ class DriftTEAPOT(NodeTEAPOT):
 		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
 		TPB.drift(bunch, length)
+
+class BunchWrapTEAPOT(NodeTEAPOT):
+	"""
+		Drift TEAPOT element.
+		"""
+	def __init__(self, name = "drift no name"):
+		"""
+			Constructor. Creates the Bunch wrapper TEAPOT element used in Ring lattices.
+		"""
+		NodeTEAPOT.__init__(self,name)
+		self.setType("bunch_wrap_teapot")
+		self.addParam("ring_length",0.)
+			   
+	def track(self, paramsDict):
+		"""
+			The bunch wrap class implementation of the AccNodeBunchTracker class track(probe) method.
+		"""
+		length = self.getLength(self.getActivePartIndex())
+		bunch = paramsDict["bunch"]
+		length = self.getParam("ring_length")
+		TPB.wrapbunch(bunch, length)
 
 class SolenoidTEAPOT(NodeTEAPOT):
 	"""
@@ -919,7 +1029,7 @@ class RingRFTEAPOT(NodeTEAPOT):
 			msg = msg + os.linesep
 			msg = msg + "nParts =" + str(nParts)
 			msg = msg + os.linesep
-			msg = msg + "lenght =" + str(self.getLength())
+			msg = msg + "length =" + str(self.getLength())
 			orbitFinalize(msg)
 
 	def track(self, paramsDict):
@@ -951,9 +1061,9 @@ class KickTEAPOT(NodeTEAPOT):
 		self.addParam("ky",0.)
 		self.addParam("dE",0.)
 		self.setType("kick teapot")
-		
 		self.setnParts(2)
-		
+		self.waveform = None
+	
 	def initialize(self):
 		"""
 		The  Kicker TEAPOT class implementation of
@@ -987,8 +1097,12 @@ class KickTEAPOT(NodeTEAPOT):
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
-		kx = self.getParam("kx")/(nParts-1)
-		ky = self.getParam("ky")/(nParts-1)
+		strength = 1.0
+		if(self.waveform):
+			strength = self.waveform.getKickFactor()
+					
+		kx = strength * self.getParam("kx")/(nParts-1)
+		ky = strength * self.getParam("ky")/(nParts-1)
 		dE = self.getParam("dE")/(nParts-1)
 		bunch = paramsDict["bunch"]
 		if(index == 0):
@@ -1002,6 +1116,13 @@ class KickTEAPOT(NodeTEAPOT):
 		if(index == (nParts-1)):
 			TPB.drift(bunch, length)
 		return
+
+	def setWaveform(self, waveform):
+		"""
+		Sets the time dependent waveform function
+		"""
+		self.waveform = waveform
+
 
 class TiltTEAPOT(BaseTEAPOT):
 	"""

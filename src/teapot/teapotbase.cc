@@ -185,6 +185,34 @@ void drift(Bunch* bunch, double length)
         arr[i][4] -= length * phifac;
     }
 }
+	
+///////////////////////////////////////////////////////////////////////////
+// NAME
+//   wrapbunch
+//
+// DESCRIPTION
+//  wraps the particles longitudinally for the case of a ring beam
+//
+// PARAMETERS
+//  bunch = reference to the macro-particle bunch
+//	length = length of the ring
+//
+// RETURNS
+//   Nothing
+//
+///////////////////////////////////////////////////////////////////////////
+	
+void wrapbunch(Bunch* bunch, double length)
+{
+	//coordinate array [part. index][x,xp,y,yp,z,dE]
+	double** arr = bunch->coordArr();
+	
+	for(int i = 0; i < bunch->getSize(); i++)
+		{
+			if(arr[i][4] < -length/2.0) arr[i][4] += length;
+			if(arr[i][4] > length/2.0) arr[i][4] -= length;
+		}
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // NAME

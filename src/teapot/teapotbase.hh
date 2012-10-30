@@ -39,6 +39,8 @@ namespace teapot_base
     void multpfringeIN(Bunch* bunch, int pole, double kl, int skew);
     void multpfringeOUT(Bunch* bunch, int pole, double kl, const int skew);
 
+	void wrapbunch(Bunch* bunch, double length);
+
     void kick(Bunch* bunch, double kx, double ky, double kE);
 
     void quad1(Bunch* bunch, double length, double kq);

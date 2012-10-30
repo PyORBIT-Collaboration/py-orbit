@@ -23,6 +23,7 @@ __all__ = []
 __all__.append("TEAPOT_Lattice")
 __all__.append("BaseTEAPOT")
 __all__.append("DriftTEAPOT")
+__all__.append("BunchWrapTEAPOT")
 __all__.append("BendTEAPOT")
 __all__.append("QuadTEAPOT")
 __all__.append("MultipoleTEAPOT")

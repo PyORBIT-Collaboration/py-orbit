@@ -48,6 +48,9 @@ private:
 	
 	/** delete the particle from the main bunch and add it to the lost particles bunch. */
 	void loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost, int& coll_flag, double& zrl);
+	
+	/** drift the particle if it misses the foil **/
+	void driftParticle(double* coords, SyncPart* syncpart, double length);
 
 protected:
 

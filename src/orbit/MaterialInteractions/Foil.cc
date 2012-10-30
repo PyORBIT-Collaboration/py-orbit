@@ -197,7 +197,7 @@ void Foil::traverseFoilFullScatter(Bunch* bunch, Bunch* lostbunch){
 	double** part_coord_arr = bunch->coordArr();
 	
 	for(int ip = 0; ip < nParts; ip++){
-		
+	
 		int step = 0;
 		zrl = length;
 		foil_flag = checkFoilFlag(part_coord_arr[ip][0], part_coord_arr[ip][2]);
@@ -236,7 +236,7 @@ void Foil::traverseFoilFullScatter(Bunch* bunch, Bunch* lostbunch){
 				}
 				if(stepsize <= rl) { //Take the step and allow nuclear scatter
 					Foil::takeStep(bunch, lostbunch, part_coord_arr[ip], syncPart, z, a, density, idum, stepsize, zrl, rl, foil_flag, ip);
-					
+				
 					//If it still exists after MCS and energy loss, nuclear scatter
 					if(foil_flag==1 && zrl > 0){
 						beta = Foil::getBeta(part_coord_arr[ip], syncPart);
@@ -297,11 +297,15 @@ void Foil::traverseFoilFullScatter(Bunch* bunch, Bunch* lostbunch){
 					}
 				}
 			}
+			else{
+				//Drift by the foil
+				driftParticle(part_coord_arr[ip], syncPart, length);
+				zrl = 0;
+			}
 		}
 	}
 	
 	//Update synchronous particle, compress bunch
-	
 	bunch->compress();
 	double newtime = syncPart->getTime() + length/( syncPart->getBeta()*OrbitConst::c );
 	syncPart->setTime(newtime);
@@ -336,6 +340,38 @@ int Foil::checkFoilFlag(double x, double y){
 		return 0;
 	}
 
+}
+
+//////////////////////////////////////////////////////////////////////////
+// NAME
+//   Drift Particle
+//
+// DESCRIPTION
+//   Drifts a single particle. 
+//
+// PARAMETERS
+//   arr = reference to the particle coordinate array
+//   i = particle index
+//   length = length of the drift
+//
+// RETURNS
+//   Nothing
+//
+///////////////////////////////////////////////////////////////////////////
+
+void Foil::driftParticle(double* arr, SyncPart* syncpart, double length)
+{
+    double KNL, phifac, dp_p;
+    double gamma2i = 1.0 / (syncpart->getGamma() * syncpart->getGamma());
+    double dp_p_coeff = 1.0 / (syncpart->getMomentum() * syncpart->getBeta());
+	
+    dp_p = arr[5] * dp_p_coeff;
+    KNL  = 1.0 / (1.0 + dp_p);
+    arr[0] += KNL * length * arr[1];
+    arr[2] += KNL * length * arr[3];
+    phifac = (arr[1] * arr[1] + arr[3] * arr[3] + dp_p * dp_p * gamma2i) / 2.0;
+    phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
+    arr[4] -= length * phifac;
 }
 
 

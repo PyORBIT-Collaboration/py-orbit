@@ -39,7 +39,7 @@ class Base_RFNode(DriftTEAPOT):
 		length = self.getLength(self.getActivePartIndex())
 		#put the track method here:
 		#self..trackBunch(bunch)
-		print "debug tracking the bunch through the rf node = ",\
+		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 
@@ -52,7 +52,7 @@ class Base_RFNode(DriftTEAPOT):
 		bunch = paramsDict["bunch"]
 		#put the track method here:
 		#self..trackBunch(bunch)
-		print "debug tracking the bunch through the rf node = ",\
+		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 
@@ -77,7 +77,7 @@ class Frequency_RFNode(Base_RFNode):
 		length = self.getLength(self.getActivePartIndex())
 		#put the track method here:
 		self.frequencynode.trackBunch(bunch)
-		print "debug tracking the bunch through the rf node = ",\
+		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 
@@ -90,7 +90,7 @@ class Frequency_RFNode(Base_RFNode):
 		bunch = paramsDict["bunch"]
 		#put the track method here:
 		self.frequencynode.trackBunch(bunch)
-		print "debug tracking the bunch through the rf node = ",\
+		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 
@@ -116,7 +116,7 @@ class Harmonic_RFNode(Base_RFNode):
 		length = self.getLength(self.getActivePartIndex())
 		#put the track method here:
 		self.harmonicnode.trackBunch(bunch)
-		print "debug tracking the bunch through the rf node = ",\
+		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 
@@ -129,7 +129,7 @@ class Harmonic_RFNode(Base_RFNode):
 		bunch = paramsDict["bunch"]
 		#put the track method here:
 		self.harmonicnode.trackBunch(bunch)
-		print "debug tracking the bunch through the rf node = ",\
+		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 

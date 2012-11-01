@@ -17,7 +17,9 @@ def bunch_pyorbit_to_orbit(ringLength, pyOrbitBunch, name_of_orbit_mpi_bunch_fil
 		px = b.px(i)*1000.
 		y = b.y(i)*1000.
 		py = b.py(i)*1000.
-		z = b.z(i)*2.0*math.pi/L
+		z = -b.z(i)*2.0*math.pi/L
+		if(z > math.pi) z = z - 2*math.pi
+		if(z < -math.pi) z = z + 2*math.pi
 		dE = b.dE(i)
 		file_out.write(str(x) + " " + str(px) + " " + str(y) + " " + str(py) + " "+ str(z) + " " + str(dE) + "\n")	
 	file_out.close()

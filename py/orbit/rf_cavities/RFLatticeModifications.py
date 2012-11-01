@@ -46,14 +46,7 @@ def addRFNode(lattice, position, rf_node):
 			" type = ", node.getType()," L = ", node.getLength()
 			orbitFinalize("We have a non-drift element at the\
 			location of the rf node! Stop!")
-		if(node.getNumberOfChildren() != 4):
-			print "Node = ", node.getName(),\
-			" type = ", node.getType()," L = ", node.getLength(),\
-			" N children nodes = ", node.getNumberOfChildren()
-			orbitFinalize("Drift element was modified with\
-			additional functionality (SC or something\
-			else)! Add collimation first! Stop!")
-	# Make array of nodes from rf node in the center and possibly
+			# Make array of nodes from rf node in the center and possibly
 	# two drifts if their length is more than length_tollerance [m]
 	nodes_new_arr = [rf_node,]
 	drift_node_start = lattice.getNodes()[node_start_ind]

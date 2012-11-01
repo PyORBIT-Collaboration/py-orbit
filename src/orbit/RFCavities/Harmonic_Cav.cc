@@ -94,7 +94,7 @@ void Harmonic_Cav::trackBunch(Bunch* bunch)
 
   for(int i = 0; i < bunch->getSize(); i++)
   {
-    phase = ZtoPhi * arr[i][4];
+    phase = -ZtoPhi * arr[i][4];
     dERF  = bunch->getCharge()* RFVoltage * sin(RFHNum * phase + RFPhase);
     arr[i][5] += dERF - dESync;
   }

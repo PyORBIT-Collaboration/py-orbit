@@ -60,7 +60,6 @@ extern "C" {
 	//assignImpedance  A routine to import a python complex tuple and convert to c++ impedance array
 	static PyObject* assignImpedance(PyObject *self, PyObject *args){
 		
-		cout<<"Getting here \n";
 		pyORBIT_Object* pyLSpaceChargeCalc = (pyORBIT_Object*) self;
 		LSpaceChargeCalc* cpp_LSpaceChargeCalc = (LSpaceChargeCalc*) pyLSpaceChargeCalc->cpp_obj;
 		PyObject* py_cmplx_arr;

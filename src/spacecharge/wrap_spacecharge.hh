@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 	void initspacecharge(void);
-	PyObject* getSpaceChargeType(char* name);
+	PyObject* getSpaceChargeType(const char* name);
 	
 #ifdef __cplusplus
 }

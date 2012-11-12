@@ -38,7 +38,7 @@ extern "C" {
 		wrap_lspacechargecalc::initLSpaceChargeCalc(module);
   }
 	
-	PyObject* getSpaceChargeType(char* name){
+	PyObject* getSpaceChargeType(const char* name){
 		PyObject* mod = PyImport_ImportModule("spacecharge");
 		PyObject* pyType = PyObject_GetAttrString(mod,name);
 		Py_DECREF(mod);

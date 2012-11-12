@@ -5,6 +5,13 @@
 
 using namespace OrbitUtils;
 
+const int BaseBoundary2D::IS_INSIDE    =  1;
+const int BaseBoundary2D::IS_OUTSIDE   = -1;
+const int BaseBoundary2D::TO_BE_KILLED =  0;
+
+const double BaseBoundary2D::PI = 3.14159265358979324;
+
+
 // Constructor
 BaseBoundary2D::BaseBoundary2D(int nPoints, int nModes): CppPyWrapper(NULL)
 {
@@ -127,6 +134,16 @@ int BaseBoundary2D::getNumberOfModes(){ return nModes_;}
 
 /** Returns 0 if the boundary is not initialized */
 int BaseBoundary2D::isInitialized(){ return initialized_;}
+
+/** Returns IS_INSIDE or IS_OUTSIDE depending on the particle's position */
+int BaseBoundary2D::isInside(double x, double y)
+{
+  int isIns = IS_OUTSIDE;
+	if( x > xMin_ && x < xMax_ && y > yMin_ && y < yMax_){
+		isIns = IS_INSIDE;
+	}
+  return isIns;
+}
 
 /** Returns the x-coordinate of the boundary point with an index i */
 double BaseBoundary2D::getBoundaryPointX(int i){

@@ -7,8 +7,6 @@
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 
-
-
 using namespace std;
 
 /** 
@@ -68,11 +66,21 @@ class BaseBoundary2D: public OrbitUtils::CppPyWrapper
 		
 		/** Returns the shape index */
 		int getShapeType();
+	
+		/** Returns IS_INSIDE or IS_OUTSIDE depending on the particle's position */
+		virtual int isInside(double x, double y);			
 		
+	///public static members		
 	public:
 		
 		/** NOSHAPE String constant */
 		string NO_SHAPE;
+
+		const static int IS_INSIDE;
+		const static int IS_OUTSIDE;
+		const static int TO_BE_KILLED;
+		
+		const static double PI;			
 		
 	protected:
 	

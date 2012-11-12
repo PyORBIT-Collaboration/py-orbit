@@ -105,15 +105,17 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, BaseBoundary2D
 	for (int i = 0, n = bunch->getSize(); i < n; i++){
 		x = bunch->x(i);
 		y = bunch->y(i);
-		z = bunch->z(i);		
+		z = bunch->z(i);	
 		
-		phiGrid->calcGradient(x,y,ex,ey);	
-		//std::cout<<" debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;		
-		Lfactor = - zGrid->getValue(z) * factor;
-		//std::cerr<<" debug zgrid="<<zGrid->getValue(z)<<" lfactor="<<Lfactor;		
-		bunch->xp(i) += ex * Lfactor;
-		bunch->yp(i) += ey * Lfactor;	
-		//std::cerr<<" xp="<<bunch->xp(i)<<" yp="<<bunch->yp(i);
+		if(boundary != NULL && boundary->isInside(x,y) == BaseBoundary2D::IS_INSIDE){
+			phiGrid->calcGradient(x,y,ex,ey);	
+			//std::cout<<" debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;		
+			Lfactor = - zGrid->getValue(z) * factor;
+			//std::cerr<<" debug zgrid="<<zGrid->getValue(z)<<" lfactor="<<Lfactor;		
+			bunch->xp(i) += ex * Lfactor;
+			bunch->yp(i) += ey * Lfactor;	
+			//std::cerr<<" xp="<<bunch->xp(i)<<" yp="<<bunch->yp(i);
+		}
 	}
 }
 

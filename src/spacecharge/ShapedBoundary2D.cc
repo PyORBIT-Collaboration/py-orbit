@@ -3,12 +3,6 @@
 #include <iostream>
 #include <cfloat>
 
-const int ShapedBoundary2D::IS_INSIDE    =  1;
-const int ShapedBoundary2D::IS_OUTSIDE   = -1;
-const int ShapedBoundary2D::TO_BE_KILLED =  0;
-
-const double ShapedBoundary2D::PI = 3.14159265358979324;
-
 using namespace OrbitUtils;
 
 /** Constructor */

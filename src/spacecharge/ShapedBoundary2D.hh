@@ -35,18 +35,10 @@ class ShapedBoundary2D: public BaseBoundary2D
 	  int impactPoint(double x,  double y,  double z,
 		                double px, double py, double pz,
 		                double* r_v,double* n_v);
-		
+
 		/** Returns IS_INSIDE or IS_OUTSIDE depending on the particle's position */
-		int isInside(double x, double y);	
+		int isInside(double x, double y);
 		
-		///public static members
-		public:
-			const static int IS_INSIDE;
-			const static int IS_OUTSIDE;
-			const static int TO_BE_KILLED;
-			
-			const static double PI;	
-			
 	protected:
 		
 		double r_circle_;

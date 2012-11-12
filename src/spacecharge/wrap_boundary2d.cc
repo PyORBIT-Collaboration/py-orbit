@@ -149,6 +149,17 @@ extern "C" {
     return Py_None;
 	}
 	
+	//isInside(double x, double y) - returns -1 or +1 for "no" and "yes"
+	static PyObject* Boundary2D_isInside(PyObject *self, PyObject *args){
+		pyORBIT_Object* pyBoundary2D = (pyORBIT_Object*) self;
+		BaseBoundary2D* cpp_Boundary2D = (BaseBoundary2D*) pyBoundary2D->cpp_obj;
+		double x,y;
+		if(!PyArg_ParseTuple(args,"dd:isInside",&x,&y)){
+			ORBIT_MPI_Finalize("PyBoundary2D - isInside(x,y) - method needs parameters.");
+		}			
+		return Py_BuildValue("i",cpp_Boundary2D->isInside(x,y));
+	}	
+	
 	// initialize() - initializes the all arrays
 	static PyObject* Boundary2D_initialize(PyObject *self, PyObject *args){
 		pyORBIT_Object* pyBoundary2D = (pyORBIT_Object*) self;
@@ -201,6 +212,7 @@ extern "C" {
 		{ "getNumberOfModes",    Boundary2D_getNumberOfModes,    METH_VARARGS,"returns the number of free-space modes"},
 		{ "getNumberOfPoints",   Boundary2D_getNumberOfPoints,   METH_VARARGS,"returns the number of boundary points"},
 		{ "getShapeName",        Boundary2D_getShapeName,        METH_VARARGS,"returns the shape name"},
+		{ "isInside",            Boundary2D_isInside,            METH_VARARGS,"returns -1 or +1 if (x,y) point is inside the boundary"},
 		{ "isInitialized",       Boundary2D_isInitialized,       METH_VARARGS,"returns 1 if initialized and 0 if not"},
 		{ "initialize",          Boundary2D_initialize,          METH_VARARGS,"initializes all boundary arrays"},
 		{ "getBoundaryPoint",    Boundary2D_getBoundaryPoint,    METH_VARARGS,"returns tuple (x,y) - a boundary point with index"},

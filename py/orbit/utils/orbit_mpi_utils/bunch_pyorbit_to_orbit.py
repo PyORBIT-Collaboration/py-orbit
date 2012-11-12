@@ -25,12 +25,8 @@ def bunch_pyorbit_to_orbit(ringLength, pyOrbitBunch, name_of_orbit_mpi_bunch_fil
 	
 	# n_parts_arr - array of size of the number of CPUs, 
 	# and have the number of macroparticles on each CPU
-	n_parts_arr = []
-	for i_cpu in range(size):
-		if(rank == i_cpu):
-			n_parts_arr.append(b.getSize())
-		else:
-			n_parts_arr.append(0)
+	n_parts_arr = [0]*size
+	n_parts_arr[rank] = b.getSize()
 	n_parts_arr = orbit_mpi.MPI_Allreduce(n_parts_arr,mpi_datatype.MPI_INT,mpi_op.MPI_SUM,comm)	
 	
 	file_out = None

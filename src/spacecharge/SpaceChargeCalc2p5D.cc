@@ -107,7 +107,7 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, BaseBoundary2D
 		y = bunch->y(i);
 		z = bunch->z(i);	
 		
-		if(boundary != NULL && boundary->isInside(x,y) == BaseBoundary2D::IS_INSIDE){
+		if(boundary == NULL || (boundary != NULL && boundary->isInside(x,y) == BaseBoundary2D::IS_INSIDE)){
 			phiGrid->calcGradient(x,y,ex,ey);	
 			//std::cout<<" debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;		
 			Lfactor = - zGrid->getValue(z) * factor;

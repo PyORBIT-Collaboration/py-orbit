@@ -127,7 +127,7 @@ void PoissonSolverFFT2D::_defineGreenF()
 			rTransX = iX * dx_;
 			rTot2 = rTransX*rTransX + rTransY*rTransY;
 			//we can add constant (to get the same numers as in ORBIT)
-			//this constant is + log(1000000.0)
+			//this constant is (- log(1000.0))
 			//here in the original ORBIT we deleted this constant 
 			if(iX != 0 || iY != 0){
 				greensF_[iX][iY] = - log(rTot2)/2;

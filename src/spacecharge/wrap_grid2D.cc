@@ -273,6 +273,7 @@ extern "C" {
 		{ "setZero",       Grid2D_setZero,       METH_VARARGS,"sets all points on the grid to zero"},
 		{ "getValue",      Grid2D_getValue,      METH_VARARGS,"returns value for (x,y) point"},
 		{ "setValue",      Grid2D_setValue,      METH_VARARGS,"sets value for (ix,iy) point - (val,ix,iy)"},
+		{ "getValueOnGrid",Grid2D_getValueOnGrid,METH_VARARGS,"returns value on the grid for (ind_x,ind_y) point"},
 		{ "setGridX",      Grid2D_setGridX,      METH_VARARGS,"sets the X grid with min,max"},
 		{ "setGridY",      Grid2D_setGridY,      METH_VARARGS,"sets the Y grid with min,max"},
 		{ "getGridX",      Grid2D_getGridX,      METH_VARARGS,"returns the x-grid point with index ind"},

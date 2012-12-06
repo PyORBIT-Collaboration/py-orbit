@@ -50,7 +50,7 @@ class PoissonSolverFFT2D: public PoissonSolver2D
 		puts results into an external potential grid
 		*/
 		void findPotential(Grid2D* rhoGrid,Grid2D*  phiGrid); 
-		
+	
 		
 	protected:
 		

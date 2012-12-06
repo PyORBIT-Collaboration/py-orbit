@@ -173,7 +173,7 @@ void PoissonSolverFFT2D::_defineGreenF()
 
 void PoissonSolverFFT2D::findPotential(Grid2D* rhoGrid,Grid2D*  phiGrid)
 {
-	double shape_diff_limit = 0.0000001;
+	double shape_diff_limit = 0.00000001;
 	//check sizes of the grids
   if( xSize_ !=  rhoGrid->getSizeX() || ySize_ != rhoGrid->getSizeY() ||
 		  xSize_ !=  phiGrid->getSizeX() || ySize_ != phiGrid->getSizeY() ||

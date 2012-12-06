@@ -120,64 +120,81 @@ void SpaceChargeCalc2p5D::trackBunch(Bunch* bunch, double length, BaseBoundary2D
 }
 
 void SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, BaseBoundary2D* boundary){
-
+	
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	
-    if(boundary == NULL){
+	if(boundary == NULL){
 		
-	bunchExtremaCalc->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);
-	
-	//check if the beam size is not zero 
-	if( xMin >=  xMax || yMin >=  yMax || zMin >=  zMax){
-		int rank = 0;
-		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		if(rank == 0){
-			std::cerr << "SpaceChargeCalc2p5D::bunchAnalysis(bunch,...)" << std::endl
-         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
-								<< "x min ="<< xMin <<" max="<< xMax << std::endl
-								<< "y min ="<< yMin <<" max="<< yMax << std::endl
-								<< "z min ="<< zMin <<" max="<< zMax << std::endl
-								<< "Stop."<< std::endl;
+		bunchExtremaCalc->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);
+		
+		//check if the beam size is not zero 
+		if( xMin >=  xMax || yMin >=  yMax || zMin >=  zMax){
+			int rank = 0;
+			ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+			if(rank == 0){
+				std::cerr << "SpaceChargeCalc2p5D::bunchAnalysis(bunch,...)" << std::endl
+				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
+				<< "x min ="<< xMin <<" max="<< xMax << std::endl
+				<< "y min ="<< yMin <<" max="<< yMax << std::endl
+				<< "z min ="<< zMin <<" max="<< zMax << std::endl
+				<< "Stop."<< std::endl;
+			}
+			ORBIT_MPI_Finalize();
 		}
-		ORBIT_MPI_Finalize();
-	}
-	
-	double xy_ratio_beam = (xMax - xMin)/(yMax - yMin);
-	double width, center;
-	if(xy_ratio_beam > xy_ratio){
-		center = (yMax + yMin)/2.0;
-		width = ((yMax - yMin)*(xy_ratio_beam/xy_ratio))/2.0;
-		yMin = center - width;
-		yMax = center + width;
-	} else {
-		center = (xMax + xMin)/2.0;
-		width = ((xMax - xMin)/(xy_ratio_beam/xy_ratio))/2.0;		
-		xMin = center - width;
-		xMax = center + width;
-	}
-    }
-    else{   
-	xMax = boundary->getMaxX();
-	xMin = boundary->getMinX();
-	yMax = boundary->getMaxY();
-	yMin = boundary->getMinY();
-	
-	bunchExtremaCalc->getExtremaZ(bunch, zMin, zMax);
-	
-	//check if the beam size is not zero 
-	if(zMin >=  zMax){
-		int rank = 0;
-		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		if(rank == 0){
-			std::cerr << "SpaceChargeCalc2p5D::bunchAnalysis(bunch,...)" << std::endl
-         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
-								<< "z min ="<< zMin <<" max="<< zMax << std::endl
-								<< "Stop."<< std::endl;
+		
+		/** Here we will define the x/y ratio to use it in the FFT solver.
+		    The same ratio means that we do not have to recalculate Green
+				functions for FFT Possion solver. So, if the existing ratio changed
+				less for 25% we will fix the space charge region which is faster
+				than the Green functions recalculations in poissonSolver->setGridXY(...)
+				method.
+		*/
+		double xy_ratio_beam = (xMax - xMin)/(yMax - yMin);
+		if(fabs(xy_ratio_beam-xy_ratio) < 0.25*xy_ratio){
+			double width, center;
+			if(xy_ratio_beam > xy_ratio){
+				center = (yMax + yMin)/2.0;
+				width = ((yMax - yMin)*(xy_ratio_beam/xy_ratio))/2.0;
+				yMin = center - width;
+				yMax = center + width;
+			} else {
+				center = (xMax + xMin)/2.0;
+				width = ((xMax - xMin)/(xy_ratio_beam/xy_ratio))/2.0;		
+				xMin = center - width;
+				xMax = center + width;
+			}
+			xy_ratio = (xMax - xMin)/(yMax - yMin);
 		}
-		ORBIT_MPI_Finalize();
+		else{
+			xy_ratio = xy_ratio_beam;
+			poissonSolver->setGridXY(xMin,xMax,yMin,yMax);
+			//std::cerr << "debug v0 grid changed r="<<xy_ratio<< std::endl;
+		}
 	}
-    }
-    
+	else{   
+		xMax = boundary->getMaxX();
+		xMin = boundary->getMinX();
+		yMax = boundary->getMaxY();
+		yMin = boundary->getMinY();
+		
+		xy_ratio = (xMax - xMin)/(yMax - yMin);
+		
+		bunchExtremaCalc->getExtremaZ(bunch, zMin, zMax);
+		
+		//check if the beam size is not zero 
+		if(zMin >=  zMax){
+			int rank = 0;
+			ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+			if(rank == 0){
+				std::cerr << "SpaceChargeCalc2p5D::bunchAnalysis(bunch,...)" << std::endl
+				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
+				<< "z min ="<< zMin <<" max="<< zMax << std::endl
+				<< "Stop."<< std::endl;
+			}
+			ORBIT_MPI_Finalize();
+		}
+	}
+	
 	//set Grids' limits
 	rhoGrid->setGridX(xMin,xMax);
 	rhoGrid->setGridY(yMin,yMax);	
@@ -187,17 +204,25 @@ void SpaceChargeCalc2p5D::bunchAnalysis(Bunch* bunch, double& totalMacrosize, Ba
 	
 	zGrid->setGridZ(zMin,zMax);	
 	
-	poissonSolver->setGridX(xMin,xMax);
-        poissonSolver->setGridY(yMin,yMax);
-
+	//this one just for case boundary != null, and will work only once
+	double solver_xMin = poissonSolver->getMinX();
+	double solver_xMax = poissonSolver->getMaxX();
+	double solver_yMin = poissonSolver->getMinY();
+	double solver_yMax = poissonSolver->getMaxY();
+	double shape_diff_limit = 0.00000001;
+	if(fabs((solver_xMax-solver_xMin)/(solver_yMax-solver_yMin)- xy_ratio) > shape_diff_limit){
+		poissonSolver->setGridXY(xMin,xMax,yMin,yMax);
+		//std::cerr << "debug v1 grid changed r="<<xy_ratio<< std::endl;
+	}
+	
 	//sizes of the grids are set up
 	//bin rho&z Bunch to the Grid
 	rhoGrid->setZero();
 	zGrid->setZero();
-
+	
 	rhoGrid->binBunch(bunch);
 	zGrid->binBunch(bunch);
-
+	
 	rhoGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 	zGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 	

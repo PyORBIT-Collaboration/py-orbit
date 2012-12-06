@@ -73,6 +73,11 @@ public:
 		*/
   virtual void setGridY(double yMin, double yMax) = 0;	
 	
+  /** Sets x-grid and y-grid simultaneously. This method is virtual, because the setting of limits may involve 
+	  * some subclass specific actions.
+		*/	
+	virtual void setGridXY(double xMin, double xMax, double yMin, double yMax) = 0;
+	
   /** Solves the Poisson problem for an external charge distribution and
 	    puts results into an external potential grid
 	*/

@@ -59,7 +59,7 @@ void Frequency_Cav::trackBunch(Bunch* bunch)
 {
   double RFFreq  = _RFFreq;
   double RFE0TL  = _RFE0TL;
-  double RFPhase = _RFPhase;
+  double RFPhase = OrbitConst::PI * _RFPhase / 180.0;
 
   bunch->compress();
   SyncPart* syncPart   = bunch->getSyncPart();

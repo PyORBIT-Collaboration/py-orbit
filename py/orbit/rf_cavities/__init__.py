@@ -14,5 +14,6 @@ from orbit.rf_cavities.RFLatticeModifications import addRFNode
 __all__ = []
 __all__.append("Frequency_RFNode")
 __all__.append("Harmonic_RFNode")
+__all__.append("TimeDep_Harmonic_RFNode")
 __all__.append("addRFNode")
 

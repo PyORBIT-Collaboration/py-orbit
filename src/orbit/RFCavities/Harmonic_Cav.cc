@@ -84,7 +84,7 @@ void Harmonic_Cav::trackBunch(Bunch* bunch)
   double dESync    = _dESync;
   double RFHNum    = _RFHNum;
   double RFVoltage = _RFVoltage;
-  double RFPhase   = _RFPhase;
+  double RFPhase   = OrbitConst::PI * _RFPhase / 180.0;
 
   double dERF, phase;
 

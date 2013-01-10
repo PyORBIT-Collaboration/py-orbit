@@ -2,6 +2,8 @@
 
 #include "wrap_Frequency_Cav.hh"
 #include "wrap_Harmonic_Cav.hh"
+#include "wrap_Barrier_Cav.hh"
+
 
 static PyMethodDef rfcavitiesMethods[] = {{NULL,NULL}};
 
@@ -19,7 +21,8 @@ void initrfcavities()
   //create new module
   PyObject* module = Py_InitModule("rfcavities", rfcavitiesMethods);
   wrap_rfcavities::initFrequency_Cav(module);
-  wrap_rfcavities::initHarmonic_Cav(module);		
+  wrap_rfcavities::initHarmonic_Cav(module);
+  wrap_rfcavities::initBarrier_Cav(module);
 }
 
 PyObject* getRFCavityType(char* name)

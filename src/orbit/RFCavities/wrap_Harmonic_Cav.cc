@@ -42,7 +42,9 @@ static PyObject* Harmonic_Cav_new(PyTypeObject *type,
 // This is implementation of the __init__ method
 //-----------------------------------------------------
 
-static int Harmonic_Cav_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds)
+static int Harmonic_Cav_init(pyORBIT_Object *self,
+                             PyObject *args,
+                             PyObject *kwds)
 {
   double ZtoPhi    = 0.0;
   double dESync    = 0.0;
@@ -51,11 +53,19 @@ static int Harmonic_Cav_init(pyORBIT_Object *self, PyObject *args, PyObject *kwd
   double RFPhase   = 0.0;
 
   if(!PyArg_ParseTuple(args, "ddddd:arguments",
-                       &ZtoPhi, &dESync, &RFHNum, &RFVoltage, &RFPhase))
+                       &ZtoPhi,
+                       &dESync,
+                       &RFHNum,
+                       &RFVoltage,
+                       &RFPhase))
   {
     ORBIT_MPI_Finalize("PyBunch - addParticle - cannot parse arguments! They should be (ZtoPhi, dESync, RFHNum, RFVoltage, RFPhase)");
   }
-  self->cpp_obj = new Harmonic_Cav(ZtoPhi, dESync, RFHNum, RFVoltage, RFPhase);
+  self->cpp_obj = new Harmonic_Cav(ZtoPhi,
+                                   dESync,
+                                   RFHNum,
+                                   RFVoltage,
+                                   RFPhase);
   ((Harmonic_Cav*) self->cpp_obj)->setPyWrapper((PyObject*) self);
   return 0;
 }

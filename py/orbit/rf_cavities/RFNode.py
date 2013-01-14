@@ -19,6 +19,7 @@ from orbit.teapot import DriftTEAPOT
 #import RF cavity classes
 from rfcavities import Frequency_Cav
 from rfcavities import Harmonic_Cav
+from rfcavities import Barrier_Cav
 
 class Base_RFNode(DriftTEAPOT):
 
@@ -302,9 +303,6 @@ class SyncPhaseDep_Harmonic_RFNode(Base_RFNode):
 			RFHNum, RFVoltage, RFPhase)
 		self.setType("harmonic rf node")
 		self.setLength(0.0)
-		
-		print "Params1 = ", time, dESync, keold, kenew
-		print "Params2 = ", RFVoltage, RFPhase, SyncPhase, Zsync
 
 	def trackBunch(self, bunch):
 		"""
@@ -345,9 +343,6 @@ class SyncPhaseDep_Harmonic_RFNode(Base_RFNode):
 		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
-		
-		print "Params1 = ", time, dESync, keold, kenew
-		print "Params2 = ", RFVoltage, RFPhase, SyncPhase, Zsync
 
 	def track(self, paramsDict):
 		"""
@@ -389,9 +384,6 @@ class SyncPhaseDep_Harmonic_RFNode(Base_RFNode):
 		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
-
-		print "Params1 = ", time, dESync, keold, kenew
-		print "Params2 = ", RFVoltage, RFPhase, SyncPhase, Zsync
 
 class Barrier_RFNode(Base_RFNode):
 
@@ -433,7 +425,7 @@ class Barrier_RFNode(Base_RFNode):
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 
-class SyncPhaseDep_Harmonic_RFNode(Base_RFNode):
+class TimeDep_Barrier_RFNode(Base_RFNode):
 
 	def __init__(self, ZtoPhi, accelDict, bunch,\
 		length, name = "syncphase_timedep_harmonic_rfnode"):
@@ -442,39 +434,29 @@ class SyncPhaseDep_Harmonic_RFNode(Base_RFNode):
 			Harmonic RF Cavity TEAPOT element
 		"""
 		Base_RFNode.__init__(self, length, name)
-		self.Z2Phi = ZtoPhi
 		self.localDict = accelDict
-		gammaTrans = self.localDict["gammaTrans"]
-		RFHNum = self.localDict["RFHNum"]
 		n_tuple = self.localDict["n_tuple"]
 		time_tuple = self.localDict["time"]
-		SyncPhase_tuple = self.localDict["SyncPhase"]
 		RFVoltage_tuple = self.localDict["RFVoltage"]
-		RFPhase_tuple = self.localDict["RFPhase"]
+		RFPhasep_tuple  = self.localDict["RFPhasep"]
+		RFPhasem_tuple  = self.localDict["RFPhasem"]
+		dRFPhasep_tuple = self.localDict["dRFPhasep"]
+		dRFPhasem_tuple = self.localDict["dRFPhasem"]
 		time = bunch.getSyncParticle().time()
-		charge = bunch.charge()
-		gamma = bunch.getSyncParticle().gamma()
-		keold = bunch.getSyncParticle().kinEnergy()
 		RFVoltage = interp(time, n_tuple,\
 			time_tuple, RFVoltage_tuple)
-		RFPhase = interp(time, n_tuple,\
-			time_tuple, RFPhase_tuple)
-		SyncPhase = interp(time, n_tuple,\
-			time_tuple, SyncPhase_tuple)
-		dESync = charge * RFVoltage *\
-			math.sin(math.pi *\
-			(RFHNum * SyncPhase + RFPhase) / 180.0)
-		kenew = keold + dESync
-		bunch.getSyncParticle().kinEnergy(kenew)
-		Zsync = - math.pi * SyncPhase / (180.0 * ZtoPhi)
-		bunch.getSyncParticle().z(Zsync)
-		self.harmonicnode = Harmonic_Cav(ZtoPhi, dESync,\
-			RFHNum, RFVoltage, RFPhase)
-		self.setType("harmonic rf node")
+		RFPhasep = interp(time, n_tuple,\
+			time_tuple, RFPhasep_tuple)
+		RFPhasem = interp(time, n_tuple,\
+			time_tuple, RFPhasem_tuple)
+		dRFPhasep = interp(time, n_tuple,\
+			time_tuple, dRFPhasep_tuple)
+		dRFPhasem = interp(time, n_tuple,\
+			time_tuple, dRFPhasem_tuple)
+		self.barriernode = Barrier_Cav(ZtoPhi, RFVoltage,\
+			RFPhasep, RFPhasem, dRFPhasep, dRFPhasem)
+		self.setType("barrier rf node")
 		self.setLength(0.0)
-		
-		print "Params1 = ", time, dESync, keold, kenew
-		print "Params2 = ", RFVoltage, RFPhase, SyncPhase, Zsync
 
 	def trackBunch(self, bunch):
 		"""
@@ -482,42 +464,34 @@ class SyncPhaseDep_Harmonic_RFNode(Base_RFNode):
 			AccNodeBunchTracker class track(probe) method.
 		"""
 		length = self.getLength(self.getActivePartIndex())
-		gammaTrans = self.localDict["gammaTrans"]
-		RFHNum = self.localDict["RFHNum"]
 		n_tuple = self.localDict["n_tuple"]
 		time_tuple = self.localDict["time"]
-		SyncPhase_tuple = self.localDict["SyncPhase"]
 		RFVoltage_tuple = self.localDict["RFVoltage"]
-		RFPhase_tuple = self.localDict["RFPhase"]
+		RFPhasep_tuple  = self.localDict["RFPhasep"]
+		RFPhasem_tuple  = self.localDict["RFPhasem"]
+		dRFPhasep_tuple = self.localDict["dRFPhasep"]
+		dRFPhasem_tuple = self.localDict["dRFPhasem"]
 		time = bunch.getSyncParticle().time()
-		charge = bunch.charge()
-		gamma = bunch.getSyncParticle().gamma()
-		keold = bunch.getSyncParticle().kinEnergy()
 		RFVoltage = interp(time, n_tuple,\
 			time_tuple, RFVoltage_tuple)
-		RFPhase = interp(time, n_tuple,\
-			time_tuple, RFPhase_tuple)
-		SyncPhase = interp(time, n_tuple,\
-			time_tuple, SyncPhase_tuple)
-		dESync = charge * RFVoltage *\
-			math.sin(math.pi *\
-			(RFHNum * SyncPhase + RFPhase) / 180.0)
-		kenew = keold + dESync
-		bunch.getSyncParticle().kinEnergy(kenew)
-		ZtoPhi = self.Z2Phi
-		Zsync = - math.pi * SyncPhase / (180.0 * ZtoPhi)
-		bunch.getSyncParticle().z(Zsync)
-		self.harmonicnode.dESync(dESync)
-		self.harmonicnode.RFVoltage(RFVoltage)
-		self.harmonicnode.RFPhase(RFPhase)
+		RFPhasep = interp(time, n_tuple,\
+			time_tuple, RFPhasep_tuple)
+		RFPhasem = interp(time, n_tuple,\
+			time_tuple, RFPhasem_tuple)
+		dRFPhasep = interp(time, n_tuple,\
+			time_tuple, dRFPhasep_tuple)
+		dRFPhasem = interp(time, n_tuple,\
+			time_tuple, dRFPhasem_tuple)
+		self.barriernode.RFVoltage(RFVoltage)
+		self.barriernode.RFPhasep(RFPhasep)
+		self.barriernode.RFPhasem(RFPhasem)
+		self.barriernode.dRFPhasep(dRFPhasep)
+		self.barriernode.dRFPhasem(dRFPhasem)
 		#put the track method here:
-		self.harmonicnode.trackBunch(bunch)
+		self.barriernode.trackBunch(bunch)
 		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
-		
-		print "Params1 = ", time, dESync, keold, kenew
-		print "Params2 = ", RFVoltage, RFPhase, SyncPhase, Zsync
 
 	def track(self, paramsDict):
 		"""
@@ -526,42 +500,38 @@ class SyncPhaseDep_Harmonic_RFNode(Base_RFNode):
 		"""
 		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
-		gammaTrans = self.localDict["gammaTrans"]
-		RFHNum = self.localDict["RFHNum"]
 		n_tuple = self.localDict["n_tuple"]
 		time_tuple = self.localDict["time"]
-		SyncPhase_tuple = self.localDict["SyncPhase"]
 		RFVoltage_tuple = self.localDict["RFVoltage"]
-		RFPhase_tuple = self.localDict["RFPhase"]
+		RFPhasep_tuple  = self.localDict["RFPhasep"]
+		RFPhasem_tuple  = self.localDict["RFPhasem"]
+		dRFPhasep_tuple = self.localDict["dRFPhasep"]
+		dRFPhasem_tuple = self.localDict["dRFPhasem"]
 		time = bunch.getSyncParticle().time()
-		charge = bunch.charge()
-		gamma = bunch.getSyncParticle().gamma()
-		keold = bunch.getSyncParticle().kinEnergy()
 		RFVoltage = interp(time, n_tuple,\
 			time_tuple, RFVoltage_tuple)
-		RFPhase = interp(time, n_tuple,\
-			time_tuple, RFPhase_tuple)
-		SyncPhase = interp(time, n_tuple,\
-			time_tuple, SyncPhase_tuple)
-		dESync = charge * RFVoltage *\
-			math.sin(math.pi *\
-			(RFHNum * SyncPhase + RFPhase) / 180.0)
-		kenew = keold + dESync
-		bunch.getSyncParticle().kinEnergy(kenew)
-		ZtoPhi = self.Z2Phi
-		Zsync = - math.pi * SyncPhase / (180.0 * ZtoPhi)
-		bunch.getSyncParticle().z(Zsync)
-		self.harmonicnode.dESync(dESync)
-		self.harmonicnode.RFVoltage(RFVoltage)
-		self.harmonicnode.RFPhase(RFPhase)
+		RFPhasep = interp(time, n_tuple,\
+			time_tuple, RFPhasep_tuple)
+		RFPhasem = interp(time, n_tuple,\
+			time_tuple, RFPhasem_tuple)
+		dRFPhasep = interp(time, n_tuple,\
+			time_tuple, dRFPhasep_tuple)
+		dRFPhasem = interp(time, n_tuple,\
+			time_tuple, dRFPhasem_tuple)
+		self.barriernode.RFVoltage(RFVoltage)
+		self.barriernode.RFPhasep(RFPhasep)
+		self.barriernode.RFPhasem(RFPhasem)
+		self.barriernode.dRFPhasep(dRFPhasep)
+		self.barriernode.dRFPhasem(dRFPhasem)
 		#put the track method here:
-		self.harmonicnode.trackBunch(bunch)
+		self.barriernode.trackBunch(bunch)
 		#print "debug tracking the bunch through the rf node = ",\
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
-
-		print "Params1 = ", time, dESync, keold, kenew
-		print "Params2 = ", RFVoltage, RFPhase, SyncPhase, Zsync
+		#print "time = ", time
+		#print "RFVoltage = ", RFVoltage
+		#print "RFPhaseplus = ", RFPhasep + dRFPhasep, RFPhasep - dRFPhasep
+		#print "RFPhasemnus = ", RFPhasem - dRFPhasem, RFPhasem + dRFPhasem
 
 def interp(x, n_tuple, x_tuple, y_tuple):
 	"""

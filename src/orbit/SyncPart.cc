@@ -36,9 +36,6 @@
 #include <iomanip>
 #include <string>
 
-//the limit p/m when we will use non/relativistic formulas
-#define P_OVER_M_LIMIT 1.0e-5
-
 using namespace OrbitUtils;
 
 ///////////////////////////////////////////////////////////////////////////
@@ -134,16 +131,9 @@ void SyncPart::setZ(double z){
 }
 
 void SyncPart::setMomentum(double p){
-	if(p_abs == 0.){
 		this->pxyz[0] = 0.;
 		this->pxyz[1] = 0.;
 		this->pxyz[2] = p;
-	} else {
-		double coef = p/p_abs;
-		this->pxyz[0] = coef*this->pxyz[0];
-		this->pxyz[1] = coef*this->pxyz[1];
-		this->pxyz[2] = coef*this->pxyz[2];
-	}
 	updateKinematics();
 }
 
@@ -310,27 +300,14 @@ void SyncPart::updateKinematics(){
 	double m2 = m*m;
 	double w2 = m2+p2;
 	double w = sqrt(w2);
-	//relativistic or non-relativistic approach
-	if(p_abs/m < P_OVER_M_LIMIT){
-		energy = p2/(2.0*m);
-	}
-	else{
-		energy = w - m;
-	}
+	energy = p2/(sqrt(m2+p2)+m);
 	beta = p_abs/w;
 	gamma = w/m;
 }
 
 double SyncPart::momentumToEnergy(double p){
 	double m = bunch->getMass();
-	double ek = 0.;
-	//relativistic or non-relativistic approach
-	if(p/m < P_OVER_M_LIMIT){
-		ek = p*p/(2.0*m);
-	}
-	else{
-		ek = sqrt(m*m+p*p)-m;
-	}
+	double ek = p*p/(sqrt(m*m+p*p)+m);
 	return ek;
 }
 
@@ -503,7 +480,7 @@ void SyncPart::print(std::ostream& Out)
   //single CPU case
   if(rank_MPI == 0){
 
-		Out <<std::setprecision(10);
+		Out <<std::setprecision(14);
 
     //print coordinates
     Out << "%  SYNC_PART_COORDS ";

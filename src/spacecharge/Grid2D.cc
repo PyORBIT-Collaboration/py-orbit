@@ -128,6 +128,8 @@ void Grid2D::binBunch(Bunch* bunch){
 	}
 }
 
+
+
 /** Bins the value into the 2D grid */	
 void Grid2D::binValue(double value, double x, double y){
 	if(x < xMin_ || x > xMax_ || y < yMin_ || y > yMax_) return;
@@ -155,6 +157,52 @@ void Grid2D::binValue(double value, double x, double y){
   arr_[iX+1][iY]   += Wxp * Wy0 * value; 
   arr_[iX+1][iY+1] += Wxp * Wyp * value;             
 }
+
+/** Does a bilinear binning scheme on the bunch */
+void Grid2D::binBunchBilinear(Bunch* bunch){
+	
+	bunch->compress();
+	double** part_coord_arr = bunch->coordArr();
+	int nParts = bunch->getSize();
+	int has_msize = bunch->hasParticleAttributes("macrosize");
+	if(has_msize > 0){
+		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
+			double m_size = 0.;
+			for(int i = 0, n = bunch->getSize(); i < n; i++){
+				m_size = macroSizeAttr->macrosize(i);
+				binValueBilinear(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);
+			}
+			return;
+		}
+		double m_size = bunch->getMacroSize();
+		for(int i = 0; i < nParts; i++){
+			//cerr<<"i = "<<i;
+			binValueBilinear(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);
+			
+		}
+}
+
+/** Bilinear bin of the value into the 2D grid */
+void Grid2D::binValueBilinear(double value, double x, double y){
+
+	int iX, iY;
+	double xFract,  yFract;
+	
+	getBilinearIndAndFracX(x, iX, xFract);
+	getBilinearIndAndFracY(y, iY, yFract);
+	arr_[iX][iY] += ((1.-xFract) * (1.-yFract)) * value;
+	arr_[iX][iY+1] += ((1.-xFract) * yFract) * value;
+	arr_[iX+1][iY] += (xFract * (1.-yFract)) * value;
+	arr_[iX+1][iY+1] += (xFract * yFract) * value;
+	//cerr<<"iX = "<<iX<<" xFract "<<xFract <<"\n";
+	//cerr<<"iY = "<<iY<<" yFract "<<yFract <<"\n\n";
+	//cerr<<"[iX][iY] gets "<< (1.-xFract) * (1.-yFract) <<" [iX][iY+1] gets "<< (1.-xFract) * yFract <<" [iX+1][iY] gets "<< (xFract * (1.-yFract))<<" [iX+1][iY] gets "<<(xFract * (1.-yFract))<<"\n\n";
+	
+	double sum = (((1.-xFract) * (1.-yFract))) + (((1.-xFract) * yFract)) + ((xFract * (1.-yFract))) +  ((xFract * yFract));
+	
+	
+}
+
 
 /** Calculates gradient at a position (x,y) */	
 void Grid2D::calcGradient(double x, double y, double& ex, double& ey){
@@ -229,7 +277,23 @@ void Grid2D::calcGradient(int iX, int iY, double& ex, double& ey){
 	calcGradient(x,y,ex,ey);
 }
 
-/** Sets all grid points to zero */	
+/** Calculates bilinear interpolated value at a position (x,y) */
+void Grid2D::interpolateBilinear(double x, double y, double& value){
+	double f1, f2, f3, f4;
+	int iX, iY;
+	double xFract,  yFract;
+	getBilinearIndAndFracX(x,iX,xFract);
+	getBilinearIndAndFracY(y,iY,yFract);
+	f1 = arr_[iX][iY];
+	f2 = arr_[iX+1][iY];
+	f3 = arr_[iX+1][iY+1];
+	f4 = arr_[iX][iY+1];
+	
+	value = (1. - xFract) * (1. - yFract) * f1 + xFract * (1. - yFract) * f2 +
+	(1. - xFract) * yFract * f4 + xFract * yFract * f3;
+	
+}
+/** Sets all grid points to zero */
 void Grid2D::setZero(){
 	for(int i = 0; i < xSize_; i++){
 		for(int j = 0; j < ySize_; j++){
@@ -265,9 +329,27 @@ void Grid2D::getIndAndFracY(double y, int& ind, double& frac){
    if(ind < 1) ind = 1;
    if(ind > (ySize_-2)) ind = ySize_ - 2;
    frac = (y - (yMin_ + ind*dy_))/dy_; 	
-}	
+}
 
-/** Returns the grid point x-coordinate for this index. */   
+/** Returns the index and fraction for a bilinear scheme */
+void Grid2D::getBilinearIndAndFracX(double x, int& ind, double& frac){
+	ind  = int ( (x - xMin_)/dx_ );
+	if(ind < 0) ind = 0;
+	if(ind > (xSize_-2)) ind = xSize_ - 2;
+	frac = (x - (xMin_ + ind*dx_))/dx_;
+	//cerr<<"x, ind, xMin, dx,  frac "<<x<<" "<<ind<<" "<<xMin_<<" "<<dx_<<" "<<frac<<"\n";
+}
+
+/** Returns the index and fraction for a bilinear scheme */
+void Grid2D::getBilinearIndAndFracY(double y, int& ind, double& frac){
+	ind  = int ( (y - yMin_)/dy_ );
+	if(ind < 0) ind = 0;
+	if(ind > (ySize_-2)) ind = ySize_ - 2;
+	frac = (y - (yMin_ + ind*dy_))/dy_;
+	
+}
+
+/** Returns the grid point x-coordinate for this index. */
 double Grid2D::getGridX(int index){
 	return xMin_ + index*dx_;
 }

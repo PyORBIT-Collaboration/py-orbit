@@ -72,6 +72,9 @@ public:
 	/** Calculates gradient at a grid point (ix,iy) */
 	void calcGradient(int iX, int iY, double& ex, double& ey);
 	
+	/** Calculates bilinear interpolated gradient at a position (x,y)*/	
+	void calcGradientBilinear(double x, double y, double& ex, double& ey);
+	
 	/** Calculates bilinear interpolation a grid for position (x,y) */
 	void interpolateBilinear(double x, double y, double& value);
 		

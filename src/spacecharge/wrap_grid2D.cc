@@ -46,7 +46,7 @@ extern "C" {
 		return 0;
   }
 		
-  	//setZero()
+  //setZero()
   static PyObject* Grid2D_setZero(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
 		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
@@ -64,6 +64,19 @@ extern "C" {
 			ORBIT_MPI_Finalize("PyGrid2D - getValue(x,y) - parameters are needed.");
 		}
 		return Py_BuildValue("d",cpp_Grid2D->getValue(x,y));
+	}
+
+	//getValueBilinear(double x, double y)
+  static PyObject* Grid2D_getValueBilinear(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		double x,y;
+		if(!PyArg_ParseTuple(args,"dd:getValue",&x,&y)){
+			ORBIT_MPI_Finalize("PyGrid2D - getValueBilinear(x,y) - parameters are needed.");
+		}
+		double val;
+		cpp_Grid2D->interpolateBilinear(x,y,val);
+		return Py_BuildValue("d",val);	
 	}
 	
 	//setValue(double value, int ix, int iy)
@@ -230,6 +243,24 @@ extern "C" {
 		Py_INCREF(Py_None);
     return Py_None;	
 	}		
+		
+	//binBunchBilinear(Bunch* bunch)
+  static PyObject* Grid2D_binBunchBilinear(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		PyObject* pyBunch;
+		if(!PyArg_ParseTuple(args,"O:binBunchBilinear",&pyBunch)){
+			ORBIT_MPI_Finalize("PyGrid2D - binBunchBilinear(Bunch* bunch) - parameter are needed.");
+		}
+		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("PyGrid2D - binBunchBilinear(Bunch* bunch) - method needs a Bunch.");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+		cpp_Grid2D->binBunchBilinear(cpp_bunch);
+		Py_INCREF(Py_None);
+    return Py_None;	
+	}	
 	
 	//binValue(double value, double x, double y)
   static PyObject* Grid2D_binValue(PyObject *self, PyObject *args){
@@ -243,6 +274,19 @@ extern "C" {
 		Py_INCREF(Py_None);
     return Py_None;	
 	}	
+
+	//binValueBilinear(double value, double x, double y)
+  static PyObject* Grid2D_binValueBilinear(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		double val,x,y;
+		if(!PyArg_ParseTuple(args,"ddd:binValueBilinear",&val,&x,&y)){
+			ORBIT_MPI_Finalize("PyGrid2D - binValueBilinear(val,x,y) - parameters are needed.");
+		}
+		cpp_Grid2D->binValueBilinear(val,x,y);
+		Py_INCREF(Py_None);
+    return Py_None;	
+	}		
 	
 	//calcGradient(double x, double y)
   static PyObject* Grid2D_calcGradient(PyObject *self, PyObject *args){
@@ -257,6 +301,20 @@ extern "C" {
 		return Py_BuildValue("(dd)",ex,ey);
 	}
 	
+	//calcGradientBilinear(double x, double y)
+  static PyObject* Grid2D_calcGradientBilinear(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
+		double x,y;
+		double ex, ey;
+		if(!PyArg_ParseTuple(args,"dd:calcGradientBilinear",&x,&y)){
+			ORBIT_MPI_Finalize("PyGrid2D - calcGradientBilinear(x,y) - parameters are needed.");
+		}
+		cpp_Grid2D->calcGradientBilinear(x,y,ex,ey);
+		return Py_BuildValue("(dd)",ex,ey);
+	}	
+	
+	
   //-----------------------------------------------------
   //destructor for python Grid2D class (__del__ method).
   //-----------------------------------------------------
@@ -270,25 +328,29 @@ extern "C" {
 	// defenition of the methods of the python Grid2D wrapper class
 	// they will be vailable from python level
   static PyMethodDef Grid2DClassMethods[] = {
-		{ "setZero",       Grid2D_setZero,       METH_VARARGS,"sets all points on the grid to zero"},
-		{ "getValue",      Grid2D_getValue,      METH_VARARGS,"returns value for (x,y) point"},
-		{ "setValue",      Grid2D_setValue,      METH_VARARGS,"sets value for (ix,iy) point - (val,ix,iy)"},
-		{ "getValueOnGrid",Grid2D_getValueOnGrid,METH_VARARGS,"returns value on the grid for (ind_x,ind_y) point"},
-		{ "setGridX",      Grid2D_setGridX,      METH_VARARGS,"sets the X grid with min,max"},
-		{ "setGridY",      Grid2D_setGridY,      METH_VARARGS,"sets the Y grid with min,max"},
-		{ "getGridX",      Grid2D_getGridX,      METH_VARARGS,"returns the x-grid point with index ind"},
-		{ "getGridY",      Grid2D_getGridY,      METH_VARARGS,"returns the x-grid point with index ind"},
-		{ "getSizeX",      Grid2D_getSizeX,      METH_VARARGS,"returns the size of grid in X dir."},
-		{ "getSizeY",      Grid2D_getSizeY,      METH_VARARGS,"returns the size of grid in Y dir."},
-		{ "getMinX",       Grid2D_getMinX,       METH_VARARGS,"returns the min grid point in X dir."},
-		{ "getMaxX",       Grid2D_getMaxX,       METH_VARARGS,"returns the max grid point in X dir."},
-		{ "getMinY",       Grid2D_getMinY,       METH_VARARGS,"returns the min grid point in Y dir."},
-		{ "getMaxY",       Grid2D_getMaxY,       METH_VARARGS,"returns the max grid point in Y dir."},
-		{ "isInside",      Grid2D_isInside,      METH_VARARGS,"returns 1 or 0 if (x,y) inside grid or not"},
-		{ "binValue",      Grid2D_binValue,      METH_VARARGS,"bins the value into the 2D mesh"},
-		{ "binBunch",      Grid2D_binBunch,      METH_VARARGS,"bins the Bunch instance into the 2D mesh"},
-		{ "calcGradient",  Grid2D_calcGradient,  METH_VARARGS,"returns gradient as (gx,gy) for point (x,y)"},
-		{ "synchronizeMPI",Grid2D_synchronizeMPI,METH_VARARGS,"synchronize through the MPI communicator"},		
+		{ "setZero",              Grid2D_setZero,              METH_VARARGS,"sets all points on the grid to zero"},
+		{ "getValue",             Grid2D_getValue,             METH_VARARGS,"returns value for (x,y) point calculated 9-points weighting scheme"},
+		{ "getValueBilinear",     Grid2D_getValueBilinear,     METH_VARARGS,"returns value for (x,y) point using bi-linear interpolation"},
+		{ "setValue",             Grid2D_setValue,             METH_VARARGS,"sets value for (ix,iy) point - (val,ix,iy)"},
+		{ "getValueOnGrid",       Grid2D_getValueOnGrid,       METH_VARARGS,"returns value on the grid for (ind_x,ind_y) point"},
+		{ "setGridX",             Grid2D_setGridX,             METH_VARARGS,"sets the X grid with min,max"},
+		{ "setGridY",             Grid2D_setGridY,             METH_VARARGS,"sets the Y grid with min,max"},
+		{ "getGridX",             Grid2D_getGridX,             METH_VARARGS,"returns the x-grid point with index ind"},
+		{ "getGridY",             Grid2D_getGridY,             METH_VARARGS,"returns the x-grid point with index ind"},
+		{ "getSizeX",             Grid2D_getSizeX,             METH_VARARGS,"returns the size of grid in X dir."},
+		{ "getSizeY",             Grid2D_getSizeY,             METH_VARARGS,"returns the size of grid in Y dir."},
+		{ "getMinX",              Grid2D_getMinX,              METH_VARARGS,"returns the min grid point in X dir."},
+		{ "getMaxX",              Grid2D_getMaxX,              METH_VARARGS,"returns the max grid point in X dir."},
+		{ "getMinY",              Grid2D_getMinY,              METH_VARARGS,"returns the min grid point in Y dir."},
+		{ "getMaxY",              Grid2D_getMaxY,              METH_VARARGS,"returns the max grid point in Y dir."},
+		{ "isInside",             Grid2D_isInside,             METH_VARARGS,"returns 1 or 0 if (x,y) inside grid or not"},
+		{ "binValue",             Grid2D_binValue,             METH_VARARGS,"bins the value into the 2D mesh"},
+		{ "binValueBilinear",     Grid2D_binValueBilinear,     METH_VARARGS,"bins the value into the 2D mesh bi-linearly"},
+		{ "binBunch",             Grid2D_binBunch,             METH_VARARGS,"bins the Bunch instance into the 2D mesh"},
+		{ "binBunchBilinear",     Grid2D_binBunchBilinear,     METH_VARARGS,"bins the Bunch instance into the 2D mesh bi-linearly"},
+		{ "calcGradient",         Grid2D_calcGradient,         METH_VARARGS,"returns gradient as (gx,gy) for point (x,y) calculated by 9-points weighting scheme"},
+		{ "calcGradientBilinear", Grid2D_calcGradientBilinear, METH_VARARGS,"returns gradient as (gx,gy) for point (x,y) calculated bi-linerly"},
+		{ "synchronizeMPI",       Grid2D_synchronizeMPI,       METH_VARARGS,"synchronize through the MPI communicator"},		
     {NULL}
   };
 

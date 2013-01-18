@@ -193,18 +193,11 @@ void Grid2D::binValueBilinear(double value, double x, double y){
 	arr_[iX][iY] += ((1.-xFract) * (1.-yFract)) * value;
 	arr_[iX][iY+1] += ((1.-xFract) * yFract) * value;
 	arr_[iX+1][iY] += (xFract * (1.-yFract)) * value;
-	arr_[iX+1][iY+1] += (xFract * yFract) * value;
-	//cerr<<"iX = "<<iX<<" xFract "<<xFract <<"\n";
-	//cerr<<"iY = "<<iY<<" yFract "<<yFract <<"\n\n";
-	//cerr<<"[iX][iY] gets "<< (1.-xFract) * (1.-yFract) <<" [iX][iY+1] gets "<< (1.-xFract) * yFract <<" [iX+1][iY] gets "<< (xFract * (1.-yFract))<<" [iX+1][iY] gets "<<(xFract * (1.-yFract))<<"\n\n";
-	
-	double sum = (((1.-xFract) * (1.-yFract))) + (((1.-xFract) * yFract)) + ((xFract * (1.-yFract))) +  ((xFract * yFract));
-	
-	
+	arr_[iX+1][iY+1] += (xFract * yFract) * value;	
 }
 
 
-/** Calculates gradient at a position (x,y) */	
+/** Calculates gradient at a position (x,y) by using 9-points schema */	
 void Grid2D::calcGradient(double x, double y, double& ex, double& ey){
 	double dWxm,dWx0,dWxp,dWym,dWy0,dWyp;
 	double Wxm, Wx0, Wxp, Wym, Wy0, Wyp;
@@ -251,7 +244,7 @@ void Grid2D::calcGradient(double x, double y, double& ex, double& ey){
 	ey = ey / dy_;
 }
 
-/** Calculates gradient at a grid point (ix,iy) */	
+/** Calculates gradient at a grid point (ix,iy) by using 9-points schema */	
 void Grid2D::calcGradient(int iX, int iY, double& ex, double& ey){
 	if(iX != 0 && iX != (xSize_ - 1) && iY != 0 && iY != (ySize_ - 1)){
 		ex =
@@ -275,6 +268,19 @@ void Grid2D::calcGradient(int iX, int iY, double& ex, double& ey){
 	double x = xMin_ + iX*dx_;
 	double y = yMin_ + iY*dy_;
 	calcGradient(x,y,ex,ey);
+}
+
+/** Calculates bilinear interpolated gradient at a position (x,y)*/	
+void Grid2D::calcGradientBilinear(double x, double y, double& ex, double& ey){
+	int iX, iY;
+	double xFract,  yFract;
+	double xFract2, yFract2;
+	getBilinearIndAndFracX(x,iX,xFract);
+	getBilinearIndAndFracY(y,iY,yFract);	
+  ex = (arr_[iX+1][iY] - arr_[iX][iY])*(1.0 - yFract) + yFract*(arr_[iX+1][iY+1] - arr_[iX][iY+1]); 
+	ex = ex / dx_;
+  ey =(arr_[iX][iY+1] - arr_[iX][iY])*(1.0 - xFract) + xFract*(arr_[iX+1][iY+1] - arr_[iX+1][iY]);
+	ey = ey / dy_;
 }
 
 /** Calculates bilinear interpolated value at a position (x,y) */
@@ -337,7 +343,6 @@ void Grid2D::getBilinearIndAndFracX(double x, int& ind, double& frac){
 	if(ind < 0) ind = 0;
 	if(ind > (xSize_-2)) ind = xSize_ - 2;
 	frac = (x - (xMin_ + ind*dx_))/dx_;
-	//cerr<<"x, ind, xMin, dx,  frac "<<x<<" "<<ind<<" "<<xMin_<<" "<<dx_<<" "<<frac<<"\n";
 }
 
 /** Returns the index and fraction for a bilinear scheme */

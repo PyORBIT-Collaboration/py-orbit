@@ -60,11 +60,20 @@ public:
 	/** Bins the value into the 2D grid */	
 	void binValue(double value, double x, double y);	
 	
+	/** Does a bilinear binning scheme on the bunch */
+	void binBunchBilinear(Bunch* bunch);
+	
+	/** Bilinear bin of the value into the 2D grid */
+	void binValueBilinear(double value, double x, double y);
+
 	/** Calculates gradient at a position (x,y) */	
 	void calcGradient(double x, double y, double& ex, double& ey);
+
+	/** Calculates gradient at a grid point (ix,iy) */
+	void calcGradient(int iX, int iY, double& ex, double& ey);
 	
-	/** Calculates gradient at a grid point (ix,iy) */	
-	void calcGradient(int ix, int iy, double& ex, double& ey);
+	/** Calculates bilinear interpolation a grid for position (x,y) */
+	void interpolateBilinear(double x, double y, double& value);
 		
   /** Returns the grid size in x-direction */
   int getSizeX(); 
@@ -91,8 +100,23 @@ public:
       The fraction will be : 0 <= frac <= 1.0
 	*/	
   void getIndAndFracY(double y, int& ind, double& frac);
-
-  /** Returns the grid point x-coordinate for this index. */   
+	
+	/** Returns the index and the fraction of the grid's point for particular x.
+	 The index is the lower left corner for a bilinear interpolation:
+	 0 <= ind <= (nBins-1)
+	 The fraction will be : 0 <= frac <= 1.0
+	 */
+	void getBilinearIndAndFracX(double x, int& ind, double& frac);
+	
+	/** Returns the index and the fraction of the grid's point for particular x.
+	 The index is the lower left corner for a bilinear interpolation:
+	 0 <= ind <= (nBins-1)
+	 The fraction will be : 0 <= frac <= 1.0
+	 */
+	void getBilinearIndAndFracY(double y, int& ind, double& frac);
+	
+	
+  /** Returns the grid point x-coordinate for this index. */
   double getGridX(int index);
 
   /** Returns the grid point y-coordinate for this index. */   

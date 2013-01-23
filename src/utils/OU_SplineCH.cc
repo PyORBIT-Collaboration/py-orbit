@@ -212,12 +212,13 @@ namespace OrbitUtils{
 		if(rank_MPI == 0){
 		  Out<<std::setprecision(15)<< std::setiosflags(std::ios::scientific);			
 			Out<<"% size = "<< getSize() <<std::endl;
-			Out<<"% #i      x     y    m(Cubic Hermite)"<<std::endl;
+			Out<<"% #i      x     y     y'    m(Cubic Hermite)"<<std::endl;
 			
 			for(int i = 0; i < size; i++){
 				Out<<" "<< i
 				<<"   \t"<< x_arr[i]
 				<<"   \t"<< y_arr[i]
+				<<"   \t"<< getYP(x_arr[i])
 				<<"   \t"<< m_arr[i]
 				<<std::endl;
 				if(i % 1000 == 0) Out.flush();

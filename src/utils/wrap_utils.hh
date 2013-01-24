@@ -9,7 +9,7 @@ extern "C" {
 
 namespace wrap_orbit_utils{
 	void initutils(void);
-	PyObject* getOrbitUtilsType(char* name);
+	PyObject* getOrbitUtilsType(const char* name);
 }
 
 #ifdef __cplusplus

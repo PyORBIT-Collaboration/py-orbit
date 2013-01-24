@@ -9,6 +9,7 @@
 #include "wrap_splinech.hh"
 #include "wrap_statmoments2d.hh"
 #include "wrap_bunch_extrema_calculator.hh"
+#include "wrap_gauss_legendre_integrator.hh"
 
 namespace wrap_orbit_utils{
 
@@ -32,9 +33,10 @@ extern "C" {
 		wrap_splinech::initSplineCH(module);
 		wrap_statmoments2d::initstatmoments2d(module);
 		wrap_utils_bunch::initBunchExtremaCalculator(module);
+		wrap_gl_integrator::initGLIntegrator(module);
   }
 
-	PyObject* getOrbitUtilsType(char* name){
+	PyObject* getOrbitUtilsType(const char* name){
 		PyObject* mod = PyImport_ImportModule("orbit_utils");
 		PyObject* pyType = PyObject_GetAttrString(mod,name);
 		Py_DECREF(mod);

@@ -40,14 +40,17 @@ namespace OrbitUtils{
 		virtual ~Function();
 		
 		void add(double x, double y);
+		void add(double x, double y, double err);
 		
 		int getSize();
 		
 		double x(int ind);
 		double y(int ind);
+		double err(int ind);
 		
 		double* xArr();
 		double* yArr();
+		double* errArr();
 		
 		double getMinX();
 		double getMinY();
@@ -61,6 +64,7 @@ namespace OrbitUtils{
 		void cleanMemory(); 
 		
 		double getY(double x);
+		double getYErr(double x);
 		
 		//this method should be used only for monotonic function
 		// f(x1) < f(x2) if x1 < x2
@@ -121,6 +125,7 @@ namespace OrbitUtils{
 		//x and y array 
 		double* x_arr;
 		double* y_arr;
+		double* err_arr;
 		
 		//MPI members
 		int iMPIini; 

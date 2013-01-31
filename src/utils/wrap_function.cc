@@ -38,14 +38,15 @@ extern "C" {
     return 0;
   }
   
-	/** It will add (x,y) pair to the Function instance */
+	/** It will add (x,y) or (x,y,err) point to the Function instance */
   static PyObject* Function_add(PyObject *self, PyObject *args){
 	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
 	  double x,y;
-		if(!PyArg_ParseTuple(	args,"dd:",&x,&y))
-			error("pyFunction add(x,y) - parameters are needed");
+		double err = 0.;
+		if(!PyArg_ParseTuple(	args,"dd|d:",&x,&y,&err))
+			error("pyFunction add(x,y) or add(x,y,err) - parameters are needed");
 		else {
-			cpp_Function->add(x,y);
+			cpp_Function->add(x,y,err);
 		}
 		Py_INCREF(Py_None);
 		return Py_None;
@@ -78,6 +79,17 @@ extern "C" {
 		return Py_BuildValue("d",cpp_Function->y(ind));
   }
 	
+	
+ 	/** It will return y for a particular index ind */
+  static PyObject* Function_err(PyObject *self, PyObject *args){
+	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
+		int ind = -1;
+		if(!PyArg_ParseTuple(	args,"i:",&ind)){
+			error("pyFunction err(index) - parameter is needed");
+		}	
+		return Py_BuildValue("d",cpp_Function->err(ind));
+  }
+	
  	/** It will return (x,y) for a particular index ind */
   static PyObject* Function_xy(PyObject *self, PyObject *args){
 	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
@@ -86,6 +98,16 @@ extern "C" {
 			error("pyFunction xy(index) - parameter is needed");
 		}	
 		return Py_BuildValue("(dd)",cpp_Function->x(ind),cpp_Function->y(ind));
+  }		
+	
+ 	/** It will return (x,y) for a particular index ind */
+  static PyObject* Function_xyErr(PyObject *self, PyObject *args){
+	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
+		int ind = -1;
+		if(!PyArg_ParseTuple(	args,"i:",&ind)){
+			error("pyFunction xyErr(index) - parameter is needed");
+		}	
+		return Py_BuildValue("(ddd)",cpp_Function->x(ind),cpp_Function->y(ind),cpp_Function->err(ind));
   }		
 	
  	/** It will return minimal x value in the Function */
@@ -146,6 +168,16 @@ extern "C" {
 			error("pyFunction getX(y) - parameter is needed");
 		}	
 		return Py_BuildValue("d",cpp_Function->getX(val));
+  }
+	
+ 	/** It will return x for a specified y value */
+  static PyObject* Function_getYErr(PyObject *self, PyObject *args){
+	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
+		double val = 0.;
+		if(!PyArg_ParseTuple(	args,"d:",&val)){
+			error("pyFunction getYErr(y) - parameter is needed");
+		}	
+		return Py_BuildValue("d",cpp_Function->getYErr(val));
   }
 	
  	/** It will set the constant step flag to 1 if it is possible */
@@ -230,7 +262,9 @@ extern "C" {
 		{ "getSize",		 	 Function_getSize,    	METH_VARARGS,"Returns the number of (x,y) in Function"},
 		{ "x",				     Function_x,          	METH_VARARGS,"Returns x value for a point with a particular index"},
  		{ "y",				     Function_y,    	      METH_VARARGS,"Returns y value for a point with a particular index"},
- 		{ "xy",				     Function_xy,    	      METH_VARARGS,"Returns (x,y) value for a point with a particular index"},
+ 		{ "err",			     Function_err,    	    METH_VARARGS,"Returns err value for y with a particular index"},
+ 		{ "xy",				     Function_xy,    	    METH_VARARGS,"Returns (x,y) value for a point with a particular index"},
+ 		{ "xyErr",				 Function_xyErr,    	  METH_VARARGS,"Returns (x,y,err) value for a point with a particular index"},
  		{ "getMinX",		 	 Function_getMinX,    	METH_VARARGS,"Returns the minimal x value in the Function"},
  		{ "getMaxX",		 	 Function_getMaxX,    	METH_VARARGS,"Returns the maximal x value in the Function"},
  		{ "getMinY",		 	 Function_getMinY,    	METH_VARARGS,"Returns the minimal y value in the Function"},
@@ -239,6 +273,7 @@ extern "C" {
  		{ "cleanMemory",	 Function_cleanMemory, METH_VARARGS,"It will free the memory and remove all points in the Function"},
  		{ "getY",				 	 Function_getY,    	    METH_VARARGS,"Returns y for a specified x value "},
  		{ "getX",				 	 Function_getX,    	    METH_VARARGS,"Returns x for a specified y value "},
+ 		{ "getYErr",			 Function_getYErr,    	METH_VARARGS,"Returns err for a specified y value "},
  		{ "setConstStep", Function_setConstStep, METH_VARARGS,"It will set the constant step flag to 1 if it is possible"},
  		{ "isStepConst", 	 Function_isStepConst,  METH_VARARGS,"It will return 1 if the step is const and 0 otherwise"},
  		{ "setInverse",		 Function_setInverse,   METH_VARARGS,"It will build the reverse Function if it is possible and return 1 or 0"},

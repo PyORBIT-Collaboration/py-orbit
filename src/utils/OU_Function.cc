@@ -26,6 +26,7 @@ Function::Function(): CppPyWrapper(NULL)
 {  
 	x_arr = NULL;
 	y_arr = NULL;
+	err_arr = NULL;
 	sizeChunk = 10;
   cleanMemory();
 
@@ -46,6 +47,7 @@ Function::~Function()
 {
   delete [] x_arr;
   delete [] y_arr;
+  delete [] err_arr;
 }
 
 void Function::resize()
@@ -58,24 +60,29 @@ void Function::resize()
 	
   double* x_tmp = x_arr;
   double* y_tmp = y_arr;
+  double* err_tmp = err_arr;
 
   maxSize += sizeChunk_inner;
 	
   x_arr = new double[maxSize];
   y_arr = new double[maxSize];
+  err_arr = new double[maxSize];
 
   for(int i = 0; i < size; i++){
     x_arr[i] = x_tmp[i];
     y_arr[i] = y_tmp[i];
+    err_arr[i] = err_tmp[i];
   }
 	
   for(int i = size; i < maxSize; i++){
     x_arr[i] = 0.;
     y_arr[i] = 0.;
+    err_arr[i] = 0.;
   }
 
   delete [] x_tmp;
   delete [] y_tmp;
+  delete [] err_tmp;
 }
 
 void Function::finalize(const char* message)
@@ -85,7 +92,7 @@ void Function::finalize(const char* message)
   }
 }
 
-void Function::add(double x, double y)
+void Function::add(double x, double y, double err)
 {
   inf_const_step = 0;
   if((size+1) ==  maxSize){
@@ -94,6 +101,7 @@ void Function::add(double x, double y)
 
   x_arr[size] = x;
   y_arr[size] = y;
+  err_arr[size] = err;
   size++;
 
   if(xMin > x) xMin = x;
@@ -105,6 +113,7 @@ void Function::add(double x, double y)
 			//the x_arr sorting needed
 			double x_tmp = x_arr[size-1];
 			double y_tmp = y_arr[size-1];	
+			double err_tmp = err_arr[size-1];	
 			int ind = 0;
 			if(x_tmp > x_arr[0]){
 				int ind_start = 0;
@@ -128,11 +137,18 @@ void Function::add(double x, double y)
 			for(int i = size-1; i > ind; i--){
 				x_arr[i] = x_arr[i-1];
 				y_arr[i] = y_arr[i-1];
+				err_arr[i] = err_arr[i-1];
 			}
 			x_arr[ind] = x_tmp;
 			y_arr[ind] = y_tmp; 			
+			err_arr[ind] = err_tmp; 			
 		}
 	}
+}
+
+void Function::add(double x, double y)
+{
+	add(x,y,0.);
 }
 
 int Function::getSize()
@@ -159,6 +175,15 @@ double Function::y(int ind)
   return 0.0;
 }
 
+double Function::err(int ind)
+{
+  if(ind < size){
+    return err_arr[ind];
+  }
+  finalize("ORBIT Utils Function class:The index in err(int ind) more than size");
+  return 0.0;
+}
+
 double* Function::xArr(){
 	return x_arr;
 }
@@ -167,6 +192,9 @@ double* Function::yArr(){
 	return y_arr;
 }
 
+double* Function::errArr(){
+	return err_arr;
+}
 
 double Function::getMinX()
 {
@@ -211,15 +239,18 @@ void Function::cleanMemory()
 	
   if(x_arr != NULL) delete [] x_arr;
   if(y_arr != NULL) delete [] y_arr;
+  if(err_arr != NULL) delete [] err_arr;
 	
   maxSize = sizeChunk;
 	
   x_arr = new double[maxSize];
   y_arr = new double[maxSize];
+  err_arr = new double[maxSize];
 
   for(int i = 0; i < maxSize; i++){
     x_arr[i] = 0.;
     y_arr[i] = 0.;
+    err_arr[i] = 0.;
   }	
 }
 
@@ -238,7 +269,7 @@ double Function::getY(double x)
   if(inf_const_step > 0){
     ind = (int)((x-xMin)/x_step);
     if(ind < 0 || ind > (size-2)){
-      finalize("ORBIT Utils Function class: The Function method  y(double x)  ind < 0 or ind >= (size-2)");
+      finalize("ORBIT Utils Function class: The Function method  getY(double x)  ind < 0 or ind >= (size-2)");
     }
     yy = y_arr[ind] + (y_arr[ind+1] - y_arr[ind])*((x - x_arr[ind])/x_step);
     return yy;
@@ -265,6 +296,50 @@ double Function::getY(double x)
   yy = y_arr[ind] + (y_arr[ind+1] - y_arr[ind])*((x - x_arr[ind])/(x_arr[ind+1] - x_arr[ind]));
   return yy;
 }
+
+double Function::getYErr(double x)
+{
+  if(size < 1){
+    finalize("ORBIT Utils Function class: The Function method  getYerr(double x)  (size<1)");
+  }	
+	
+  if(x <= xMin) return err_arr[0];
+  if(x >= xMax) return err_arr[size-1];
+
+  int ind = 0;
+  double err = 0.;
+
+  if(inf_const_step > 0){
+    ind = (int)((x-xMin)/x_step);
+    if(ind < 0 || ind > (size-2)){
+      finalize("ORBIT Utils Function class: The Function method  getYerr(double x)  ind < 0 or ind >= (size-2)");
+    }
+    err = err_arr[ind] + (err_arr[ind+1] - err_arr[ind])*((x - x_arr[ind])/x_step);
+    return err;
+  }
+
+  int ind_start = 0;
+  int ind_stop = size-1;
+	int count = 0;
+  while((ind_stop - ind_start) > 1){
+		count++;
+    ind = (ind_stop + ind_start)/2;
+    if(x > x_arr[ind]){
+      ind_start = ind;
+    }
+    else{
+				ind_stop =  ind;
+    }
+		if(count > 200){
+			finalize("ORBIT Utils Function class: The Function method  getX(double y) has unlimited loop. Check data.");
+		}
+  }	
+	ind = ind_start;
+
+  err = err_arr[ind] + (err_arr[ind+1] - err_arr[ind])*((x - x_arr[ind])/(x_arr[ind+1] - x_arr[ind]));
+  return err;
+}
+
 
 //this method should be used only for monotonic function
 // f(x1) < f(x2) if x1 < x2
@@ -453,12 +528,13 @@ void Function::print(ostream& Out)
        <<"% maxY = "<< getMaxY() <<std::endl
        <<"% x-step const = "<< isStepConst() <<std::endl;
 
-      Out<<"% #i      x     y"<<std::endl;
+      Out<<"% #i      x     y      y_err "<<std::endl;
 
         for(int i = 0; i < size; i++){
           Out<<" "<< i
 	     <<"   \t"<< x_arr[i]
 	     <<"   \t"<< y_arr[i]
+	     <<"   \t"<< err_arr[i]
              <<std::endl;
 	  if(i % 1000 == 0) Out.flush();
 	}
@@ -491,10 +567,16 @@ int Function::normalize()
 
   for(int i = 0; i < size; i++){
     y_arr[i] /=y_arr[size-1];
+		if(y_arr[size-1] != 0.){
+			err_arr[i] /=y_arr[size-1];
+		} else {
+			err_arr[i] = 0.;
+		}
   }
 
   y_arr[size-1] = 1.0;
   y_arr[0] = 0.;
+  err_arr[0] = 0.;
 
   yMin = 1.0e+300;
   yMax = -1.0e+300;

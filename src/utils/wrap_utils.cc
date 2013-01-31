@@ -10,6 +10,7 @@
 #include "wrap_statmoments2d.hh"
 #include "wrap_bunch_extrema_calculator.hh"
 #include "wrap_gauss_legendre_integrator.hh"
+#include "wrap_polynomial.hh"
 
 namespace wrap_orbit_utils{
 
@@ -34,6 +35,7 @@ extern "C" {
 		wrap_statmoments2d::initstatmoments2d(module);
 		wrap_utils_bunch::initBunchExtremaCalculator(module);
 		wrap_gl_integrator::initGLIntegrator(module);
+		wrap_polynomial::initPolynomial(module);		
   }
 
 	PyObject* getOrbitUtilsType(const char* name){

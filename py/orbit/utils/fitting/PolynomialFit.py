@@ -14,6 +14,7 @@ from orbit_utils import Polynomial
 
 class PolynomialFit:
 	def __init__(self,order):
+		""" The calss to fit Function or SplineCH with a polynomial. """
 		self.order = order
 		self.polynomial = Polynomial()
 		#self.coef_err_arr is a final array with coef_arr and err_arr for polinomial coefficients
@@ -22,14 +23,25 @@ class PolynomialFit:
 		self.x_y_err_arr = []
 		
 	def getPolynomial(self):
+		""" It returns an unbounded polynomial. """ 
 		polynomial = Polynomial()
 		self.polynomial.copyTo(polynomial)
 		return polynomial
 	
 	def getCoefficientsAndErr(self):
+		""" It returns the list of coefficients and their errors """
 		return self.coef_err_arr
 		
+	def getCoefficients(self):
+		""" Returns the list of coefficients of the polynomial """
+		coef_arr = []
+		for i in range(len(self.coef_err_arr)):
+			[coef,err] = self.coef_err_arr[i]
+			coef_arr.append(coef)
+		return coef_arr
+		
 	def fitFunction(self, function):
+		""" Fit the Function instance """
 		self.x_y_err_arr = []
 		for i in range(function.getSize()):
 			x = function.x(i)
@@ -39,6 +51,7 @@ class PolynomialFit:
 		self._makePolynomial()
 		
 	def fitSpline(self, spline):
+		""" Fit the SplineCH instance """
 		self.x_y_err_arr = []
 		for i in range(spline.getSize()):
 			x = spline.x(i)

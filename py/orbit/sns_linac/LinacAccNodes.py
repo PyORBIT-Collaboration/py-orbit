@@ -192,40 +192,6 @@ class LinacMagnetNode(LinacNode):
 		"""
 		return self.__fringeFieldOUT.getUsage()
 		
-
-class TiltNode(BaseLinacNode):
-	"""
-	The class to do tilt at the entrance of an node.
-	"""
-	def __init__(self, name = "tilt", angle = 0.):
-		"""
-		Constructor. Creates the Tilt Node.
-		"""
-		AccNode.__init__(self,name)
-		self.__angle = angle
-		self.setType("tilt")
-
-	def setTiltAngle(self, angle = 0.):
-		"""
-		Sets the tilt angle for the tilt operation.
-		"""
-		self.__angle = angle
-
-	def getTiltAngle(self):
-		"""
-		Returns the tilt angle for the tilt operation.
-		"""
-		return self.__angle
-
-	def track(self, paramsDict):
-		"""
-		It is tracking the dictionary with parameters through
-		the titlt node.
-		"""
-		if(self.__angle != 0.):
-			bunch = paramsDict["bunch"]
-			TPB.rotatexy(bunch,self.__angle)
-
 #-----------------------------------------------------
 #    LINAC ABST NODES ELEMENTS
 #-----------------------------------------------------
@@ -447,6 +413,8 @@ class DCorrectorV(LinacMagnetNode):
 class BaseRF_Gap(BaseLinacNode):
 	"""
 	The simplest RF gap representation. The only E*T*L defines all effects of the node.
+	By default the Matrix RF Gap model is used. This model can be replaced later with 
+	a more complex RF gap model by using the setCppGapModel(...) method.
 	"""
 	def __init__(self, name = "baserfgap"):
 		"""
@@ -462,6 +430,7 @@ class BaseRF_Gap(BaseLinacNode):
 		self.__isFirstGap = False
 		self.setnParts(3)	
 		self.cppGapModel = MatrixRfGap()
+		#self.cppGapModel = BaseRfGap()
 
 	def setCppGapModel(self, cppGapModel = MatrixRfGap):
 		"""
@@ -556,6 +525,7 @@ class BaseRF_Gap(BaseLinacNode):
 		rfCavity = self.getRF_Cavity()
 		frequency = rfCavity.getFrequency()	
 		rfPhase = rfCavity.getPhase() + modePhase
+		rf_ampl = rfCavity.getAmp()
 		phase = rfPhase
 		arrival_time = syncPart.time()
 		designArrivalTime = rfCavity.getDesignArrivalTime()
@@ -584,7 +554,7 @@ class BaseRF_Gap(BaseLinacNode):
 			phase = math.fmod(frequency*(arrival_time - designArrivalTime)*2.0*math.pi+rfPhase,2.0*math.pi)	
 		#------------------------------------------------------
 		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
-		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
+		self.cppGapModel.trackBunch(bunch,frequency,rf_ampl,E0TL,phase)
 		self.setGapPhase(phase)
 		#print "debug delta_time in deg=",frequency*(arrival_time - designArrivalTime)*380.
 		#print "debug RF =",self.getName()," E0TL=",E0TL," phase=",(phase*180./math.pi - 180.)," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3		
@@ -609,6 +579,7 @@ class BaseRF_Gap(BaseLinacNode):
 		arrival_time = bunch.getSyncParticle().time()
 		frequency = rfCavity.getFrequency()
 		rfPhase = rfCavity.getPhase() + modePhase
+		rf_ampl = rfCavity.getDesignAmp()
 		phase = rfPhase
 		if(self.__isFirstGap):
 			rfCavity.setDesignArrivalTime(arrival_time)
@@ -622,7 +593,7 @@ class BaseRF_Gap(BaseLinacNode):
 		#print "debug name=",self.getName()," arr_time=",arrival_time," phase=",phase*180./math.pi," E0TL=",E0TL*1.0e+3," freq=",frequency
 		#------------------------------------------------------
 		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
-		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
+		self.cppGapModel.trackBunch(bunch,frequency,rf_ampl,E0TL,phase)
 		self.setGapPhase(phase)
 		#syncPart = bunch.getSyncParticle()
 		#eKin = syncPart.kinEnergy()

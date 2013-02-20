@@ -37,7 +37,7 @@ public:
   virtual ~MatrixRfGap();
 	
 	/** Tracks the Bunch trough the RF gap. */	
-	void trackBunch(Bunch* bunch, double frequency, double E0TL, double phase);	
+	void trackBunch(Bunch* bunch, double frequency, double ampl, double E0TL, double phase);	
 		
   private:
 		

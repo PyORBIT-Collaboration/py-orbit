@@ -27,7 +27,9 @@ MatrixRfGap::~MatrixRfGap()
 }
 
 /** Tracks the Bunch trough the RF gap. */	
-void MatrixRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double phase){
+void MatrixRfGap::trackBunch(Bunch* bunch, double frequency, double ampl, double E0TL, double phase){
+	//we do not use the ampl amplitude of the field in the gap
+	//it can be used in other models of the gap	
 	bunch->compress();
 	SyncPart* syncPart = bunch->getSyncPart();
 	double gamma = syncPart->getGamma();

@@ -45,16 +45,16 @@ extern "C" {
     pyORBIT_Object* pyBaseRfGap = (pyORBIT_Object*) self;
 		BaseRfGap* cpp_BaseRfGap = (BaseRfGap*) pyBaseRfGap->cpp_obj;
 		PyObject* pyBunch;
-	  double frequency, e0tl, phase;		
-		if(!PyArg_ParseTuple(args,"Oddd:trackBunch",&pyBunch,&frequency,&e0tl,&phase)){
-			ORBIT_MPI_Finalize("PyBaseRfGap - trackBunch(Bunch* bunch, freq, E0TL, phase) - parameters are needed.");
+	  double frequency, e0tl, phase, ampl;		
+		if(!PyArg_ParseTuple(args,"Odddd:trackBunch",&pyBunch,&frequency,&ampl,&e0tl,&phase)){
+			ORBIT_MPI_Finalize("PyBaseRfGap - trackBunch(Bunch* bunch, freq, ampl, E0TL, phase) - parameters are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyBaseRfGap - trackBunch(Bunch* bunch, freq, E0TL, phase) - first param. should be a Bunch.");
+			ORBIT_MPI_Finalize("PyBaseRfGap - trackBunch(Bunch* bunch, freq, ampl, E0TL, phase) - first param. should be a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_BaseRfGap->trackBunch(cpp_bunch,frequency,e0tl,phase);
+		cpp_BaseRfGap->trackBunch(cpp_bunch,frequency,ampl,e0tl,phase);
 		Py_INCREF(Py_None);
     return Py_None;	
 	}		

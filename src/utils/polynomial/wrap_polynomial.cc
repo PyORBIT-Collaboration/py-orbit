@@ -108,9 +108,6 @@ extern "C" {
 			}			
 			p = (Polynomial*) ((pyORBIT_Object*) pyP)->cpp_obj;
 			cpp_Polynomial->derivative(p);
-			int order = p->getOrder();
-			for(int i = 0; i < (order+1); i++){
-			}
 		}		
 		Py_INCREF(pyP);
 		return pyP;

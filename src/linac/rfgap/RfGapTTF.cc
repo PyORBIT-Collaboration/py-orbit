@@ -22,10 +22,7 @@ RfGapTTF::RfGapTTF(): CppPyWrapper(NULL)
 {
 
 	Tttf = new Polynomial(0);
-	TPttf = new Polynomial(0);
 	Sttf = new Polynomial(0);
-	SPttf = new Polynomial(0);
-	
 	
 	beta_min = 0.;
 	beta_max = 1.0;
@@ -40,11 +37,17 @@ RfGapTTF::RfGapTTF(): CppPyWrapper(NULL)
 // Destructor
 RfGapTTF::~RfGapTTF()
 {
-	delete Tttf;
-	delete TPttf;
-	delete Sttf;
-	delete SPttf;
+	if(Tttf->getPyWrapper() != NULL){
+		Py_XDECREF(Tttf->getPyWrapper());
+	} else {
+		delete Tttf;
+	}
 
+	if(Sttf->getPyWrapper() != NULL){
+		Py_XDECREF(Sttf->getPyWrapper());
+	} else {
+		delete Sttf;
+	}
 }
 
 /** Tracks the Bunch trough the RF gap. The formulas are not ready yet. */	
@@ -100,8 +103,6 @@ void RfGapTTF::setParameters(Polynomial* Tttf_in, Polynomial* Sttf_in,
 
 	setT_TTF(Tttf_in);
 	setS_TTF(Sttf_in);
-	Tttf->derivative(TPttf);
-	Sttf->derivative(SPttf);
 	
 	this->beta_min = beta_min;
 	this->beta_max = beta_max;
@@ -132,15 +133,13 @@ Polynomial* RfGapTTF::getS_TTF(){
 }
 
 /** Sets the Polynomial to T TTF. */
-void* RfGapTTF::setT_TTF(Polynomial* Tttf_in){
-  Tttf_in->copyTo(Tttf);
-	Tttf->derivative(TPttf);	
+void RfGapTTF::setT_TTF(Polynomial* Tttf_in){
+	Tttf_in->copyTo(Tttf);
 }
 
 /** Sets the Polynomial to S TTF. */
-void* RfGapTTF::setS_TTF(Polynomial* Sttf_in){
+void RfGapTTF::setS_TTF(Polynomial* Sttf_in){
 	Sttf_in->copyTo(Sttf);
-	Sttf->derivative(SPttf);	
 }
 
 /** Returns RF frequency. */

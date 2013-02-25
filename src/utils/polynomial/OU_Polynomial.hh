@@ -45,7 +45,9 @@ namespace OrbitUtils{
 		
 		double value(double x);
 		
-		void derivative(Polynomial* derivP);
+		double derivative(double x);
+		
+		void derivativeTo(Polynomial* derivP);
 		
 		void copyTo(Polynomial* p);
 		

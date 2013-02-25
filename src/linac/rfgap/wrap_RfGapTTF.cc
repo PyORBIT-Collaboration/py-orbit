@@ -38,6 +38,16 @@ extern "C" {
   //this is implementation of the __init__ method
   static int RfGapTTF_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
 		self->cpp_obj = new RfGapTTF();	
+		PyObject* mod = PyImport_ImportModule("orbit_utils");
+		pyORBIT_Object* pyPolyT = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));
+		pyORBIT_Object* pyPolyS = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));
+		Polynomial* cpp_polyT = (Polynomial*) ((pyORBIT_Object*)pyPolyT)->cpp_obj;
+		Polynomial* cpp_polyS = (Polynomial*) ((pyORBIT_Object*)pyPolyS)->cpp_obj;
+		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) self->cpp_obj;
+		delete cpp_RfGapTTF->Tttf;
+		delete cpp_RfGapTTF->Sttf;
+		cpp_RfGapTTF->Tttf = cpp_polyT;
+		cpp_RfGapTTF->Sttf = cpp_polyS;
 		((RfGapTTF*) self->cpp_obj)->setPyWrapper((PyObject*) self);
 		return 0;
   }
@@ -75,8 +85,8 @@ extern "C" {
 		}		
 		Polynomial* cpp_poly = (Polynomial*) ((pyORBIT_Object*)pyPolynomial)->cpp_obj;
 		cpp_RfGapTTF->setT_TTF(cpp_poly);
-		Py_INCREF(Py_None);
-    return Py_None;		
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getT_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getT_TTF()->getPyWrapper();
 	}	
 	
 	//setS_TTF() returns the Polynomial instance for T Transit Time Factor
@@ -93,30 +103,24 @@ extern "C" {
 		}		
 		Polynomial* cpp_poly = (Polynomial*) ((pyORBIT_Object*)pyPolynomial)->cpp_obj;
 		cpp_RfGapTTF->setS_TTF(cpp_poly);
-		Py_INCREF(Py_None);
-    return Py_None;		
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getS_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getS_TTF()->getPyWrapper();			
 	}		
 	
 	//getT_TTF() returns the Polynomial instance for T Transit Time Factor
   static PyObject* RfGapTTF_getT_TTF(PyObject *self, PyObject *args){
-    pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;
+    pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;	
 		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
-		PyObject* mod = PyImport_ImportModule("orbit_utils");
-		pyORBIT_Object* pyPoly = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));
-		Polynomial* cpp_poly = (Polynomial*) ((pyORBIT_Object*)pyPoly)->cpp_obj;
-		cpp_RfGapTTF->getT_TTF()->copyTo(cpp_poly);
-    return (PyObject*) pyPoly;	
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getT_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getT_TTF()->getPyWrapper();	
 	}		
 	
 	//getS_TTF() returns the Polynomial instance for T Transit Time Factor
   static PyObject* RfGapTTF_getS_TTF(PyObject *self, PyObject *args){
     pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;
 		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
-		PyObject* mod = PyImport_ImportModule("orbit_utils");
-		pyORBIT_Object* pyPoly = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));
-		Polynomial* cpp_poly = (Polynomial*) ((pyORBIT_Object*)pyPoly)->cpp_obj;
-		cpp_RfGapTTF->getS_TTF()->copyTo(cpp_poly);
-    return (PyObject*) pyPoly;	
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getS_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getS_TTF()->getPyWrapper();	
 	}	
 
 	//setParameters() Sets up the gap parameters: T,S, minimal and maximal beta, 
@@ -182,7 +186,7 @@ extern "C" {
   //-----------------------------------------------------
   static void RfGapTTF_del(pyORBIT_Object* self){
 		//std::cerr<<"The RfGapTTF __del__ has been called!"<<std::endl;
-		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) self->cpp_obj;
+		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) self->cpp_obj;	
 		delete cpp_RfGapTTF;
 		self->ob_type->tp_free((PyObject*)self);
   }

@@ -92,7 +92,18 @@ double Polynomial::value(double x)
 	return sum;
 }
 
-void Polynomial::derivative(Polynomial* derivP)
+double Polynomial::derivative(double x)
+{
+	double t = 1.0;
+	double sum = 0.;
+	for (int i = 1; i < (order+1); i++){
+		sum = sum + coef_arr[i]*i*t;
+		t = t*x;
+	}		
+	return sum;
+}
+
+void Polynomial::derivativeTo(Polynomial* derivP)
 {
 	if(order == 0){
 		derivP->setOrder(0);

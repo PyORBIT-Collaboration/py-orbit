@@ -94,20 +94,30 @@ extern "C" {
 		return Py_BuildValue("d",cpp_Polynomial->value(x));
   }
 	
- 	/** It will put the derivative into the other polynomial */
+ 	/** It will return the polynomial derivative for x */
   static PyObject* Polynomial_derivative(PyObject *self, PyObject *args){
+	  Polynomial* cpp_Polynomial = (Polynomial*)((pyORBIT_Object*) self)->cpp_obj;
+		double x;
+		if(!PyArg_ParseTuple(	args,"d:",&x)){
+			error("pyPolynomial.derivative(x) - parameter is needed");
+		}	
+		return Py_BuildValue("d",cpp_Polynomial->derivative(x));
+  }
+	
+ 	/** It will put the derivativeTo into the other polynomial */
+  static PyObject* Polynomial_derivativeTo(PyObject *self, PyObject *args){
 	  Polynomial* cpp_Polynomial = (Polynomial*)((pyORBIT_Object*) self)->cpp_obj;
 	  PyObject* pyP;
 		Polynomial* p = NULL;
 		if(!PyArg_ParseTuple(	args,"O:",&pyP))
-			error("pyPolynomial.derivative(polinomial)- parameter is needed");
+			error("pyPolynomial.derivativeTo(polinomial)- parameter is needed");
 		else {
 			PyObject* pyORBIT_Polynomial_Type = getOrbitUtilsType("Polynomial");
 			if(!PyObject_IsInstance(pyP,pyORBIT_Polynomial_Type)){
-				error("pyPolynomial.derivative(polinomial)- parameter is needed");
+				error("pyPolynomial.derivativeTo(polinomial)- parameter is needed");
 			}			
 			p = (Polynomial*) ((pyORBIT_Object*) pyP)->cpp_obj;
-			cpp_Polynomial->derivative(p);
+			cpp_Polynomial->derivativeTo(p);
 		}		
 		Py_INCREF(pyP);
 		return pyP;
@@ -136,7 +146,7 @@ extern "C" {
   //destructor for python Polynomial class (__del__ method).
   //-----------------------------------------------------
   static void Polynomial_del(pyORBIT_Object* self){
-		//std::cerr<<"The Polynomial __del__ has been called!"<<std::endl;
+		//std::cerr<<"The Polynomial __del__ has been called! order="<< ((Polynomial*)self->cpp_obj)->getOrder()<<std::endl;
 		delete ((Polynomial*)self->cpp_obj);
 		self->ob_type->tp_free((PyObject*)self);
   }
@@ -147,7 +157,8 @@ extern "C" {
 		{ "order",				 Polynomial_order,    	  METH_VARARGS,"Sets or returns order of the Polynomial."},
 		{ "coefficient",	 Polynomial_coefficient, METH_VARARGS,"Sets or gets the cofficient with index - coefficient(index[,val])"},
 		{ "value",		 	   Polynomial_value,       METH_VARARGS,"Returns the value of the polynomial."},
-		{ "derivative",		 Polynomial_derivative,  METH_VARARGS,"derivative(polynomial) - initializes another polynomial as derivative"},
+		{ "derivative",	   Polynomial_derivative,  METH_VARARGS,"Returns the value of the derivative of the polynomial."},
+		{ "derivativeTo",	 Polynomial_derivativeTo,METH_VARARGS,"derivativeTo(polynomial) - initializes another polynomial as derivative"},
 		{ "copyTo",		 	   Polynomial_copyTo,    	METH_VARARGS,"copyTo(polynomial) - initializes another polynomial as a copy"},
     {NULL}
   };

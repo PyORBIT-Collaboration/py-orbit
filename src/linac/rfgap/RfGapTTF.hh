@@ -63,10 +63,10 @@ public:
 	OrbitUtils::Polynomial* getS_TTF();
 	
   /** Sets the Polynomial to T TTF. */
-  void* setT_TTF(OrbitUtils::Polynomial* Tttf);
+  void setT_TTF(OrbitUtils::Polynomial* Tttf);
 	
   /** Sets the Polynomial to S TTF. */
-  void* setS_TTF(OrbitUtils::Polynomial* Sttf);
+  void setS_TTF(OrbitUtils::Polynomial* Sttf);
 	
 	/** Returns RF frequency. */
 	double getFrequency();
@@ -77,13 +77,11 @@ public:
 	/** Returns the realtive amplitude. */
 	double getRelativeAmplitude();
 	
+	/** polynomials for T,S TTF as functions of cappa = 2*pi*rf_freq/(c_light*beta) */
+	OrbitUtils::Polynomial* Tttf;
+	OrbitUtils::Polynomial* Sttf;
+	
   private:
-		
-		// polynomials for T,T',S,S' TTF as functions of cappa = 2*pi*rf_freq/(c_light*beta)
-		OrbitUtils::Polynomial* Tttf;
-		OrbitUtils::Polynomial* TPttf;
-		OrbitUtils::Polynomial* Sttf;
-		OrbitUtils::Polynomial* SPttf;
 		
 		//the limits where the polynomials are defined
 		double beta_min,beta_max;

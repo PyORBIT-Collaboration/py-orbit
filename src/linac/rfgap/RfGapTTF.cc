@@ -23,6 +23,8 @@ RfGapTTF::RfGapTTF(): CppPyWrapper(NULL)
 
 	Tttf = new Polynomial(0);
 	Sttf = new Polynomial(0);
+	Tpttf = new Polynomial(0);
+	Spttf = new Polynomial(0);
 	
 	beta_min = 0.;
 	beta_max = 1.0;
@@ -48,6 +50,19 @@ RfGapTTF::~RfGapTTF()
 	} else {
 		delete Sttf;
 	}
+
+	if(Tpttf->getPyWrapper() != NULL){
+		Py_XDECREF(Tpttf->getPyWrapper());
+	} else {
+		delete Tpttf;
+	}
+
+	if(Spttf->getPyWrapper() != NULL){
+		Py_XDECREF(Spttf->getPyWrapper());
+	} else {
+		delete Spttf;
+	}
+
 }
 
 /** Tracks the Bunch trough the RF gap. The formulas are not ready yet. */	
@@ -95,7 +110,8 @@ void RfGapTTF::trackBunch(Bunch* bunch, double frequency, double ampl, double E0
 Sets up the gap parameters: T,S, minimal and maximal beta, 
 rf frequency, the gap length,  and the relative amplitude.
 */
-void RfGapTTF::setParameters(Polynomial* Tttf_in, Polynomial* Sttf_in, 
+void RfGapTTF::setParameters(Polynomial* Tttf_in, Polynomial* Tpttf_in,
+	Polynomial* Sttf_in, Polynomial* Spttf_in,
 	double beta_min, double beta_max, 
 	double rf_frequency, double gap_length, 
 	double relative_amplitude)
@@ -103,6 +119,8 @@ void RfGapTTF::setParameters(Polynomial* Tttf_in, Polynomial* Sttf_in,
 
 	setT_TTF(Tttf_in);
 	setS_TTF(Sttf_in);
+	setTp_TTF(Tpttf_in);
+	setSp_TTF(Spttf_in);
 	
 	this->beta_min = beta_min;
 	this->beta_max = beta_max;
@@ -132,6 +150,16 @@ Polynomial* RfGapTTF::getS_TTF(){
 	return Sttf;
 }
 
+/** Returns Tp TTF. */
+Polynomial* RfGapTTF::getTp_TTF(){
+	return Tpttf;
+}
+
+/** Returns Sp TTF. */
+Polynomial* RfGapTTF::getSp_TTF(){
+	return Spttf;
+}
+
 /** Sets the Polynomial to T TTF. */
 void RfGapTTF::setT_TTF(Polynomial* Tttf_in){
 	Tttf_in->copyTo(Tttf);
@@ -140,6 +168,16 @@ void RfGapTTF::setT_TTF(Polynomial* Tttf_in){
 /** Sets the Polynomial to S TTF. */
 void RfGapTTF::setS_TTF(Polynomial* Sttf_in){
 	Sttf_in->copyTo(Sttf);
+}
+
+/** Sets the Polynomial to Tp TTF. */
+void RfGapTTF::setTp_TTF(Polynomial* Tpttf_in){
+	Tpttf_in->copyTo(Tpttf);
+}
+
+/** Sets the Polynomial to Sp TTF. */
+void RfGapTTF::setSp_TTF(Polynomial* Spttf_in){
+	Spttf_in->copyTo(Spttf);
 }
 
 /** Returns RF frequency. */

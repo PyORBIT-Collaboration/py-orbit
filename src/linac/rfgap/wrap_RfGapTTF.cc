@@ -41,13 +41,21 @@ extern "C" {
 		PyObject* mod = PyImport_ImportModule("orbit_utils");
 		pyORBIT_Object* pyPolyT = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));
 		pyORBIT_Object* pyPolyS = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));
+		pyORBIT_Object* pyPolyTp = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));
+		pyORBIT_Object* pyPolySp = (pyORBIT_Object*) PyObject_CallMethod(mod,"Polynomial","O",Py_BuildValue("i",0));		
 		Polynomial* cpp_polyT = (Polynomial*) ((pyORBIT_Object*)pyPolyT)->cpp_obj;
 		Polynomial* cpp_polyS = (Polynomial*) ((pyORBIT_Object*)pyPolyS)->cpp_obj;
+		Polynomial* cpp_polyTp = (Polynomial*) ((pyORBIT_Object*)pyPolyTp)->cpp_obj;
+		Polynomial* cpp_polySp = (Polynomial*) ((pyORBIT_Object*)pyPolySp)->cpp_obj;		
 		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) self->cpp_obj;
 		delete cpp_RfGapTTF->Tttf;
 		delete cpp_RfGapTTF->Sttf;
+		delete cpp_RfGapTTF->Tpttf;
+		delete cpp_RfGapTTF->Spttf;
 		cpp_RfGapTTF->Tttf = cpp_polyT;
 		cpp_RfGapTTF->Sttf = cpp_polyS;
+		cpp_RfGapTTF->Tpttf = cpp_polyTp;
+		cpp_RfGapTTF->Spttf = cpp_polySp;
 		((RfGapTTF*) self->cpp_obj)->setPyWrapper((PyObject*) self);
 		return 0;
   }
@@ -107,6 +115,42 @@ extern "C" {
     return (PyObject*)cpp_RfGapTTF->getS_TTF()->getPyWrapper();			
 	}		
 	
+	//setTp_TTF() returns the Polynomial instance for T Transit Time Factor
+  static PyObject* RfGapTTF_setTp_TTF(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;
+		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
+		PyObject* pyPolynomial;
+		if(!PyArg_ParseTuple(args,"O:setTp_TTF",&pyPolynomial)){
+			ORBIT_MPI_Finalize("PyRfGapTTF - setTp_TTF(Polynomial) - parameter is needed.");
+		}		
+		PyObject* pyORBIT_Polynomial_Type = wrap_orbit_utils::getOrbitUtilsType("Polynomial");
+		if(!PyObject_IsInstance(pyPolynomial,pyORBIT_Polynomial_Type)){
+			ORBIT_MPI_Finalize("PyRfGapTTF - setTp_TTF(Polynomial) - the param. should be a Polynomial.");
+		}		
+		Polynomial* cpp_poly = (Polynomial*) ((pyORBIT_Object*)pyPolynomial)->cpp_obj;
+		cpp_RfGapTTF->setTp_TTF(cpp_poly);
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getTp_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getTp_TTF()->getPyWrapper();
+	}	
+	
+	//setSp_TTF() returns the Polynomial instance for T Transit Time Factor
+  static PyObject* RfGapTTF_setSp_TTF(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;
+		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
+		PyObject* pyPolynomial;
+		if(!PyArg_ParseTuple(args,"O:setSp_TTF",&pyPolynomial)){
+			ORBIT_MPI_Finalize("PyRfGapTTF - setSp_TTF(Polynomial) - parameter is needed.");
+		}		
+		PyObject* pyORBIT_Polynomial_Type = wrap_orbit_utils::getOrbitUtilsType("Polynomial");
+		if(!PyObject_IsInstance(pyPolynomial,pyORBIT_Polynomial_Type)){
+			ORBIT_MPI_Finalize("PyRfGapTTF - setSp_TTF(Polynomial) - the param. should be a Polynomial.");
+		}		
+		Polynomial* cpp_poly = (Polynomial*) ((pyORBIT_Object*)pyPolynomial)->cpp_obj;
+		cpp_RfGapTTF->setSp_TTF(cpp_poly);
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getSp_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getSp_TTF()->getPyWrapper();			
+	}			
+	
 	//getT_TTF() returns the Polynomial instance for T Transit Time Factor
   static PyObject* RfGapTTF_getT_TTF(PyObject *self, PyObject *args){
     pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;	
@@ -123,6 +167,22 @@ extern "C" {
     return (PyObject*)cpp_RfGapTTF->getS_TTF()->getPyWrapper();	
 	}	
 
+	//getTp_TTF() returns the Polynomial instance for T Transit Time Factor
+  static PyObject* RfGapTTF_getTp_TTF(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;	
+		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getTp_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getTp_TTF()->getPyWrapper();	
+	}		
+	
+	//getSp_TTF() returns the Polynomial instance for T Transit Time Factor
+  static PyObject* RfGapTTF_getSp_TTF(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;
+		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
+		Py_INCREF((PyObject*)cpp_RfGapTTF->getSp_TTF()->getPyWrapper());
+    return (PyObject*)cpp_RfGapTTF->getSp_TTF()->getPyWrapper();	
+	}	
+	
 	//setParameters() Sets up the gap parameters: T,S, minimal and maximal beta, 
   //rf frequency, the gap length,  and the relative amplitude
   static PyObject* RfGapTTF_setParameters(PyObject *self, PyObject *args){
@@ -130,22 +190,30 @@ extern "C" {
 		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
 		PyObject* pyPolynomialT;
 		PyObject* pyPolynomialS;
+		PyObject* pyPolynomialTp;
+		PyObject* pyPolynomialSp;
 		double beta_min,beta_max,rf_frequency,gap_length,relative_amplitude;
-		if(!PyArg_ParseTuple(args,"OOddddd:setParameters",&pyPolynomialT,&pyPolynomialS,
+		if(!PyArg_ParseTuple(args,"OOOOddddd:setParameters",&pyPolynomialT,&pyPolynomialTp,
+			                   &pyPolynomialS,&pyPolynomialSp,
 			                   &beta_min,&beta_max,&rf_frequency,&gap_length,
 												  &relative_amplitude))
 		{
-			ORBIT_MPI_Finalize("RfGapTTF - setParameters(...) - parameters are needed.");
+			ORBIT_MPI_Finalize("RfGapTTF - setParameters(PolyT,PolyTp,PolyS,PolySp...) - parameters are needed.");
 		}		
 		PyObject* pyORBIT_Polynomial_Type = wrap_orbit_utils::getOrbitUtilsType("Polynomial");
 		if(!PyObject_IsInstance(pyPolynomialT,pyORBIT_Polynomial_Type) || 
-			 !PyObject_IsInstance(pyPolynomialS,pyORBIT_Polynomial_Type))
+			 !PyObject_IsInstance(pyPolynomialS,pyORBIT_Polynomial_Type) ||
+		   !PyObject_IsInstance(pyPolynomialTp,pyORBIT_Polynomial_Type) ||
+			 !PyObject_IsInstance(pyPolynomialSp,pyORBIT_Polynomial_Type))
 		{
-			ORBIT_MPI_Finalize("RfGapTTF - setParameters(PolyT,PolyS,...) - 2 first should be a Polynomial.");
+			ORBIT_MPI_Finalize("RfGapTTF - setParameters(PolyT,PolyTp,PolyS,PolySp,...) - 2 first should be a Polynomial.");
 		}	
 		Polynomial* cpp_polyT = (Polynomial*) ((pyORBIT_Object*)pyPolynomialT)->cpp_obj;
 		Polynomial* cpp_polyS = (Polynomial*) ((pyORBIT_Object*)pyPolynomialS)->cpp_obj;
-		cpp_RfGapTTF->setParameters(cpp_polyT,cpp_polyS,beta_min,beta_max,rf_frequency,
+		Polynomial* cpp_polyTp = (Polynomial*) ((pyORBIT_Object*)pyPolynomialTp)->cpp_obj;
+		Polynomial* cpp_polySp = (Polynomial*) ((pyORBIT_Object*)pyPolynomialSp)->cpp_obj;
+		cpp_RfGapTTF->setParameters(cpp_polyT,cpp_polyTp,cpp_polyS,cpp_polySp,
+			                          beta_min,beta_max,rf_frequency,
 			                          gap_length,relative_amplitude);
 		Py_INCREF(Py_None);
     return Py_None;		
@@ -197,9 +265,13 @@ extern "C" {
 		{ "trackBunch",     RfGapTTF_trackBunch,    METH_VARARGS,"tracks the Bunch through the RF gap."},
 		{ "getT_TTF",       RfGapTTF_getT_TTF,      METH_VARARGS,"get the T TTF Polynomial of the gap model."},
 		{ "getS_TTF",       RfGapTTF_getS_TTF,      METH_VARARGS,"get the S TTF Polynomial of the gap model."},
+		{ "getTp_TTF",      RfGapTTF_getTp_TTF,     METH_VARARGS,"get the Tp TTF Polynomial of the gap model."},
+		{ "getSp_TTF",      RfGapTTF_getSp_TTF,     METH_VARARGS,"get the Sp TTF Polynomial of the gap model."},
 		{ "setT_TTF",       RfGapTTF_setT_TTF,      METH_VARARGS,"set the T TTF Polynomial to the gap model."},
 		{ "setS_TTF",       RfGapTTF_setS_TTF,      METH_VARARGS,"set the S TTF Polynomial to the gap model."},
-		{ "setParameters",         RfGapTTF_setParameters,       METH_VARARGS,"sets parameters (Tttf,Sttf,b0,b1,rfFreq,L,Amp)."},		
+		{ "setTp_TTF",      RfGapTTF_setTp_TTF,     METH_VARARGS,"set the Tp TTF Polynomial to the gap model."},
+		{ "setSp_TTF",      RfGapTTF_setSp_TTF,     METH_VARARGS,"set the Sp TTF Polynomial to the gap model."},
+		{ "setParameters",         RfGapTTF_setParameters,       METH_VARARGS,"sets parameters (T,Tp,S,Sp,b0,b1,rfFreq,L,Amp)."},		
 		{ "getBetaMinMax",         RfGapTTF_getBetaMinMax,       METH_VARARGS,"returns (beta_min,beta_max)."},
 		{ "getFrequency",          RfGapTTF_getFrequency,        METH_VARARGS,"returns the RF frequency."},
 		{ "getLength",             RfGapTTF_getLength,           METH_VARARGS,"returns the RF length. "},

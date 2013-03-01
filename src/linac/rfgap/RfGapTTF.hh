@@ -45,7 +45,8 @@ public:
 	    Sets up the gap parameters: T,S, minimal and maximal beta, 
 			rf frequency, the gap length,  and the relative amplitude.
 	*/
-	void setParameters(OrbitUtils::Polynomial* Tttf, OrbitUtils::Polynomial* Sttf, 
+	void setParameters(OrbitUtils::Polynomial* Tttf, OrbitUtils::Polynomial* Tpttf, 
+		                 OrbitUtils::Polynomial* Sttf, OrbitUtils::Polynomial* Spttf, 
 		                 double beta_min, double beta_max, 
 										  double rf_frequency, double gap_length, 
 											double relative_amplitude);
@@ -62,11 +63,23 @@ public:
 	/** Returns S TTF. */
 	OrbitUtils::Polynomial* getS_TTF();
 	
+	/** Returns Tp TTF. */
+	OrbitUtils::Polynomial* getTp_TTF();
+	
+	/** Returns Sp TTF. */
+	OrbitUtils::Polynomial* getSp_TTF();	
+	
   /** Sets the Polynomial to T TTF. */
   void setT_TTF(OrbitUtils::Polynomial* Tttf);
 	
   /** Sets the Polynomial to S TTF. */
   void setS_TTF(OrbitUtils::Polynomial* Sttf);
+	
+  /** Sets the Polynomial to Tp TTF. */
+  void setTp_TTF(OrbitUtils::Polynomial* Tpttf);
+	
+  /** Sets the Polynomial to Sp TTF. */
+  void setSp_TTF(OrbitUtils::Polynomial* Spttf);	
 	
 	/** Returns RF frequency. */
 	double getFrequency();
@@ -80,6 +93,8 @@ public:
 	/** polynomials for T,S TTF as functions of cappa = 2*pi*rf_freq/(c_light*beta) */
 	OrbitUtils::Polynomial* Tttf;
 	OrbitUtils::Polynomial* Sttf;
+	OrbitUtils::Polynomial* Tpttf;
+	OrbitUtils::Polynomial* Spttf;	
 	
   private:
 		

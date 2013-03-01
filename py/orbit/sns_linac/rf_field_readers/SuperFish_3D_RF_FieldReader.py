@@ -121,16 +121,16 @@ class SuperFish_3D_RF_FieldReader:
 		Zmax = 0.01*self.Zmax
 		Rmin = 0.01*self.Rmin
 		Rmax = 0.01*self.Rmax
-		grid2D_Ez = Grid2D(self.zSteps+1,rSteps+1,Zmin,Zmax,Rmin,Rmax)
-		grid2D_Er = Grid2D(self.zSteps+1,rSteps+1,Zmin,Zmax,Rmin,Rmax)
-		grid2D_H  = Grid2D(self.zSteps+1,rSteps+1,Zmin,Zmax,Rmin,Rmax)
+		grid2D_Ez = Grid2D(self.zSteps+1,self.rSteps+1,Zmin,Zmax,Rmin,Rmax)
+		grid2D_Er = Grid2D(self.zSteps+1,self.rSteps+1,Zmin,Zmax,Rmin,Rmax)
+		grid2D_H  = Grid2D(self.zSteps+1,self.rSteps+1,Zmin,Zmax,Rmin,Rmax)
 		for iz in range(self.zSteps+1):
-			for ir in range(rSteps+1):
-				i = (zSteps+1)*ir + iz
+			for ir in range(self.rSteps+1):
+				i = (self.zSteps+1)*ir + iz
 				[z,r,Ez,Er,E,B] = self.data_arr[i]
 				grid2D_Ez.setValue(Ez,iz,ir)
 				grid2D_Er.setValue(Er,iz,ir)
-				grid2D_H.setValue(H,iz,ir)
+				grid2D_H.setValue(B,iz,ir)
 		return (grid2D_Ez,grid2D_Er,grid2D_H)
 		
 	def getAxisEz(self, zSimmetric = -1):

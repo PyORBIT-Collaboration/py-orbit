@@ -40,7 +40,7 @@ class RF_AxisFieldAnalysis:
 		self.roots_arr = self.rootAnalysis()
 		#find the roots of derivative - yp = y' - RFgap center positions
 		self.yp_roots_arr = self.gapCentersAnalysis()
-		print "debug yp roots=",self.yp_roots_arr
+		#print "debug yp roots=",self.yp_roots_arr
 		if(len(self.roots_arr) - 1 != len(self.yp_roots_arr)):
 			rank = orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
 			if(rank == 0):

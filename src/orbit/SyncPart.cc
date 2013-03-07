@@ -274,7 +274,7 @@ void SyncPart::updateKinematics(){
 	if(p_abs != 0.){
 		y_normal[0] = pxyz[1]*x_normal[2] - pxyz[2]*x_normal[1];
 		y_normal[1] = -(pxyz[0]*x_normal[2] - pxyz[2]*x_normal[0]);
-		y_normal[0] = pxyz[0]*x_normal[1] - pxyz[1]*x_normal[0];
+		y_normal[2] = pxyz[0]*x_normal[1] - pxyz[1]*x_normal[0];
 		y_normal_abs = sqrt(y_normal[0]*y_normal[0] + y_normal[1]*y_normal[1] + y_normal[2]*y_normal[2]);
 	} else {
 		int iter = 0;

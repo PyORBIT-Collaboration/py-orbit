@@ -28,7 +28,9 @@ using namespace OrbitUtils;
 RungeKuttaTracker::RungeKuttaTracker(double lengthIn){
 	
 	length = lengthIn;
-	
+		
+	c_light = OrbitConst::c;
+		
 	//spatial eps in [m]
 	eps = 0.000001;
 			
@@ -140,7 +142,6 @@ void RungeKuttaTracker::getExitPlane(double& a, double& b, double& c, double& d)
 void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, ExternalEffects* extEff){
 	n_steps = n_init;
 	int nMax = 5*n_steps;
-	c_light = OrbitConst::c;
 	charge = bunch->getCharge();
 	mass = bunch->getMass();
 	mass2 = mass*mass;
@@ -154,27 +155,30 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 		ORBIT_MPI_Finalize("RungeKuttaTracker::trackBunch - syncPart cannot cross the entrance plane.");
 	}
 	cross_t = -(plEntrV[0]*syncPart->getX() + 
-		          plEntrV[1]*syncPart->getY() + 
-							plEntrV[2]*syncPart->getZ() + plEntrV[3])/cross_t;
+		plEntrV[1]*syncPart->getY() + 
+		plEntrV[2]*syncPart->getZ() + 
+		plEntrV[3])/cross_t;
 	y_init_vct[0] = cross_t*syncPart->getPX() + syncPart->getX();
 	y_init_vct[1] = cross_t*syncPart->getPY() + syncPart->getY();
 	y_init_vct[2] = cross_t*syncPart->getPZ() + syncPart->getZ();
+	std::cout<<"debug sync part x0="<<syncPart->getX()<<" y0="<<syncPart->getY()<<" z0="<<syncPart->getZ()<<std::endl;
+	std::cout<<"debug entry     x0="<<y_init_vct[0]<<" y0="<<y_init_vct[1]<<" z0="<<y_init_vct[2]<<std::endl;
 	syncPart->setXYZ(y_init_vct);
 	y_init_vct[3] = syncPart->getPX();
 	y_init_vct[4] = syncPart->getPY();
 	y_init_vct[5] = syncPart->getPZ();
 	//this is a time when synch particle crosses the entrance plane
-	double t_sync_start = 0.;
 	double t_sync_final = 0.;
-	//std::cerr<<"debug start time="<< t_sync_start <<std::endl;
+	double t_previous_final = 0.;
 	double y_sync_final_vct[6];
 	//step size definition from synch. particle
 	double t_st = t_step;
-	//std::cerr<<"debug length [m]="<< length <<std::endl;
-	//std::cerr<<"debug c_light="<< c_light <<std::endl;
-	//std::cerr<<"debug beta="<< syncPart->getBeta() <<std::endl;
-	//std::cerr<<"debug time step [sec]="<< t_st <<std::endl;
+	std::cerr<<"debug length [m]="<< length <<std::endl;
+	std::cerr<<"debug c_light="<< c_light <<std::endl;
+	std::cerr<<"debug beta="<< syncPart->getBeta() <<std::endl;
+	std::cerr<<"debug time step [sec]="<< t_st <<std::endl;
 	for(int iN = 1; iN < 16; iN++){
+		std::cerr<<"debug start loop iN=" <<iN<<" time step="<<t_st<<std::endl;
 		nMax = nMax*2;
 		for(int i = 0; i < 6; i++){
 			y_in_vct[i] = y_init_vct[i];
@@ -182,6 +186,7 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 		}
 		int step_count = 0;
 		double t = 0.;
+		std::cerr<<"debug is before exit="<< isBeforeExit(y_out_vct) <<std::endl;
 		while(isBeforeExit(y_out_vct)){
 			step_count = step_count + 1;
 			for(int i = 0; i < 6; i++){
@@ -205,15 +210,22 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 			          plExitV[2]*y_in_vct[2] + plExitV[3])/cross_t;	
 		for(int i = 0; i < 6; i++){
 			y_final_vct[i] = cross_t* (y_out_vct[i] - y_in_vct[i])+ y_in_vct[i];
-		}
+		}	
 		t_sync_final = t + t_st*(cross_t - 1.);
-		//std::cerr<<"debug final r=" << y_final_vct[0] <<" "<< y_final_vct[1] <<" "<< y_final_vct[2] <<std::endl;
+		std::cerr<<"debug final r=" << y_final_vct[0] <<" "<< y_final_vct[1] <<" "<< y_final_vct[2] <<std::endl;
+		std::cerr<<"debug final p=" << y_final_vct[3] <<" "<< y_final_vct[4] <<" "<< y_final_vct[5] <<std::endl;
 		if(iN > 1){
 			double diff = 0.;
 			for(int i = 0; i < 3; i++){
 				diff = diff + (y_final_vct[i]-y_sync_final_vct[i])*(y_final_vct[i]-y_sync_final_vct[i]);
 			}
+			//the spatial difference
 			diff = sqrt(diff);
+			std::cerr<<"debug spatial diff=" <<diff<<std::endl;
+			//add the time difference
+			double p_out_2 = y_final_vct[3]*y_final_vct[3]+y_final_vct[4]*y_final_vct[4]+y_final_vct[5]*y_final_vct[5];
+			diff += fabs(t_sync_final-t_previous_final)*c_light*sqrt(p_out_2/(mass2+p_out_2));
+			std::cerr<<"debug with time diff=" <<diff<<std::endl;
 			if(diff < eps){
 				//that is enough!
 			  t_step = t_st;
@@ -230,12 +242,13 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 			y_sync_final_vct[i] = y_final_vct[i];
 		}		
 		t_st = t_st/2;
+		t_previous_final = t_sync_final;
 	}
-	syncPart->setTime(syncPart->getTime() + t_sync_final - t_sync_start);
-  //std::cerr<<"debug time step [sec]="<< t_step <<std::endl;
-  //std::cerr<<"debug number of steps="<< n_steps <<std::endl;
-  //std::cerr<<"debug t_sync_start="<< t_sync_start <<std::endl;	
-  //std::cerr<<"debug t_sync_final="<< t_sync_final <<std::endl;	
+	std::cerr<<"debug track of synch part FINALIZED =======================" <<std::endl;	
+	syncPart->setTime(syncPart->getTime() + t_sync_final);
+  std::cerr<<"debug time step [sec]="<< t_step <<std::endl;
+  std::cerr<<"debug number of steps="<< n_steps <<std::endl;
+  std::cerr<<"debug t_sync_final="<< t_sync_final <<std::endl;	
 	//------------------------------------------------
 	//performs the necessary actions before tracking
 	if(extEff != NULL) extEff->setupEffects(bunch);
@@ -268,6 +281,8 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 	ny_start_vct[0] = syncPart->getNormalYX();
 	ny_start_vct[1] = syncPart->getNormalYY();
 	ny_start_vct[2] = syncPart->getNormalYZ();
+	std::cerr<<"debug orts nx="<< nx_start_vct[0] <<" " << nx_start_vct[1] <<" " << nx_start_vct[2]<<" "  <<std::endl;
+	std::cerr<<"debug orts ny="<< ny_start_vct[0] <<" " << ny_start_vct[1] <<" " << ny_start_vct[2]<<" "  <<std::endl;
 	p_sync_start_vct[0] = syncPart->getPX();
 	p_sync_start_vct[1] = syncPart->getPY();
 	p_sync_start_vct[2] = syncPart->getPZ();	
@@ -335,7 +350,6 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 		r_start_vct[2] = t_start*v_vct[2] + r_start_vct[2];
 		//std::cerr<<"debug t_start="<< t_start <<std::endl;	
 		t_start = t_start - partCoordArr[ip][4]/v_sync_start;
-	  t_start = t_start - t_sync_start;
 		//std::cerr<<"debug r_sync_start="<< r_sync_start_vct[0] <<" "<< r_sync_start_vct[1] <<" "<< r_sync_start_vct[2] <<std::endl;
 		//std::cerr<<"debug p_sync_start="<< p_sync_start_vct[0]<<" "<< p_sync_start_vct[1]<<" "<< p_sync_start_vct[2] <<std::endl;
 		//std::cerr<<"debug r_start="<< r_start_vct[0]<<" "<< r_start_vct[1]<<" "<< r_start_vct[2] <<std::endl;
@@ -438,7 +452,6 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, double t_step_in, 
 	                            BaseFieldSource* fieldSource, ExternalEffects* extEff)
 {
-	c_light = OrbitConst::c;
 	charge = bunch->getCharge();
 	mass = bunch->getMass();
 	mass2 = mass*mass;

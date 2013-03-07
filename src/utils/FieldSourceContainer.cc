@@ -24,7 +24,8 @@
 
 using namespace OrbitUtils;
 
-FieldSourceContainer::FieldSourceContainer(){
+FieldSourceContainer::FieldSourceContainer():BaseFieldSource() 
+{
 }
 
 FieldSourceContainer::~FieldSourceContainer(){

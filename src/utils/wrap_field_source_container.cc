@@ -44,7 +44,7 @@ extern "C" {
 	  BaseFieldSource* fs;
 	  PyObject* pyfs;
 		if(!PyArg_ParseTuple(	args,"O:",&pyfs))
-			error(" AddEffect(external effect) - parameter is needed");
+			error(" AddFieldSource(BaseFieldSource fs) - parameter is needed");
 		else {
 			fs = (BaseFieldSource*) ((pyORBIT_Object*) pyfs)->cpp_obj;
 			cpp_FieldSourceContainer->AddFieldSource(fs);

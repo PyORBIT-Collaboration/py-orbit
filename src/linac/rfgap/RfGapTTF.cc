@@ -4,8 +4,6 @@
    non-linearity in transverse direction.
 */
 
-#include "ParticleMacroSize.hh"
-
 #include <iostream>
 #include <cmath>
 

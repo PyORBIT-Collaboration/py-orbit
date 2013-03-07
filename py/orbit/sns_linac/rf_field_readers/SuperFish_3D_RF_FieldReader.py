@@ -116,7 +116,7 @@ class SuperFish_3D_RF_FieldReader:
 		It fills out the Grid2D instances with the electric and magnetic filed components -
 		Ez, Er, H.
 		"""
-		#The Z and R in the self.data_arr are in [cm], so to switch to [m] we use 0.0
+		#The Z and R in the self.data_arr are in [cm], so to switch to [m] we use 0.01
 		Zmin = 0.01*self.Zmin
 		Zmax = 0.01*self.Zmax
 		Rmin = 0.01*self.Rmin

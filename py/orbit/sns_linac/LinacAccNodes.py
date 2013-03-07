@@ -432,6 +432,12 @@ class BaseRF_Gap(BaseLinacNode):
 		self.cppGapModel = MatrixRfGap()
 		#self.cppGapModel = BaseRfGap()
 
+	def setnParts(self, n = 3):
+		"""
+		Method. Sets the number of body parts of the node. For the RF gap it will be only 3.
+		"""
+		BaseLinacNode.setnParts(self,3)
+
 	def setCppGapModel(self, cppGapModel = MatrixRfGap):
 		"""
 		This method will set the fast c++ simple model for the RF Gap. 

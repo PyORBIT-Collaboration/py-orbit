@@ -82,7 +82,7 @@ void BunchTwissAnalysis::analyzeBunch(Bunch* bunch){
 			}			
 		}	
 	} else {
-		m_size = bunch->getMacroSize();
+		m_size = 1.0;
 		for(int ip = 0; ip < nParts; ip++){
 			for(int i = 0; i < 6; i++){
 				avg_arr[i] += part_coord_arr[ip][i];

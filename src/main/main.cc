@@ -14,6 +14,7 @@
 #include "wrap_collimator.hh"
 #include "wrap_foil.hh"
 #include "wrap_rfcavities.hh"
+#include "wrap_aperture.hh"
 
 /**
  * The main function that will initialize the MPI and will 
@@ -50,8 +51,12 @@ int main (int argc, char **argv)
   wrap_teapotbase::initteapotbase();
   wrap_linac::initlinac();
   wrap_collimator::initcollimator();
+  wrap_aperture::initaperture();
   wrap_foil::initfoil();
   wrap_rfcavities::initrfcavities();
+	
+	
+	
 
   //Runge-Kutta tracker package
   inittrackerrk4();

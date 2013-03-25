@@ -197,15 +197,6 @@ extern "C" {
 		return Py_BuildValue("i",cpp_SuperFishFieldSource->getDirectionZ());
 	}		
 	
-  /** 
-	   Sets the field symmetry property. If symm == 1 
-		 the field is symmetric around the z=0. 
-	*/
-	void setSymmetry(int symm);
-	
-  /** Returns the field symmetry property. */
-	int getSymmetry();		
-	
 	//setSymmetry(symm) sets the RF symmetry 0-no symmetry 1-it is there.
   static PyObject* SuperFishFieldSource_setSymmetry(PyObject *self, PyObject *args){
     pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
@@ -224,6 +215,26 @@ extern "C" {
     pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
 		SuperFishFieldSource* cpp_SuperFishFieldSource = (SuperFishFieldSource*) pySuperFishFieldSource->cpp_obj;	
 		return Py_BuildValue("i",cpp_SuperFishFieldSource->getSymmetry());
+	}	
+	
+	//setTimeInit(time_init) sets the RF initial time.
+  static PyObject* SuperFishFieldSource_setTimeInit(PyObject *self, PyObject *args){
+    pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
+		SuperFishFieldSource* cpp_SuperFishFieldSource = (SuperFishFieldSource*) pySuperFishFieldSource->cpp_obj;	
+		double time_init;
+		if(!PyArg_ParseTuple(args,"d:setTimeInit()",&time_init)){
+			ORBIT_MPI_Finalize("PySuperFishFieldSource - setTimeInit(time_init) - parameter is needed.");
+		}		
+		cpp_SuperFishFieldSource->setTimeInit(time_init);
+		Py_INCREF(Py_None);
+		return Py_None;			
+	}
+		
+	//getTimeInit() returns the RF initial time.
+  static PyObject* SuperFishFieldSource_getTimeInit(PyObject *self, PyObject *args){
+    pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
+		SuperFishFieldSource* cpp_SuperFishFieldSource = (SuperFishFieldSource*) pySuperFishFieldSource->cpp_obj;	
+		return Py_BuildValue("d",cpp_SuperFishFieldSource->getTimeInit());
 	}	
 	
   //-----------------------------------------------------
@@ -254,6 +265,8 @@ extern "C" {
 		{ "setDirectionZ",            SuperFishFieldSource_setDirectionZ,              METH_VARARGS,"set the RF directionZ."},		
 		{ "getSymmetry",              SuperFishFieldSource_getSymmetry,                METH_VARARGS,"get the RF z symmetry."},
 		{ "setSymmetry",              SuperFishFieldSource_setSymmetry,                METH_VARARGS,"set the RF z symmetry."},		
+		{ "getTimeInit",              SuperFishFieldSource_getTimeInit,               METH_VARARGS,"get the RF initial time."},
+		{ "setTimeInit",              SuperFishFieldSource_setTimeInit,               METH_VARARGS,"set the RF initial time."},
     {NULL}
   };
 

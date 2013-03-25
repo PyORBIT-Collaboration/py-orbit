@@ -23,7 +23,8 @@ SuperFishFieldSource::SuperFishFieldSource(): BaseFieldSource()
 	symm = 0;
 	rf_frequency = 1.0;
   amplitude = 0.;
- 
+  time_init = 0.;
+	field_center_pos = 0.;
 	grid2D_Ez = new Grid2D(3,3);
 	grid2D_Er = new Grid2D(3,3);
 	grid2D_H  = new Grid2D(3,3);
@@ -66,6 +67,33 @@ void SuperFishFieldSource::setGrid2D_Fields(Grid2D* grid2D_Ez_in,Grid2D* grid2D_
 	grid2D_Ez = grid2D_Ez_in;
 	grid2D_Er = grid2D_Er_in;
 	grid2D_H  = grid2D_H_in;
+	double norm_coeff = 1.0;
+	double ez_max = 0.;
+	double ez = 0.;
+	for(int i=0; i < grid2D_Ez->getSizeX(); i++){
+		ez = fabs(grid2D_Ez->getValueOnGrid(i,0));
+		if(ez_max < ez) ez_max = ez;
+	}
+	if(ez_max > 0.){
+		norm_coeff = 1./ez_max;
+	}
+	for(int i=0; i < grid2D_Ez->getSizeX(); i++){
+		for(int j=0; j < grid2D_Ez->getSizeY(); j++){
+			grid2D_Ez->setValue(grid2D_Ez->getValueOnGrid(i,j)*norm_coeff,i,j);
+		}
+	}
+	for(int i=0; i < grid2D_Er->getSizeX(); i++){
+		for(int j=0; j < grid2D_Er->getSizeY(); j++){
+			grid2D_Er->setValue(grid2D_Er->getValueOnGrid(i,j)*norm_coeff,i,j);
+		}
+	}	
+	for(int i=0; i < grid2D_H->getSizeX(); i++){
+		for(int j=0; j < grid2D_H->getSizeY(); j++){
+			grid2D_H->setValue(grid2D_H->getValueOnGrid(i,j)*norm_coeff,i,j);
+		}
+	}
+	//set the center position. It will be used only if the symmetry == 0.
+	field_center_pos = (grid2D_Ez->getMaxX() + grid2D_Ez->getMinX())/2.0;
 }	
 	
 /** 
@@ -76,6 +104,7 @@ void SuperFishFieldSource::setGrid2D_Fields(Grid2D* grid2D_Ez_in,Grid2D* grid2D_
 	3) symm == 0 and z_direction == -1 : The whole cavity is reversed z = -z
 	For cases 2) and 3) the field_center_pos = (grid2D_Ez->getMaxX()+grid2D_Ez->getMinX())/2.
 	E in [V/m] and B in [T]
+	The internal magnetic field grid2D_H is in [A/m] and should be converted to the [T].
 */
 void SuperFishFieldSource::getElectricMagneticField(
 	double x, double y, double z_in, double t, 
@@ -92,7 +121,7 @@ void SuperFishFieldSource::getElectricMagneticField(
 	double r2 = x2+y2;
 	double r = sqrt(r2);
 	
-	double phase = 2.0*OrbitConst::PI*rf_frequency*t + field_phase;
+	double phase = 2.0*OrbitConst::PI*rf_frequency*(t + time_init) + field_phase;
 	double cos_phi = cos(phase);
 	double sin_phi = sin(phase);	
 	
@@ -104,7 +133,7 @@ void SuperFishFieldSource::getElectricMagneticField(
 		
 		double z_abs = fabs(z);
 		
-		if(fabs(z) > grid2D_Ez->getMaxX() || r > grid2D_Ez->getMaxY()){
+		if(z_abs > grid2D_Ez->getMaxX() || r > grid2D_Ez->getMaxY()){
 			return;
 		}
 		
@@ -116,7 +145,7 @@ void SuperFishFieldSource::getElectricMagneticField(
 		
 		E_r = amplitude*grid2D_Er->getValue(z_abs,r)*cos_phi;
 		
-		if(z < 0){
+		if(z < 0.){
 			E_r = - E_r;
 		}		
 		
@@ -135,8 +164,13 @@ void SuperFishFieldSource::getElectricMagneticField(
 	//===================================================
 	//cases 2) or 3)     START
 	//===================================================
-	z = (z_in - field_center_pos)*z_direction;
-	if( z > grid2D_Ez->getMaxX() || z < grid2D_Ez->getMinX() || r > grid2D_Ez->getMaxY()){
+	if(z_direction > 0.){
+		z = z_in;
+	} else {
+		z = 2.*field_center_pos - z_in;
+	}
+
+	if( z_in > grid2D_Ez->getMaxX() || z_in < grid2D_Ez->getMinX() || r > grid2D_Ez->getMaxY()){
 		return;
 	}	
 	
@@ -147,9 +181,9 @@ void SuperFishFieldSource::getElectricMagneticField(
 	}	
 	
 	E_r = amplitude*grid2D_Er->getValue(z,r)*cos_phi;
+
+	B =   - z_direction*OrbitConst::permeability*amplitude*grid2D_H->getValue(z,r)*sin_phi;
 	
-	
-	B =  - z_direction*OrbitConst::permeability*amplitude*grid2D_H->getValue(z,r)*sin_phi;
 	E_x = E_r*x/r;
 	E_y = E_r*y/r;
 	B_x = - B*y/r;
@@ -209,7 +243,7 @@ int SuperFishFieldSource::getDirectionZ(){
 
 /** Sets the field direction along the z-axis.  */
 void SuperFishFieldSource::setDirectionZ(int z_direction){
-	this->z_direction = z_direction;
+	this->z_direction = z_direction/fabs(z_direction);
 }
 
 /** Returns the field symmetry property. */
@@ -223,6 +257,16 @@ int SuperFishFieldSource::getSymmetry(){
 */
 void SuperFishFieldSource::setSymmetry(int symm){
 	this->symm = symm;
+}
+
+/** Returns the field initial time. */
+double SuperFishFieldSource::getTimeInit(){
+	return time_init;
+}
+
+/** Sets the field initial time. */
+void SuperFishFieldSource::setTimeInit(double time_init){
+	this->time_init = time_init;
 }
 
 /** Returns the Grid2D instance with Ez field. */

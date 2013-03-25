@@ -73,6 +73,12 @@ public:
   /** Returns the field symmetry property. */
 	int getSymmetry();		
 		
+	/** Returns the field initial time. */
+	double getTimeInit();
+	
+	/** Sets the field initial time. */
+	void setTimeInit(double time_init);	
+	
 	/** Returns the Grid2D instance with Ez field. */
 	Grid2D* getGrid2D_Ez();
 	
@@ -114,6 +120,9 @@ public:
 		
 		//the parameter defines the amplitude of the field 
 		double amplitude;
+		
+		//the initial time
+		double time_init;
 		
 };
 

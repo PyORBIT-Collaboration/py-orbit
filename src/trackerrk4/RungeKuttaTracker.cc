@@ -138,7 +138,12 @@ void RungeKuttaTracker::getExitPlane(double& a, double& b, double& c, double& d)
 }
 
 
-/** It tracks a traditional ORBIT bunch. The external effects instance could be NULL. */
+/** 
+  It tracks a traditional ORBIT bunch. The external effects instance could be NULL. 
+	The time is counted from 0. It is a moment of synchronous particle cross the 
+	entrance plane. For some particles the time will be negative, because they are ahead
+	of the synchronous particle.
+*/
 void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, ExternalEffects* extEff){
 	n_steps = n_init;
 	int nMax = 5*n_steps;
@@ -275,6 +280,7 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 	double v_vct[3];
 	//set up start parameters for syncPart
 	double v_sync_start = c_light*syncPart->getBeta();
+	double beta_sync_start = syncPart->getBeta();
 	double energy_sync_start = syncPart->getEnergy();
 	double pSyncPart_start = syncPart->getMomentum();	
 	nx_start_vct[0] = syncPart->getNormalXX();
@@ -300,6 +306,7 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 	double v_sync_final = c_light*syncPart->getBeta();
 	double energy_sync_final = syncPart->getEnergy();
 	double pSyncPart_final = syncPart->getMomentum();
+  double beta_sync_final = syncPart->getBeta();	
 	nx_final_vct[0] = syncPart->getNormalXX();
 	nx_final_vct[1] = syncPart->getNormalXY();
 	nx_final_vct[2] = syncPart->getNormalXZ();
@@ -314,30 +321,48 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 	p_norm_sync_final_vct[2] = p_sync_final_vct[2]/pSyncPart_final;
 	r_sync_final_vct[0] = syncPart->getX();
 	r_sync_final_vct[1] = syncPart->getY();
-	r_sync_final_vct[2] = syncPart->getZ();	
-	v_sync_final = c_light*syncPart->getBeta();	
+	r_sync_final_vct[2] = syncPart->getZ();		
 	double t_start = 0.;
 	double t_final = 0.;
 	double pz_along = 0.;
 	double enrg_part = 0.;
+	double p_part2 = 0.;
 	double p_part = 0.;
+	double x = 0., y = 0., xp = 0., yp = 0., z = 0., dE = 0.;
+	double xp2 = 0.;
+	double yp2 = 0.;
+	double px_xp_coef = 0.;
+	double xp_coef = 0.;
 	for(int ip = 0, nParts = bunch->getSize(); ip < nParts; ip++){
+		x = partCoordArr[ip][0];
+		y = partCoordArr[ip][2];
+		xp = partCoordArr[ip][1];
+		yp = partCoordArr[ip][3];
+		z = partCoordArr[ip][4];
+		dE = partCoordArr[ip][5];
+		// Transformations here are the subject of the meaning of x' and y' and
+    // how they are related to the transverse momentum of particles.
+		// Here we use these transformations to comply to the Drift element of the TEAPOT.
+		// At the end of the loop we have to do backward transformations.
+		enrg_part = energy_sync_start+dE;
+		p_part2 = enrg_part*(enrg_part + 2*mass);
+		p_part = sqrt(p_part2);
+		xp_coef = 1./(1.+dE/(pSyncPart_start*beta_sync_start));
+		xp2 = pow(xp*xp_coef,2);
+		yp2 = pow(yp*xp_coef,2);		
+		pz_along = sqrt(p_part2/(1.+xp2+yp2));
+		px_xp_coef = pz_along*xp_coef;
 		//find the transverse (relative to the synch. particle moment) moment vector
-		p_start_vct[0] = pSyncPart_start*(partCoordArr[ip][1]*nx_start_vct[0] + partCoordArr[ip][3]*ny_start_vct[0]);
-		p_start_vct[1] = pSyncPart_start*(partCoordArr[ip][1]*nx_start_vct[1] + partCoordArr[ip][3]*ny_start_vct[1]);
-		p_start_vct[2] = pSyncPart_start*(partCoordArr[ip][1]*nx_start_vct[2] + partCoordArr[ip][3]*ny_start_vct[2]);
-		pz_along = (energy_sync_start+partCoordArr[ip][5])*(energy_sync_start+partCoordArr[ip][5] + 2*mass);
-		pz_along = pz_along - (partCoordArr[ip][1]*pSyncPart_start)*(partCoordArr[ip][1]*pSyncPart_start)
-		                    - (partCoordArr[ip][3]*pSyncPart_start)*(partCoordArr[ip][3]*pSyncPart_start);
-		pz_along = sqrt(pz_along);
+		p_start_vct[0] = px_xp_coef*(xp*nx_start_vct[0] + yp*ny_start_vct[0]);
+		p_start_vct[1] = px_xp_coef*(xp*nx_start_vct[1] + yp*ny_start_vct[1]);
+		p_start_vct[2] = px_xp_coef*(xp*nx_start_vct[2] + yp*ny_start_vct[2]);
 		p_start_vct[0] = p_start_vct[0] + pz_along*p_norm_sync_start_vct[0];
 		p_start_vct[1] = p_start_vct[1] + pz_along*p_norm_sync_start_vct[1];
 		p_start_vct[2] = p_start_vct[2] + pz_along*p_norm_sync_start_vct[2];	
 		//now absolute position 
-		r_start_vct[0] = r_sync_start_vct[0] + partCoordArr[ip][0]*nx_start_vct[0] + partCoordArr[ip][2]*ny_start_vct[0];
-		r_start_vct[1] = r_sync_start_vct[1] + partCoordArr[ip][0]*nx_start_vct[1] + partCoordArr[ip][2]*ny_start_vct[1];
-		r_start_vct[2] = r_sync_start_vct[2] + partCoordArr[ip][0]*nx_start_vct[2] + partCoordArr[ip][2]*ny_start_vct[2];
-		p_part = sqrt(p_start_vct[0]*p_start_vct[0] + p_start_vct[1]*p_start_vct[1] + p_start_vct[2]*p_start_vct[2]);
+		r_start_vct[0] = r_sync_start_vct[0] + x*nx_start_vct[0] + y*ny_start_vct[0];
+		r_start_vct[1] = r_sync_start_vct[1] + x*nx_start_vct[1] + y*ny_start_vct[1];
+		r_start_vct[2] = r_sync_start_vct[2] + x*nx_start_vct[2] + y*ny_start_vct[2];
 		enrg_part = syncPart->momentumToEnergy(p_part);
 		v_vct[0] = c_light*p_start_vct[0]/enrg_part;
 		v_vct[1] = c_light*p_start_vct[1]/enrg_part;
@@ -383,6 +408,13 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 			//place to account for external effeects
 			if(extEff != NULL) extEff->applyEffectsForEach(bunch, ip, y_in_vct, y_out_vct, t, t_step, fieldSource, this);
 			t = t + t_step;
+			/**
+			double e_x,e_y,e_z,b_x,b_y,b_z;
+			fieldSource->getElectricMagneticField(y_out_vct[0],y_out_vct[1],y_out_vct[2],t, e_x,e_y,e_z, b_x,b_y,b_z);
+			std::cout<<"debug step="<<step_count<<" z ="<<y_out_vct[2]<<" x="<<y_out_vct[0]<<" y="<<y_out_vct[1]<<" t="<<t<<std::endl;
+			std::cout<<"debug   ex="<<e_x<<" ey="<<e_y<<" ez="<<e_z<<std::endl;
+			std::cout<<"debug   bx="<<b_x<<" by="<<b_y<<" bz="<<b_z<<std::endl;
+			*/
 			if(step_count > nMax){
 				ORBIT_MPI_Finalize("RungeKuttaTracker::trackBunch - particle cannot exit outside.");
 			}
@@ -412,25 +444,26 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 			t_final = t + t_step*(cross_t - 1.);
 			//std::cerr<<"debug t_final="<< t_final <<std::endl;
 			//tracking is finished, let's put final coordinates 
-		  p_part = sqrt(p_final_vct[0]*p_final_vct[0] + p_final_vct[1]*p_final_vct[1] + p_final_vct[2]*p_final_vct[2]);
+		  p_part2 = p_final_vct[0]*p_final_vct[0] + p_final_vct[1]*p_final_vct[1] + p_final_vct[2]*p_final_vct[2];
+			p_part = sqrt(p_part2);
 		  enrg_part = syncPart->momentumToEnergy(p_part);
 			partCoordArr[ip][5] = enrg_part - energy_sync_final;
-			partCoordArr[ip][1] = (p_final_vct[0]*nx_final_vct[0] + 
-				                     p_final_vct[1]*nx_final_vct[1] + 
-														 p_final_vct[2]*nx_final_vct[2])/pSyncPart_final;
-			partCoordArr[ip][3] = (p_final_vct[0]*ny_final_vct[0] + 
-				                     p_final_vct[1]*ny_final_vct[1] + 
-														 p_final_vct[2]*ny_final_vct[2])/pSyncPart_final;
+			xp = (p_final_vct[0]*nx_final_vct[0] + p_final_vct[1]*nx_final_vct[1] + p_final_vct[2]*nx_final_vct[2]);
+			yp = (p_final_vct[0]*ny_final_vct[0] + p_final_vct[1]*ny_final_vct[1] + p_final_vct[2]*ny_final_vct[2]);
+			pz_along = sqrt(p_part2 - xp*xp -yp*yp);
+			xp_coef = (1.+partCoordArr[ip][5]/(pSyncPart_final*beta_sync_final))/pz_along;
+			partCoordArr[ip][1] = xp*xp_coef;			
+			partCoordArr[ip][3] = yp*xp_coef;
 			partCoordArr[ip][0] = (r_final_vct[0]*nx_final_vct[0] + 
 				                     r_final_vct[1]*nx_final_vct[1] + 
-														 r_final_vct[2]*nx_final_vct[2]);
+														  r_final_vct[2]*nx_final_vct[2]);
 			partCoordArr[ip][2] = (r_final_vct[0]*ny_final_vct[0] + 
 				                     r_final_vct[1]*ny_final_vct[1] + 
-														 r_final_vct[2]*ny_final_vct[2]);
+														  r_final_vct[2]*ny_final_vct[2]);
 			partCoordArr[ip][4] = (-(t_final - t_sync_final))*v_sync_final +
 				                    (r_final_vct[0]*p_norm_sync_final_vct[0] +
 				                     r_final_vct[1]*p_norm_sync_final_vct[1] +
-														 r_final_vct[2]*p_norm_sync_final_vct[2]);
+														  r_final_vct[2]*p_norm_sync_final_vct[2]);
 		}
 	}
 	//------------------------------------------------
@@ -598,7 +631,7 @@ void RungeKuttaTracker::rk4Step(double t, double t_st, BaseFieldSource* fieldSou
 void RungeKuttaTracker::calculateRightSideODE(double t, BaseFieldSource* fieldSource){
 	fieldSource->getElectricMagneticField(y_vct[0],y_vct[1],y_vct[2],t,
 		                                    e_vct[0],e_vct[1],e_vct[2],
-																				b_vct[0],b_vct[1],b_vct[2]);
+																				  b_vct[0],b_vct[1],b_vct[2]);
 	//std::cerr<<"debug E=" << e_vct[0] <<" "<< e_vct[1] <<" "<< e_vct[2] <<std::endl;
 	//std::cerr<<"debug B=" << b_vct[0] <<" "<< b_vct[1] <<" "<< b_vct[2] <<std::endl;
 	double coef = mass2 + y_vct[3]*y_vct[3] + y_vct[4]*y_vct[4] + y_vct[5]*y_vct[5];

@@ -115,6 +115,8 @@ class SuperFish_3D_RF_FieldReader:
 		""" 
 		It fills out the Grid2D instances with the electric and magnetic filed components -
 		Ez, Er, H.
+		The Ez and Er are in MV in SuperFish file, and H in [A/m].
+		In the Grid2D Ez and Er will be placed in [V/m].
 		"""
 		#The Z and R in the self.data_arr are in [cm], so to switch to [m] we use 0.01
 		Zmin = 0.01*self.Zmin
@@ -127,10 +129,10 @@ class SuperFish_3D_RF_FieldReader:
 		for iz in range(self.zSteps+1):
 			for ir in range(self.rSteps+1):
 				i = (self.zSteps+1)*ir + iz
-				[z,r,Ez,Er,E,B] = self.data_arr[i]
-				grid2D_Ez.setValue(Ez,iz,ir)
-				grid2D_Er.setValue(Er,iz,ir)
-				grid2D_H.setValue(B,iz,ir)
+				[z,r,Ez,Er,E,H] = self.data_arr[i]
+				grid2D_Ez.setValue(Ez*1.0e+6,iz,ir)
+				grid2D_Er.setValue(Er*1.0e+6,iz,ir)
+				grid2D_H.setValue(H,iz,ir)
 		return (grid2D_Ez,grid2D_Er,grid2D_H)
 		
 	def getAxisEz(self, zSimmetric = -1):

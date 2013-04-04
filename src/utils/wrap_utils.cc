@@ -11,6 +11,7 @@
 #include "wrap_bunch_extrema_calculator.hh"
 #include "wrap_gauss_legendre_integrator.hh"
 #include "wrap_polynomial.hh"
+#include "wrap_numrecipes.hh"
 
 namespace wrap_orbit_utils{
 
@@ -36,6 +37,8 @@ extern "C" {
 		wrap_utils_bunch::initBunchExtremaCalculator(module);
 		wrap_gl_integrator::initGLIntegrator(module);
 		wrap_polynomial::initPolynomial(module);		
+		//this call creates the module orbit_utils.numrecipes with functions
+		wrap_numrecipes::initNumrecipes("orbit_utils.numrecipes");
   }
 
 	PyObject* getOrbitUtilsType(const char* name){

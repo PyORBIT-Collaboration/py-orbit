@@ -1,9 +1,9 @@
 //////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
-//    bessj0.hh
+//    bessel.cc
 //
-//    This subroutine calculates the First and Second Kind Bessel Function of
+//    This subroutine calculates the First Kind and Modified Bessel Function of
 //    order 0,1,n for any real number x. The polynomial approximation by
 //    series of Chebyshev polynomials is used for 0<x<8 and 0<8/x<1.
 //    REFERENCES:

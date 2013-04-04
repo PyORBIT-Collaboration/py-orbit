@@ -136,7 +136,21 @@ extern "C" {
 		SuperFishFieldSource* cpp_SuperFishFieldSource = (SuperFishFieldSource*) pySuperFishFieldSource->cpp_obj;	
 		return Py_BuildValue("d",cpp_SuperFishFieldSource->getAmplitude());
 	}
+
+	//getAvgField() returns the average e_z field.
+  static PyObject* SuperFishFieldSource_getAvgField(PyObject *self, PyObject *args){
+    pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
+		SuperFishFieldSource* cpp_SuperFishFieldSource = (SuperFishFieldSource*) pySuperFishFieldSource->cpp_obj;	
+		return Py_BuildValue("d",cpp_SuperFishFieldSource->getAvgField());
+	}	
 	
+	//getLength() returns the length of the field.
+  static PyObject* SuperFishFieldSource_getLength(PyObject *self, PyObject *args){
+    pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
+		SuperFishFieldSource* cpp_SuperFishFieldSource = (SuperFishFieldSource*) pySuperFishFieldSource->cpp_obj;	
+		return Py_BuildValue("d",cpp_SuperFishFieldSource->getLength());
+	}	
+		
 	//setPhase(phase) sets the RF phase.
   static PyObject* SuperFishFieldSource_setPhase(PyObject *self, PyObject *args){
     pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
@@ -257,6 +271,8 @@ extern "C" {
 		{ "setFrequency",             SuperFishFieldSource_setFrequency,               METH_VARARGS,"set RF frequency."},
 		{ "getAmplitude",             SuperFishFieldSource_getAmplitude,               METH_VARARGS,"get the RF amplitude."},
 		{ "setAmplitude",             SuperFishFieldSource_setAmplitude,               METH_VARARGS,"set the RF amplitude."},
+		{ "getAvgField",              SuperFishFieldSource_getAvgField,                METH_VARARGS,"get the average e_z filed."},
+		{ "getLength",                SuperFishFieldSource_getLength,                  METH_VARARGS,"get the length of the filed."},
 		{ "getPhase",                 SuperFishFieldSource_getPhase,                   METH_VARARGS,"get the RF phase."},
 		{ "setPhase",                 SuperFishFieldSource_setPhase,                   METH_VARARGS,"set the RF phase."},
 		{ "getFieldCenterPos",        SuperFishFieldSource_getFieldCenterPos,          METH_VARARGS,"get the RF center position."},

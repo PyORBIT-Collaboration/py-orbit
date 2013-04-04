@@ -58,6 +58,12 @@ public:
   /** Returns the field amplitude. */
 	double getAmplitude();	
 	
+	/** Returns the average e_z field on the z-axis. */
+	double getAvgField();
+
+	/** Returns the length of the field. */
+	double getLength();
+
   /** Sets the field direction along the z-axis. */
 	void setDirectionZ(int z_direction);
 	
@@ -100,6 +106,9 @@ public:
 		Grid2D* grid2D_Ez;
 		Grid2D* grid2D_Er;
 		Grid2D* grid2D_H;
+		
+		//average z-axis field
+		double avg_ez_field;
 		
 		//initial phase of the field
 		double field_phase;

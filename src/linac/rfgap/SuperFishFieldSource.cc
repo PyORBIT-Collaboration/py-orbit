@@ -28,6 +28,8 @@ SuperFishFieldSource::SuperFishFieldSource(): BaseFieldSource()
 	grid2D_Ez = new Grid2D(3,3);
 	grid2D_Er = new Grid2D(3,3);
 	grid2D_H  = new Grid2D(3,3);
+	
+	avg_ez_field = 0.;
 
 }
 
@@ -94,6 +96,13 @@ void SuperFishFieldSource::setGrid2D_Fields(Grid2D* grid2D_Ez_in,Grid2D* grid2D_
 	}
 	//set the center position. It will be used only if the symmetry == 0.
 	field_center_pos = (grid2D_Ez->getMaxX() + grid2D_Ez->getMinX())/2.0;
+	
+	//calculate the average filed
+	avg_ez_field = 0.;
+	for( int i = 0; i < grid2D_Ez->getSizeX(); i++){
+		avg_ez_field += fabs(grid2D_Ez->getValueOnGrid(i,0));
+	}
+	avg_ez_field /=grid2D_Ez->getSizeX();
 }	
 	
 /** 
@@ -234,6 +243,19 @@ double SuperFishFieldSource::getAmplitude(){
 /** Sets the field amplitude. */
 void SuperFishFieldSource::setAmplitude(double amplitude){
 	this->amplitude = amplitude;
+}
+
+/** Returns the average e_z field on the z-axis. */
+double SuperFishFieldSource::getAvgField(){
+	return amplitude*avg_ez_field;
+}
+
+/** Returns the length of the field. */
+double SuperFishFieldSource::getLength(){
+	if(symm == 1){
+		return 2.0*grid2D_Ez->getMaxX();
+	}
+	return (grid2D_Ez->getMaxX() -  grid2D_Ez->getMinX());
 }
 
 /** Returns the field direction along the z-axis. */

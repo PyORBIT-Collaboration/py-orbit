@@ -97,6 +97,10 @@ void Collimator::collimateBunch(Bunch* bunch, Bunch* lostbunch){
 		zrl = length;
 		coll_flag = checkCollFlag(part_coord_arr[ip][0], part_coord_arr[ip][2]);
 		
+		if(coll_flag == 1){
+			if(ma_ == 9) loseParticle(bunch, lostbunch, ip, nLost, coll_flag, zrl);
+		}
+
 		while(zrl > 0){
 			//If not inside collimator, drift until the end or entry to the collimator, whichever comes first.
 			if(coll_flag == 0 && zrl > 0) coll_flag = driftParticle(coll_flag, zrl, length, part_coord_arr[ip], syncPart);
@@ -104,13 +108,9 @@ void Collimator::collimateBunch(Bunch* bunch, Bunch* lostbunch){
 			//If in the collimator, tally the hit and start tracking
 			if(coll_flag == 1) {
 				nHits++;	
-							
+										
 				//Check for black absorber.
-				if(ma_ == 9){
-					loseParticle(bunch, lostbunch, ip, nLost, coll_flag, zrl);
-					return;
-				}
-				
+								
 				directionfac = getDirection(part_coord_arr[ip], syncPart);
 				rl = zrl * directionfac;
 				
@@ -128,7 +128,6 @@ void Collimator::collimateBunch(Bunch* bunch, Bunch* lostbunch){
 					double totcross = icross + ecross;
 					meanfreepath = (OrbitUtils::get_a(ma_) / (nAvogadro * 1000.0) / (density * density_fac_) / (totcross * 1.0e-28));
 					stepsize = -meanfreepath * log(Random::ran1(idum));
-					cerr<<"here1\n";
 				}
 				
 				double rcross = MaterialInteractions::ruthScattJackson(stepsize, z, a, density, idum, beta, 0, pfac, thetax, thetay);
@@ -144,13 +143,13 @@ void Collimator::collimateBunch(Bunch* bunch, Bunch* lostbunch){
 					Collimator::checkStep(rl, radlengthfac, stepsize, part_coord_arr[ip], syncPart);
 					if(stepsize < smallstep) stepsize = smallstep;
 					Collimator::takeStep(bunch, lostbunch, part_coord_arr[ip], syncPart, z, a, density, idum, stepsize, zrl, rl, coll_flag, ip);
-					cerr<<"here2\n";
+					
 					
 				}
 				
 				else{ //Take the step and allow nuclear scatter
 					Collimator::takeStep(bunch, lostbunch, part_coord_arr[ip], syncPart, z, a, density, idum, stepsize, zrl, rl, coll_flag, ip);
-					cerr<<"here3\n";
+				
 					//If it still exists after MCS and energy loss, nuclear scatter
 					if(coll_flag==1 && zrl > 0){
 						beta = Collimator::getBeta(part_coord_arr[ip], syncPart);
@@ -168,7 +167,7 @@ void Collimator::collimateBunch(Bunch* bunch, Bunch* lostbunch){
 						double i_frac = icross/totcross;
 						double r_frac = rcross/totcross;
 						choice = Random::ran1(idum);
-						cerr<<"here4\n";
+						
 						// Nuclear Elastic Scattering
 						if((choice >= 0.) && (choice <= e_frac))
 						{

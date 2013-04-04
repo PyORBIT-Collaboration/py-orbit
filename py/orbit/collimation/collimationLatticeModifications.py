@@ -13,7 +13,7 @@ from orbit.collimation import TeapotCollimatorNode
 # import teapot drift class
 from orbit.teapot import DriftTEAPOT
 
-def addTeapotColimatorNode(lattice, position, collimator_node):
+def addTeapotCollimatorNode(lattice, position, collimator_node):
 	"""
 	It will put one Teapot collimation node in the lattice 
 	"""

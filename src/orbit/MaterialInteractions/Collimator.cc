@@ -100,15 +100,21 @@ void Collimator::collimateBunch(Bunch* bunch, Bunch* lostbunch){
 		if(coll_flag == 1){
 			if(ma_ == 9) loseParticle(bunch, lostbunch, ip, nLost, coll_flag, zrl);
 		}
-
+		
 		while(zrl > 0){
+			
 			//If not inside collimator, drift until the end or entry to the collimator, whichever comes first.
 			if(coll_flag == 0 && zrl > 0) coll_flag = driftParticle(coll_flag, zrl, length, part_coord_arr[ip], syncPart);
-		
+			
 			//If in the collimator, tally the hit and start tracking
 			if(coll_flag == 1) {
+				//Lose it for black absorber
+				if(ma_ == 9){
+					loseParticle(bunch, lostbunch, ip, nLost, coll_flag, zrl);
+					break;
+				}
 				nHits++;	
-										
+				
 				//Check for black absorber.
 								
 				directionfac = getDirection(part_coord_arr[ip], syncPart);
@@ -710,7 +716,7 @@ void Collimator::takeStep(Bunch* bunch, Bunch* lostbunch, double* coords, SyncPa
 	double beta = Collimator::getBeta(coords, syncpart);
 	double p = Collimator::getP(coords, syncpart);
 	double pfac = Collimator::getPFactor(coords, syncpart);
-	
+
 	MaterialInteractions::mcsJackson(stepsize, z, a, density, idum, beta, pfac, coords[0], coords[2], coords[1], coords[3]);
 	double dE = MaterialInteractions::ionEnergyLoss(beta, z, a);
 	dE = -dE * density * density_fac_ * stepsize; //Factors for units m->cm and MeV->GeV

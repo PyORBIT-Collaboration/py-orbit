@@ -4,12 +4,12 @@
 ## Classes:
 ##  - TeapotCollimatorNode - collimation node for the TEAPOT lattices
 ## 
-## addTeapotColimatorNode - function to add one collimator node to the lattice
+## addTeapotCollimatorNode - function to add one collimator node to the lattice
 
 from TeapotCollimatorNode import TeapotCollimatorNode
-from collimationLatticeModifications import addTeapotColimatorNode
+from collimationLatticeModifications import addTeapotCollimatorNode
 
 __all__ = []
 __all__.append("TeapotCollimatorNode")
-__all__.append("addTeapotColimatorNode")
+__all__.append("addTeapotCollimatorNode")
 

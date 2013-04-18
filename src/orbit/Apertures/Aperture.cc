@@ -17,103 +17,69 @@
 //   Aperture::Aperture
 //
 // DESCRIPTION
-//   Constructs a aperture
+//   Constructs an aperture
 //
 // PARAMETERS
-// 
+//   Shape can be the intergers 1, 2, or 3. 1 is a circular aperture, 2 is
+//   an elipital aperture, and 3 is a rectangular aperture. a is either the
+//   radius of the circle or half the length of the aperture in the x 
+//   diminsion. b is half the length of the aperture in the y diminsion. 
+//   c is the x offset and d is the y offset of the aperture.
 //
 // RETURNS
 //   int.
 //
 ///////////////////////////////////////////////////////////////////////////
 
-Aperture::Aperture(double shape, double a, double b, double c, double d, double angle): CppPyWrapper(NULL)
+Aperture::Aperture(double shape, double a, double b, double c, double d): CppPyWrapper(NULL)
 {
-
+	shape_ = shape;
+	a_ = a;
+	b_ = b;
+	c_ = c;
+	d_ = d;
 }
 
 void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
+         
+  //Removes particle if located outside aperture from main bunch and adds it to the lost bunch.
 
 	int j = 1, coll_flag = 0, lastArg, trackit;
-	double nAvogadro = 6.022045e23;
-	
+	double a = a_;
+	double b = b_;
+	double c = c_;
+	double d = d_;
+	int shape = shape_;
+       
 	bunch->compress();
 	double m_size = 0.;
 	int nParts = bunch->getSize();
-	double** part_coord_arr = bunch->coordArr();
+	double** coord = bunch->coordArr();
+
+	for (int count = 0; count < nParts; count++){
 	
+	    if(shape == 1)
+	      if((pow((coord[count][0]-c), 2) + pow((coord[count][2]-d), 2)) >= pow(a, 2)){
+                    lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+                    bunch->deleteParticleFast(count);
+	        }
+
+		if(shape == 2)
+	      if((pow((coord[count][0]-c), 2)/pow(a,2) + pow((coord[count][2]-d), 2)/pow(b,2)) >= 1){
+                    lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+                    bunch->deleteParticleFast(count);
+	        }
 	
+	    if(shape == 3)
+	      if((abs((coord[count][0])-c)>=a)||(abs((coord[count][2]-d))>=b)){
+	          lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+        	    bunch->deleteParticleFast(count);
+	      }
+	}
+		
 	//Update synchronous particle, compress bunch
-	
 	bunch->compress();
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-// NAME
-//
-//   Aperture::checkCollFlag
-//
-// DESCRIPTION
-//   Checks to see if a particle is located inside a aperture.  Returns
-//   1 if the particle is in the aperture, 0 if it isn't.
-//
-// PARAMETERS
-//   x:      x coordinate of particle.
-//   y:      y coordinate of particle.
-//
-// RETURNS
-//   int.
-//
-///////////////////////////////////////////////////////////////////////////
-
-int Aperture::checkCollFlag(double x, double y){
-
-	double xtemp = x, ytemp = y;
-	double PI = OrbitConst::PI;
-	
-	
-/*
-	if((pow(x, 2) + pow(y, 2)) >= pow(a, 2)){
-		return 1;
-	
-	}
-*/	
-    return 0; 
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// NAME
-//
-//   Aperture::loseParticle
-//
-// DESCRIPTION
-//   Lose the particle from the alive bunch and add it to the lost bunch
-//
-// PARAMETERS
-//	 coords: particle coordinates
-//   bunch: the primary bunch
-//	 lostbunch: the lost bunch
-//	 nLost:		the number of lost particles in this aperture
-//	 coll_flag:	flag for if particle is still in aperture (and alive)
-//	 zrt:		remaining length in z the particle has in aperture
-//
-// RETURNS
-//   nothing.
-//
-///////////////////////////////////////////////////////////////////////////
-
-/*
-void Aperture::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost, int& coll_flag, double& zrl){
-	double** coords = bunch->coordArr();
-	lostbunch->addParticle(coords[ip][0], coords[ip][1], coords[ip][2], coords[ip][3], coords[ip][4], coords[ip][5]);
-	
-	bunch->deleteParticleFast(ip);
-	
-	nLost++;
-	
-}
-*/	
 	
 

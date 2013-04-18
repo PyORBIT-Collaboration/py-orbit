@@ -35,13 +35,12 @@ extern "C" {
 	  double b = 0.;
 	  double c = 0.;
 	  double d = 0.;
-	  double angle = 0.;
 	  
 	  //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-	  if(!PyArg_ParseTuple(	args,"iddddd:arguments",&shape,&a,&b,&c,&d,&angle)){
-		  error("PyBunch - addParticle - cannot parse arguments! It should be (shape,a,b,c,d,angle)");	
+	  if(!PyArg_ParseTuple(	args,"idddd:arguments",&shape,&a,&b,&c,&d)){
+		  error("PyBunch - addParticle - cannot parse arguments! It should be (shape,a,b,c,d)");	
 	  }
-		self->cpp_obj =  new Aperture(shape,a,b,c,d,angle);
+	  self->cpp_obj =  new Aperture(shape,a,b,c,d);
 	  ((Aperture*) self->cpp_obj)->setPyWrapper((PyObject*) self);
     return 0;
   }
@@ -142,7 +141,7 @@ extern "C" {
 		if (PyType_Ready(&pyORBIT_Aperture_Type) < 0) return;
 		Py_INCREF(&pyORBIT_Aperture_Type);
 		//create new module
-		PyObject* module = Py_InitModule("Aperture",ApertureClassMethods);
+		PyObject* module = Py_InitModule("aperture",ApertureClassMethods);
 		PyModule_AddObject(module, "Aperture", (PyObject *)&pyORBIT_Aperture_Type);			
 	}
 

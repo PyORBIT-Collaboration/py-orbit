@@ -17,7 +17,7 @@ class Aperture: public OrbitUtils::CppPyWrapper
 public:
 	
 	/** Aperture */
-  Aperture(double shape, double a, double b, double c, double d); //(double shape, double size...)
+  Aperture(int shape, double a, double b, double c, double d); //(double shape, double size...)
 
 	/** Routine for transfering particles through a aperture */
 	void checkBunch(Bunch* bunch, Bunch* lostbunch);
@@ -28,7 +28,8 @@ protected:
 	int nLost;
 
 	//Aperture parameters
-  double shape_, a_, b_, c_, d_;
+	int shape_;
+	double a_, b_, c_, d_;
 	//int ma_, shape_;
 
 };

@@ -31,7 +31,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-Aperture::Aperture(double shape, double a, double b, double c, double d): CppPyWrapper(NULL)
+Aperture::Aperture(int shape, double a, double b, double c, double d): CppPyWrapper(NULL)
 {
 	shape_ = shape;
 	a_ = a;

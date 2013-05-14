@@ -26,7 +26,6 @@ class BunchTwissAnalysis: public OrbitUtils::CppPyWrapper
 		/** Performs the Twiss analysis of the bunch */
 		void analyzeBunch(Bunch* bunch);
 		
-		
 		/** Returns the centered correlation <(x-<x>)*(y-<y>)> = <x*y> - <x>*<y> */
 		double getCorrelation(int ic, int jc);
 		
@@ -50,6 +49,13 @@ class BunchTwissAnalysis: public OrbitUtils::CppPyWrapper
 		
 		/** Returns Twiss gamma for index 0,1,2 - x,y,z planes.*/
 		double getGamma(int ic);
+	
+		/** Computes the XY moments of the bunch up to a prescribed order */
+		void computeBunchMoments(Bunch* bunch, int order);
+	
+		/** Returns the XY moment of the beam */
+		double getBunchMoment(int i, int j);
+		
 		
 	private:
 		
@@ -69,6 +75,12 @@ class BunchTwissAnalysis: public OrbitUtils::CppPyWrapper
 		    It is excessive because <x*y> = <y*x> etc.*/
 		double* corr_arr;
 		double* corr_arr_MPI;
+	
+		/** array with XY Moments */
+		double** momentXY;
+	
+		/** order for the moments **/
+		double _order;
 		
 };
 

@@ -34,11 +34,11 @@ extern "C" {
     return 0;
   }
   
-	/** Performs the Twiss analysis of the bunch */
+ /** Performs the Twiss analysis of the bunch */
   static PyObject* BunchTwissAnalysis_analyzeBunch(PyObject *self, PyObject *args){
 	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
 		PyObject* pyBunch;
-		if(!PyArg_ParseTuple(args,"O:binBunch",&pyBunch)){
+		if(!PyArg_ParseTuple(args,"O:analyzeBunch",&pyBunch)){
 			ORBIT_MPI_Finalize("BunchTwissAnalysis - analyzeBunch(Bunch* bunch) - parameter are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
@@ -50,16 +50,45 @@ extern "C" {
 		Py_INCREF(Py_None);
 		return Py_None;
   }
+	
+	/** Returns the XY moments of the beam up to a prescribed order */
+	static PyObject* BunchTwissAnalysis_computeBunchMoments(PyObject *self, PyObject *args){
+		BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+		PyObject* pyBunch;
+		int order;
+		if(!PyArg_ParseTuple(args,"Oi:computeBunchMoments",&pyBunch,&order)){
+			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, double order) - parameters are needed.");
+		}
+		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, double order) - method needs a Bunch.");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+		cpp_BunchTwissAnalysis->computeBunchMoments(cpp_bunch, order);
+		Py_INCREF(Py_None);
+		return Py_None;
+	
+	}
 		
 	/** It will return the centered correlation <(x-<x>)*(y-<y>)> = <x*y> - <x>*<y> for coordinates with indeces (ic,jc) */
-  static PyObject* BunchTwissAnalysis_getCorrelation(PyObject *self, PyObject *args){
+	static PyObject* BunchTwissAnalysis_getCorrelation(PyObject *self, PyObject *args){
 	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
 	  int ic,jc;
 		if(!PyArg_ParseTuple(	args,"ii:getCorrelation",&ic,&jc)){
 			error("pyBunchTwissAnalysis.getCorrelation(ic,jc) - parameters are needed");
 		}
     return Py_BuildValue("d",cpp_BunchTwissAnalysis->getCorrelation(ic,jc));
-  }	
+	}
+	
+	/** It will return the (i,j) XY moment of the beam */
+	static PyObject* BunchTwissAnalysis_getBunchMoment(PyObject *self, PyObject *args){
+		BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+		int i,j;
+		if(!PyArg_ParseTuple(	args,"ii:getBunchMoment",&i,&j)){
+			error("pyBunchTwissAnalysis.getBunchMoment(i,j) - parameters are needed");
+		}
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getBunchMoment(i,j));
+	}
 
 	/** Returns the average value for coordinate with index ic */
   static PyObject* BunchTwissAnalysis_getAverage(PyObject *self, PyObject *args){
@@ -153,16 +182,18 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef BunchTwissAnalysisClassMethods[] = {
 		{ "analyzeBunch",				 BunchTwissAnalysis_analyzeBunch,    	METH_VARARGS,"Performs the Twiss analysis of the bunch."},
- 		{ "getCorrelation",			 BunchTwissAnalysis_getCorrelation,    METH_VARARGS,"Returns the centered correlation <(x-<x>)*(y-<y>)> = <x*y> - <x>*<y> for coordinates with indeces (ic,jc)"},		
+		{ "computeBunchMoments",			 BunchTwissAnalysis_computeBunchMoments,    METH_VARARGS,"Returns the XY moments of the beam up to a prescribed order"},
+ 		{ "getCorrelation",			 BunchTwissAnalysis_getCorrelation,    METH_VARARGS,"Returns the centered correlation <(x-<x>)*(y-<y>)> = <x*y> - <x>*<y> for coordinates with indeces (ic,jc)"},
+		{ "getBunchMoment",			 BunchTwissAnalysis_getBunchMoment,    METH_VARARGS,"Returns the (i,j) xy moment of the beam"},
  		{ "getAverage",			 	   BunchTwissAnalysis_getAverage,        METH_VARARGS,"Returns the average value for coordinate with index ic"},		
  		{ "getGlobalCount",			 BunchTwissAnalysis_getGlobalCount,    METH_VARARGS,"Returns the total number of analysed macroparticles"},		
  		{ "getGlobalMacrosize", BunchTwissAnalysis_getGlobalMacrosize,METH_VARARGS,"Returns the total macrosize"},		
-  	{ "getEmittance",			 	 BunchTwissAnalysis_getEmittance,      METH_VARARGS,"Returns the emittance for index 0,1,2 - x,y,z planes"},		
-  	{ "getAlpha",			 	     BunchTwissAnalysis_getAlpha,    	    METH_VARARGS,"Returns Twiss alpha for index 0,1,2 - x,y,z planes"},		
-  	{ "getBeta",			 	     BunchTwissAnalysis_getBeta,    	      METH_VARARGS,"Returns Twiss beta for index 0,1,2 - x,y,z planes"},		
-  	{ "getGamma",			 	     BunchTwissAnalysis_getGamma,    	    METH_VARARGS,"Returns Twiss gamma for index 0,1,2 - x,y,z planes"},				
-  	{ "getTwiss",			 	     BunchTwissAnalysis_getTwiss,    	    METH_VARARGS,"Returns Twiss tuple (alpha,beta,gamma,emitt) for index 0,1,2 - x,y,z planes"},				
-   {NULL}
+		{ "getEmittance",			 	 BunchTwissAnalysis_getEmittance,      METH_VARARGS,"Returns the emittance for index 0,1,2 - x,y,z planes"},		
+		{ "getAlpha",			 	     BunchTwissAnalysis_getAlpha,    	    METH_VARARGS,"Returns Twiss alpha for index 0,1,2 - x,y,z planes"},		
+		{ "getBeta",			 	     BunchTwissAnalysis_getBeta,    	      METH_VARARGS,"Returns Twiss beta for index 0,1,2 - x,y,z planes"},		
+		{ "getGamma",			 	     BunchTwissAnalysis_getGamma,    	    METH_VARARGS,"Returns Twiss gamma for index 0,1,2 - x,y,z planes"},				
+		{ "getTwiss",			 	     BunchTwissAnalysis_getTwiss,    	    METH_VARARGS,"Returns Twiss tuple (alpha,beta,gamma,emitt) for index 0,1,2 - x,y,z planes"},				
+		{NULL}
   };
 	
 	// defenition of the memebers of the python BunchTwissAnalysis wrapper class

@@ -156,6 +156,7 @@ class RF_AxisFieldAnalysis:
 	def makeTransitTimeTables(self,beta_min,beta_max,n_table_points,rf_freq):
 		"""
 		It will calculate transit time factor tables for all RF gaps
+		TTFs (T,S,Tp,Sp) are funcftions of the cappa variable = 2*pi*f/(c*beta)
 		"""
 		self.rf_freq = rf_freq
 		c_light = 2.99792458e+8
@@ -239,6 +240,7 @@ class RF_AxisFieldAnalysis:
 		"""
 		The method will prepare the polynomial fitting for the T,Tp,S,Sp 
 		as functions of cappa for all RF gaps
+		TTFs (T,S,Tp,Sp) are funcftions of the cappa variable = 2*pi*f/(c*beta)
 		"""
 		if(len(self.ttp_ssp_gap_arr) == 0):
 			print "Please, call makeTransitTimeTables(beta_min,beta_max,n_table_points,rf_freq) first!"

@@ -39,7 +39,7 @@ public:
   virtual ~RfGapTTF();
 	
 	/** Tracks the Bunch trough the RF gap. */	
-	void trackBunch(Bunch* bunch, double frequency, double ampl, double E0TL, double phase);	
+	void trackBunch(Bunch* bunch, double E0, double phase);	
 			
 	/** 
 	    Sets up the gap parameters: T,S, minimal and maximal beta, 
@@ -105,7 +105,7 @@ public:
 		//but we also need it for auxilary purposes. The units are Hz.
 		double rf_frequency;
 		
-		//gap_length is a gap parameter L to substitute into the E0TL expression
+		//gap_length is a gap parameter L to substitute into the E0L expression
 		double gap_length;
 		
 		//the parameter defines the amplitude of the gap relative 

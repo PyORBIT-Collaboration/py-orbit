@@ -65,16 +65,16 @@ extern "C" {
     pyORBIT_Object* pyRfGapTTF = (pyORBIT_Object*) self;
 		RfGapTTF* cpp_RfGapTTF = (RfGapTTF*) pyRfGapTTF->cpp_obj;
 		PyObject* pyBunch;
-	  double frequency, e0tl, phase, ampl;		
-		if(!PyArg_ParseTuple(args,"Odddd:trackBunch",&pyBunch,&frequency,&ampl,&e0tl,&phase)){
-			ORBIT_MPI_Finalize("PyRfGapTTF - trackBunch(Bunch* bunch, freq, ampl, E0TL, phase) - parameters are needed.");
+	  double E0, phase;		
+		if(!PyArg_ParseTuple(args,"Odd:trackBunch",&pyBunch,&E0,&phase)){
+			ORBIT_MPI_Finalize("PyRfGapTTF - trackBunch(Bunch* bunch, E0L, phase) - parameters are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyRfGapTTF - trackBunch(Bunch* bunch, freq, ampl, E0TL, phase) - first param. should be a Bunch.");
+			ORBIT_MPI_Finalize("PyRfGapTTF - trackBunch(Bunch* bunch, E0L, phase) - first param. should be a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_RfGapTTF->trackBunch(cpp_bunch,frequency,ampl,e0tl,phase);
+		cpp_RfGapTTF->trackBunch(cpp_bunch,E0,phase);
 		Py_INCREF(Py_None);
     return Py_None;	
 	}		
@@ -262,7 +262,7 @@ extern "C" {
 	// defenition of the methods of the python RfGapTTF wrapper class
 	// they will be vailable from python level
   static PyMethodDef RfGapTTFClassMethods[] = {
-		{ "trackBunch",     RfGapTTF_trackBunch,    METH_VARARGS,"tracks the Bunch through the RF gap."},
+		{ "trackBunch",     RfGapTTF_trackBunch,    METH_VARARGS,"tracks the Bunch through the RF gap trackBunch(bunch,E0,phase)."},
 		{ "getT_TTF",       RfGapTTF_getT_TTF,      METH_VARARGS,"get the T TTF Polynomial of the gap model."},
 		{ "getS_TTF",       RfGapTTF_getS_TTF,      METH_VARARGS,"get the S TTF Polynomial of the gap model."},
 		{ "getTp_TTF",      RfGapTTF_getTp_TTF,     METH_VARARGS,"get the Tp TTF Polynomial of the gap model."},

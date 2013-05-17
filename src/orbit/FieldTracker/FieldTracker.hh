@@ -19,7 +19,7 @@ class FieldTracker: public OrbitUtils::CppPyWrapper
 public:
 	
 	/** FieldTracker */
-    FieldTracker(); 
+    FieldTracker(double a);
     
 	/** Routine for transfering particles through a aperture */
 	void trackBunch(Bunch* b);

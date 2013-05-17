@@ -19,18 +19,18 @@
 
 //Constructor
 
-FieldTracker::FieldTracker()
+FieldTracker::FieldTracker(double a)
 {
     
-    
+    cerr<<"Instantiating the 3D field track class \n";
     
 }
 
-FieldTracker:TrackBunch(Bunch b)
+void FieldTracker::trackBunch(Bunch* b)
 {
     
     
-    
+	cerr<<"Ready to track in the 3D field!\n";
     
     
 }

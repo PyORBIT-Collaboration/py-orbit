@@ -29,8 +29,6 @@ FieldTracker::FieldTracker(double a)
 void FieldTracker::trackBunch(Bunch* b)
 {
     
-    
 	cerr<<"Ready to track in the 3D field!\n";
-    
     
 }

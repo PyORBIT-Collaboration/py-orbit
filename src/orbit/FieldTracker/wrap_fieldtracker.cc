@@ -79,7 +79,6 @@ namespace wrap_FieldTracker{
             {NULL}
         };
         
-        
         //new python FieldTracker wrapper type definition
         static PyTypeObject pyORBIT_FieldTracker_Type = {
             PyObject_HEAD_INIT(NULL)

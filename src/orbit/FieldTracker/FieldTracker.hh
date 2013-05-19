@@ -25,7 +25,6 @@ public:
 	void trackBunch(Bunch* b);
     
 protected:
-    
 
 };
 

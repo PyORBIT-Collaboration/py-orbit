@@ -7,9 +7,9 @@
 
 #include "FieldTracker.hh"
 
-#include "wrap_FieldTracker.hh"
+#include "wrap_fieldtracker.hh"
 
-namespace wrap_FieldTracker{
+namespace wrap_fieldtracker{
     
     void error(const char* msg){ ORBIT_MPI_Finalize(msg); }
     

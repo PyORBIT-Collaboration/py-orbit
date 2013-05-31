@@ -12,7 +12,7 @@ import math
 # import the linac structure tree with all sequences and nodes, but without drifts
 from LinacParser import LinacStructureTree
 
-from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode, MarkerLinacNode, Drift, Quad, BaseRF_Gap
+from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode, MarkerLinacNode, Drift, Quad, BaseRF_Gap, Bend
 from LinacAccNodes import DCorrectorH, DCorrectorV
 from LinacAccNodes import RF_Cavity, Sequence
 
@@ -128,6 +128,26 @@ class LinacLatticeFactory():
 					accNode.setParam("dB/dr",node.getParam("field"))
 					accNode.setParam("field",node.getParam("field"))
 					accNode.setLength(node.getParam("effLength"))
+                                                                                
+                                        #if(0.5*accNode.getLength() > self.maxDriftLength):                                        
+                                        #    accNode.setnParts(2*int(0.5*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1  > 0)*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1 ) + 1))
+
+					accSeq.addNode(accNode)
+				#------------BEND-----------------
+                                elif(node.getType() == "BEND"):
+					accNode = Bend(node.getName())                                        
+					accNode.updateParamsDict(node.getParamsDict())	                                        
+					accNode.setParam("poles",[int(x) for x in eval(node.getParam("poles"))])
+					accNode.setParam("kls", [x for x in eval(node.getParam("kls"))])
+                                        accNode.setParam("skews",[int(x) for x in eval(node.getParam("skews"))])
+                                        accNode.setParam("ea1",node.getParam("ea1"))
+                                        accNode.setParam("ea2",node.getParam("ea2"))
+                                        accNode.setParam("theta",node.getParam("theta"))
+					accNode.setLength(node.getParam("effLength"))
+                                                                                
+                                        #if(0.5*accNode.getLength() > self.maxDriftLength):                                        
+                                        #    accNode.setnParts(2*int(0.5*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1  > 0)*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1 ) + 1))
+
 					accSeq.addNode(accNode)
 				#------------RF_Gap-----------------	
 				elif(node.getType() == "RFGAP"):
@@ -142,7 +162,7 @@ class LinacLatticeFactory():
 					accNode.setParam("length",node.getParam("gapLength"))
 					accNode.setParam("gapLength",node.getParam("gapLength"))		
 					accNode.setParam("modePhase",node.getParam("modePhase"))
-					rf_cav_name = node.getParam("parentCvaity")
+					rf_cav_name = node.getParam("parentCavity")
 					if(rf_cav_name not in rf_cav_names):
 						accNode.setParam("firstPhase", (math.pi/180.)*accNode.getParam("firstPhase"))
 						rf_cav_names.append(rf_cav_name)
@@ -201,13 +221,13 @@ class LinacLatticeFactory():
 				if(lastNode.getLength()/2.0 + lastNode.getParam("pos") > accSeq.getLength()):
 					msg = "The LinacLatticeFactory method getLinacAccLattice(names): the last node is too long!"
 					msg = msg + os.linesep
-					msg = msg + "name=" + firstNode.getName()
+					msg = msg + "name=" + lastNode.getName()
 					msg = msg + os.linesep
-					msg = msg + "type=" + firstNode.getType()
+					msg = msg + "type=" + lastNode.getType()
 					msg = msg + os.linesep
-					msg = msg + "length=" + str(firstNode.getLength())
+					msg = msg + "length=" + str(lastNode.getLength())
 					msg = msg + os.linesep
-					msg = msg + "pos=" + str(firstNode.getParam("pos"))					
+					msg = msg + "pos=" + str(lastNode.getParam("pos"))					
 					msg = msg + os.linesep
 					msg = msg + "sequence name=" + accSeq.getName()				
 					msg = msg + os.linesep

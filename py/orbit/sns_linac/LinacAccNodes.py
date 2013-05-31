@@ -347,7 +347,181 @@ class Quad(LinacMagnetNode):
 			TPB.quad1(bunch, length, kq)
 			#print "debug after xp",	bunch.xp(0)
 		return		
+
+
+class Bend(LinacMagnetNode):
+	"""
+	Bend Combined Functions TEAPOT element.
+	"""
+	def __init__(self, name = "bend no name"):
+		"""
+		Constructor. Creates the Bend Combined Functions TEAPOT element .
+		"""
+		LinacMagnetNode.__init__(self,name)
+		self.addParam("poles",[])
+		self.addParam("kls",[])
+		self.addParam("skews",[])
+
+		self.addParam("ea1",0.)
+		self.addParam("ea2",0.)
+		self.addParam("rho",0.)
+		self.addParam("theta",1.0e-36)
 		
+		self.setnParts(2)
+                self.setType("bend linac")
+                self.setUsageFringeFieldIN(True)
+                self.setUsageFringeFieldOUT(True)
+		
+		def fringeIN(node,paramsDict):
+                        bunch = paramsDict["bunch"]
+                        length = paramsDict["parentNode"].getLength()
+			usageIN = node.getUsage()
+			e = node.getParam("ea1")
+			rho = node.getParam("rho")
+			poleArr = node.getParam("poles")
+                        klArr =  [-x*bunch.charge()*length for x in self.getParam("kls")]
+			skewArr = node.getParam("skews")
+			nParts = paramsDict["parentNode"].getnParts()
+			if(e != 0.):
+				inout = 0
+				TPB.wedgedrift(bunch,e,inout)
+				if(usageIN):
+					frinout = 0
+					TPB.wedgerotate(bunch, e, frinout)
+					TPB.bendfringeIN(bunch, rho)
+					if(length != 0.):
+						for i in xrange(len(poleArr)):
+							pole = poleArr[i]
+							kl = klArr[i]/length
+							skew = skewArr[i]
+							TPB.multpfringeIN(bunch,pole,kl,skew)
+					frinout = 1
+					TPB.wedgerotate(bunch, e, frinout)                                
+				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1)
+			else:
+				if(usageIN):
+					TPB.bendfringeIN(bunch, rho)
+					if(length != 0.):
+						for i in xrange(len(poleArr)):
+							pole = poleArr[i]
+							kl = klArr[i]/length
+							skew = skewArr[i]
+							TPB.multpfringeIN(bunch,pole,kl,skew)
+
+		def fringeOUT(node,paramsDict):
+                        bunch = paramsDict["bunch"]
+                        length = paramsDict["parentNode"].getLength()
+			usageOUT = node.getUsage()
+			e = node.getParam("ea2")
+			rho = node.getParam("rho")
+			poleArr = node.getParam("poles")
+                        klArr =  [-x*bunch.charge()*length for x in self.getParam("kls")]
+			skewArr = node.getParam("skews")
+                        nParts = paramsDict["parentNode"].getnParts()
+			if(e != 0.):
+				inout = 1
+				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1)
+				if(usageOUT):
+					frinout = 0
+					TPB.wedgerotate(bunch, -e, frinout)
+					TPB.bendfringeOUT(bunch, rho)
+					if(length != 0.):
+						for i in xrange(len(poleArr)):
+							pole = poleArr[i]
+							kl = klArr[i]/length
+							skew = skewArr[i]
+							TPB.multpfringeOUT(bunch,pole,kl,skew)
+					frinout = 1
+					TPB.wedgerotate(bunch, -e, frinout)
+				TPB.wedgedrift(bunch,e,inout)
+			else:
+				if(usageOUT):
+					TPB.bendfringeOUT(bunch, rho)
+					if(length != 0.):
+						for i in xrange(len(poleArr)):
+							pole = poleArr[i]
+							kl = klArr[i]/length
+							skew = skewArr[i]
+							TPB.multpfringeOUT(bunch,pole,kl,skew)
+
+		self.setFringeFieldFunctionIN(fringeIN)
+		self.setFringeFieldFunctionOUT(fringeOUT)
+
+		
+
+	def initialize(self):
+		"""
+		The  Bend Combined Functions TEAPOT class implementation of
+		the AccNode class initialize() method.
+		"""
+		nParts = self.getnParts()
+		if(nParts < 2):
+			msg = "The Bend Combined Functions TEAPOT class instance should have more than 2 parts!"
+			msg = msg + os.linesep
+			msg = msg + "Method initialize():"
+			msg = msg + os.linesep
+			msg = msg + "Name of element=" + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element=" + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "nParts =" + str(nParts)
+			orbitFinalize(msg)
+		rho = self.getLength()/self.getParam("theta")
+		self.addParam("rho",rho)
+		lengthIN = (self.getLength()/(nParts - 1))/2.0
+		lengthOUT = (self.getLength()/(nParts - 1))/2.0
+		lengthStep = lengthIN + lengthOUT
+		self.setLength(lengthIN,0)
+		self.setLength(lengthOUT,nParts - 1)
+		for i in xrange(nParts-2):
+			self.setLength(lengthStep,i+1)
+
+	def track(self, paramsDict):
+		"""
+		The Bend Combined Functions TEAPOT  class implementation of
+		the AccNodeBunchTracker class track(probe) method.
+		"""
+                bunch = paramsDict["bunch"]
+		nParts = self.getnParts()
+		index = self.getActivePartIndex()
+		length = self.getLength(index)
+		poleArr = self.getParam("poles")
+		klArr =  [-x*bunch.charge()*self.getLength() for x in self.getParam("kls")]
+		skewArr = self.getParam("skews")		
+		theta = self.getParam("theta")/(nParts - 1)
+		if(index == 0):
+			TPB.bend1(bunch, length, theta/2.0)
+			return
+		if(index > 0 and index < (nParts-1)):
+			TPB.bend2(bunch, length/2.0)
+			TPB.bend3(bunch, theta/2.0)
+			TPB.bend4(bunch,theta/2.0)
+			for i in xrange(len(poleArr)):
+				pole = poleArr[i]
+				kl = klArr[i]/(nParts - 1)
+				skew = skewArr[i]
+				TPB.multp(bunch,pole,kl,skew)
+			TPB.bend4(bunch,theta/2.0)
+			TPB.bend3(bunch, theta/2.0)
+			TPB.bend2(bunch, length/2.0)
+			TPB.bend1(bunch, length, theta)
+			return
+		if(index == (nParts-1)):
+			TPB.bend2(bunch, length)
+			TPB.bend3(bunch, theta/2.0)
+			TPB.bend4(bunch, theta/2.0)
+			for i in xrange(len(poleArr)):
+				pole = poleArr[i]
+				kl = klArr[i]/(nParts - 1)
+				skew = skewArr[i]
+				TPB.multp(bunch,pole,kl,skew)
+			TPB.bend4(bunch, theta/2.0)
+			TPB.bend3(bunch, theta/2.0)
+			TPB.bend2(bunch, length)
+			TPB.bend1(bunch, length, theta/2.0)
+		return
+                
+                
 class DCorrectorH(LinacMagnetNode):
 	"""
 	The Horizontal Dipole Corrector.

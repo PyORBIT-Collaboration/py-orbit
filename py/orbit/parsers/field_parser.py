@@ -14,11 +14,6 @@ class Field_Parser3D:
 	def __del__(self):
 		del self.__lines
 		
-		
-	def dumb(self, i):
-		return 3 + i
-		
-		
 	def getLimits(self,filename):
 		
 		infile = open(filename,"r")
@@ -69,25 +64,79 @@ class Field_Parser3D:
 		print "Range of X,Y,Z values in data: ", Xrange, " ", Yrange, " ", Zrange
 		
 		return range
-	
-	def getGridSize(self,range, step):
+
+
+###############################################################################
+#  gets the gridsize give the range of each variable 
+# and the step of each variable
+##############################################################################	
+	def getGridSize(self,range, step, usrLimits):
 		
 		for i in xrange(3):
-			range[i] = int(range[i]*1/step)
-		gridSize = [range[0],range[1], range[2]]
+			range[i] = range[i]*1.0/step[i]		
+		gridSize = [range[0]+1,range[1]+1, range[2]+1]
+
+		
+		xrnge = usrLimits[1] - usrLimits[0]
+		yrnge = usrLimits[3] - usrLimits[2]
+		zrnge = usrLimits[5] - usrLimits[4]
+		usrRange = [xrnge,yrnge,zrnge]
+		
+		for i in xrange(3):
+			usrRange[i] = (usrRange[i]*1.0/step[i]) + 1
+		for i in xrange(3):
+			if(usrRange[i]<gridSize[i]): 
+				gridSize[i] = usrRange[i]
+		gridSize = map(int,gridSize)
 		print "Grid Size [x,y,z]: " , gridSize
 		
+
 		return gridSize
-	
+###############################################################################
+#Returns the coordinates in the grid given the rawNumbers 
+#and the limits of each variable.
+############################################################################## 	
 	def getCoordinates(self, gridSize, step,rawNumbers, limits):
 		
 		coordinates = [rawNumbers[0] ,rawNumbers[1],rawNumbers[2]]
 		for i in xrange(len(coordinates)):
-			coordinates[i] = coordinates[i]*(1/step)
-			coordinates[i] = coordinates[i]+2*-limits[2*i]
+			coordinates[i] = coordinates[i]*(1.0/step[i])
+			coordinates[i] = coordinates[i]-limits[2*i]/step[i]
 		coordinates = map(int, coordinates)
 		
 		return coordinates
+	
+	
+#####
+# Checks to see if the given coordinates are within the range specified
+#####
+	def checkLimits(self, arrayLimits, value):
+		if(value[0] >= arrayLimits[0] and 
+		value[0] <= arrayLimits[1]):
+			if(value[1] >= arrayLimits[2] and 
+			value[1] <= arrayLimits[3]):
+				if(value[2] >= arrayLimits[4] and 
+				value[2] <= arrayLimits[5]):
+					return True
+		else:
+			return False
+		
+	def checkGrid(self,step,value):
+		localStep = [0,0,0]
+		localValue = [0,0,0]
+		for i in xrange(3):
+			localStep[i] = 2*step[i]
+			localValue[i] = 2*value[i]
+		map(int, localStep)
+		map(int, localValue)
+		
+		for i in xrange(3):
+			if(value[i]%step[i] != 0):
+				return False
+		else:
+			return True
+		
+
 	
 	
 ###############################################################################
@@ -98,31 +147,36 @@ class Field_Parser3D:
 # zsize: size of the grid in the z diminsion
 # All Grid sizes are user defined.
 ###############################################################################
-	def parse(self, filename, xsize, ysize, zsize):
-				
+	def parse(self, filename, xmin,xmax,ymin,ymax,zmin,zmax,xstep,ystep,zstep):
+		
+		usrLimits = [xmin,xmax,ymin,ymax,zmin,zmax]		
 		limits = self.getLimits(filename)
 		
 		range = self.getRange(limits)
-		step = 0.5
+		step = [xstep,ystep,zstep]
 		
-		gridSize = self.getGridSize(range, step)
-
- 		numLines = limits[6]
- 		
- 		
+		
+		gridSize = self.getGridSize(range, step, usrLimits)
+	
+ 		numLines = limits[6]	
  		
 		print "Number of lines in the file: ",numLines , "\n"
 		
 		#for now we will say that the size of the grid encompasses all datapoints
 		print "GridSize " , gridSize[0],gridSize[1],gridSize[2]
-  		fieldgrid3DBx = Grid3D(gridSize[0]+1,gridSize[1]+1,gridSize[2]+1)
-  		fieldgrid3DBy = Grid3D(gridSize[0]+1,gridSize[1]+1,gridSize[2]+1)
-  		fieldgrid3DBz = Grid3D(gridSize[0]+1,gridSize[1]+1,gridSize[2]+1)
-  		fieldgrid3DMag = Grid3D(gridSize[0]+1,gridSize[1]+1,gridSize[2]+1)
+  		fieldgrid3DBx = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		fieldgrid3DBy = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		fieldgrid3DBz = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		fieldgrid3DMag = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		xGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		yGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		zGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
   		
-  		setGridX = (limits[0],limits[1])
-  		setGridY = (limits[2],limits[3])
-  		setGridZ = (limits[4],limits[5])
+  		
+  		
+#   		setGridX = (usrLimits[0],usrLimits[1])
+#   		setGridY = (usrLimits[2],usrLimits[3])
+#   		setGridZ = (usrLimits[4],usrLimits[5])
   		
   		
 	
@@ -132,22 +186,41 @@ class Field_Parser3D:
 		# Maps values from file to grid.
 		##
 		infile1 = open(filename,"r")
-		i = 0;
+		x =1
 		for line in infile1.readlines():
 			splitLine = line.split()
 			rawNumbers = map(float, splitLine)
-			coordinates = self.getCoordinates(gridSize,step,rawNumbers, limits)
-# 			print coordinates
- 			fieldgrid3DBx.setValue(rawNumbers[3]/10000.0, coordinates[0], coordinates[1], coordinates[2])
- 			fieldgrid3DBy.setValue(rawNumbers[4]/10000.0, coordinates[0], coordinates[1], coordinates[2])
- 			fieldgrid3DBz.setValue(rawNumbers[5]/10000.0, coordinates[0], coordinates[1], coordinates[2])
- 			
- 			getMag = ((rawNumbers[3]**2.0+rawNumbers[4]**2.0+rawNumbers[5]**2.0)**0.5)/10000.0
+# 			Maps data points to integers so that they can be evaluated for stepsize
+			testRS = map(int, rawNumbers)
+#   			print rawNumbers
+  			if(self.checkGrid(step,rawNumbers) and
+ 			  self.checkLimits(usrLimits,rawNumbers) 
+ 			  ):
+			  	
+# 			  	print gridSize, step, rawNumbers, limits
+				coordinates = self.getCoordinates(gridSize,step,rawNumbers, usrLimits)
+#   				print coordinates
+# 				print rawNumbers
+					
+ 				xGrid.setValue(rawNumbers[0]/100.0, coordinates[0], coordinates[1], coordinates[2])
+ 		 		yGrid.setValue(rawNumbers[1]/100.0, coordinates[0], coordinates[1], coordinates[2])
+ 		 	 	zGrid.setValue(rawNumbers[2]/100.0, coordinates[0], coordinates[1], coordinates[2])
+		 	 	fieldgrid3DBx.setValue(rawNumbers[3]/10000.0, coordinates[0], coordinates[1], coordinates[2])		 	
+		 		fieldgrid3DBy.setValue(rawNumbers[4]/10000.0, coordinates[0], coordinates[1], coordinates[2])
+		 	
+ 				fieldgrid3DBz.setValue(rawNumbers[5]/10000.0, coordinates[0], coordinates[1], coordinates[2])
+ 			 	getMag = ((rawNumbers[3]**2.0+rawNumbers[4]**2.0+rawNumbers[5]**2.0)**0.5)/10000.0
  		 	
- 		 	fieldgrid3DMag.setValue(getMag, coordinates[0], coordinates[1], coordinates[2])
-#  		 	print fieldgrid3Dx.getValueOnGrid(coordinates[0], coordinates[1], coordinates[2])
- 		
- 		MagList = [fieldgrid3DBx,fieldgrid3DBy,fieldgrid3DBz,fieldgrid3DMag]
+ 	 			fieldgrid3DMag.setValue(getMag, coordinates[0], coordinates[1], coordinates[2])
+#   		 		if (x<1000):
+#  				  	print "At Coordinates " , coordinates, " x == ", x
+#  				 	print "Values X,Y,ZGrid ",  xGrid.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), yGrid.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), zGrid.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2])
+#  				 	print "Values fieldGrids " ,  fieldgrid3DBx.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), fieldgrid3DBy.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), fieldgrid3DBz.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]) 
+ 				 	
+#     				x += 1
+ 		  		 
+ 		  		 
+ 		MagList = [fieldgrid3DBx,fieldgrid3DBy,fieldgrid3DBz,fieldgrid3DMag,xGrid,yGrid,zGrid]
  		
 		return MagList
 	

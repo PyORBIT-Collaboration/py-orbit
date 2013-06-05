@@ -13,7 +13,10 @@ class Field_Parser3D:
 	
 	def __del__(self):
 		del self.__lines
-		
+	
+###########################################################################	
+#Gets the limits of the file being parsed	
+###########################################################################		
 	def getLimits(self,filename):
 		
 		infile = open(filename,"r")
@@ -44,9 +47,12 @@ class Field_Parser3D:
 		print "Min and Max values: " , xmin, xmax, ymin, ymax, zmin, zmax, numLines, "\n" 
 
 		limits = [xmin, xmax, ymin, ymax, zmin, zmax, numLines]
-			
-		return limits	
-	#limits is a list of format [xmin,xmax,ymin,ymax,zmin,zmax]
+		return limits
+	
+	
+###########################################################################		
+#Limits is a list of format [xmin,xmax,ymin,ymax,zmin,zmax]
+###########################################################################
 	def getRange(self,limits):
 		xmin = limits[0]
  		xmax = limits[1]
@@ -107,9 +113,9 @@ class Field_Parser3D:
 		return coordinates
 	
 	
-#####
+#######################################################################
 # Checks to see if the given coordinates are within the range specified
-#####
+#######################################################################
 	def checkLimits(self, arrayLimits, value):
 		if(value[0] >= arrayLimits[0] and 
 		value[0] <= arrayLimits[1]):
@@ -121,6 +127,10 @@ class Field_Parser3D:
 		else:
 			return False
 		
+		
+##########################################################################
+#Checks to see if the point is on the grid given the current step
+##########################################################################		
 	def checkGrid(self,step,value):
 		localStep = [0,0,0]
 		localValue = [0,0,0]
@@ -142,9 +152,9 @@ class Field_Parser3D:
 ###############################################################################
 # Parameters 
 # filename: name of the text file to be processed
-# xsize: size of the grid in the x diminsion
-# ysize: size of the grid in the y diminsion
-# zsize: size of the grid in the z diminsion
+# xmin,xmax,ymin,ymax,zmin,zmax - user defined limits for the file being parsed
+# xstep,ystep,ztep - the step size for the parsing. (0.5 parses 0.0,0.5,1.0,1.5 etc.
+# while a 1.0 value will parse 0.0,1.0,2.0, etc.
 # All Grid sizes are user defined.
 ###############################################################################
 	def parse(self, filename, xmin,xmax,ymin,ymax,zmin,zmax,xstep,ystep,zstep):
@@ -155,7 +165,7 @@ class Field_Parser3D:
 		range = self.getRange(limits)
 		step = [xstep,ystep,zstep]
 		
-		
+		#Computes the size of the grid given the user limits and the step
 		gridSize = self.getGridSize(range, step, usrLimits)
 	
  		numLines = limits[6]	
@@ -172,35 +182,20 @@ class Field_Parser3D:
   		yGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
   		zGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
   		
-  		
-  		
-#   		setGridX = (usrLimits[0],usrLimits[1])
-#   		setGridY = (usrLimits[2],usrLimits[3])
-#   		setGridZ = (usrLimits[4],usrLimits[5])
-  		
-  		
-	
-		print
-	
-		##
 		# Maps values from file to grid.
-		##
+	
 		infile1 = open(filename,"r")
-		x =1
 		for line in infile1.readlines():
 			splitLine = line.split()
 			rawNumbers = map(float, splitLine)
 # 			Maps data points to integers so that they can be evaluated for stepsize
 			testRS = map(int, rawNumbers)
-#   			print rawNumbers
+
   			if(self.checkGrid(step,rawNumbers) and
  			  self.checkLimits(usrLimits,rawNumbers) 
  			  ):
 			  	
-# 			  	print gridSize, step, rawNumbers, limits
 				coordinates = self.getCoordinates(gridSize,step,rawNumbers, usrLimits)
-#   				print coordinates
-# 				print rawNumbers
 					
  				xGrid.setValue(rawNumbers[0]/100.0, coordinates[0], coordinates[1], coordinates[2])
  		 		yGrid.setValue(rawNumbers[1]/100.0, coordinates[0], coordinates[1], coordinates[2])
@@ -212,12 +207,6 @@ class Field_Parser3D:
  			 	getMag = ((rawNumbers[3]**2.0+rawNumbers[4]**2.0+rawNumbers[5]**2.0)**0.5)/10000.0
  		 	
  	 			fieldgrid3DMag.setValue(getMag, coordinates[0], coordinates[1], coordinates[2])
-#   		 		if (x<1000):
-#  				  	print "At Coordinates " , coordinates, " x == ", x
-#  				 	print "Values X,Y,ZGrid ",  xGrid.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), yGrid.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), zGrid.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2])
-#  				 	print "Values fieldGrids " ,  fieldgrid3DBx.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), fieldgrid3DBy.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]), fieldgrid3DBz.getValueOnGrid(coordinates[0],coordinates[1],coordinates[2]) 
- 				 	
-#     				x += 1
  		  		 
  		  		 
  		MagList = [fieldgrid3DBx,fieldgrid3DBy,fieldgrid3DBz,fieldgrid3DMag,xGrid,yGrid,zGrid]

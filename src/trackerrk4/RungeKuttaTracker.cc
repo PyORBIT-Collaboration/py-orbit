@@ -487,6 +487,11 @@ void RungeKuttaTracker::trackBunch(Bunch* bunch, BaseFieldSource* fieldSource, E
 void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, double t_step_in, 
 	                            BaseFieldSource* fieldSource, ExternalEffects* extEff)
 {
+	//------------------------------------------------
+	//performs the necessary actions before tracking
+	if(extEff != NULL) extEff->setupEffects(bunch);	
+	//------------------------------------------------        
+    
 	charge = bunch->getCharge();
 	mass = bunch->getMass();
 	mass2 = mass*mass;
@@ -497,10 +502,7 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 	double** partCoordArr = bunch->coordArr();
 	int flag = 0;
 	double t = t_begin;
-	//------------------------------------------------
-	//performs the necessary actions before tracking
-	if(extEff != NULL) extEff->setupEffects(bunch);	
-	//------------------------------------------------	
+	
 	for (int i = 0; i < n_steps; i++){
 		
 		t = t_begin + i*t_step;

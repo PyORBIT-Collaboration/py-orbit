@@ -650,6 +650,14 @@ void Bunch::deleteParticleFast(int index)
   needOfCompress = 1;
 }
 
+void Bunch::recoverParticle(int index)
+{
+  arrFlag[index] = 1; //dead
+
+  //we need compress in the future
+  needOfCompress = 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////
 //
 // NAME

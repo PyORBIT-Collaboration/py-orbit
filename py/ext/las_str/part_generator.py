@@ -94,71 +94,52 @@ class ParticlesGen:
 
 
 class BunchGen:
+    
+    def getCoords(self, alpha, beta, emit_rms, u_cutoff):
+        """ Returns u and u' [m] and [rad] """
 
+        while 1:
+            u = random.gauss(0.,math.sqrt(beta*emit_rms))
+            up = random.gauss(0.,math.sqrt(emit_rms/beta))
+            if(u*u+beta*beta*up*up < u_cutoff*u_cutoff):
+                up = up - alpha*u/beta
+                return u,up
+                      
 
-    def getBunch(self,time_par):
+    def getBunch(self,time_par):        
 
         rank = orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)
         random.seed((rank+1)*12571+time_par*int(time.time()))
-
-
-        TK = self.TK
-        N_part = self.N_part
-        alphaX = self.alphaX
-        betaX = self.betaX
-        emtX = self.emtX
-        alphaY = self.alphaY
-        betaY = self.betaY
-        emtY = self.emtY
-        relativeSpread = self.relativeSpread
-        dispD = self.dispD
-        dispDP = self.dispDP
-        cutOffX = self.cutOffX
-        cutOffY = self.cutOffY
-        mass = self.mass
-        charge = self.charge
-        sigma_beam = self.sigma_beam
-        cutOffZ = self.cutOffZ
         
+        E = self.mass + self.TK
+        P = math.sqrt(E*E - self.mass*self.mass)
+        #vz = 299792458*P/E
         
-        E = mass + TK
-        P = math.sqrt(E*E - mass*mass)
-        vz = 299792458*P/E
+        #beta = P/E
+        #gamma = E/self.mass
         
-        beta = math.sqrt(E*E - mass*mass)/E
-        gamma = 1./math.sqrt(1-beta*beta)
+        #bg = beta*gamma
         
-        bg = beta*gamma
-
-
-
-        trGenX = TransverseCoordGen(alphaX,betaX,emtX/bg,cutOffX)
-        trGenY = TransverseCoordGen(alphaY,betaY,emtY/bg,cutOffY)
-
-        gamaX = (1.0+alphaX*alphaX)/betaX
-        gamaY = (1.0+alphaY*alphaY)/betaY
-
-        sigmaXP = math.sqrt(emtX*gamaX)*1.0e+3
-        sigmaYP = math.sqrt(emtY*gamaY)*1.0e+3
-
-
-        pGen = EnergyGen(TK,relativeSpread,mass)
-        partGen = ParticlesGen(dispD,dispDP,trGenX,trGenY,pGen)
-
         bunch = Bunch()
-        bunch.charge(charge)
-        bunch.mass(mass)
-        
-        for i in range(N_part):
-            (x,px,y,py,z,pz) = partGen.getCoords()
+        bunch.charge(self.charge)
+        bunch.mass(self.mass)
+
+
+        for i in range(self.N_part):
+
+            x,xp = self.getCoords(self.alphaX, self.betaX, self.emtX, math.sqrt(self.emtX*self.betaX)*3.0)
+            y,yp = self.getCoords(self.alphaY, self.betaY, self.emtY, math.sqrt(self.emtY*self.betaY)*3.0)
+            z,zp = self.getCoords(self.alphaZ, self.betaZ, self.emtZ, math.sqrt(self.emtZ*self.betaZ)*3.0)             
             
-            res = 0
-            while(res == 0):
-                z = random.gauss(0,sigma_beam*vz)
-                if( abs(z) <  cutOffZ*vz):
-                    res = 1
-#            bunch.addParticle(0.,0.,0.,0.,0.,P)
+            x += self.dispD*zp
+            xp += self.dispDP*zp           
+
+            px = xp*P
+            py = yp*P
+            pz = (1 + zp)*P
+            
             bunch.addParticle(x,px,y,py,z,pz)
+            
         
         return bunch
 

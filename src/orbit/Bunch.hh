@@ -97,6 +97,7 @@ public:
   //removes a macro-particle from a bunch
   //you need to compress the bunch after one or +several delete operations
   void deleteParticleFast(int index);
+  void recoverParticle(int index);
 
   //removes a macro-particle from a bunch
   //You do not need to call compress method

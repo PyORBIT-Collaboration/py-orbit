@@ -38,7 +38,7 @@ public:
   /** Destructor */
   virtual ~RfGapTTF();
 	
-	/** Tracks the Bunch trough the RF gap. */	
+	/** Tracks the Bunch through the RF gap. */	
 	void trackBunch(Bunch* bunch, double E0, double phase);	
 			
 	/** 

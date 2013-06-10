@@ -174,13 +174,13 @@ class Field_Parser3D:
 		
 		#for now we will say that the size of the grid encompasses all datapoints
 		print "GridSize " , gridSize[0],gridSize[1],gridSize[2]
-  		fieldgrid3DBx = Grid3D(gridSize[0],gridSize[1],gridSize[2])
-  		fieldgrid3DBy = Grid3D(gridSize[0],gridSize[1],gridSize[2])
-  		fieldgrid3DBz = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		BXGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		BYGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		BZGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
   		fieldgrid3DMag = Grid3D(gridSize[0],gridSize[1],gridSize[2])
-  		xGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
-  		yGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
-  		zGrid = Grid3D(gridSize[0],gridSize[1],gridSize[2])
+  		XGrid = []
+  		YGrid = []
+  		ZGrid = []
   		
 		# Maps values from file to grid.
 	
@@ -197,19 +197,20 @@ class Field_Parser3D:
 			  	
 				coordinates = self.getCoordinates(gridSize,step,rawNumbers, usrLimits)
 					
- 				xGrid.setValue(rawNumbers[0]/100.0, coordinates[0], coordinates[1], coordinates[2])
- 		 		yGrid.setValue(rawNumbers[1]/100.0, coordinates[0], coordinates[1], coordinates[2])
- 		 	 	zGrid.setValue(rawNumbers[2]/100.0, coordinates[0], coordinates[1], coordinates[2])
-		 	 	fieldgrid3DBx.setValue(rawNumbers[3]/10000.0, coordinates[0], coordinates[1], coordinates[2])		 	
-		 		fieldgrid3DBy.setValue(rawNumbers[4]/10000.0, coordinates[0], coordinates[1], coordinates[2])
+ 				XGrid.append(rawNumbers[0]/100.0)
+ 		 		YGrid.append(rawNumbers[1]/100.0)
+ 		 	 	ZGrid.append(rawNumbers[2]/100.0)
+		 	 	BXGrid.setValue(rawNumbers[3]/10000.0, coordinates[0], coordinates[1], coordinates[2])		 	
+		 		BYGrid.setValue(rawNumbers[4]/10000.0, coordinates[0], coordinates[1], coordinates[2])
 		 	
- 				fieldgrid3DBz.setValue(rawNumbers[5]/10000.0, coordinates[0], coordinates[1], coordinates[2])
+ 				BZGrid.setValue(rawNumbers[5]/10000.0, coordinates[0], coordinates[1], coordinates[2])
  			 	getMag = ((rawNumbers[3]**2.0+rawNumbers[4]**2.0+rawNumbers[5]**2.0)**0.5)/10000.0
  		 	
  	 			fieldgrid3DMag.setValue(getMag, coordinates[0], coordinates[1], coordinates[2])
  		  		 
  		  		 
- 		MagList = [fieldgrid3DBx,fieldgrid3DBy,fieldgrid3DBz,fieldgrid3DMag,xGrid,yGrid,zGrid]
+ 		MagList = [BXGrid,BYGrid,BZGrid,fieldgrid3DMag,XGrid,YGrid,ZGrid]
+ 
  		
 		return MagList
 	

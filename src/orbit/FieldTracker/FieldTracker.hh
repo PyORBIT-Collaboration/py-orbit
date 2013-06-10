@@ -6,6 +6,7 @@
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 #include "Bunch.hh"
+#include <Grid3D.hh>
 
 using namespace std;
 
@@ -23,6 +24,14 @@ public:
     
 	/** Routine for transfering particles through a aperture */
 	void trackBunch(Bunch* b);
+
+	double * BGrid3D(double xField3D,double yField3D,double zField3D,
+			double XGrid[],double YGrid[],double ZGrid[],
+			int nXgrid,int nYGrid,int nZGrid,
+			double BxField3D,double ByField3D,double BzField3D,
+			Grid3D BXGrid, Grid3D BYGrid,Grid3D BZGrid,
+			int zsymmetry);
+
     
 protected:
 

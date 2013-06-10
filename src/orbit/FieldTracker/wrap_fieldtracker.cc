@@ -57,6 +57,51 @@ namespace wrap_fieldtracker{
             Py_INCREF(Py_None);
             return Py_None;
         }
+
+        /** Performs the collimation tracking of the bunch */
+          static PyObject* FieldTracker_BGrid3D(PyObject *self, PyObject *args){
+            FieldTracker* cpp_FieldTracker = (FieldTracker*)((pyORBIT_Object*) self)->cpp_obj;
+
+            double xField3D;
+            double yField3D;
+            double zField3D;
+
+            double *XGrid;
+            double *YGrid;
+            double *ZGrid;
+
+            int nXGrid;
+            int nYGrid;
+            int nZGrid;
+
+            double BxField3D;
+            double ByField3D;
+            double BzField3D;
+
+            PyObject* pyXGrid3D;
+            PyObject* pyYGrid3D;
+            PyObject* pyZGrid3D;
+
+            int zsymmetry;
+
+
+            if(!PyArg_ParseTuple(args,"ddddddiiidddOOOi:trackBunch",&xField3D,&yField3D,&zField3D,
+            		&XGrid,&YGrid,&ZGrid,
+            		&nXGrid,&nYGrid,&nZGrid,
+            		&BxField3D,&ByField3D, &BzField3D
+            		&pyXGrid3D,&pyYGrid3D,&pyZGrid3D, &zsymmetry)){
+                ORBIT_MPI_Finalize("FieldTracker - BGrid3d(args) - parameters are needed.");
+            }
+//            PyObject* pyORBIT_Bunch_Type = wrap_Grid3D::getBunchType("Bunch");
+//            if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+//                ORBIT_MPI_Finalize("FieldTracker - trackBunch(Bunch* bunch) - method needs a Bunch.");
+//            }
+//
+//            Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+//            cpp_FieldTracker->trackBunch(cpp_bunch);
+            Py_INCREF(Py_None);
+            return Py_None;
+        }
 		
         
         //-----------------------------------------------------
@@ -72,6 +117,7 @@ namespace wrap_fieldtracker{
         // they will be vailable from python level
         static PyMethodDef FieldTrackerClassMethods[] = {
             { "trackBunch",FieldTracker_trackBunch,METH_VARARGS,"Performs the field tracking of the bunch."},
+            {"BGrid3D", FieldTracker_BGrid3D,METH_VARARGS,"Computes the Bfield at a reference particles location"},
             {NULL}
         };
         

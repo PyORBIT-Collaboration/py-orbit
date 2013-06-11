@@ -44,10 +44,10 @@ protected:
 	double * XGrid;
 	double * YGrid;
 	double * ZGrid;
-	Grid3D BXGrid= Grid3D(0,0,0);
-	Grid3D BYGrid= Grid3D(0,0,0);
-	Grid3D BZGrid = Grid3D(0,0,0);
-	Grid3D BMagGrid = Grid3D(0,0,0);
+	static Grid3D BXGrid;
+	static Grid3D BYGrid;
+	static Grid3D BZGrid;
+	static Grid3D BMagGrid;
 
 };
 

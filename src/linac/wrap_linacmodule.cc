@@ -5,6 +5,7 @@
 #include "wrap_MatrixRfGap.hh"
 #include "wrap_RfGapTTF.hh"
 #include "wrap_SuperFishFieldSource.hh"
+#include "wrap_RfGapThreePointTTF.hh"
 
 static PyMethodDef linacmoduleMethods[] = { {NULL,NULL} };
 
@@ -20,6 +21,7 @@ extern "C" {
 		 wrap_linac::initMatrixRfGap(module);
 		 wrap_linac::initRfGapTTF(module);	
 		 wrap_linac::initSuperFishFieldSource(module);
+		 wrap_linac::initRfGapThreePointTTF(module);
 	 }
 	 
 	 PyObject* getLinacType(char* name){

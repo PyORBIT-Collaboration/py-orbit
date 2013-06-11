@@ -6,7 +6,7 @@
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 #include "Bunch.hh"
-#include <Grid3D.hh>
+#include "Grid3D.hh"
 
 using namespace std;
 
@@ -44,10 +44,10 @@ protected:
 	double * XGrid;
 	double * YGrid;
 	double * ZGrid;
-	static Grid3D BXGrid;
-	static Grid3D BYGrid;
-	static Grid3D BZGrid;
-	static Grid3D BMagGrid;
+	Grid3D* BXGrid;
+	Grid3D* BYGrid;
+	Grid3D* BZGrid;
+	Grid3D* BMagGrid;
 
 };
 

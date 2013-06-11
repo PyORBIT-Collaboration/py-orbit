@@ -106,10 +106,10 @@ void FieldTracker::ParseGrid3D(const string &fileName,
   XGrid = new double[nXTab];
   YGrid = new double[nYTab];
   ZGrid = new double[nZTab];
-  BXGrid = Grid3D(nXTab,nYTab,nZTab);
-  BYGrid = Grid3D(nXTab,nYTab,nZTab);
-  BZGrid = Grid3D(nXTab,nYTab,nZTab);
-  BMagGrid = Grid3D(nXTab,nYTab,nZTab);
+  BXGrid = new Grid3D(nXTab,nYTab,nZTab);
+  BYGrid = new Grid3D(nXTab,nYTab,nZTab);
+  BZGrid = new Grid3D(nXTab,nYTab,nZTab);
+  BMagGrid = new Grid3D(nXTab,nYTab,nZTab);
 
   ifstream fio2;
   fio2.open(file);
@@ -150,13 +150,13 @@ void FieldTracker::ParseGrid3D(const string &fileName,
                     XGrid[xindex] = x / 100.0;
                     YGrid[yindex] = y / 100.0;
                     ZGrid[zindex] = z / 100.0;
-                    BXGrid.setValue(Bx/10000.0, xindex, yindex, zindex);
-                    BYGrid.setValue(By/10000.0, xindex, yindex, zindex);
-                    BZGrid.setValue(Bx/10000.0, xindex, yindex, zindex);
+                    BXGrid->setValue(Bx/10000.0, xindex, yindex, zindex);
+                    BYGrid->setValue(By/10000.0, xindex, yindex, zindex);
+                    BZGrid->setValue(Bx/10000.0, xindex, yindex, zindex);
 
                     std::cerr << "Values at " << xindex << " ,"<< yindex << " ," << zindex;
                     std::cerr << XGrid[xindex] << "/n";
-                    std::cerr << BZGrid.getValueOnGrid(xindex,yindex,zindex);
+                    std::cerr << BZGrid->getValueOnGrid(xindex,yindex,zindex);
 
 
 
@@ -186,6 +186,7 @@ void FieldTracker::ParseGrid3D(const string &fileName,
   }
 
   fio2.close();
+  
 }
 
 

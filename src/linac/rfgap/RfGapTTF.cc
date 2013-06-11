@@ -2,7 +2,7 @@
    This class represents a Parmila type RF gap. It acts on the coordinates 
    of the particle by using the transit time factors. The model includes  
    non-linearity in transverse direction.
-	 TTFs (T,S,Tp,Sp) are funcftions of the cappa variable = 2*pi*f/(c*beta).
+	 TTFs (T,S,Tp,Sp) are funcftions of the kappa variable = 2*pi*f/(c*beta).
 */
 
 #include <iostream>
@@ -83,20 +83,20 @@ void RfGapTTF::trackBunch(Bunch* bunch, double E0, double phase){
 	double mass = bunch->getMass();
 	double charge = bunch->getCharge();
 	double eKin_in = syncPart->getEnergy();
-	double cappa_in = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_in);
-	double delta_eKin = charge*E0L*(Tttf->value(cappa_in)*cos(phase) - Sttf->value(cappa_in)*sin(phase));
+	double kappa_in = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_in);
+	double delta_eKin = charge*E0L*(Tttf->value(kappa_in)*cos(phase) - Sttf->value(kappa_in)*sin(phase));
 	//calculate params in the middle of the gap
 	syncPart->setMomentum(syncPart->energyToMomentum(eKin_in + delta_eKin/2.0));
 	double gamma_gap = syncPart->getGamma();
 	double beta_gap = syncPart->getBeta();	
-	double cappa_gap = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_gap);
-	// T,S,Tp,Sp for cappa = cappa_gap, we assume a small energy spread
-  double ttf_t = Tttf->value(cappa_gap);
-  double ttf_s = Sttf->value(cappa_gap);
-  double ttf_tp = Tpttf->value(cappa_gap);
-  double ttf_sp = Spttf->value(cappa_gap);		
+	double kappa_gap = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_gap);
+	// T,S,Tp,Sp for kappa = kappa_gap, we assume a small energy spread
+  double ttf_t = Tttf->value(kappa_gap);
+  double ttf_s = Sttf->value(kappa_gap);
+  double ttf_tp = Tpttf->value(kappa_gap);
+  double ttf_sp = Spttf->value(kappa_gap);		
 	//the TTF RF gap has the phase correction to simplectic tracking. The delta time in seconds
-	double delta_phase = charge*E0L*cappa_gap*(ttf_t*sin(phase) + ttf_s*cos(phase))
+	double delta_phase = charge*E0L*kappa_gap*(ttf_t*sin(phase) + ttf_s*cos(phase))
 	                     /(mass*beta_gap*beta_gap*gamma_gap*gamma_gap*gamma_gap);
 	double delta_time = delta_phase/(2.0*OrbitConst::PI*rf_frequency);	
 	syncPart->setTime(syncPart->getTime() + delta_time);
@@ -105,12 +105,12 @@ void RfGapTTF::trackBunch(Bunch* bunch, double E0, double phase){
 	syncPart->setMomentum(syncPart->energyToMomentum(eKin_out));	
 	double gamma_out = syncPart->getGamma();
 	double beta_out = syncPart->getBeta();	
-	double cappa_out = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_out);
+	double kappa_out = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_out);
 	//(wave momentum)/beta
-	double Kr = cappa_gap/gamma_gap;
-	double cappa_Kr = cappa_gap/Kr;
+	double Kr = kappa_gap/gamma_gap;
+	double kappa_Kr = kappa_gap/Kr;
 	//phase coeff
-	double phase_coeff = charge*E0L*cappa_gap/(mass*beta_gap*beta_gap*gamma_gap*gamma_gap*gamma_gap);
+	double phase_coeff = charge*E0L*kappa_gap/(mass*beta_gap*beta_gap*gamma_gap*gamma_gap*gamma_gap);
   //transverse coeff
 	double trans_coeff = charge*E0L/(mass*beta_gap*beta_gap*gamma_gap*gamma_gap);
 	double prime_coeff = (beta_in * gamma_in)/(beta_out * gamma_out); 
@@ -122,15 +122,15 @@ void RfGapTTF::trackBunch(Bunch* bunch, double E0, double phase){
     r = sqrt(x * x + y * y);
     I0 = bessi0(Kr * r);
     I1 = bessi1(Kr * r);		
-		phase_in = bunch->z(i)*cappa_in;
+		phase_in = bunch->z(i)*kappa_in;
 		phase_rf = phase - phase_in;	
 		sin_phRf = sin(phase_rf);
 		cos_phRf = cos(phase_rf);
 		//longitudinal-energy part
 		bunch->dE(i) =bunch->dE(i)  + charge*E0L*I0*(ttf_t*cos_phRf - ttf_s*sin_phRf) - delta_eKin;	
 		phase_out = phase_in + phase_coeff*(I0*(ttf_tp*sin_phRf + ttf_sp*cos_phRf) +
-			                     r*cappa_Kr*I1*(ttf_t*sin_phRf + ttf_s*cos_phRf));
-		bunch->z(i) = phase_out/cappa_out;
+			                     r*kappa_Kr*I1*(ttf_t*sin_phRf + ttf_s*cos_phRf));
+		bunch->z(i) = phase_out/kappa_out;
 		//transverse focusing 
 		if(r == 0.){
 			d_rp = 0.;
@@ -146,7 +146,7 @@ void RfGapTTF::trackBunch(Bunch* bunch, double E0, double phase){
 /** 
 Sets up the gap parameters: T,S, minimal and maximal beta, 
 rf frequency, the gap length,  and the relative amplitude.
-TTFs (T,S,Tp,Sp) are funcftions of the cappa variable = 2*pi*f/(c*beta).
+TTFs (T,S,Tp,Sp) are funcftions of the kappa variable = 2*pi*f/(c*beta).
 */
 void RfGapTTF::setParameters(Polynomial* Tttf_in, Polynomial* Tpttf_in,
 	Polynomial* Sttf_in, Polynomial* Spttf_in,

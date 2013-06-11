@@ -43,27 +43,27 @@ public:
 	
 	/** 
 	It calculates the symmetrical TTF for 3-point approximation of the field. 
-	This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+	This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
   */
-	static double Tttf(double dz, double a, double b, double cappa);
+	static double Tttf(double dz, double a, double b, double kappa);
 	
 	/** 
 	It calculates the asymmetrical TTF for 3-point approximation of the field. 
-	This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+	This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
 	*/	
-	static double Sttf(double dz, double a, double b, double cappa);
+	static double Sttf(double dz, double a, double b, double kappa);
 	
 	/** 
 	It calculates the derivative of the symmetrical TTF for 3-point approximation of the field. 
-	This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+	This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
 	*/	
-	static double Tpttf(double dz, double a, double b, double cappa);
+	static double Tpttf(double dz, double a, double b, double kappa);
 	
 	/** 
 	It calculates the derivative of the asymmetrical TTF for 3-point approximation of the field. 
-	This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+	This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
 	*/
-	static double Spttf(double dz, double a, double b, double cappa);
+	static double Spttf(double dz, double a, double b, double kappa);
 	
   private:
 		

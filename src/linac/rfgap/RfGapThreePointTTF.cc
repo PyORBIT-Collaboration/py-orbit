@@ -52,22 +52,22 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
 	double mass = bunch->getMass();
 	double charge = bunch->getCharge();
 	double eKin_in = syncPart->getEnergy();
-	double cappa_in = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_in);
-	double ttf_t = Tttf(dz,a_param,b_param,cappa_in);
-	double ttf_s = Sttf(dz,a_param,b_param,cappa_in);
+	double kappa_in = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_in);
+	double ttf_t = Tttf(dz,a_param,b_param,kappa_in);
+	double ttf_s = Sttf(dz,a_param,b_param,kappa_in);
 	double delta_eKin = charge*E0L*(ttf_t*cos(phase) - ttf_s*sin(phase));
 	//calculate params in the middle of the gap
 	syncPart->setMomentum(syncPart->energyToMomentum(eKin_in + delta_eKin/2.0));
 	double gamma_gap = syncPart->getGamma();
 	double beta_gap = syncPart->getBeta();	
-	double cappa_gap = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_gap);
-	// T,S,Tp,Sp for cappa = cappa_gap, we assume a small energy spread
-  ttf_t = Tttf(dz,a_param,b_param,cappa_gap);
-  ttf_s = Sttf(dz,a_param,b_param,cappa_gap);
-  double ttf_tp = Tpttf(dz,a_param,b_param,cappa_gap);
-  double ttf_sp = Spttf(dz,a_param,b_param,cappa_gap);		
+	double kappa_gap = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_gap);
+	// T,S,Tp,Sp for kappa = kappa_gap, we assume a small energy spread
+  ttf_t = Tttf(dz,a_param,b_param,kappa_gap);
+  ttf_s = Sttf(dz,a_param,b_param,kappa_gap);
+  double ttf_tp = Tpttf(dz,a_param,b_param,kappa_gap);
+  double ttf_sp = Spttf(dz,a_param,b_param,kappa_gap);		
 	//the TTF RF gap has the phase correction to simplectic tracking. The delta time in seconds
-	double delta_phase = charge*E0L*cappa_gap*(ttf_t*sin(phase) + ttf_s*cos(phase))
+	double delta_phase = charge*E0L*kappa_gap*(ttf_t*sin(phase) + ttf_s*cos(phase))
 	                     /(mass*beta_gap*beta_gap*gamma_gap*gamma_gap*gamma_gap);
 	double delta_time = delta_phase/(2.0*OrbitConst::PI*rf_frequency);	
 	syncPart->setTime(syncPart->getTime() + delta_time);
@@ -76,12 +76,12 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
 	syncPart->setMomentum(syncPart->energyToMomentum(eKin_out));	
 	double gamma_out = syncPart->getGamma();
 	double beta_out = syncPart->getBeta();	
-	double cappa_out = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_out);
+	double kappa_out = 2.0*OrbitConst::PI*rf_frequency/(OrbitConst::c*beta_out);
 	//(wave momentum)/beta
-	double Kr = cappa_gap/gamma_gap;
-	double cappa_Kr = cappa_gap/Kr;
+	double Kr = kappa_gap/gamma_gap;
+	double kappa_Kr = kappa_gap/Kr;
 	//phase coeff
-	double phase_coeff = charge*E0L*cappa_gap/(mass*beta_gap*beta_gap*gamma_gap*gamma_gap*gamma_gap);
+	double phase_coeff = charge*E0L*kappa_gap/(mass*beta_gap*beta_gap*gamma_gap*gamma_gap*gamma_gap);
   //transverse coeff
 	double trans_coeff = charge*E0L/(mass*beta_gap*beta_gap*gamma_gap*gamma_gap);
 	double prime_coeff = (beta_in * gamma_in)/(beta_out * gamma_out); 
@@ -93,15 +93,15 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
     r = sqrt(x * x + y * y);
     I0 = bessi0(Kr * r);
     I1 = bessi1(Kr * r);		
-		phase_in = bunch->z(i)*cappa_in;
+		phase_in = bunch->z(i)*kappa_in;
 		phase_rf = phase - phase_in;	
 		sin_phRf = sin(phase_rf);
 		cos_phRf = cos(phase_rf);
 		//longitudinal-energy part
 		bunch->dE(i) =bunch->dE(i)  + charge*E0L*I0*(ttf_t*cos_phRf - ttf_s*sin_phRf) - delta_eKin;	
 		phase_out = phase_in + phase_coeff*(I0*(ttf_tp*sin_phRf + ttf_sp*cos_phRf) +
-			                     r*cappa_Kr*I1*(ttf_t*sin_phRf + ttf_s*cos_phRf));
-		bunch->z(i) = phase_out/cappa_out;
+			                     r*kappa_Kr*I1*(ttf_t*sin_phRf + ttf_s*cos_phRf));
+		bunch->z(i) = phase_out/kappa_out;
 		//transverse focusing 
 		if(r == 0.){
 			d_rp = 0.;
@@ -116,25 +116,25 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
 	
 /** 
    It calculates the symmetrical TTF for 3-point approximation of the field. 
-   This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+   This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
 */
-double RfGapThreePointTTF::Tttf(double dz, double a, double b, double cappa)
-{ double cappa_dz = cappa*dz;
-	double cappa2 = cappa*cappa;
-  double ttf = 2*sin(cappa_dz)/cappa *( 1.0 + b*(dz*dz - 2.0/cappa2)) +
-               4*b*cappa_dz*cos(cappa_dz)/	(cappa2*cappa);
-  ttf = ttf/(2*dz+(2.0/3.0)*b*dz*dz);
+double RfGapThreePointTTF::Tttf(double dz, double a, double b, double kappa)
+{ double kappa_dz = kappa*dz;
+	double kappa2 = kappa*kappa;
+  double ttf = 2*sin(kappa_dz)/kappa *( 1.0 + b*(dz*dz - 2.0/kappa2)) +
+               4*b*kappa_dz*cos(kappa_dz)/	(kappa2*kappa);
+  ttf = ttf/(2*dz+(2.0/3.0)*b*dz*dz*dz);
   return ttf;
 }
 
 /** 
    It calculates the asymmetrical TTF for 3-point approximation of the field. 
-   This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+   This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
 */
-double RfGapThreePointTTF::Sttf(double dz, double a, double b, double cappa)
-{ double cappa_dz = cappa*dz;
-	double cappa2 = cappa*cappa;
-  double ttf = (2*a*sin(cappa_dz)/cappa - cappa_dz*cos(cappa_dz))/cappa2;
+double RfGapThreePointTTF::Sttf(double dz, double a, double b, double kappa)
+{ double kappa_dz = kappa*dz;
+	double kappa2 = kappa*kappa;
+  double ttf = 2*a*(sin(kappa_dz) - kappa_dz*cos(kappa_dz))/kappa2;
   ttf = ttf/(2*dz+(2.0/3.0)*b*dz*dz*dz);
   return ttf;
 }
@@ -142,27 +142,26 @@ double RfGapThreePointTTF::Sttf(double dz, double a, double b, double cappa)
 
 /** 
    It calculates the derivative of the symmetrical TTF for 3-point approximation of the field. 
-   This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+   This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
 */
-double RfGapThreePointTTF::Tpttf(double dz, double a, double b, double cappa)
-{ double cappa_dz = cappa*dz;
-	double cappa2 = cappa*cappa;
-	double ttfp = 2*(dz*cos(cappa_dz)/cappa - sin(cappa_dz)/cappa2)*( 1.0 + b*(cappa_dz*cappa_dz - 2.0)/cappa2)  +
-	              8*b*sin(cappa_dz)/(cappa2*cappa2) -
-	              4*b*dz*dz*sin(cappa_dz)/cappa2 - 8*b*dz*cos(cappa_dz)/(cappa*cappa2);
-  ttfp = ttfp/(2*dz+(2.0/3.0)*b*dz*dz);
+double RfGapThreePointTTF::Tpttf(double dz, double a, double b, double kappa)
+{ double kappa_dz = kappa*dz;
+	double kappa2 = kappa*kappa;
+	double ttfp = 2*(dz*cos(kappa_dz)/kappa - sin(kappa_dz)/kappa2)*( 1.0 + b*(kappa_dz*kappa_dz - 2.0)/kappa2)  +
+	              8*b*sin(kappa_dz)/(kappa2*kappa2) -
+	              4*b*dz*dz*sin(kappa_dz)/kappa2 - 8*b*dz*cos(kappa_dz)/(kappa*kappa2);
+  ttfp = ttfp/(2*dz+(2.0/3.0)*b*dz*dz*dz);
   return ttfp;
 }
 
 /** 
    It calculates the derivative of the asymmetrical TTF for 3-point approximation of the field. 
-   This TTF as functions of the cappa variable = 2*pi*f/(c*beta).
+   This TTF as functions of the kappa variable = 2*pi*f/(c*beta).
 */
-double RfGapThreePointTTF::Spttf(double dz, double a, double b, double cappa)
-{ double cappa_dz = cappa*dz;
-	double cappa2 = cappa*cappa;
-	double ttfp = 2*a*dz*cos(cappa_dz)/(cappa2*cappa) - 6*a*sin(cappa_dz)/(cappa2*cappa2) +
-	              dz*dz*sin(cappa_dz)/cappa + dz*cos(cappa_dz)/cappa2;
+double RfGapThreePointTTF::Spttf(double dz, double a, double b, double kappa)
+{ double kappa_dz = kappa*dz;
+	double kappa2 = kappa*kappa;
+	double ttfp = 2*a*dz*dz*sin(kappa_dz)/kappa - 4*a*(sin(kappa_dz) - kappa_dz*cos(kappa_dz))/(kappa2*kappa);
   ttfp = ttfp/(2*dz+(2.0/3.0)*b*dz*dz*dz);
   return ttfp;
 }

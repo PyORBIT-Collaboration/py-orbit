@@ -90,7 +90,7 @@ public:
 	/** Returns the realtive amplitude. */
 	double getRelativeAmplitude();
 	
-	/** polynomials for T,S TTF as functions of cappa = 2*pi*rf_freq/(c_light*beta) */
+	/** polynomials for T,S TTF as functions of kappa = 2*pi*rf_freq/(c_light*beta) */
 	OrbitUtils::Polynomial* Tttf;
 	OrbitUtils::Polynomial* Sttf;
 	OrbitUtils::Polynomial* Tpttf;

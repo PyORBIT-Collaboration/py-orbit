@@ -31,9 +31,23 @@ public:
 			double BxField3D,double ByField3D,double BzField3D,
 			Grid3D BXGrid, Grid3D BYGrid,Grid3D BZGrid,
 			int zsymmetry);
+	void ParseGrid3D(const string &fileName,
+	                 const double &xmin, const double &xmax,
+	                 const double &ymin, const double &ymax,
+	                 const double &zmin, const double &zmax,
+	                 const int &skipX,
+	                 const int &skipY,
+	                 const int &skipZ);
 
     
 protected:
+	double * XGrid;
+	double * YGrid;
+	double * ZGrid;
+	Grid3D BXGrid= Grid3D(0,0,0);
+	Grid3D BYGrid= Grid3D(0,0,0);
+	Grid3D BZGrid = Grid3D(0,0,0);
+	Grid3D BMagGrid = Grid3D(0,0,0);
 
 };
 

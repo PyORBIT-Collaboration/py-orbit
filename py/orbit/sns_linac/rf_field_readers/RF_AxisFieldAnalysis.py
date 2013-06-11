@@ -120,6 +120,26 @@ class RF_AxisFieldAnalysis:
 			#print "debug i=",i," x= %8.4f y = %12.5e   yp= %12.5e "%(x,y,yp)
 		return roots_arr
 		
+	def getNormilizedSpline(self):
+		"""
+		Returns the spline  normilized by the integral of the absolute value.
+		"""
+		n = self.splineFiled.getSize()
+		f = Function()
+		for i in range(n):
+			f.add(self.splineFiled.x(i),math.fabs(self.splineFiled.y(i)))
+		integral = GaussLegendreIntegrator(500)
+		integral.setLimits(self.splineFiled.x(0),self.splineFiled.x(n-1))
+		spline = SplineCH()					
+		spline.compile(f)
+		res = integral.integral(spline)	
+		f = Function()
+		for i in range(n):
+			f.add(self.splineFiled.x(i),self.splineFiled.y(i)/res)		
+		spline = SplineCH()					
+		spline.compile(f)
+		return spline		
+		
 	def gapCentersAnalysis(self):
 		"""
 		The method will calculate the positions of d(Ez)/dz = 0 as centers of the gaps

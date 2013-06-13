@@ -26,11 +26,10 @@ public:
 	void trackBunch(Bunch* b);
 
 	double * BGrid3D(double xField3D,double yField3D,double zField3D,
-			double XGrid[],double YGrid[],double ZGrid[],
 			int nXgrid,int nYGrid,int nZGrid,
 			double BxField3D,double ByField3D,double BzField3D,
-			Grid3D BXGrid, Grid3D BYGrid,Grid3D BZGrid,
 			int zsymmetry);
+
 	void ParseGrid3D(const string &fileName,
 	                 const double &xmin, const double &xmax,
 	                 const double &ymin, const double &ymax,
@@ -48,6 +47,8 @@ protected:
 	Grid3D* BYGrid;
 	Grid3D* BZGrid;
 	Grid3D* BMagGrid;
+	int nXGrid, nYGrid, nZGrid;
+
 
 };
 

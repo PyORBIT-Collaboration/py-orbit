@@ -36,6 +36,8 @@ RfGapThreePointTTF::~RfGapThreePointTTF()
 */	
 void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E0, double Ep, double rf_frequency, double phase){
 	//energy and mass of particles in GeV and Em,E0, Ep in V/m
+	// if E0 == 0. then there will be no acceleration at all. So bunch will be the same.
+	if(E0 == 0.) return;
 	Em = Em/1.0e+9;
 	E0 = E0/1.0e+9;
 	Ep = Ep/1.0e+9;	
@@ -112,6 +114,8 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
 		bunch->xp(i) = bunch->xp(i)*prime_coeff + d_rp*bunch->x(i);
 		bunch->yp(i) = bunch->yp(i)*prime_coeff + d_rp*bunch->y(i);		
 	}
+	//std::cout << "=====debug from C++ =============="<<std::endl;
+	//bunch->print(std::cout);
 }	
 	
 /** 

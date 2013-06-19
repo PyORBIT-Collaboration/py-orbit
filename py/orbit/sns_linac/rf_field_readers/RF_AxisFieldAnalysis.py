@@ -16,7 +16,7 @@ class RF_AxisFieldAnalysis:
 	The result of analysis are Time Transit Factors T,Tp,S,Sp for all gaps
 	found in the cavity.
 	"""
-	def __init__(self,splineFiled):
+	def __init__(self,splineFiled, zeroIsCenter = False):
 		self.splineFiled = splineFiled
 		#----------------------------------------------------
 		self.eps_root = 1.0e-6
@@ -39,7 +39,10 @@ class RF_AxisFieldAnalysis:
 		#calculate the roots
 		self.roots_arr = self.rootAnalysis()
 		#find the roots of derivative - yp = y' - RFgap center positions
-		self.yp_roots_arr = self.gapCentersAnalysis()
+		if(zeroIsCenter):
+			self.yp_roots_arr = [0.]
+		else:
+			self.yp_roots_arr = self.gapCentersAnalysis()
 		#print "debug yp roots=",self.yp_roots_arr
 		if(len(self.roots_arr) - 1 != len(self.yp_roots_arr)):
 			rank = orbit_mpi.MPI_Comm_rank(mpi_comm.MPI_COMM_WORLD)

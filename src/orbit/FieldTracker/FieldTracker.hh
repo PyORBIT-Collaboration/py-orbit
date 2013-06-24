@@ -25,9 +25,7 @@ public:
 	/** Routine for transfering particles through a aperture */
 	void trackBunch(Bunch* b);
 
-	double * BGrid3D(double xField3D,double yField3D,double zField3D,
-			int nXgrid,int nYGrid,int nZGrid,
-			double BxField3D,double ByField3D,double BzField3D,
+	void BGrid3D(double xField3D,double yField3D,double zField3D,
 			int zsymmetry);
 
 	void ParseGrid3D(const string &fileName,
@@ -38,6 +36,7 @@ public:
 	                 const int &skipY,
 	                 const int &skipZ);
 
+
     
 protected:
 	double * XGrid;
@@ -47,7 +46,28 @@ protected:
 	Grid3D* BYGrid;
 	Grid3D* BZGrid;
 	Grid3D* BMagGrid;
-	int nXGrid, nYGrid, nZGrid;
+	int  nXGrid;
+	int  nYGrid;
+	int  nZGrid;
+	double  BxField3D;
+	double  ByField3D;
+	double  BzField3D;
+
+	double _length;
+	double _xrefi;
+	double _xreff;
+	double _yrefi;
+	double _yreff;
+	double _eulerai;
+	double _eulerbi;
+	double _eulergi;
+	double _euleraf;
+	double _eulerbg;
+	double _eulergf;
+
+
+
+
 
 
 };

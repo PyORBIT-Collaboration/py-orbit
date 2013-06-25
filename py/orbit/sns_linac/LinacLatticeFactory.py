@@ -128,9 +128,9 @@ class LinacLatticeFactory():
 					accNode.setParam("dB/dr",node.getParam("field"))
 					accNode.setParam("field",node.getParam("field"))
 					accNode.setLength(node.getParam("effLength"))
-                                                                                
-                                        #if(0.5*accNode.getLength() > self.maxDriftLength):                                        
-                                        #    accNode.setnParts(2*int(0.5*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1  > 0)*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1 ) + 1))
+                                  
+                                        if(0.5*accNode.getLength() > self.maxDriftLength):
+                                            accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 
 					accSeq.addNode(accNode)
 				#------------BEND-----------------
@@ -144,9 +144,9 @@ class LinacLatticeFactory():
                                         accNode.setParam("ea2",node.getParam("ea2"))
                                         accNode.setParam("theta",node.getParam("theta"))
 					accNode.setLength(node.getParam("effLength"))
-                                                                                
-                                        #if(0.5*accNode.getLength() > self.maxDriftLength):                                        
-                                        #    accNode.setnParts(2*int(0.5*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1  > 0)*int(accNode.getLength()/(self.maxDriftLength + 1.0e-15) + 1 ) + 1))
+                                                                             
+                                        if(0.5*accNode.getLength() > self.maxDriftLength):
+                                            accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 
 					accSeq.addNode(accNode)
 				#------------RF_Gap-----------------	

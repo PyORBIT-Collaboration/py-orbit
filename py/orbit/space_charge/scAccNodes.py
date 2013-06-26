@@ -25,6 +25,12 @@ class SC_Base_AccNode(AccNodeBunchTracker):
 		self.sc_length = 0.
 		self.switcher = True
 		self.sc_calculator = sc_calculator
+                
+	def isRFGap(self):
+		"""
+		Returns False. The RF Gap node returns True.
+		"""
+		return False
 		
 	def setLengthOfSC(self, sc_length):
 		"""

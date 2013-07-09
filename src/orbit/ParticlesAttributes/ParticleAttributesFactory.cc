@@ -24,6 +24,7 @@
 #include "part_time.hh"
 #include "Evolution.hh"
 #include "LostParticleAttributes.hh"
+#include "ParticlePhaseAttributes.hh"
 
 ParticleAttributesFactory::ParticleAttributesFactory()
 {
@@ -51,20 +52,24 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 	}	
 	//for MPI --- stop
 	
-  ParticleAttributes* part_atrs = NULL;
-  if(name == "empty"){
-    part_atrs = new ParticleAttributes(bunch,0);
-  }
+	ParticleAttributes* part_atrs = NULL;
+	if(name == "empty"){
+		part_atrs = new ParticleAttributes(bunch,0);
+	}
 	
-  if(name == "macrosize"){
-    part_atrs = new ParticleMacroSize(bunch);
-  }
+	if(name == "macrosize"){
+		part_atrs = new ParticleMacroSize(bunch);
+	}
   
-  if(name == "LostParticleAttributes"){
-	part_atrs = new LostParticleAttributes(bunch);
-  }
+	if(name == "LostParticleAttributes"){
+		part_atrs = new LostParticleAttributes(bunch);
+	}
+
+	if(name == "ParticlePhaseAttributes"){
+		part_atrs = new ParticlePhaseAttributes(bunch); 
+	}
   
-  if(name == "Amplitudes"){
+	if(name == "Amplitudes"){
 		if(params_dict.size() == 0){
 			cout<<"dictionary Amplitudes(dict) should be defined "<<"\n";
 		} else {
@@ -82,11 +87,10 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
 			}
 		}
-  }
+	}
   
   
-  
-  if(name == "Populations"){
+	if(name == "Populations"){
 		if(params_dict.size() == 0){
 			cout<<"dictionary AtomPopulations(dict) should be defined "<<"\n";
 		} else {
@@ -104,9 +108,9 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
 			}
 		}
-  }
+	}
   
-  if(name == "pq_coords"){
+	if(name == "pq_coords"){
 		if(params_dict.size() == 0){
 			cout<<"dictionary pq_coords(dict) should be defined "<<"\n";
 		} else {
@@ -124,9 +128,9 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
 			}
 		}
-  }
+	}
   
-  if(name == "part_time"){
+	if(name == "part_time"){
 		if(params_dict.size() == 0){
 			cout<<"dictionary prf_time(dict) should be defined "<<"\n";
 		} else {
@@ -144,9 +148,9 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
 			}
 		}
-  }
+	}
   
-  if(name == "Evolution"){
+	if(name == "Evolution"){
 		if(params_dict.size() == 0){
 			cout<<"dictionary Evolution(dict) should be defined "<<"\n";
 		} else {
@@ -164,38 +168,39 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 				ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
 			}
 		}
-  }
+	}
   	
   
-  if(part_atrs == NULL) {
-    if(rank_MPI == 0){
-      std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(const string name, Bunch* bunch)"<< std::endl;
+	if(part_atrs == NULL) {
+		if(rank_MPI == 0){
+			std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(const string name, Bunch* bunch)"<< std::endl;
 			std::cerr << "MPI Communicator="<< MPI_COMM_Local << std::endl;
 			std::cerr << "MPI size="<< size_MPI << std::endl;
 			std::cerr << "MPI rank="<< rank_MPI << std::endl;
-      std::cerr << "There is not a particle attirubutes class with such name in the Factory."<< std::endl;
-      std::cerr << "attr. name:"<< name << std::endl;
-    }
-    ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
-    return part_atrs;
-  }
+			std::cerr << "There is not a particle attirubutes class with such name in the Factory."<< std::endl;
+			std::cerr << "attr. name:"<< name << std::endl;
+		}
+		ORBIT_MPI_Finalize("ParticleAttributesFactory::getParticleAttributesInstance. Stop.");
+		return part_atrs;
+	}
 	
 	//copy the particle attributes dictionary
 	part_atrs->parameterDict = params_dict;
 	part_atrs->parameterDict["size"] = part_atrs->getAttSize();
 	
-  return part_atrs;
+	return part_atrs;
 }
 
 void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& names){
-  names.clear();
-  names.push_back("macrosize");
-  names.push_back("Amplitudes");
-  names.push_back("Populations");
-  names.push_back("pq_coords");
-  names.push_back("part_time");
-  names.push_back("Evolution");
-  names.push_back("LostParticleAttributes");
+	names.clear();
+	names.push_back("macrosize");
+	names.push_back("Amplitudes");
+	names.push_back("Populations");
+	names.push_back("pq_coords");
+	names.push_back("part_time");
+	names.push_back("Evolution");
+	names.push_back("LostParticleAttributes");
+	names.push_back("ParticlePhaseAttributes");
 }
 
 

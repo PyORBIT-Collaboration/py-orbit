@@ -55,8 +55,7 @@ class BunchTwissAnalysis: public OrbitUtils::CppPyWrapper
 	
 		/** Returns the XY moment of the beam */
 		double getBunchMoment(int i, int j);
-		
-		
+	
 	private:
 		
 		/** Number of points accounted */

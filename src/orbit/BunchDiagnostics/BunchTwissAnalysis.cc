@@ -6,6 +6,7 @@
 #include <cstdlib>
 
 #include "ParticleMacroSize.hh"
+#include "SyncPart.hh"
 
 /** Constructor */
 BunchTwissAnalysis::BunchTwissAnalysis(): CppPyWrapper(NULL)
@@ -119,7 +120,8 @@ void BunchTwissAnalysis::analyzeBunch(Bunch* bunch){
 	
 	for(int i = 0; i < 6; i++){
 		avg_arr[i] = avg_arr_MPI[i]/total_macrosize;
-	}	
+	}
+	
 	for(int i = 0; i < 6; i++){
 		for(int j = 0; j < i+1; j++){
 			corr_arr[i+6*j] = corr_arr_MPI[i+6*j]/total_macrosize;
@@ -339,7 +341,6 @@ double BunchTwissAnalysis::getGamma(int ic)
 	double gamma = xp2_avg/emitt_rms;
 	return gamma;
 }
-
 
 
 

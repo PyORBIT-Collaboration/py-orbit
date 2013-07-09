@@ -57,11 +57,11 @@ extern "C" {
 		PyObject* pyBunch;
 		int order;
 		if(!PyArg_ParseTuple(args,"Oi:computeBunchMoments",&pyBunch,&order)){
-			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, double order) - parameters are needed.");
+			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, int order) - parameters are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, double order) - method needs a Bunch.");
+			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, int order) - method needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
 		cpp_BunchTwissAnalysis->computeBunchMoments(cpp_bunch, order);
@@ -155,6 +155,7 @@ extern "C" {
 		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getGamma(ic));
   }		
 	
+	
  	/** It returns the Twiss array (alpha,beta,gamma,emittance) for index 0,1,2 - x,y,z planes*/
   static PyObject* BunchTwissAnalysis_getTwiss(PyObject *self, PyObject *args){
 	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
@@ -192,7 +193,7 @@ extern "C" {
 		{ "getAlpha",			 	     BunchTwissAnalysis_getAlpha,    	    METH_VARARGS,"Returns Twiss alpha for index 0,1,2 - x,y,z planes"},		
 		{ "getBeta",			 	     BunchTwissAnalysis_getBeta,    	      METH_VARARGS,"Returns Twiss beta for index 0,1,2 - x,y,z planes"},		
 		{ "getGamma",			 	     BunchTwissAnalysis_getGamma,    	    METH_VARARGS,"Returns Twiss gamma for index 0,1,2 - x,y,z planes"},				
-		{ "getTwiss",			 	     BunchTwissAnalysis_getTwiss,    	    METH_VARARGS,"Returns Twiss tuple (alpha,beta,gamma,emitt) for index 0,1,2 - x,y,z planes"},				
+		{ "getTwiss",			 	     BunchTwissAnalysis_getTwiss,    	    METH_VARARGS,"Returns Twiss tuple (alpha,beta,gamma,emitt) for index 0,1,2 - x,y,z planes"},
 		{NULL}
   };
 	

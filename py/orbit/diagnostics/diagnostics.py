@@ -37,8 +37,7 @@ class StatLats:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 
-		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\t" + str(dispersionx) + "\t" + str(ddispersionx) + "\t" + str(dispersiony) + "\t" + str(ddispersiony) + "\n" )
-		
+		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\n"		
 	def closeStatLats(self):
 		self.file_out.close()
 

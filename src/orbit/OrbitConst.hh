@@ -85,6 +85,8 @@ public:
   //charge of the proton
   const static double charge_proton;
 
+  const static double tiny;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////

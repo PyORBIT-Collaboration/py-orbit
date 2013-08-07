@@ -30,12 +30,44 @@ namespace wrap_fieldtracker{
         
         /** This is implementation of the __init__ method */
         static int FieldTracker_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
-            double a = 0;
+            double bx = 0.0;
+            double by = 0.0;
+            double ax = 0.0;
+            double ay = 0.0;
+            double ex = 0.0;
+            double epx = 0.0;
+            double l = 0.0;
+            double zi = 0.0;
+            double zf = 0.0;
+            double ds = 0.0;
+            int niters = 0;
+            double resid = 0.0;
+            double xrefi = 0.0;
+            double yrefi = 0.0;
+            double eulerai = 0.0;
+            double eulerbi = 0.0;
+            double eulergi = 0.0;
+            FieldTracker* cpp_FieldTracker = (FieldTracker*)((pyORBIT_Object*) self)->cpp_obj;
+            PyObject* pyBunch;
+
+            const char* filename = NULL;
+
             //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-            if(!PyArg_ParseTuple( args,"d:arguments", &a)){
+            if(!PyArg_ParseTuple( args,"ddddddddddiddddddOs:arguments", &bx, &by,
+         	       &ax, &ay, &ex,  &epx, &l, &zi,  &zf, &ds,  &niters, &resid,
+         	       &xrefi, &yrefi, &eulerai, &eulerbi, &eulergi, &pyBunch, &filename))
+            {
                 error("PyBunch - addParticle - cannot parse arguments! It should be (a)");
             }
-            self->cpp_obj =  new FieldTracker(a);
+            std::string filename_str(filename);
+
+            PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+            Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+
+            self->cpp_obj =  new FieldTracker(bx, by,
+          	       ax, ay, ex,  epx, l, zi,  zf, ds,  niters, resid,
+          	       xrefi, yrefi, eulerai, eulerbi, eulergi, cpp_bunch, filename_str);
+
             ((FieldTracker*) self->cpp_obj)->setPyWrapper((PyObject*) self);
             return 0;
         }
@@ -58,51 +90,17 @@ namespace wrap_fieldtracker{
             return Py_None;
         }
 
-//        /** Performs the collimation tracking of the bunch */
-//          static PyObject* FieldTracker_BGrid3D(PyObject *self, PyObject *args){
-//            FieldTracker* cpp_FieldTracker = (FieldTracker*)((pyORBIT_Object*) self)->cpp_obj;
-//
-//            double xField3D;
-//            double yField3D;
-//            double zField3D;
-//
-//            double *XGrid;
-//            double *YGrid;
-//            double *ZGrid;
-//
-//            int nXGrid;
-//            int nYGrid;
-//            int nZGrid;
-//
-//            double BxField3D;
-//            double ByField3D;
-//            double BzField3D;
-//
-//            PyObject* pyXGrid3D;
-//            PyObject* pyYGrid3D;
-//            PyObject* pyZGrid3D;
-//
-//            int zsymmetry;
-//
-//
-//            if(!PyArg_ParseTuple(args,"ddddddiiidddOOOi:trackBunch",&xField3D,&yField3D,&zField3D,
-//            		&XGrid,&YGrid,&ZGrid,
-//            		&nXGrid,&nYGrid,&nZGrid,
-//            		&BxField3D,&ByField3D, &BzField3D
-//            		&pyXGrid3D,&pyYGrid3D,&pyZGrid3D, &zsymmetryls)){
-//                ORBIT_MPI_Finalize("FieldTracker - BGrid3d(args) - parameters are needed.");
-//            }
-////            PyObject* pyORBIT_Bunch_Type = wrap_Grid3D::getBunchType("Bunch");
-////            if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-////                ORBIT_MPI_Finalize("FieldTracker - trackBunch(Bunch* bunch) - method needs a Bunch.");
-////            }
-////
-////            Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-////            cpp_FieldTracker->trackBunch(cpp_bunch);
-//            Py_INCREF(Py_None);
-//            return Py_None;
-//        }
-		
+
+        static PyObject* FieldTracker_setPathVariable(PyObject *self, PyObject *args){
+           int i = 0;
+           FieldTracker* cpp_FieldTracker = (FieldTracker*)((pyORBIT_Object*) self)->cpp_obj;
+        	if(!PyArg_ParseTuple(args,"i:arguments",  &i))
+            {
+                error("PyBunch - addParticle - cannot parse arguments! It should be (i)");
+            }
+        	cpp_FieldTracker->setPathVariable(i);
+        	return Py_None;
+        }
         
         //-----------------------------------------------------
         //destructor for python FieldTracker class (__del__ method).
@@ -117,7 +115,7 @@ namespace wrap_fieldtracker{
         // they will be vailable from python level
         static PyMethodDef FieldTrackerClassMethods[] = {
             { "trackBunch",FieldTracker_trackBunch,METH_VARARGS,"Performs the field tracking of the bunch."},
-//            {"BGrid3D", FieldTracker_BGrid3D,METH_VARARGS,"Computes the Bfield at a reference particles location"},
+            {"setPathVariable", FieldTracker_setPathVariable,METH_VARARGS,"Determines whether or not to output path"},
             {NULL}
         };
         
@@ -170,7 +168,7 @@ namespace wrap_fieldtracker{
         
         
         //--------------------------------------------------
-        //Initialization of the pyFieldAperture class
+        //Initialization of the pyFieldTracker class
         //--------------------------------------------------
         
         void initfieldtracker(){

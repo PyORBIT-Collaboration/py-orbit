@@ -20,13 +20,21 @@ class FieldTracker: public OrbitUtils::CppPyWrapper
 public:
 	
 	/** FieldTracker */
-    FieldTracker(double a);
+    FieldTracker( const double &bx, const double &by,
+ 	       const double &ax, const double &ay,
+ 	       const double &ex, const double &epx,
+ 	       const double &l,
+ 	       const double &zi, const double &zf,
+ 	       const double &ds, const int &niters,
+ 	       const double &resid,
+ 	       const double &xrefi, const double &yrefi,
+ 	       const double &eulerai, const double &eulerbi,
+ 	       const double &eulergi, Bunch* b, string &filename);
     
 	/** Routine for transfering particles through a aperture */
 	void trackBunch(Bunch* b);
 
-	void BGrid3D(double xField3D,double yField3D,double zField3D,
-			int zsymmetry);
+	void BGrid3D();
 
 	void ParseGrid3D(const string &fileName,
 	                 const double &xmin, const double &xmax,
@@ -36,7 +44,9 @@ public:
 	                 const int &skipY,
 	                 const int &skipZ);
 
-
+	void initVars();
+	void nodeCalculator(Bunch* b);
+	void setPathVariable(int i);
     
 protected:
 	double * XGrid;
@@ -52,6 +62,9 @@ protected:
 	double  BxField3D;
 	double  ByField3D;
 	double  BzField3D;
+	double xField3D;
+	double yField3D;
+	double zField3D;
 
 	double _length;
 	double _xrefi;
@@ -62,9 +75,41 @@ protected:
 	double _eulerbi;
 	double _eulergi;
 	double _euleraf;
-	double _eulerbg;
+	double _eulerbf;
 	double _eulergf;
+	double _zi;
+	double _zf;
+	double _ds;
+	double _sref;
+	double rmax;
 
+	// NODE CALCULATOR STUFF
+	double _betaX;
+	double _betaY;
+	double _alphaX;
+	double _alphaY;
+	double _etaX;
+	double _etaPX;
+
+	  double xFoilMin;
+	  double xFoilMax;
+	  double  yFoilMin;
+	  double yFoilMax;
+	  double zFoilMin;
+	  double zFoilMax;
+	  int doRefPath;
+	//
+
+	double _niters;
+
+	double rMax;
+	double foilAngle;
+
+	double _resid;
+	double sMax;
+	int getPath;
+	double BScale;
+	int zsymmetry;
 
 
 

@@ -1,5 +1,5 @@
 """
-This module is a collimator node class for TEAPOT lattice
+This module is a FieldTracker node class for TEAPOT lattice
 """
 
 import os
@@ -14,15 +14,15 @@ from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
 # import teapot drift class
 from orbit.teapot import DriftTEAPOT
 
-# import Collimator class
-from collimator import Collimator
+# import Fieldtracker class
+from fieldtracker import FieldTracker
 
 class TeapotFieldTrackerNode(DriftTEAPOT):
     """ 
-    The collimator node class for TEAPOT lattice
+    The fieldtracker node class for TEAPOT lattice
     """
-    def __init__(self, order, bx, by, ax, ay, ex, epx, l, zi, zf, ds, niters,
-                  resid, xrefi, yrefi, eulerai, eulerbi, eulergi, apflag, b):
+    def __init__(self, bx, by, ax, ay, ex, epx, l, zi, zf, ds, niters,
+                  resid, xrefi, yrefi, eulerai, eulerbi, eulergi, b, filename):
         """
         Constructor. Creates the FieldTracker TEAPOT element.
         """

@@ -1,5 +1,5 @@
 """
-Module. Includes functions that will modify the accelerator lattice by inserting the one collimator node accelerator node.
+Module. Includes functions that will modify the accelerator lattice by inserting the one fieldtracker node accelerator node.
 """
 # import the auxiliary classes
 from orbit.utils import orbitFinalize
@@ -7,7 +7,7 @@ from orbit.utils import orbitFinalize
 # import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunchTracker
 
-# import Teapot collimation node
+# import Teapot fieldtracker node
 from orbit.FieldTracker import TeapotFieldTrackerNode
 
 # import teapot drift class
@@ -15,7 +15,7 @@ from orbit.teapot import DriftTEAPOT
 
 def addTeapotFieldTrackerNode(lattice, position, fieldtracker_node):
 	"""
-	It will put one Teapot collimation node in the lattice 
+	It will put one Teapot fieldtracker node in the lattice 
 	"""
 	length_tollerance = 0.0001
 	lattice.initialize()
@@ -30,20 +30,20 @@ def addTeapotFieldTrackerNode(lattice, position, fieldtracker_node):
 		ind += 1
 		z += node.getLength()
 	#-------now we check that between start and end we have only non-modified drift elements
-	#-------if the space charge was added first - that is a problem. The collimation should be added first.
+	#-------if the space charge was added first - that is a problem. The tracker should be added first.
 	for node in lattice.getNodes()[node_start_ind:node_stop_ind+1]:
 		#print "debug node=",node.getName()," type=",node.getType()," L=",node.getLength()
 		if(not isinstance(node,DriftTEAPOT)):
 			print "Non-drift node=",node.getName()," type=",node.getType()," L=",node.getLength()
-			orbitFinalize("We have non-drift element at the place of the collimator! Stop!")
+			orbitFinalize("We have non-drift element at the place of the tracker! Stop!")
 			#if(node.getNumberOfChildren() != 4):
 			#print "Node=",node.getName()," type=",node.getType()," L=",node.getLength()," N children nodes=",node.getNumberOfChildren()
-			#orbitFinalize("Drift element was modified with additional functionality (SC or something else)! Add collimation first! Stop!")
-	# make array of nodes from collimator in the center and possible two drifts if their length is more than length_tollerance [m]
+			#orbitFinalize("Drift element was modified with additional functionality (SC or something else)! Add fieldtracker first! Stop!")
+	# make array of nodes from fieldtracker in the center and possible two drifts if their length is more than length_tollerance [m]
 	nodes_new_arr = [fieldtracker_node,]
 	drift_node_start = lattice.getNodes()[node_start_ind]
 	drift_node_stop = lattice.getNodes()[node_stop_ind]	
-	#------now we will create two drift nodes: before the collimator and after
+	#------now we will create two drift nodes: before the fieldtracker and after
 	#------if the length of one of these additional drifts less than length_tollerance [m] we skip this drift 
 	if(position_start > lattice.getNodePositionsDict()[drift_node_start][0] +  length_tollerance):
 		drift_node_start_new = DriftTEAPOT(drift_node_start.getName())

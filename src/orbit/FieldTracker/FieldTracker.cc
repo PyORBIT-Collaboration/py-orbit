@@ -535,7 +535,6 @@ void FieldTracker::BGrid3D()
 	  if(ig < 0) ig = 1;
 	  if(jg < 0) jg = 1;
 	  if(kg < 0) kg = 1;
-	  //could need to be changed to -2 do to array differences in C and SC
 	  if(ig > nXGrid - 2) ig = nXGrid - 2;
 	  if(jg > nYGrid - 2) jg = nYGrid - 2;
 	  if(kg > nZGrid - 2) kg = nZGrid - 2;
@@ -628,8 +627,6 @@ void FieldTracker::initVars()
 ////////////////////////////////////////////////////////////////////////////////
 void FieldTracker::nodeCalculator(Bunch* b)
 {
-
- //  If tune calculation is on, check storage sizes:
   int oldSize, i;
 
   double betaX  = _betaX;
@@ -653,7 +650,6 @@ void FieldTracker::nodeCalculator(Bunch* b)
 
   double coeff = 1.e-09 * OrbitConst::c * OrbitConst::charge_electron / pMomentum;
 
-  //MIGHT NEED TO BE FIXED ^^^^
   double ds, resid;
   double  dx,  dy,  dz,  dxo,  dyo,  dzo;
   double dpx, dpy, dpz, dpxo, dpyo, dpzo;

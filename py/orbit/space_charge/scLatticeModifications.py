@@ -1,6 +1,8 @@
 """
 Module. Includes a base function that will modify the accelerator lattice by inserting the SC accelerator nodes.
 """
+# import the auxiliary classes
+from orbit.utils import orbitFinalize
 
 # import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunchTracker
@@ -26,6 +28,8 @@ def setSC_General_AccNodes(lattice, sc_path_length_min, space_charge_calculator,
 		nParts = accNode.getnParts()
 		for ip in range(nParts):
 			part_length = accNode.getLength(ip)
+			if(part_length > 1.0):
+				print "Warning! Node ",accNode.getName(), " has length ", part_length, "m which is great than 1 m.  Space charge algorithm may be innacurate!"
 			if(running_path > sc_path_length_min):
 				nodes_arr.append((accNode,ip,length_total,running_path))
 				running_path = 0.

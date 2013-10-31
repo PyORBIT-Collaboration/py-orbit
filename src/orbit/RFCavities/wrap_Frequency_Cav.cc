@@ -38,7 +38,7 @@ static PyObject* Frequency_Cav_new(PyTypeObject *type,
 }
 
 //-----------------------------------------------------
-// Initializator for python Frequency_Cav class
+// Initialization for python Frequency_Cav class
 // This is implementation of the __init__ method
 //-----------------------------------------------------
 

@@ -38,7 +38,7 @@ static PyObject* Barrier_Cav_new(PyTypeObject *type,
 }
 
 //-----------------------------------------------------
-// Initializator for python Barrier_Cav class
+// Initialization for python Barrier_Cav class
 // This is implementation of the __init__ method
 //-----------------------------------------------------
 

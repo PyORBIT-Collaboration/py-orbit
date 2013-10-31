@@ -38,7 +38,7 @@ static PyObject* Harmonic_Cav_new(PyTypeObject *type,
 }
 
 //-----------------------------------------------------
-// Initializator for python Harmonic_Cav class
+// Initialization for python Harmonic_Cav class
 // This is implementation of the __init__ method
 //-----------------------------------------------------
 

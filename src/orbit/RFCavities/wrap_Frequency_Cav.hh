@@ -17,4 +17,4 @@ extern "C"
 }
 #endif  // __cplusplus
 
-#endif // WRAP_HARMONIC_CAV_H
+#endif // WRAP_FREQUENCY_CAV_H

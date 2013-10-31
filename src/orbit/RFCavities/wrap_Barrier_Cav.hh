@@ -17,4 +17,4 @@ extern "C"
 }
 #endif  // __cplusplus
 
-#endif // WRAP_HARMONIC_CAV_H
+#endif // WRAP_BARRIER_CAV_H

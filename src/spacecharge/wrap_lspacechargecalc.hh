@@ -4,13 +4,15 @@
 #include "Python.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-  namespace wrap_lspacechargecalc{
+  namespace wrap_lspacechargecalc
+  {
     void initLSpaceChargeCalc(PyObject* module);
   }
-	
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

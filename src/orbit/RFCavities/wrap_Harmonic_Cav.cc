@@ -59,7 +59,7 @@ static int Harmonic_Cav_init(pyORBIT_Object *self,
                        &RFVoltage,
                        &RFPhase))
   {
-    ORBIT_MPI_Finalize("PyBunch - addParticle - cannot parse arguments! They should be (ZtoPhi, dESync, RFHNum, RFVoltage, RFPhase)");
+    ORBIT_MPI_Finalize("PyHarmonic_Cav - Harmonic_Cav_init - cannot parse arguments! They should be (ZtoPhi, dESync, RFHNum, RFVoltage, RFPhase)");
   }
   self->cpp_obj = new Harmonic_Cav(ZtoPhi,
                                    dESync,

@@ -1,6 +1,6 @@
 #include "orbit_mpi.hh"
 #include "pyORBIT_Object.hh"
-#
+
 #include "wrap_lspacechargecalc.hh"
 #include "wrap_bunch.hh"
 
@@ -10,10 +10,12 @@
 
 using namespace OrbitUtils;
 
-namespace wrap_LSpaceChargeCalc{
+namespace wrap_LSpaceChargeCalc
+{
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 	//---------------------------------------------------------

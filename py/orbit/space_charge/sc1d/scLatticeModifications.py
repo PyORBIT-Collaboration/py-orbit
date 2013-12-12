@@ -9,6 +9,8 @@ from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunch
 
 # import SC acc. nodes
 from orbit.space_charge.sc1d import SC1D_AccNode
+from orbit.space_charge.sc1d import FreqDep_SC1D_AccNode
+from orbit.space_charge.sc1d import BetFreqDep_SC1D_AccNode
 
 # import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunchTracker

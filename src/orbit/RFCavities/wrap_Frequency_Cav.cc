@@ -51,7 +51,7 @@ static int Frequency_Cav_init(pyORBIT_Object *self, PyObject *args, PyObject *kw
   if(!PyArg_ParseTuple(args, "ddd:arguments",
                        &RFFreq, &RFE0TL, &RFPhase))
   {
-    ORBIT_MPI_Finalize("PyBunch - addParticle - cannot parse arguments! They should be (RFFreq, RFE0TL, RFPhase)");
+    ORBIT_MPI_Finalize("PyFrequency_Cav - Frequency_Cav_init - cannot parse arguments! They should be (RFFreq, RFE0TL, RFPhase)");
   }
   self->cpp_obj = new Frequency_Cav(RFFreq, RFE0TL, RFPhase);
   ((Frequency_Cav*) self->cpp_obj)->setPyWrapper((PyObject*) self);

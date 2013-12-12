@@ -61,7 +61,7 @@ static int Barrier_Cav_init(pyORBIT_Object *self,
                        &dRFPhasep,
                        &dRFPhasem))
   {
-    ORBIT_MPI_Finalize("PyBunch - addParticle - cannot parse arguments! They should be (ZtoPhi, RFVoltage, RFPhasep, RFPhasem, dRFPhasep, dRFPhasem)");
+    ORBIT_MPI_Finalize("PyBarrier_Cav - Barrier_Cav_init - cannot parse arguments! They should be (ZtoPhi, RFVoltage, RFPhasep, RFPhasem, dRFPhasep, dRFPhasem)");
   }
   self->cpp_obj = new Barrier_Cav(ZtoPhi,
                                   RFVoltage,

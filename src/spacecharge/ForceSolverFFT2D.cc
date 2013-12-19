@@ -45,9 +45,9 @@ void ForceSolverFFT2D::init(int xSize, int ySize)
 
 	// FFTW_MEASURE or FFTW_ESTIMATE
 
-	planForward_greenF_ = fftw_plan_dft_2d(xSize2_ , ySize2_ , in_,  out_green_, FFTW_FORWARD, FFTW_MEASURE);
-	planForward_        = fftw_plan_dft_2d(xSize2_ , ySize2_ , in_,  out_,       FFTW_FORWARD, FFTW_MEASURE);
-	planBackward_       = fftw_plan_dft_2d(xSize2_ , ySize2_ , out_res_, in_res_,FFTW_BACKWARD, FFTW_MEASURE);
+	planForward_greenF_ = fftw_plan_dft_2d(xSize2_ , ySize2_ , in_,  out_green_, FFTW_FORWARD, FFTW_ESTIMATE);
+	planForward_        = fftw_plan_dft_2d(xSize2_ , ySize2_ , in_,  out_,       FFTW_FORWARD, FFTW_ESTIMATE);
+	planBackward_       = fftw_plan_dft_2d(xSize2_ , ySize2_ , out_res_, in_res_,FFTW_BACKWARD, FFTW_ESTIMATE);
   
 	//define FFT of the Green fuction
 	//_defineGreenF();

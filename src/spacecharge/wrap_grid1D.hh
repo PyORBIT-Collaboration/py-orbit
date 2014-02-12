@@ -4,10 +4,12 @@
 #include "Python.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-  namespace wrap_spacecharge{
+  namespace wrap_spacecharge
+  {
     void initGrid1D(PyObject* module);
   }
 

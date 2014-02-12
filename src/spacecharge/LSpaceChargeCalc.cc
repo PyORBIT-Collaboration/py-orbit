@@ -108,7 +108,7 @@ void LSpaceChargeCalc::trackBunch(Bunch* bunch)
   zmin  = zmax - length;
   zGrid->setGridZ(zmin, zmax);
   zGrid->setZero();
-  zGrid->binBunchSmoothedCount(bunch, length);
+  zGrid->binBunchSmoothedByParticle(bunch);
   zGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 
   if (nPartsGlobal < nMacrosMin) return;

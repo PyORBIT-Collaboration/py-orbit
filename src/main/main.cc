@@ -18,34 +18,35 @@
 #include "wrap_fieldtracker.hh"
 
 /**
- * The main function that will initialize the MPI and will 
+ * The main function that will initialize the MPI and will
  * call the python interpreter: Py_Main(argc,argv).
  */
-int main (int argc, char **argv)
+
+int main(int argc, char **argv)
 {
+  //  for(int i = 0; i < argc; i++)
+  //  {
+  //    std::cout << "before i = " << i << " arg = " << argv[i] << std::endl;
+  //  }
 
-  //   for(int i = 0; i < argc; i++){
-  //     std::cout<<"before i="<<i<<" arg="<<argv[i]<<std::endl;
-  //   }
+  ORBIT_MPI_Init(&argc, &argv);
 
+  //  for(int i = 0; i < argc; i++)
+  //  {
+  //    std::cout << "after i = " << i <<" arg = " << argv[i] << std::endl;
+  //  }
 
-  ORBIT_MPI_Init(&argc,&argv);
+  //  int rank = 0;
+  //  int size = 0;
+  //  ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  //  ORBIT_MPI_Comm_size(MPI_COMM_WORLD, &size);
+  //  std::cout << "rank = " << rank << " size = " << size << std::endl;
 
-  //   for(int i = 0; i < argc; i++){
-  //     std::cout<<"after i="<<i<<" arg="<<argv[i]<<std::endl;
-  //   }
-
-  //int rank = 0;
-  //int size = 0;
-  //ORBIT_MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  //ORBIT_MPI_Comm_size(MPI_COMM_WORLD,&size);
-  //std::cout<<"rank="<< rank <<" size="<< size <<std::endl;
-
-
-  //we need this to initialize the extra ORBIT modules
+  // We need to initialize the extra ORBIT modules
   Py_Initialize();
 
-  //ORBIT module initializations
+  // ORBIT module initializations
+
   wrap_orbit_mpi::initorbit_mpi();
   wrap_orbit_bunch::initbunch();
   wrap_orbit_utils::initutils();
@@ -57,21 +58,21 @@ int main (int argc, char **argv)
   wrap_rfcavities::initrfcavities();
   wrap_fieldtracker::initfieldtracker();
 
-	
+  // Runge-Kutta tracker package
 
-  //Runge-Kutta tracker package
   inittrackerrk4();
 
-  //space-charge package
-  initspacecharge();
-	
-  //the python interpreter
-  //It will call Py_Initialize() again, but there is no harm
-  Py_Main(argc,argv);
+  // Space-charge package
 
-  //std::cout << "MPI - stopped" << std::endl;
+  initspacecharge();
+
+  // The python interpreter
+  // It will call Py_Initialize() again, but there is no harm.
+
+  Py_Main(argc, argv);
+
+  // std::cout << "MPI - stopped" << std::endl;
   ORBIT_MPI_Finalize();
 
   return 0;
-
 }

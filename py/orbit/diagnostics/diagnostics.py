@@ -9,6 +9,7 @@ import math
 import random
 import sys
 from bunch import BunchTwissAnalysis
+from bunch import BunchTuneAnalysis
 from orbit.utils.consts import speed_of_light
 
 class StatLats:
@@ -37,7 +38,8 @@ class StatLats:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 
-		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\n"		
+		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) +"\n")
+							
 	def closeStatLats(self):
 		self.file_out.close()
 
@@ -59,19 +61,18 @@ class StatLatsSetMember:
 		betay = self.bunchtwissanalysis.getBeta(1)
 		alphay = self.bunchtwissanalysis.getAlpha(1)
 		emity = self.bunchtwissanalysis.getEmittance(1)
-		dispersionx = self.bunchtwissanalysis.getDispersion(0, bunch)
-		ddispersionx = self.bunchtwissanalysis.getDispersionDerivative(0, bunch)
-		dispersiony = self.bunchtwissanalysis.getDispersion(1, bunch)
-		ddispersiony = self.bunchtwissanalysis.getDispersionDerivative(1, bunch)
+		#dispersionx = self.bunchtwissanalysis.getDispersion(0, bunch)
+		#ddispersionx = self.bunchtwissanalysis.getDispersionDerivative(0, bunch)
+		#dispersiony = self.bunchtwissanalysis.getDispersion(1, bunch)
+		#ddispersiony = self.bunchtwissanalysis.getDispersionDerivative(1, bunch)
 		
 		sp = bunch.getSyncParticle()
 		time = sp.time()
 
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
-	
 
-		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\t" + str(dispersionx) + "\t" + str(ddispersionx) + "\t" + str(dispersiony) + "\t" + str(ddispersiony) + "\n")
+		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\n")
 	
 	def closeStatLats(self):
 		self.file_out.close()

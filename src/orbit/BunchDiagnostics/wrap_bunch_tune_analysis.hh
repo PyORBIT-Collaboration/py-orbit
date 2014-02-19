@@ -1,5 +1,5 @@
-#ifndef WRAP_ORBIT_BUNCH_TUNE_ANALYSIS_HH_
-#define WRAP_ORBIT_BUNCH_TUNE_ANALYSIS_HH_
+#ifndef WRAP_BUNCH_TUNE_ANALYSIS_HH_
+#define WRAP_BUNCH_TUNE_ANALYSIS_HH_
 
 #include "Python.h"
 
@@ -15,4 +15,4 @@ extern "C" {
 }
 #endif
 
-#endif /*WRAP_ORBIT_BUNCH_TUNE_ANALYSIS_HH_*/
+#endif /*WRAP_BUNCH_TUNE_ANALYSIS_HH_*/

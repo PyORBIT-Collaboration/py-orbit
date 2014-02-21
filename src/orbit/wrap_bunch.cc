@@ -11,6 +11,7 @@
 #include "wrap_bunch.hh"
 #include "wrap_syncpart.hh"
 #include "wrap_bunch_twiss_analysis.hh"
+#include "wrap_bunch_tune_analysis.hh"
 
 #include "pyORBIT_Object.hh"
 
@@ -20,7 +21,6 @@
 namespace wrap_orbit_bunch{
 
   void error(const char* msg){ ORBIT_MPI_Finalize(msg); }
-
 	//---------------------------------------------------------
 	//Python Bunch class definition
 	//---------------------------------------------------------
@@ -37,7 +37,7 @@ namespace wrap_orbit_bunch{
   //initializator for python Bunch class
   //this is implementation of the __init__ method
   static int Bunch_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
-    //std::cerr<<"The Bunch __init__ has been called!"<<std::endl;
+		//std::cerr<<"The Bunch __init__ has been called!"<<std::endl;
 		//instantiation of a new c++ Bunch
 		self->cpp_obj = (void*) new Bunch();
 		((Bunch*) self->cpp_obj)->setPyWrapper((PyObject*) self);
@@ -1312,15 +1312,16 @@ extern "C" {
 #endif
 
   void initbunch(){
-		//check that the Bunch wrapper is ready
-		if (PyType_Ready(&pyORBIT_Bunch_Type) < 0) return;
-		Py_INCREF(&pyORBIT_Bunch_Type);
-    //create new module
-    PyObject* module = Py_InitModule("bunch",BunchModuleMethods);
-		PyModule_AddObject(module, "Bunch", (PyObject *)&pyORBIT_Bunch_Type);			
-		//add the SyncParticle python class
-		wrap_orbit_syncpart::initsyncpart(module);
-		wrap_bunch_twiss_analysis::initbunchtwissanalysis(module);
+	  //check that the Bunch wrapper is ready
+	  if (PyType_Ready(&pyORBIT_Bunch_Type) < 0) return;
+	  Py_INCREF(&pyORBIT_Bunch_Type);
+	  //create new module
+	  PyObject* module = Py_InitModule("bunch",BunchModuleMethods);
+	  PyModule_AddObject(module, "Bunch", (PyObject *)&pyORBIT_Bunch_Type);
+	  //add the SyncParticle python class
+	  wrap_orbit_syncpart::initsyncpart(module);
+	  wrap_bunch_twiss_analysis::initbunchtwissanalysis(module);
+	  wrap_bunch_tune_analysis::initbunchtuneanalysis(module);
   }
 
 	PyObject* getBunchType(const char* name){

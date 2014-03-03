@@ -50,12 +50,12 @@ def bunch_orbit_to_pyorbit(ringLength, kineticEnergy, name_of_orbit_mpi_bunch_fi
 		recv_rank = n_count % size	
 		if(rank == main_rank):
 			res_arr = ln.strip().split()
-			x  = float(res_arr[0])/1000.
-			xp = float(res_arr[1])/1000.
-			y  = float(res_arr[2])/1000.
-			yp = float(res_arr[3])/1000.
-			z  = float(res_arr[4])*L/(2*math.pi)
-			dE = float(res_arr[5])
+			x  =  float(res_arr[0])/1000.
+			xp =  float(res_arr[1])/1000.
+			y  =  float(res_arr[2])/1000.
+			yp =  float(res_arr[3])/1000.
+			z  = -float(res_arr[4])*L/(2*math.pi)
+			dE =  float(res_arr[5])
 			val_arr = (x,xp,y,yp,z,dE)
 			# send the information if rank = 0 is not going to keep this particle
 			if(recv_rank != main_rank):

@@ -3,7 +3,7 @@ DIRS += ./ecloud
 #DIRS += ./intsystem
 #DIRS += ./laserstripping
 #DIRS += ./H0starkeffect
-DIRS += ./PTC
+#DIRS += ./PTC
 
 #========rules=========================
 
@@ -18,4 +18,3 @@ clean:
 	@for dir in $(DIRS); do \
 		(cd $$dir; if [ -f ./Makefile ]; then $(MAKE) clean; fi;); \
 	done
-

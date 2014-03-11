@@ -25,6 +25,7 @@
 #include "Evolution.hh"
 #include "LostParticleAttributes.hh"
 #include "ParticlePhaseAttributes.hh"
+#include "ParticleIdNumber.hh"
 
 ParticleAttributesFactory::ParticleAttributesFactory()
 {
@@ -59,6 +60,10 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 	
 	if(name == "macrosize"){
 		part_atrs = new ParticleMacroSize(bunch);
+	}
+	
+	if(name == "ParticleIdNumber"){
+		part_atrs = new ParticleIdNumber(bunch);
 	}
   
 	if(name == "LostParticleAttributes"){
@@ -194,6 +199,7 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& names){
 	names.clear();
 	names.push_back("macrosize");
+	names.push_back("ParticleIdNumber");
 	names.push_back("Amplitudes");
 	names.push_back("Populations");
 	names.push_back("pq_coords");

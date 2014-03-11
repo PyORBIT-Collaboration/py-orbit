@@ -47,7 +47,7 @@ class InjectParts:
 		nPartsGlobal = self.bunch.getSizeGlobal()
 		
 		if(self.nmaxmacroparticles > 0):
-			if(nPartsGlobal > self.nmaxmacroparticles):
+			if(nPartsGlobal >= self.nmaxmacroparticles):
 				return
 				
 				#if((nTurnsDone % injectTurnInterval) != 0):
@@ -130,6 +130,7 @@ class InjectParts:
 			if(nPartsGlobal > self.nmaxmacroparticles):
 				return
 		
+	
 		#if((nTurnsDone % self.injectturninterval) != 0):
 				#	return
 

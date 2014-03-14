@@ -64,6 +64,7 @@ def addLongitudinalSpaceChargeNode(lattice, position, sc1D_node):
 	# initialize the lattice
 	lattice.initialize()
 
-		
-
+def addLongitudinalSpaceChargeNodeAsChild(lattice, AccNode, scNode):
+	AccNode.addChildNode(scNode,AccNode.BODY,0,AccNode.BEFORE)
+	lattice.initialize()
 

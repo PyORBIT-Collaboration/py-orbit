@@ -6,7 +6,7 @@ from orbit_mpi import mpi_datatype
 
 from bunch import Bunch
 
-def bunch_orbit_to_pyorbit(ringLength, kineticEnergy, name_of_orbit_mpi_bunch_file, pyOrbitBunch = None):
+def bunch_orbit_to_pyorbit(ringLength, kineticEnergy, name_of_orbit_mpi_bunch_file, pyOrbitBunch = None, number_parts = -1):
 	"""
 	Translates ORBIT_MPI bunch to pyORBIT bunch and returns it. PyORBIT bunch needs 
 	the ring length (m) and energy, mass and charge of the synchronous particle, but 
@@ -72,7 +72,9 @@ def bunch_orbit_to_pyorbit(ringLength, kineticEnergy, name_of_orbit_mpi_bunch_fi
 			if(len(ln) > 0):
 				ln_nonempty = 1
 		ln_nonempty = orbit_mpi.MPI_Bcast(ln_nonempty,mpi_datatype.MPI_INT,main_rank,comm)				
-		n_count += 1		
+		n_count += 1
+		if(n_count == number_parts):
+			break
 		
 	if(rank == main_rank): file_in.close()
 	return pyOrbitBunch

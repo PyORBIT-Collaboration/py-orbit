@@ -92,14 +92,17 @@ class PTC_Node(BaseTEAPOT):
 		self.addParam("etax"  , etax)
 		self.addParam("etapx" , etapx)
 
-	def track(self, bunch, PhaseLength):
+	def track(self, paramsDict):
 		"""
 		The PTC class implementation of the
 		AccNodeBunchTracker class track(probe) method.
 		"""
+		bunch = paramsDict["bunch"]
+		PhaseLength = paramsDict["length"]
 		orbit_ptc_node_index = self.getParam("node_index")
 		action_type = -1
 		#ptc_get_task_type_(orbit_ptc_node_index, action_type)
+		
 		if(action_type == 1):
 			print "==============================="
 			print "PTC_Node.track."

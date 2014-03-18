@@ -187,7 +187,8 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 			
 			for(j = 0; j<_order+1; j++)
 				for(i=0 ; i< _order+2-j; i++)
-					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(2)), double(j));
+					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
+
 		}
 		
 	} else {
@@ -202,7 +203,7 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 			
 			for(j = 0; j<_order; j++)
 				for(i=0 ; i< _order+1-j; i++)
-					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(2)), double(j));
+					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
 			
 		}
 		

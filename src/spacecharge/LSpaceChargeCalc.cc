@@ -34,7 +34,7 @@ LSpaceChargeCalc::LSpaceChargeCalc(double b_a_in, double length_in, int nMacrosM
   nMacrosMin     = nMacrosMin_in;
   useSpaceCharge = useSpaceCharge_in;
   nBins          = nBins_in;
-  zGrid          = new Grid1D(nBins);
+  zGrid          = new Grid1D(nBins, length);
 
   _fftmagnitude  = new double[nBins / 2];
   _fftphase      = new double[nBins / 2];
@@ -53,7 +53,7 @@ LSpaceChargeCalc::LSpaceChargeCalc(double b_a_in, double length_in, int nMacrosM
 
   _in   = (fftw_complex *) fftw_malloc(nBins * sizeof(fftw_complex));
   _out  = (fftw_complex *) fftw_malloc(nBins * sizeof(fftw_complex));
-  _plan = fftw_plan_dft_1d(nBins, _in,  _out, FFTW_FORWARD, FFTW_MEASURE);
+  _plan = fftw_plan_dft_1d(nBins, _in,  _out, FFTW_FORWARD, FFTW_ESTIMATE);
 }
 
 

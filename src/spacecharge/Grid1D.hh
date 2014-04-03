@@ -24,6 +24,9 @@ public:
   /** Constructor with grid size only */
   Grid1D(int zSize);
 
+  /** Constructor with lattice length */
+  Grid1D(int zSize, double length);
+	
   /** Constructor with grid size and spatial limits */
   Grid1D(int zSize, double zMin, double zMax);
 
@@ -140,6 +143,9 @@ protected:
 
   /** grid limits */
   double zMin_, zMax_;
+	
+  /** lattice length */
+  double length_;
 };
 
 

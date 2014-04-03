@@ -26,10 +26,21 @@ Grid1D::Grid1D(int zSize):CppPyWrapper(NULL)
   zSize_ = zSize;
   zMin_  = -1.0;
   zMax_  = +1.0;
+  length_ = 0.0;
   init();
   setZero();
 }
 
+/** Constructor with grid size and lattice length */
+Grid1D::Grid1D(int zSize, double length):CppPyWrapper(NULL)
+{
+	zSize_ = zSize;
+	length_ = length;
+	zMin_  = -1.0;
+	zMax_  = +1.0;
+	init();
+	setZero();
+}
 
 /** Constructor with grid size and spatial limits */
 Grid1D::Grid1D(int zSize, double zMin, double zMax):CppPyWrapper(NULL)
@@ -446,7 +457,16 @@ void Grid1D::getIndAndWZSmoothed(double z,
 {
   if(zSize_ > 2)
   {
-    double zgloc = (z - zMin_) / dz_;
+	double zgloc = 0;
+    //double zgloc = (z - zMin_) / dz_;
+	if(length_ == 0){
+		std::cerr<<"Warning!: Lattice length should not be zero for smoothed binning.\n";
+		zgloc = (z - zMin_) / dz_;
+	}
+	else{
+		zgloc = (z + length_/2.0) / dz_;
+	}
+	  
     iZ0 = int(zgloc + 0.5);
     double frac = zgloc - double(iZ0);
     WZm  = 0.5 * (0.5 - frac) * (0.5 - frac);

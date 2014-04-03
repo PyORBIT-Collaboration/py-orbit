@@ -43,18 +43,28 @@ static PyObject* Grid1D_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static int Grid1D_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds)
 {
+  int nVars = PyTuple_Size(args);
   int binZ;
+  double length;
   double zMin = -1.0, zMax = +1.0;
-  if(!PyArg_ParseTuple(args,"i|dd:__init__", &binZ, &zMin, &zMax))
-  {
-    ORBIT_MPI_Finalize("PyGrid1D - Grid1D(0Z[, zMin, zMax]) - constructor needs parameters.");
+  if (nVars == 2){
+	  if(!PyArg_ParseTuple(args,"i|d:__init__", &binZ, &length))
+	  {
+		  ORBIT_MPI_Finalize("PyGrid1D - Grid1D(0Z, length]) - constructor needs parameters.");
+	  }
+	  self->cpp_obj = new Grid1D(binZ, length);
   }
-  self->cpp_obj = new Grid1D(binZ, zMin, zMax);
-  ((Grid1D*) self->cpp_obj)->setPyWrapper((PyObject*) self);
+  if (nVars ==1 || nVars == 3 ){
+	if(!PyArg_ParseTuple(args,"i|ddd:__init__", &binZ, &zMin, &zMax))
+	{
+		ORBIT_MPI_Finalize("PyGrid1D - Grid1D(0Z[, zMin, zMax]) - constructor needs parameters.");
+	}
+	self->cpp_obj = new Grid1D(binZ, zMin, zMax);
+  }
+	((Grid1D*) self->cpp_obj)->setPyWrapper((PyObject*) self);
   // std::cerr << "The Grid1D __init__ has been called!" << std::endl;
   return 0;
 }
-
 
 // setGridZ()
 

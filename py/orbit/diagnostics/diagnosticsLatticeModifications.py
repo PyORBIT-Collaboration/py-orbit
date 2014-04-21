@@ -60,6 +60,11 @@ def addTeapotDiagnosticsNode(lattice, position, diagnostics_node):
 	lattice.initialize()
 		
 
+def addTeapotDiagnosticsNodeAsChild(lattice, AccNode, diagnostics_node):
+	AccNode.addChildNode(diagnostics_node, AccNode.ENTRANCE,0,AccNode.BEFORE)
+	lattice.initialize()
+
+
 def addTeapotStatLatsNodeSet(lattice, filename):
 	"""
 	It will put one Teapot statlats node at start of each node in lattice

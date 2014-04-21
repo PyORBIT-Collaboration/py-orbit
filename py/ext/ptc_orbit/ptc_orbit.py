@@ -13,6 +13,9 @@ from orbit.teapot_base import TPB
 # import the function that creates multidimensional arrays
 from orbit.utils import orbitFinalize
 
+# import some constants
+from orbit.utils import consts
+
 # import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccNode,\
     AccActionsContainer, AccNodeBunchTracker
@@ -117,6 +120,7 @@ def setBunchParamsPTC(bunch):
 	Sets the synchronous particle parameters of the bunch.
 	"""
 	(mass, charge, kin_energy) = ptc_get_syncpart_()
+	mass = mass * consts.mass_proton
 	syncPart = bunch.getSyncParticle()
 	syncPart.kinEnergy(kin_energy)
 	bunch.charge(charge)

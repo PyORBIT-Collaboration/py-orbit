@@ -7,7 +7,7 @@ import orbit_mpi
 from orbit_mpi import mpi_datatype
 from orbit_mpi import mpi_op
 
-def bunch_pyorbit_to_orbit(ringLength, nHarm, pyOrbitBunch, \
+def bunch_pyorbit_to_orbit_nHarm(ringLength, nHarm, pyOrbitBunch, \
 	name_of_orbit_mpi_bunch_file):
 	"""
 	Translates pyORBIT bunch to ORBIT_MPI bunch, incorporating RF

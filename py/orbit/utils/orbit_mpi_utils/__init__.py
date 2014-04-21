@@ -15,13 +15,11 @@
 ##   bunch into file. It is a non-parallel function.
 
 from orbit.utils.orbit_mpi_utils.bunch_orbit_to_pyorbit \
-	import bunch_orbit_to_pyorbit
+import bunch_orbit_to_pyorbit
 from orbit.utils.orbit_mpi_utils.bunch_pyorbit_to_orbit \
 	import bunch_pyorbit_to_orbit
-from orbit.utils.orbit_mpi_utils.bunch_orbit_to_pyorbit \
-	import bunch_orbit_to_pyorbit_nHarm
-from orbit.utils.orbit_mpi_utils.bunch_pyorbit_to_orbit \
-	import bunch_pyorbit_to_orbit_nHarm
+from orbit.utils.orbit_mpi_utils.bunch_orbit_to_pyorbit_nHarm import bunch_orbit_to_pyorbit_nHarm
+from orbit.utils.orbit_mpi_utils.bunch_pyorbit_to_orbit_nHarm import bunch_pyorbit_to_orbit_nHarm
 
 __all__ = []
 __all__.append("bunch_orbit_to_pyorbit")

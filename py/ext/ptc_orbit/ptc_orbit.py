@@ -200,15 +200,21 @@ def trackBunchThroughLatticePTC(lattice, bunch, PhaseLength):
 	"""
 	Tracks a bunch through the whole lattice.
 	"""
+	paramsDict = {}
+	paramsDict["bunch"]= bunch
+	paramsDict["length"]=PhaseLength
 	for node in lattice.getNodes():
-		node.track(bunch, PhaseLength)
+		node.track(paramsDict)
 
 
 def trackBunchInRangePTC(lattice, bunch, PhaseLength, indexi, indexf):
 	"""
 	Tracks a bunch from indexi through indexf, inclusive.
 	"""
+	paramsDict = {}
+	paramsDict["bunch"]= bunch
+	paramsDict["length"]=PhaseLength
 	for node in lattice.getNodes():
 		node_index = node.getParam("node_index")
 		if((node_index >= indexi) and (node_index <= indexf)):
-			node.track(bunch, PhaseLength)
+			node.track(paramsDict)

@@ -19,6 +19,9 @@ from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunch
 # import the MAD parser to construct lattices of TEAPOT elements.
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement
 
+# import the MADX parser to construct lattices of TEAPOT elements.
+from orbit.parsers.madx_parser import MADX_Parser, MADX_LattElement
+
 """
 Drift
 Bend
@@ -54,6 +57,30 @@ class TEAPOT_Lattice(AccLattice):
 		accMAD_Line = accLines[lineName]
 		self.setName(lineName)
 		accMADElements = accMAD_Line.getElements()
+		# make TEAPOT lattice elements by using TEAPOT
+		# element factory
+		for madElem in accMADElements:
+			elems = _teapotFactory.getElements(madElem)
+			for elem in elems:
+				self.addNode(elem)
+		self.initialize()
+
+	def readMADX(self, madx_file_name, seqName):
+		"""
+			It creates the teapot lattice from MAD file.
+		"""
+		parser = MADX_Parser()
+		parser.parse(madx_file_name)
+		
+		if(not seqName == parser.getSequenceName()):
+			print "==============================="
+			print "MADX file: ", madx_file_name
+			print "Can not find accelerator sequence: ", seqName
+			print "STOP."
+			sys.exit(1)
+		   
+		self.setName(parser.getSequenceName())
+		accMADElements = parser.getSequenceList()
 		# make TEAPOT lattice elements by using TEAPOT
 		# element factory
 		for madElem in accMADElements:
@@ -126,6 +153,32 @@ class TEAPOT_Ring(AccLattice):
 				self.addNode(elem)
 		self.addChildren()
 		self.initialize()
+
+	def readMADX(self, madx_file_name, seqName):
+		"""
+			It creates the teapot lattice from MAD file.
+			"""
+		parser = MADX_Parser()
+		parser.parse(madx_file_name)
+		
+		if(not seqName == parser.getSequenceName()):
+			print "==============================="
+			print "MADX file: ", madx_file_name
+			print "Can not find accelerator sequence: ", seqName
+			print "STOP."
+			sys.exit(1)
+		
+		self.setName(parser.getSequenceName())
+		accMADElements = parser.getSequenceList()
+		# make TEAPOT lattice elements by using TEAPOT
+		# element factory
+		for madElem in accMADElements:
+			elems = _teapotFactory.getElements(madElem)
+			for elem in elems:
+				self.addNode(elem)
+		self.addChildren()
+		self.initialize()
+
 	
 	def addChildren(self):
 		AccLattice.initialize(self)

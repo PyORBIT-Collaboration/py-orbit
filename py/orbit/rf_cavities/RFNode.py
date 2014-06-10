@@ -134,6 +134,175 @@ class Harmonic_RFNode(Base_RFNode):
 		self.getName(), " part ind = ", self.getActivePartIndex(),\
 		" length = ", length
 
+class Dual_Harmonic_RFNode(Base_RFNode):
+
+	def __init__(self, ZtoPhi, RFHNum, RatioRFHNum, RFVoltage, RatioVoltage, RFPhase, RFPhase2,\
+		length, name = "harmonic_rfnode"):
+		"""
+			Constructor. Creates Harmonic
+			RF Cavity TEAPOT element
+		"""
+		Base_RFNode.__init__(self, length, name)
+		self.dualharmonicnode = Dual_Harmonic_Cav(ZtoPhi, \
+			RFHNum, RatioRFHNum, RFVoltage, RatioVoltage, RFPhase, RFPhase2)
+		self.setType("dual harmonic rf node")
+		self.setLength(0.0)
+
+	def trackBunch(self, bunch):
+		"""
+			The rfcavity-teapot class implementation of the
+			AccNodeBunchTracker class track(probe) method.
+		"""
+		length = self.getLength(self.getActivePartIndex())
+		#put the track method here:
+		self.dualharmonicnode.trackBunch(bunch)
+		#print "debug tracking the bunch through the rf node = ",\
+		self.getName(), " part ind = ", self.getActivePartIndex(),\
+		" length = ", length
+
+	def track(self, paramsDict):
+		"""
+			The rfcavity-teapot class implementation of the
+			AccNodeBunchTracker class track(probe) method.
+		"""
+		length = self.getLength(self.getActivePartIndex())
+		bunch = paramsDict["bunch"]
+		#put the track method here:
+		self.dualharmonicnode.trackBunch(bunch)
+		#print "debug tracking the bunch through the rf node = ",\
+		self.getName(), " part ind = ", self.getActivePartIndex(),\
+		" length = ", length
+
+class BRhoDep_Harmonic_RFNode(Base_RFNode):
+
+	def __init__(self, ZtoPhi, accelDict, bunch,\
+		length, name = "brho_timedep_harmonic_rfnode"):
+		"""
+			Constructor. Creates BRho Time Dependent
+			Harmonic RF Cavity TEAPOT element
+		"""
+		Base_RFNode.__init__(self, length, name)
+		self.Z2Phi = ZtoPhi
+		self.localDict = accelDict
+		gammaTrans = self.localDict["gammaTrans"]
+		RFHNum = self.localDict["RFHNum"]
+		n_tuple = self.localDict["n_tuple"]
+		time_tuple = self.localDict["time"]
+		BRho_tuple = self.localDict["BRho"]
+		RFVoltage_tuple = self.localDict["RFVoltage"]
+		RFPhase_tuple = self.localDict["RFPhase"]
+		time = bunch.getSyncParticle().time()
+		mass = bunch.mass()
+		charge = bunch.charge()
+		gamma = bunch.getSyncParticle().gamma()
+		keold = bunch.getSyncParticle().kinEnergy()
+		eold = keold + mass
+		RFVoltage = interp(time, n_tuple,\
+			time_tuple, RFVoltage_tuple)
+		RFPhase = interp(time, n_tuple,\
+			time_tuple, RFPhase_tuple)
+		BRho = interp(time, n_tuple,\
+			time_tuple, BRho_tuple)
+		pcnew = 0.299792458 * charge * BRho
+		enew = math.sqrt(pcnew * pcnew + mass * mass)
+		kenew = enew - mass
+		bunch.getSyncParticle().kinEnergy(kenew)
+		dESync = enew - eold
+		Zsync = syncZ(ZtoPhi, gammaTrans, gamma, charge,\
+			dESync, RFHNum, RFVoltage, RFPhase)
+		bunch.getSyncParticle().z(Zsync)
+		self.harmonicnode = Harmonic_Cav(ZtoPhi, dESync,\
+			RFHNum, RFVoltage, RFPhase)
+		self.setType("harmonic rf node")
+		self.setLength(0.0)
+
+	def trackBunch(self, bunch):
+		"""
+			The rfcavity-teapot class implementation of the
+			AccNodeBunchTracker class track(probe) method.
+		"""
+		length = self.getLength(self.getActivePartIndex())
+		gammaTrans = self.localDict["gammaTrans"]
+		RFHNum = self.localDict["RFHNum"]
+		n_tuple = self.localDict["n_tuple"]
+		time_tuple = self.localDict["time"]
+		BRho_tuple = self.localDict["BRho"]
+		RFVoltage_tuple = self.localDict["RFVoltage"]
+		RFPhase_tuple = self.localDict["RFPhase"]
+		time = bunch.getSyncParticle().time()
+		mass = bunch.mass()
+		charge = bunch.charge()
+		gamma = bunch.getSyncParticle().gamma()
+		keold = bunch.getSyncParticle().kinEnergy()
+		eold = keold + mass
+		RFVoltage = interp(time, n_tuple,\
+			time_tuple, RFVoltage_tuple)
+		RFPhase = interp(time, n_tuple,\
+			time_tuple, RFPhase_tuple)
+		BRho = interp(time, n_tuple,\
+			time_tuple, BRho_tuple)
+		pcnew = 0.299792458 * charge * BRho
+		enew = math.sqrt(pcnew * pcnew + mass * mass)
+		kenew = enew - mass
+		bunch.getSyncParticle().kinEnergy(kenew)
+		dESync = enew - eold
+		ZtoPhi = self.Z2Phi
+		Zsync = syncZ(ZtoPhi, gammaTrans, gamma, charge,\
+			dESync, RFHNum, RFVoltage, RFPhase)
+		bunch.getSyncParticle().z(Zsync)
+		self.harmonicnode.dESync(dESync)
+		self.harmonicnode.RFVoltage(RFVoltage)
+		self.harmonicnode.RFPhase(RFPhase)
+		#put the track method here:
+		self.harmonicnode.trackBunch(bunch)
+		#print "debug tracking the bunch through the rf node = ",\
+		self.getName(), " part ind = ", self.getActivePartIndex(),\
+		" length = ", length
+
+	def track(self, paramsDict):
+		"""
+			The rfcavity-teapot class implementation of the
+			AccNodeBunchTracker class track(probe) method.
+		"""
+		length = self.getLength(self.getActivePartIndex())
+		bunch = paramsDict["bunch"]
+		gammaTrans = self.localDict["gammaTrans"]
+		RFHNum = self.localDict["RFHNum"]
+		n_tuple = self.localDict["n_tuple"]
+		time_tuple = self.localDict["time"]
+		BRho_tuple = self.localDict["BRho"]
+		RFVoltage_tuple = self.localDict["RFVoltage"]
+		RFPhase_tuple = self.localDict["RFPhase"]
+		time = bunch.getSyncParticle().time()
+		mass = bunch.mass()
+		charge = bunch.charge()
+		gamma = bunch.getSyncParticle().gamma()
+		keold = bunch.getSyncParticle().kinEnergy()
+		eold = keold + mass
+		RFVoltage = interp(time, n_tuple,\
+			time_tuple, RFVoltage_tuple)
+		RFPhase = interp(time, n_tuple,\
+			time_tuple, RFPhase_tuple)
+		BRho = interp(time, n_tuple,\
+			time_tuple, BRho_tuple)
+		pcnew = 0.299792458 * charge * BRho
+		enew = math.sqrt(pcnew * pcnew + mass * mass)
+		kenew = enew - mass
+		bunch.getSyncParticle().kinEnergy(kenew)
+		dESync = enew - eold
+		ZtoPhi = self.Z2Phi
+		Zsync = syncZ(ZtoPhi, gammaTrans, gamma, charge,\
+			dESync, RFHNum, RFVoltage, RFPhase)
+		bunch.getSyncParticle().z(Zsync)
+		self.harmonicnode.dESync(dESync)
+		self.harmonicnode.RFVoltage(RFVoltage)
+		self.harmonicnode.RFPhase(RFPhase)
+		#put the track method here:
+		self.harmonicnode.trackBunch(bunch)
+		#print "debug tracking the bunch through the rf node = ",\
+		self.getName(), " part ind = ", self.getActivePartIndex(),\
+		" length = ", length
+
 class BRhoDep_Harmonic_RFNode(Base_RFNode):
 
 	def __init__(self, ZtoPhi, accelDict, bunch,\

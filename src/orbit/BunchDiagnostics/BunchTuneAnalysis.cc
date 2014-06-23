@@ -88,7 +88,7 @@ void BunchTuneAnalysis::analyzeBunch(Bunch* bunch){
 			
 			double xcanonical = x - etax * dpp;
 			double ycanonical = y;
-			double xpfac = xp - etax * dpp;
+			double xpfac = xp - etapx * dpp;
 			double ypfac = yp;
 			double pxcanonical =  xpfac + xcanonical * (alphax/betax);
 			double pycanonical =  ypfac + ycanonical * (alphay/betay);

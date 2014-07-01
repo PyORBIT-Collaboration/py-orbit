@@ -35,12 +35,13 @@ extern "C" {
 	  double b = 0.;
 	  double c = 0.;
 	  double d = 0.;
+	  double pos = 0.;
 	  
 	  //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-	  if(!PyArg_ParseTuple(	args,"idddd:arguments",&shape,&a,&b,&c,&d)){
-		  error("PyBunch - addParticle - cannot parse arguments! It should be (shape,a,b,c,d)");	
+	  if(!PyArg_ParseTuple(	args,"iddddd:arguments",&shape,&a,&b,&c,&d,&pos)){
+		  error("PyBunch - addParticle - cannot parse arguments! It should be (shape,a,b,c,d,pos)");
 	  }
-	  self->cpp_obj =  new Aperture(shape,a,b,c,d);
+	  self->cpp_obj =  new Aperture(shape,a,b,c,d,pos);
 	  ((Aperture*) self->cpp_obj)->setPyWrapper((PyObject*) self);
     return 0;
   }

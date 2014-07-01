@@ -31,13 +31,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-Aperture::Aperture(int shape, double a, double b, double c, double d): CppPyWrapper(NULL)
+Aperture::Aperture(int shape, double a, double b, double c, double d, double pos): CppPyWrapper(NULL)
 {
 	shape_ = shape;
 	a_ = a;
 	b_ = b;
 	c_ = c;
 	d_ = d;
+	pos_ = pos;
 }
 
 void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
@@ -61,18 +62,27 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	    if(shape == 1)
 	      if((pow((coord[count][0]-c), 2) + pow((coord[count][2]-d), 2)) >= pow(a, 2)){
                     lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+				if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
+					lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
+					}
                     bunch->deleteParticleFast(count);
 	        }
 
 		if(shape == 2)
 	      if((pow((coord[count][0]-c), 2)/pow(a,2) + pow((coord[count][2]-d), 2)/pow(b,2)) >= 1){
                     lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+			  if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
+				  lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
+			  }
                     bunch->deleteParticleFast(count);
 	        }
 	
 	    if(shape == 3)
 	      if((abs((coord[count][0])-c)>=a)||(abs((coord[count][2]-d))>=b)){
 	          lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+			  if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
+				  lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
+			  }
         	    bunch->deleteParticleFast(count);
 	      }
 	}

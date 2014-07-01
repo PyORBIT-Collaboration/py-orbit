@@ -19,7 +19,7 @@ public:
 	/** Constructor */
 	Collimator(double length, int ma, 
 		              double density_fac, int shape, 
-									double a, double b, double c, double d, double angle);
+									double a, double b, double c, double d, double angle, double pos);
 
 	/** Routine for transfering particles through a collimator */
 	void collimateBunch(Bunch* bunch, Bunch* lostbunch);
@@ -61,7 +61,7 @@ protected:
 	int nLost;
 
 	//Collimator parameters
-	double length_, density_fac_, a_, b_, c_, d_, angle_;
+	double length_, density_fac_, a_, b_, c_, d_, angle_, pos_;
 	int ma_, shape_;
 
 };

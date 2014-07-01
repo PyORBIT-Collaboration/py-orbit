@@ -32,12 +32,13 @@ extern "C" {
 
 	  double length = 0.;  int ma = 0.; double density_fac = 1; int shape = 0.;
 	  double a = 0.; double b = 0.;  double c = 0.; double d = 0.; double angle = 0.;
+	  double pos = 0.;
 	  
 	  //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-	  if(!PyArg_ParseTuple(	args,"dididdddd:arguments",&length,&ma,&density_fac,&shape,&a,&b,&c,&d,&angle)){
-		  error("PyBunch - addParticle - cannot parse arguments! It should be (length,ma,density_fac,shape,a,b,c,d,angle)");	
+	  if(!PyArg_ParseTuple(	args,"dididddddd:arguments",&length,&ma,&density_fac,&shape,&a,&b,&c,&d,&angle,&pos)){
+		  error("PyBunch - addParticle - cannot parse arguments! It should be (length,ma,density_fac,shape,a,b,c,d,angle,pos)");
 	  }
-		self->cpp_obj =  new Collimator(length,ma,density_fac,shape,a,b,c,d,angle);
+		self->cpp_obj =  new Collimator(length,ma,density_fac,shape,a,b,c,d,angle,pos);
 	  ((Collimator*) self->cpp_obj)->setPyWrapper((PyObject*) self);
     return 0;
   }

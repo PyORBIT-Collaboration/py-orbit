@@ -48,7 +48,7 @@
 
 Collimator::Collimator(double length, int ma, 
 					   double density_fac, int shape, 
-					   double a, double b, double c, double d, double angle): CppPyWrapper(NULL)
+					   double a, double b, double c, double d, double angle, double pos): CppPyWrapper(NULL)
 {
 	length_ = length;
 	ma_ = ma;
@@ -59,6 +59,7 @@ Collimator::Collimator(double length, int ma,
 	c_ = c;
 	d_ = d;
 	angle_ = angle;
+	pos_ = pos;
 }
 
 void Collimator::collimateBunch(Bunch* bunch, Bunch* lostbunch){
@@ -760,7 +761,7 @@ void Collimator::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost
 	double** coords = bunch->coordArr();
 	lostbunch->addParticle(coords[ip][0], coords[ip][1], coords[ip][2], coords[ip][3], coords[ip][4], coords[ip][5]);
 	if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
-		lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = length_ - zrl;
+		lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_ + (length_ - zrl); //absolute position in lattice where particle is lost
 	}
 	bunch->deleteParticleFast(ip);
 	nLost++;

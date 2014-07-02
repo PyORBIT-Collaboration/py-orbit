@@ -42,9 +42,13 @@ class TeapotApertureNode(DriftTEAPOT):
 		lostbunch = paramsDict["lostbunch"]
 		self.Aperture.checkBunch(bunch, lostbunch)
 
+	def setPosition(self, pos):
+		self.pos = pos
+		self.Aperture.setPosition(self.pos)
+
 #This create a circular aperture node. a the radius for a circle. c is the x offset and d is the y offset of the aperture.
 class CircleApertureNode(DriftTEAPOT):
-	def __init__(self, a, pos, c = 0, d = 0, name = "aperture"):
+	def __init__(self, a, pos = 0, c = 0, d = 0, name = "aperture"):
 		DriftTEAPOT.__init__(self,name)
 		self.shape = 1
 		self.a = a
@@ -59,6 +63,11 @@ class CircleApertureNode(DriftTEAPOT):
 		bunch = paramsDict["bunch"]
 		lostbunch = paramsDict["lostbunch"]
 		self.Aperture.checkBunch(bunch, lostbunch)
+	
+	def setPosition(self, pos):
+		self.pos = pos
+		self.Aperture.setPosition(self.pos)
+
 
 #This create an elpitical aperture node. a is the the half length in the x diminsion. b is the y half length of the aperture.  c is the x offset and d is the y offset of the aperture.
 class EllipseApertureNode(DriftTEAPOT):
@@ -77,6 +86,10 @@ class EllipseApertureNode(DriftTEAPOT):
 		lostbunch = paramsDict["lostbunch"]
 		self.Aperture.checkBunch(bunch, lostbunch)
 
+	def setPosition(self, pos):
+		self.pos = pos
+		self.Aperture.setPosition(self.pos)
+
 #This create an rectangular aperture node. a is the the half length in the x diminsion. b is the y half length of the aperture.  c is the x offset and d is the y offset of the aperture.
 class RectangleApertureNode(DriftTEAPOT):
 	def __init__(self, a, b, pos = 0, c = 0, d = 0, name = "aperture"):
@@ -90,7 +103,10 @@ class RectangleApertureNode(DriftTEAPOT):
 		self.Aperture = Aperture(self.shape, self.a, self.b, self.c, self.d, self.pos)
 	
 	def track(self, paramsDict):
-
 		bunch = paramsDict["bunch"]
 		lostbunch = paramsDict["lostbunch"]
 		self.Aperture.checkBunch(bunch, lostbunch)
+
+	def setPosition(self,pos):
+		self.pos = pos
+		self.Aperture.setPosition(self.pos)

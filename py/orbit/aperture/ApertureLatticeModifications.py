@@ -20,6 +20,10 @@ def addTeapotApertureNode(lattice, position, Aperture_node):
 	"""
 	length_tolerance = 0.0001
 	lattice.initialize()
+	if(position > lattice.getLength() ):
+		position = lattice.getLength();
+		print "User-specified aperture position is larger than lattice length.  Resetting it to lattice length."
+	Aperture_node.setPosition(position);
 	position_start = position
 	position_stop = position + Aperture_node.getLength()
 	(node_start_ind,node_stop_ind,z,ind) = (-1,-1, 0., 0)

@@ -17,11 +17,14 @@ class Aperture: public OrbitUtils::CppPyWrapper
 public:
 	
 	/** Aperture */
-  Aperture(int shape, double a, double b, double c, double d, double pos); //(double shape, double size...)
+	Aperture(int shape, double a, double b, double c, double d, double pos); //(double shape, double size...)
 
 	/** Routine for transfering particles through a aperture */
 	void checkBunch(Bunch* bunch, Bunch* lostbunch);
 
+	/** Routine for setting the position in the lattice */
+	void setPosition(double position);
+	
 protected:
 
 	//Counters	

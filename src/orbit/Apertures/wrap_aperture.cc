@@ -46,6 +46,7 @@ extern "C" {
     return 0;
   }
   
+	
   /** Performs the collimation tracking of the bunch */
   static PyObject* Aperture_checkBunch(PyObject *self, PyObject *args){
 	  Aperture* cpp_Aperture = (Aperture*)((pyORBIT_Object*) self)->cpp_obj;
@@ -66,6 +67,20 @@ extern "C" {
 		return Py_None;
   }
 		
+
+	/** Sets the position of the element in the lattice */
+	static PyObject* Aperture_setPosition(PyObject *self, PyObject *args){
+		Aperture* cpp_Aperture = (Aperture*)((pyORBIT_Object*) self)->cpp_obj;
+		double position = 0;
+		if(!PyArg_ParseTuple(	args,"d:arguments",&position)){
+			error("PyBunch - setPosition - cannot parse arguments! It should be (position)");
+		}
+		cpp_Aperture->setPosition(position);
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+	
+	
 	
   //-----------------------------------------------------
   //destructor for python Aperture class (__del__ method).
@@ -79,7 +94,8 @@ extern "C" {
 	// definition of the methods of the python Aperture wrapper class
 	// they will be vailable from python level
 	static PyMethodDef ApertureClassMethods[] = {
-		{ "checkBunch",				 Aperture_checkBunch,    	METH_VARARGS,"Performs the aperture check of the bunch."},
+		{ "checkBunch",				Aperture_checkBunch,    	METH_VARARGS,"Performs the aperture check of the bunch."},
+		{ "setPosition",			Aperture_setPosition,		METH_VARARGS,"Sets the position of the element in the lattice."},
    {NULL}
   };
 

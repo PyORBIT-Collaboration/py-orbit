@@ -91,5 +91,9 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	bunch->compress();
 }
 
+void Aperture::setPosition(double position){
+	pos_ = position;
+}
+
 	
 

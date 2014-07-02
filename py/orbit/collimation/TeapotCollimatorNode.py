@@ -38,6 +38,8 @@ class TeapotCollimatorNode(DriftTEAPOT):
 		bunch = paramsDict["bunch"]
 		lostbunch = paramsDict["lostbunch"]
 		self.collimator.collimateBunch(bunch, lostbunch)
-		
 			
+	def setPosition(self, pos):
+		self.pos = pos
+		self.collimator.setPosition(self.pos)
 

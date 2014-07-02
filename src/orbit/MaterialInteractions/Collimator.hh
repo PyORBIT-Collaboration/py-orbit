@@ -24,6 +24,9 @@ public:
 	/** Routine for transfering particles through a collimator */
 	void collimateBunch(Bunch* bunch, Bunch* lostbunch);
 	
+	/** Routine for setting the start position in the lattice */
+	void setPosition(double position);
+
 	
 private:
 

@@ -17,8 +17,12 @@ def addTeapotCollimatorNode(lattice, position, collimator_node):
 	"""
 	It will put one Teapot collimation node in the lattice 
 	"""
-	length_tollerance = 0.0001
+	length_tolerance = 0.0001
 	lattice.initialize()
+	if(position > lattice.getLength() ):
+		position = lattice.getLength();
+		print "User-specified aperture position is larger than lattice length.  Resetting it to lattice length."
+	collimator_node.setPosition(position);
 	position_start = position
 	position_stop = position + collimator_node.getLength()
 	(node_start_ind,node_stop_ind,z,ind) = (-1,-1, 0., 0)
@@ -39,17 +43,17 @@ def addTeapotCollimatorNode(lattice, position, collimator_node):
 			#if(node.getNumberOfChildren() != 4):
 			#print "Node=",node.getName()," type=",node.getType()," L=",node.getLength()," N children nodes=",node.getNumberOfChildren()
 			#orbitFinalize("Drift element was modified with additional functionality (SC or something else)! Add collimation first! Stop!")
-	# make array of nodes from collimator in the center and possible two drifts if their length is more than length_tollerance [m]
+	# make array of nodes from collimator in the center and possible two drifts if their length is more than length_tolerance [m]
 	nodes_new_arr = [collimator_node,]
 	drift_node_start = lattice.getNodes()[node_start_ind]
 	drift_node_stop = lattice.getNodes()[node_stop_ind]	
 	#------now we will create two drift nodes: before the collimator and after
 	#------if the length of one of these additional drifts less than length_tollerance [m] we skip this drift 
-	if(position_start > lattice.getNodePositionsDict()[drift_node_start][0] +  length_tollerance):
+	if(position_start > lattice.getNodePositionsDict()[drift_node_start][0] +  length_tolerance):
 		drift_node_start_new = DriftTEAPOT(drift_node_start.getName())
 		drift_node_start_new.setLength(position_start - lattice.getNodePositionsDict()[drift_node_start][0])
 		nodes_new_arr.insert(0,drift_node_start_new)
-	if(position_stop < lattice.getNodePositionsDict()[drift_node_stop][1] - length_tollerance):
+	if(position_stop < lattice.getNodePositionsDict()[drift_node_stop][1] - length_tolerance):
 		drift_node_stop_new = DriftTEAPOT(drift_node_stop.getName())
 		drift_node_stop_new.setLength(lattice.getNodePositionsDict()[drift_node_stop][1] - position_stop)
 		nodes_new_arr.append(drift_node_stop_new)

@@ -769,6 +769,10 @@ void Collimator::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost
 	zrl = -1.;
 	
 }
+
+void Collimator::setPosition(double position){
+	pos_ = position;
+}
 	
 	
 

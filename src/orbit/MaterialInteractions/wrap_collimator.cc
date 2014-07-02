@@ -62,6 +62,20 @@ extern "C" {
 		Py_INCREF(Py_None);
 		return Py_None;
   }
+	
+	
+	/** Sets the position of the element in the lattice */
+	static PyObject* Collimator_setPosition(PyObject *self, PyObject *args){
+		Collimator* cpp_Collimator = (Collimator*)((pyORBIT_Object*) self)->cpp_obj;
+		double position = 0;
+		if(!PyArg_ParseTuple(	args,"d:arguments",&position)){
+			error("PyBunch - setPosition - cannot parse arguments! It should be (position)");
+		}
+		cpp_Collimator->setPosition(position);
+		Py_INCREF(Py_None);
+		return Py_None;
+	}
+	
 		
 	
   //-----------------------------------------------------
@@ -77,6 +91,7 @@ extern "C" {
 	// they will be vailable from python level
 	static PyMethodDef CollimatorClassMethods[] = {
 		{ "collimateBunch",				 Collimator_collimateBunch,    	METH_VARARGS,"Performs the collimation of the bunch."},
+		{ "setPosition",				 Collimator_setPosition,        METH_VARARGS,"Sets the start position of the collimator."},
    {NULL}
   };
 

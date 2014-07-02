@@ -3,6 +3,7 @@
 #include "wrap_Frequency_Cav.hh"
 #include "wrap_Harmonic_Cav.hh"
 #include "wrap_Barrier_Cav.hh"
+#include "wrap_Dual_Harmonic_Cav.hh"
 
 
 static PyMethodDef rfcavitiesMethods[] = {{NULL,NULL}};
@@ -22,6 +23,7 @@ void initrfcavities()
   PyObject* module = Py_InitModule("rfcavities", rfcavitiesMethods);
   wrap_rfcavities::initFrequency_Cav(module);
   wrap_rfcavities::initHarmonic_Cav(module);
+  wrap_rfcavities::initDual_Harmonic_Cav(module);
   wrap_rfcavities::initBarrier_Cav(module);
 }
 

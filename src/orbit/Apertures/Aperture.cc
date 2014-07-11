@@ -65,6 +65,9 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 				if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
 					lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
 					}
+				if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
+					lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(count,0);
+				}
                     bunch->deleteParticleFast(count);
 	        }
 
@@ -74,6 +77,9 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 			  if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
 				  lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
 			  }
+			  if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
+				  lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(count,0);
+			  }
                     bunch->deleteParticleFast(count);
 	        }
 	
@@ -82,6 +88,9 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	          lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
 			  if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
 				  lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
+			  }
+			  if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
+				  lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(count,0);
 			  }
         	    bunch->deleteParticleFast(count);
 	      }

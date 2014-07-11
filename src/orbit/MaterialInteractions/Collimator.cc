@@ -763,6 +763,9 @@ void Collimator::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost
 	if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
 		lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_ + (length_ - zrl); //absolute position in lattice where particle is lost
 	}
+	if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
+		lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(ip,0);
+	}
 	bunch->deleteParticleFast(ip);
 	nLost++;
 	coll_flag = 0;

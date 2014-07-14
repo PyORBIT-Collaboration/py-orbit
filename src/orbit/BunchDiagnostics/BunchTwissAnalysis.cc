@@ -127,7 +127,13 @@ void BunchTwissAnalysis::analyzeBunch(Bunch* bunch){
 			corr_arr[i+6*j] = corr_arr_MPI[i+6*j]/total_macrosize;
 			corr_arr[j+6*i] = corr_arr_MPI[i+6*j]/total_macrosize;
 		}	
-	}			
+	}	
+	
+	SyncPart* syncPart = bunch->getSyncPart();	
+	
+	bunch_momentum = syncPart->getMomentum();
+	bunch_beta = syncPart->getBeta();
+	bunch_gamma = syncPart->getGamma();
 }
 
 /** Performs the Twiss analysis of the bunch */
@@ -188,7 +194,7 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 			
 			for(j = 0; j<_order; j++)
 				for(i=0 ; i< _order+1-j; i++){
-					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
+					momentXY[i][j] += momX[i]/pow(sqrt(getEffectiveBeta(0)), double(i)) * momY[j]/pow(sqrt(getEffectiveBeta(1)), double(j));
 				}
 		}
 		
@@ -204,7 +210,7 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 			
 			for(j = 0; j<_order; j++)
 				for(i=0 ; i< _order+1-j; i++)
-					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
+					momentXY[i][j] += momX[i]/pow(sqrt(getEffectiveBeta(0)), double(i)) * momY[j]/pow(sqrt(getEffectiveBeta(1)), double(j));
 			
 		}
 		
@@ -285,8 +291,105 @@ double BunchTwissAnalysis::getGlobalMacrosize(){
 
 /** Returns the emittance for index 0,1,2 - x,y,z planes. */
 double BunchTwissAnalysis::getEmittance(int ic)
-{
+{	
+	// for x and y the pure betatron emittance is computed (subtracting the dispersive contribution)
 	if(ic < 0 || ic > 2 ) return 0.;
+	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
+	double xp2_avg = fabs(this->getCorrelation(2*ic+1,2*ic+1));
+	double x_xp_avg = this->getCorrelation(2*ic,2*ic+1);
+	double x_dE_avg = this->getCorrelation(2*ic,5);
+	double xp_dE_avg = this->getCorrelation(2*ic+1,5);	
+	double dE2_avg = fabs(this->getCorrelation(5,5));	
+	double emitt_rms;
+	if(ic==2){
+		emitt_rms = sqrt(fabs(x2_avg*xp2_avg - x_xp_avg*x_xp_avg));
+	} else {
+		emitt_rms = sqrt(fabs( (x2_avg - x_dE_avg*x_dE_avg/dE2_avg) * (xp2_avg - xp_dE_avg*xp_dE_avg/dE2_avg) 
+						- (x_xp_avg - x_dE_avg*xp_dE_avg/dE2_avg) * (x_xp_avg - x_dE_avg*xp_dE_avg/dE2_avg) ));
+	}						
+	return emitt_rms;
+}
+
+/** Returns the normalized betatron emittance for index 0,1 - x,y planes. */
+double BunchTwissAnalysis::getEmittanceNormalized(int ic)
+{
+	if(ic < 0 || ic > 1 ) return 0.;
+	return this->getEmittance(ic) * bunch_gamma * bunch_beta;
+}
+
+/** Returns Twiss alpha (without dispersive part for x,y) for index 0,1,2 - x,y,z planes.*/
+double BunchTwissAnalysis::getAlpha(int ic)
+{
+	if(ic < 0 || ic > 1 ) return 0.;
+	double x_xp_avg = this->getCorrelation(2*ic,2*ic+1);
+	double x_dE_avg = this->getCorrelation(2*ic, 5);
+	double xp_dE_avg = this->getCorrelation(2*ic+1, 5);
+	double dE2_avg = fabs(this->getCorrelation(5, 5));
+	double alpha;
+	if(ic == 2){
+		alpha = - x_xp_avg/this->getEmittance(ic);
+	} else {
+		alpha = -(x_xp_avg - x_dE_avg * xp_dE_avg / dE2_avg) / this->getEmittance(ic);
+	}	
+	return alpha;
+}
+
+/** Returns Twiss beta (without dispersive part for x,y) for index 0,1,2 - x,y,z planes.*/
+double BunchTwissAnalysis::getBeta(int ic)
+{
+	if(ic < 0 || ic > 1 ) return 0.;
+	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
+	double x_dE_avg = this->getCorrelation(2*ic, 5);
+	double dE2_avg = fabs(this->getCorrelation(5, 5));
+	double beta;
+	if(ic == 2){
+		beta = x2_avg/this->getEmittance(ic);
+	} else {
+		beta = (x2_avg - x_dE_avg * x_dE_avg / dE2_avg) / this->getEmittance(ic);
+	}
+	return beta;	
+}
+
+/** Returns Twiss gamma (without dispersive part for x,y) for index 0,1,2 - x,y,z planes.*/
+double BunchTwissAnalysis::getGamma(int ic)
+{	
+	if(ic < 0 || ic > 1 ) return 0.;
+	double xp2_avg = fabs(this->getCorrelation(2*ic+1,2*ic+1));
+	double xp_dE_avg = this->getCorrelation(2*ic+1, 5);
+	double dE2_avg = fabs(this->getCorrelation(5, 5));
+	double gamma;
+	if(ic == 2){
+		gamma = xp2_avg/this->getEmittance(ic);
+	} else {
+		gamma = (xp2_avg - xp_dE_avg * xp_dE_avg / dE2_avg) / this->getEmittance(ic);
+	}
+	return gamma;
+}
+
+/** Returns Twiss dispersion function for index 0,1 - x,y planes.*/
+double BunchTwissAnalysis::getDispersion(int ic)
+{	
+	if(ic < 0 || ic > 1 ) return 0.;
+	double x_dE_avg = this->getCorrelation(2*ic, 5);
+	double dE2_avg = fabs(this->getCorrelation(5, 5));
+	double dispersion = x_dE_avg/dE2_avg * bunch_momentum * bunch_beta;	
+	return dispersion;
+}
+
+/** Returns Twiss dispersion_prime function for index 0,1 - x,y planes.*/
+double BunchTwissAnalysis::getDispersionDerivative(int ic)
+{	
+	if(ic < 0 || ic > 1 ) return 0.;
+	double xp_dE_avg = this->getCorrelation(2*ic+1, 5);
+	double dE2_avg = fabs(this->getCorrelation(5, 5));
+	double dispersion_prime = xp_dE_avg/dE2_avg * bunch_momentum * bunch_beta;
+	return dispersion_prime;
+}
+
+/** Returns the effective emittance for index 0,1 - x,y planes. */
+double BunchTwissAnalysis::getEffectiveEmittance(int ic)
+{
+	if(ic < 0 || ic > 1 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
@@ -296,10 +399,10 @@ double BunchTwissAnalysis::getEmittance(int ic)
 	return emitt_rms;
 }
 
-/** Returns Twiss alpha for index 0,1,2 - x,y,z planes.*/
-double BunchTwissAnalysis::getAlpha(int ic)
+/** Returns effective Twiss alpha for index 0,1 - x,y planes.*/
+double BunchTwissAnalysis::getEffectiveAlpha(int ic)
 {
-	if(ic < 0 || ic > 2 ) return 0.;
+	if(ic < 0 || ic > 1 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
@@ -312,10 +415,10 @@ double BunchTwissAnalysis::getAlpha(int ic)
 	return alpha;
 }
 
-/** Returns Twiss beta for index 0,1,2 - x,y,z planes.*/
-double BunchTwissAnalysis::getBeta(int ic)
+/** Returns effective Twiss beta for index 0,1 - x,y planes.*/
+double BunchTwissAnalysis::getEffectiveBeta(int ic)
 {
-	if(ic < 0 || ic > 2 ) return 0.;
+	if(ic < 0 || ic > 1 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
@@ -328,10 +431,10 @@ double BunchTwissAnalysis::getBeta(int ic)
 	return beta;	
 }
 
-/** Returns Twiss gamma for index 0,1,2 - x,y,z planes.*/
-double BunchTwissAnalysis::getGamma(int ic)
+/** Returns effective Twiss gamma for index 0,1 - x,y planes.*/
+double BunchTwissAnalysis::getEffectiveGamma(int ic)
 {	
-	if(ic < 0 || ic > 2 ) return 0.;
+	if(ic < 0 || ic > 1 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
@@ -343,7 +446,5 @@ double BunchTwissAnalysis::getGamma(int ic)
 	double gamma = xp2_avg/emitt_rms;
 	return gamma;
 }
-
-
 
 

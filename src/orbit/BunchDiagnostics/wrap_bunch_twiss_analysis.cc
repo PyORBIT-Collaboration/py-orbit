@@ -125,6 +125,16 @@ extern "C" {
 		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getEmittance(ic));
   }		
 	
+ 	/** It returns the normalized emittance for index 0,1 - x,y planes*/
+  static PyObject* BunchTwissAnalysis_getEmittanceNormalized(PyObject *self, PyObject *args){
+	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+	  int ic;
+		if(!PyArg_ParseTuple(	args,"i:getEmittanceNormalized",&ic)){
+			error("pyBunchTwissAnalysis.getEmittanceNormalized(ic) - parameter is needed");
+		}		
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getEmittanceNormalized(ic));
+  }		
+	
  	/** It returns the Twiss alpha for index 0,1,2 - x,y,z planes*/
   static PyObject* BunchTwissAnalysis_getAlpha(PyObject *self, PyObject *args){
 	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
@@ -154,8 +164,27 @@ extern "C" {
 		}					
 		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getGamma(ic));
   }		
+
+ 	/** It returns Twiss dispersion function for index 0,1 - x,y planes*/
+  static PyObject* BunchTwissAnalysis_getDispersion(PyObject *self, PyObject *args){
+	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+	  int ic;
+		if(!PyArg_ParseTuple(	args,"i:getDispersion",&ic)){
+			error("pyBunchTwissAnalysis.getDispersion(ic) - parameter is needed");
+		}					
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getDispersion(ic));
+  }		
 	
-	
+ 	/** It returns Twiss dispersion_prime function for index 0,1 - x,y planes*/
+  static PyObject* BunchTwissAnalysis_getDispersionDerivative(PyObject *self, PyObject *args){
+	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+	  int ic;
+		if(!PyArg_ParseTuple(	args,"i:getDispersionDerivative",&ic)){
+			error("pyBunchTwissAnalysis.getDispersionDerivative(ic) - parameter is needed");
+		}					
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getDispersionDerivative(ic));
+  }		
+
  	/** It returns the Twiss array (alpha,beta,gamma,emittance) for index 0,1,2 - x,y,z planes*/
   static PyObject* BunchTwissAnalysis_getTwiss(PyObject *self, PyObject *args){
 	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
@@ -170,6 +199,47 @@ extern "C" {
 		return Py_BuildValue("(dddd)",alpha,beta,gamma,emitt);
   }			
 	
+	
+ 	/** It returns the effective emittance for index 0,1 - x,y planes*/
+  static PyObject* BunchTwissAnalysis_getEffectiveEmittance(PyObject *self, PyObject *args){
+	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+	  int ic;
+		if(!PyArg_ParseTuple(	args,"i:getEffectiveEmittance",&ic)){
+			error("pyBunchTwissAnalysis.getEffectiveEmittance(ic) - parameter is needed");
+		}		
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getEffectiveEmittance(ic));
+  }		
+		
+ 	/** It returns the effective Twiss alpha for index 0,1 - x,y planes*/
+  static PyObject* BunchTwissAnalysis_getEffectiveAlpha(PyObject *self, PyObject *args){
+	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+	  int ic;
+		if(!PyArg_ParseTuple(	args,"i:getEffectiveAlpha",&ic)){
+			error("pyBunchTwissAnalysis.getEffectiveAlpha(ic) - parameter is needed");
+		}				
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getEffectiveAlpha(ic));
+  }		
+	
+ 	/** It returns the effective Twiss beta for index 0,1 - x,y planes*/
+  static PyObject* BunchTwissAnalysis_getEffectiveBeta(PyObject *self, PyObject *args){
+	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+	  int ic;
+		if(!PyArg_ParseTuple(	args,"i:getEffectiveBeta",&ic)){
+			error("pyBunchTwissAnalysis.getEffectiveBeta(ic) - parameter is needed");
+		}				
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getEffectiveBeta(ic));
+  }		
+	
+ 	/** It returns the effective Twiss gamma for index 0,1 - x,y planes*/
+  static PyObject* BunchTwissAnalysis_getEffectiveGamma(PyObject *self, PyObject *args){
+	  BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
+	  int ic;
+		if(!PyArg_ParseTuple(	args,"i:getEffectiveGamma",&ic)){
+			error("pyBunchTwissAnalysis.getEffectiveGamma(ic) - parameter is needed");
+		}					
+		return Py_BuildValue("d",cpp_BunchTwissAnalysis->getEffectiveGamma(ic));
+  }		
+	
   //-----------------------------------------------------
   //destructor for python BunchTwissAnalysis class (__del__ method).
   //-----------------------------------------------------
@@ -182,18 +252,25 @@ extern "C" {
 	// defenition of the methods of the python BunchTwissAnalysis wrapper class
 	// they will be vailable from python level
   static PyMethodDef BunchTwissAnalysisClassMethods[] = {
-		{ "analyzeBunch",				 BunchTwissAnalysis_analyzeBunch,    	METH_VARARGS,"Performs the Twiss analysis of the bunch."},
-		{ "computeBunchMoments",			 BunchTwissAnalysis_computeBunchMoments,    METH_VARARGS,"Returns the XY moments of the beam up to a prescribed order"},
- 		{ "getCorrelation",			 BunchTwissAnalysis_getCorrelation,    METH_VARARGS,"Returns the centered correlation <(x-<x>)*(y-<y>)> = <x*y> - <x>*<y> for coordinates with indeces (ic,jc)"},
-		{ "getBunchMoment",			 BunchTwissAnalysis_getBunchMoment,    METH_VARARGS,"Returns the (i,j) xy moment of the beam"},
- 		{ "getAverage",			 	   BunchTwissAnalysis_getAverage,        METH_VARARGS,"Returns the average value for coordinate with index ic"},		
- 		{ "getGlobalCount",			 BunchTwissAnalysis_getGlobalCount,    METH_VARARGS,"Returns the total number of analysed macroparticles"},		
- 		{ "getGlobalMacrosize", BunchTwissAnalysis_getGlobalMacrosize,METH_VARARGS,"Returns the total macrosize"},		
-		{ "getEmittance",			 	 BunchTwissAnalysis_getEmittance,      METH_VARARGS,"Returns the emittance for index 0,1,2 - x,y,z planes"},		
-		{ "getAlpha",			 	     BunchTwissAnalysis_getAlpha,    	    METH_VARARGS,"Returns Twiss alpha for index 0,1,2 - x,y,z planes"},		
-		{ "getBeta",			 	     BunchTwissAnalysis_getBeta,    	      METH_VARARGS,"Returns Twiss beta for index 0,1,2 - x,y,z planes"},		
-		{ "getGamma",			 	     BunchTwissAnalysis_getGamma,    	    METH_VARARGS,"Returns Twiss gamma for index 0,1,2 - x,y,z planes"},				
-		{ "getTwiss",			 	     BunchTwissAnalysis_getTwiss,    	    METH_VARARGS,"Returns Twiss tuple (alpha,beta,gamma,emitt) for index 0,1,2 - x,y,z planes"},
+		{ "analyzeBunch",			BunchTwissAnalysis_analyzeBunch,			METH_VARARGS,"Performs the Twiss analysis of the bunch."},
+		{ "computeBunchMoments",	BunchTwissAnalysis_computeBunchMoments,		METH_VARARGS,"Returns the XY moments of the beam up to a prescribed order"},
+ 		{ "getCorrelation",			BunchTwissAnalysis_getCorrelation,    		METH_VARARGS,"Returns the centered correlation <(x-<x>)*(y-<y>)> = <x*y> - <x>*<y> for coordinates with indeces (ic,jc)"},
+		{ "getBunchMoment",			BunchTwissAnalysis_getBunchMoment,    		METH_VARARGS,"Returns the (i,j) xy moment of the beam"},
+ 		{ "getAverage",			 	BunchTwissAnalysis_getAverage,       		METH_VARARGS,"Returns the average value for coordinate with index ic"},		
+ 		{ "getGlobalCount",			BunchTwissAnalysis_getGlobalCount,    		METH_VARARGS,"Returns the total number of analysed macroparticles"},		
+ 		{ "getGlobalMacrosize", 	BunchTwissAnalysis_getGlobalMacrosize,		METH_VARARGS,"Returns the total macrosize"},		
+		{ "getEmittance",			BunchTwissAnalysis_getEmittance,   			METH_VARARGS,"Returns the emittance for index 0,1,2 - x,y,z planes"},		
+		{ "getEmittanceNormalized",	BunchTwissAnalysis_getEmittanceNormalized,	METH_VARARGS,"Returns the normalized emittance for index 0,1 - x,y planes"},		
+		{ "getAlpha",			 	BunchTwissAnalysis_getAlpha,    			METH_VARARGS,"Returns Twiss alpha for index 0,1,2 - x,y,z planes"},		
+		{ "getBeta",			 	BunchTwissAnalysis_getBeta,    				METH_VARARGS,"Returns Twiss beta for index 0,1,2 - x,y,z planes"},		
+		{ "getGamma",			 	BunchTwissAnalysis_getGamma,    			METH_VARARGS,"Returns Twiss gamma for index 0,1,2 - x,y,z planes"},				
+		{ "getTwiss",				BunchTwissAnalysis_getTwiss,    			METH_VARARGS,"Returns Twiss tuple (alpha,beta,gamma,emitt) for index 0,1,2 - x,y,z planes"},
+		{ "getDispersion",			BunchTwissAnalysis_getDispersion,			METH_VARARGS,"Returns Twiss dispersion function for index 0,1 - x,y planes"},				
+		{ "getDispersionDerivative",BunchTwissAnalysis_getDispersionDerivative,	METH_VARARGS,"Returns Twiss dispersion' function for index 0,1 - x,y planes"},				
+		{ "getEffectiveEmittance",	BunchTwissAnalysis_getEffectiveEmittance,	METH_VARARGS,"Returns the effective emittance for index 0,1 - x,y planes"},		
+		{ "getEffectiveAlpha",		BunchTwissAnalysis_getEffectiveAlpha,    	METH_VARARGS,"Returns effective Twiss alpha for index 0,1 - x,y planes"},		
+		{ "getEffectiveBeta",		BunchTwissAnalysis_getEffectiveBeta,    	METH_VARARGS,"Returns effective Twiss beta for index 0,1 - x,y planes"},		
+		{ "getEffectiveGamma",		BunchTwissAnalysis_getEffectiveGamma,		METH_VARARGS,"Returns effective Twiss gamma for index 0,1 - x,y planes"},				
 		{NULL}
   };
 	

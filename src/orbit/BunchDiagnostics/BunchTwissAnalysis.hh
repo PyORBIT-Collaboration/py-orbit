@@ -39,17 +39,38 @@ class BunchTwissAnalysis: public OrbitUtils::CppPyWrapper
 		double getGlobalMacrosize();
 		
 		/** Returns the emittance for index 0,1,2 - x,y,z planes. */
-		double getEmittance(int ic);
+		double getEffectiveEmittance(int ic);
 		
 		/** Returns Twiss alpha for index 0,1,2 - x,y,z planes.*/
-		double getAlpha(int ic);
+		double getEffectiveAlpha(int ic);
 		
 		/** Returns Twiss beta for index 0,1,2 - x,y,z planes.*/
-		double getBeta(int ic);
+		double getEffectiveBeta(int ic);
 		
 		/** Returns Twiss gamma for index 0,1,2 - x,y,z planes.*/
-		double getGamma(int ic);
+		double getEffectiveGamma(int ic);
 	
+		/** Returns the pure betatron emittance for index 0,1 - x,y planes. */
+		double getEmittance(int ic);
+		
+		/** Returns the normalized pure betatron emittance for index 0,1 - x,y planes. */
+		double getEmittanceNormalized(int ic);
+
+		/** Returns Twiss alpha without dispersive part for index 0,1 - x,y planes.*/
+		double getAlpha(int ic);
+
+		/** Returns Twiss beta without dispersive part for index 0,1 - x,y planes.*/
+		double getBeta(int ic);
+
+		/** Returns Twiss gamma without dispersive part for index 0,1 - x,y planes.*/
+		double getGamma(int ic);
+
+		/** Returns Twiss dispersion function for index 0,1 - x,y planes.*/
+		double getDispersion(int ic);
+		
+		/** Returns Twiss dispersion_prime function for index 0,1 - x,y planes.*/
+		double getDispersionDerivative(int ic);
+		
 		/** Computes the XY moments of the bunch up to a prescribed order */
 		void computeBunchMoments(Bunch* bunch, int order);
 	
@@ -80,6 +101,11 @@ class BunchTwissAnalysis: public OrbitUtils::CppPyWrapper
 	
 		/** order for the moments **/
 		double _order;
+		
+		/** bunch parameters */
+		double bunch_momentum;
+		double bunch_gamma;
+		double bunch_beta;
 		
 };
 

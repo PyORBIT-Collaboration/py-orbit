@@ -100,6 +100,13 @@ class LinacLatticeFactory():
 		#----------------------------------------------------------------------
 		# The DRIFTS will be generated additionally and put into right places
 		#----------------------------------------------------------------------
+		def positionComp(node1,node2):
+			if(node1.getParam("pos") > node2.getParam("pos")):
+				return 1
+			else:
+				if(node1.getParam("pos") == node2.getParam("pos")):
+					return 0
+			return -1
 		accSeqs = []
 		accRF_Cavs = [] 
 		seqPosition = 0.
@@ -113,6 +120,10 @@ class LinacLatticeFactory():
 			accSeqs.append(accSeq)
 			#these nodes are not AccNodes. They are from linac parser
 			nodes = seq.getNodes()
+			#put nodes in order according to the position in the sequence
+			for node in nodes:
+				node.setParam("pos",float(node.getParam("pos")))
+			nodes.sort(positionComp)
 			#rf_cav_names is an auxilary array with RF Cav. names
 			rf_cav_names = []
 			#array of nodes that are AccNodes with zero length
@@ -120,7 +131,7 @@ class LinacLatticeFactory():
 			#of this constructor
 			thinNodes = []
 			for node in nodes:
-				node.setParam("pos",float(node.getParam("pos")))
+				#print "debug node=",node.getName()," pos=",node.getParam("pos")
 				#------------QUAD-----------------
 				if(node.getType() == "QUAD"):
 					accNode = Quad(node.getName())
@@ -128,10 +139,8 @@ class LinacLatticeFactory():
 					accNode.setParam("dB/dr",node.getParam("field"))
 					accNode.setParam("field",node.getParam("field"))
 					accNode.setLength(node.getParam("effLength"))
-                                  
-                                        if(0.5*accNode.getLength() > self.maxDriftLength):
-                                            accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
-
+					if(0.5*accNode.getLength() > self.maxDriftLength):
+						accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 					accSeq.addNode(accNode)
 				#------------BEND-----------------
                                 elif(node.getType() == "BEND"):
@@ -139,15 +148,13 @@ class LinacLatticeFactory():
 					accNode.updateParamsDict(node.getParamsDict())	                                        
 					accNode.setParam("poles",[int(x) for x in eval(node.getParam("poles"))])
 					accNode.setParam("kls", [x for x in eval(node.getParam("kls"))])
-                                        accNode.setParam("skews",[int(x) for x in eval(node.getParam("skews"))])
-                                        accNode.setParam("ea1",node.getParam("ea1"))
-                                        accNode.setParam("ea2",node.getParam("ea2"))
-                                        accNode.setParam("theta",node.getParam("theta"))
+					accNode.setParam("skews",[int(x) for x in eval(node.getParam("skews"))])
+					accNode.setParam("ea1",node.getParam("ea1"))
+					accNode.setParam("ea2",node.getParam("ea2"))
+					accNode.setParam("theta",node.getParam("theta"))
 					accNode.setLength(node.getParam("effLength"))
-                                                                             
-                                        if(0.5*accNode.getLength() > self.maxDriftLength):
-                                            accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
-
+					if(0.5*accNode.getLength() > self.maxDriftLength):
+						accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 					accSeq.addNode(accNode)
 				#------------RF_Gap-----------------	
 				elif(node.getType() == "RFGAP"):
@@ -193,6 +200,8 @@ class LinacLatticeFactory():
 			copyAccNodes = accSeq.getNodes()[:]
 			firstNode = copyAccNodes[0]
 			lastNode = copyAccNodes[len(copyAccNodes)-1]
+			driftNodes_before = []
+			driftNodes_after = []
 			#insert the drift before the first element if its half length less than its position
 			if(math.fabs(firstNode.getLength()/2.0 - firstNode.getParam("pos")) > self.zeroDistance):
 				if(firstNode.getLength()/2.0 > firstNode.getParam("pos")):
@@ -207,15 +216,16 @@ class LinacLatticeFactory():
 					msg = msg + "pos=" + str(firstNode.getParam("pos"))						
 					orbitFinalize(msg)
 				else:
+					driftNodes = []
 					driftLength = firstNode.getParam("pos") - firstNode.getLength()/2.0
 					nDrifts = int(driftLength/self.maxDriftLength) + 1
 					driftLength = driftLength/nDrifts
-					for idrift_reverse in range(nDrifts):
-						idrift = (nDrifts-1) - idrift_reverse
+					for idrift in range(nDrifts):
 						drift = Drift(accSeq.getName()+":"+firstNode.getName()+":"+str(idrift+1)+":drift")
 						drift.setLength(driftLength)
 						drift.setParam("pos",0.+drift.getLength()*(idrift+0.5))
-						accSeq.addNode(drift, index = 0)
+						driftNodes.append(drift)
+					driftNodes_before = driftNodes
 			#insert the drift after the last element if its half length less + position is less then the sequence length
 			if(math.fabs(lastNode.getLength()/2.0 + lastNode.getParam("pos") - accSeq.getLength()) > self.zeroDistance):
 				if(lastNode.getLength()/2.0 + lastNode.getParam("pos") > accSeq.getLength()):
@@ -234,6 +244,7 @@ class LinacLatticeFactory():
 					msg = msg + "sequence length=" + str(accSeq.getLength())			
 					orbitFinalize(msg)
 				else:
+					driftNodes = []
 					driftLength = accSeq.getLength() - (lastNode.getParam("pos") + lastNode.getLength()/2.0)
 					nDrifts = int(driftLength/self.maxDriftLength) + 1
 					driftLength = driftLength/nDrifts
@@ -241,10 +252,13 @@ class LinacLatticeFactory():
 						drift = Drift(accSeq.getName()+":"+lastNode.getName()+":"+str(idrift+1)+":drift")
 						drift.setLength(driftLength)
 						drift.setParam("pos",lastNode.getParam("pos")+lastNode.getLength()/2.0 + drift.getLength()*(idrift+0.5))
-						accSeq.addNode(drift)	
+						driftNodes.append(drift)
+					driftNodes_after = driftNodes	
 			#now move on and generate drifts between (i,i+1) nodes from copyAccNodes
+			newAccNodes = driftNodes_before
 			for node_ind in range(len(copyAccNodes)-1):
 				accNode0 = copyAccNodes[node_ind]
+				newAccNodes.append(accNode0)
 				accNode1 = copyAccNodes[node_ind+1]
 				ind_of_node =  accSeq.getNodes().index(accNode1)
 				dist = accNode1.getParam("pos") - accNode1.getLength()/2 - (accNode0.getParam("pos") + accNode0.getLength()/2)
@@ -259,15 +273,20 @@ class LinacLatticeFactory():
 					msg = msg + os.linesep
 					orbitFinalize(msg)				
 				elif(dist > self.zeroDistance):
+					driftNodes = []					
 					nDrifts = int(dist/self.maxDriftLength) + 1
 					driftLength = dist/nDrifts				
 					for idrift in range(nDrifts):
 						drift = Drift(accSeq.getName()+":"+accNode0.getName()+":"+str(idrift+1)+":drift")
 						drift.setLength(driftLength)
 						drift.setParam("pos",accNode0.getParam("pos")+accNode0.getLength()*0.5+drift.getLength()*(idrift+0.5))
-						accSeq.addNode(drift, index = ind_of_node+idrift)
+						driftNodes.append(drift)
+					newAccNodes += driftNodes
 				else:
 					pass
+			newAccNodes.append(lastNode)
+			newAccNodes += driftNodes_after
+			accSeq.setNodes(newAccNodes)
 			#insert the drifts ======================stop ===========================		
 			#========================================================================
 			#Now we will go over all zero length nodes and attach them into the quads
@@ -278,9 +297,10 @@ class LinacLatticeFactory():
 			accQuads = []
 			for accNode in accSeq.getNodes():
 				if(isinstance(accNode,Quad)): accQuads.append(accNode)
-			usedThinNodes = []
+			unusedThinNodes = []
 			for node in thinNodes:
 				position = node.getParam("pos")
+				quad_found = False
 				for quad in accQuads:
 					pos = quad.getParam("pos")
 					L = quad.getLength()
@@ -296,15 +316,22 @@ class LinacLatticeFactory():
 							accNode.updateParamsDict(node.getParamsDict())
 						accNode.setParam("pos",quad.getParam("pos"))
 						quad.addChildNode(accNode, place = AccNode.BODY, part_index = (nParts/2) - 1 , place_in_part = AccNode.AFTER)
-						usedThinNodes.append(node)
+						quad_found = True
+						break
+				if(not quad_found): unusedThinNodes.append(node)
 			#remove all assigned zero-length nodes from list of thin nodes
-			for node in usedThinNodes:
-				thinNodes.remove(node)
+			thinNodes = unusedThinNodes
+			def posCompFunc(node1,node2):
+				if(node1.getParam("pos") < node2.getParam("pos")):
+					return True
+				return False
+			thinNodes.sort(posCompFunc)
 			#----------------
 			# chop the drifts if the thin element is inside or insert this element into
 			# the sequence at the end or the beginning of the drift
 			usedThinNodes = []
 			for node in thinNodes:
+				#print "debug chop drift thin node=",node.getName() 
 				position = node.getParam("pos")
 				driftNode = self.__getDriftThinNode(position,accSeq)
 				if(driftNode != None):
@@ -360,7 +387,8 @@ class LinacLatticeFactory():
 			linacAccLattice.addSequence(accSeq)
 		# zero length elements insertion ========== stop ======================	
 		for accRF_Cav in accRF_Cavs:
-		 linacAccLattice.addRF_Cavity(accRF_Cav)
+			linacAccLattice.addRF_Cavity(accRF_Cav)
+		linacAccLattice.initialize()
 		return linacAccLattice
 	
 	def __getDriftThinNode(self,position,accSeq):

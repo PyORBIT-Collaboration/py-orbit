@@ -612,12 +612,12 @@ class BaseRF_Gap(BaseLinacNode):
 		"""
 		BaseLinacNode.setnParts(self,3)
 
-	def setCppGapModel(self, cppGapModel = MatrixRfGap):
+	def setCppGapModel(self, cppGapModel = MatrixRfGap()):
 		"""
 		This method will set the fast c++ simple model for the RF Gap. 
 		By default it is Matrix RF Gap model which is a linear transport matrix.
 		"""
-		self.cppGapModel = cppGapModel()
+		self.cppGapModel = cppGapModel
 	
 	def initialize(self):
 		"""
@@ -981,6 +981,10 @@ class Sequence(NamedObject,ParamsDictObject):
 		""" Returns the array with Linac Nodes. """
 		return self.__linacNodes
 		
+	def setNodes(self, linacNodes):
+		""" Set a new set of Linac Nodes. """
+		self.__linacNodes = linacNodes
+			
 	def setPosition(self, pos):
 		""" Sets the position of the sequence. """
 		return self.setParam("position",pos)		

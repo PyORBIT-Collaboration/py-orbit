@@ -17,7 +17,7 @@ from orbit.utils import orbitFinalize, NamedObject, ParamsDictObject
 from orbit.lattice import AccLattice, AccNode, AccActionsContainer
 
 # import Sequence and RF_Cavity
-from LinacAccNodes import RF_Cavity, Sequence
+from LinacAccNodes import RF_Cavity, Sequence, Quad, BaseRF_Gap, MarkerLinacNode
 
 # import orbit Bunch
 from bunch import Bunch
@@ -47,11 +47,12 @@ class LinacAccLattice(AccLattice):
 		"""
 		return self._getSubLattice(LinacAccLattice(),index_start,index_stop)
 
-	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
+	def trackBunch(self, bunch, paramsDict = None, actionContainer = None, index_start = -1, index_stop = -1):
 		"""
 		It tracks the bunch through the lattice.
 		"""
 		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
+		if(paramsDict == None): paramsDict = {}			
 		paramsDict["bunch"] = bunch
 		bunch.getSyncParticle().time(0.)
 		
@@ -60,10 +61,10 @@ class LinacAccLattice(AccLattice):
 			node.track(paramsDict)
 			
 		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
+		self.trackActions(actionContainer,paramsDict,index_start,index_stop)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
 
-	def trackDesignBunch(self, bunch_in, paramsDict = None, actionContainer = None):
+	def trackDesignBunch(self, bunch_in, paramsDict = None, actionContainer = None, index_start = -1, index_stop = -1):
 		"""
 		This will track the design bunch through the linac and set up RF Cavities times of
 		arrivals.
@@ -80,7 +81,7 @@ class LinacAccLattice(AccLattice):
 			node.trackDesign(localParamsDict)
 			
 		actionContainer.addAction(trackDesign, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
+		self.trackActions(actionContainer,paramsDict,index_start,index_stop)
 		actionContainer.removeAction(trackDesign, AccActionsContainer.BODY)
 
 	def addRF_Cavity(self,cav):
@@ -128,5 +129,29 @@ class LinacAccLattice(AccLattice):
 	def getSequences(self):
 		""" Returns the array with sequences. """
 		return self.__sequences
+		
+	def getQuads(self, seq = None):
+		""" Returns the list of all quads or just quads belong to a particular sequence. """ 
+		quads = []
+		for node in self.getNodes():
+			if(isinstance(node,Quad)):
+				if(seq == None):
+					quads.append(node)
+				else:
+					if(node.getSequence() == seq):
+						quads.append(node)
+		return quads
 
+	def getRF_Gaps(self, rf_cav = None):
+		""" Returns the list of all RF gaps or just gaps belong to a particular RF cavity. """
+		gaps = []
+		for node in self.getNodes():
+			if(isinstance(node,BaseRF_Gap)):
+				if(rf_cav == None):
+					gaps.append(node)
+				else:
+					if(node.getRF_Cavity() == rf_cav):
+						gaps.append(node)
+		return gaps
+	
 

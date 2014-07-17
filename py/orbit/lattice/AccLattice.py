@@ -104,6 +104,13 @@ class AccLattice(NamedObject, TypedObject):
 		of the first level in the lattice.
 		"""
 		return self.__children
+		
+	def setNodes(self,childrenNodes):
+		"""
+		Method. Set up a new list of all children
+		of the first level in the lattice.
+		"""	
+		self.__children	 = childrenNodes
 
 	def getNodePositionsDict(self):
 		"""
@@ -119,7 +126,7 @@ class AccLattice(NamedObject, TypedObject):
 		"""
 		return self.__length
 
-	def _getSubLattice(self, accLatticeNew, index_start = -1, index_stop = -1,):
+	def _getSubLattice(self, accLatticeNew, index_start = -1, index_stop = -1):
 		"""
 		It returns the sub-accelerator lattice with children with
 		indexes between index_start and index_stop, inclusive. The
@@ -128,8 +135,8 @@ class AccLattice(NamedObject, TypedObject):
 		if(index_start < 0): index_start = 0
 		if(index_stop < 0): index_stop = len(self.__children) - 1 
 		#clear the node array in the new sublattice
-		accLatticeNew.getNodes()[:] = []
-		for node in self.__children[index_start:index_stop]:
+		accLatticeNew.setNodes([])
+		for node in self.__children[index_start:index_stop+1]:
 			accLatticeNew.addNode(node)
 		accLatticeNew.initialize()
 		return accLatticeNew
@@ -143,13 +150,15 @@ class AccLattice(NamedObject, TypedObject):
 		"""
 		return self._getSubLattice( AccLattice(),index_start,index_stop)
 		
-	def trackActions(self, actionsContainer, paramsDict = {}):
+	def trackActions(self, actionsContainer, paramsDict = {}, index_start = -1, index_stop = -1):
 		"""
 		Method. Tracks the actions through all nodes in the lattice.
 		"""
 		paramsDict["lattice"] = self
 		paramsDict["actions"] = actionsContainer
-		for node in self.__children:
+		if(index_start < 0): index_start = 0
+		if(index_stop < 0): index_stop = len(self.__children) - 1 		
+		for node in self.__children[index_start:index_stop+1]:
 			paramsDict["node"] = node
 			paramsDict["parentNode"] = self
 			node.trackActions(actionsContainer, paramsDict)

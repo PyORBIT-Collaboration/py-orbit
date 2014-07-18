@@ -104,7 +104,7 @@ class TEAPOT_Lattice(AccLattice):
 		"""
 		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
 
-	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
+	def trackBunch(self, bunch, paramsDict = {},  index_start = -1, index_stop = -1, actionContainer = None):
 		"""
 		It tracks the bunch through the lattice.
 		"""
@@ -116,7 +116,7 @@ class TEAPOT_Lattice(AccLattice):
 			node.track(paramsDict)
 			
 		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
+		self.trackActions(actionContainer,paramsDict,index_start,index_stop)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
 
 
@@ -220,7 +220,7 @@ class TEAPOT_Ring(AccLattice):
 			"""
 		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
 	
-	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
+	def trackBunch(self, bunch, paramsDict = {}, index_start = -1, index_stop = -1, actionContainer = None):
 		"""
 			It tracks the bunch through the lattice.
 			"""
@@ -232,7 +232,7 @@ class TEAPOT_Ring(AccLattice):
 			node.track(paramsDict)
 		
 		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
+		self.trackActions(actionContainer,paramsDict,index_start, index_stop)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
 
 

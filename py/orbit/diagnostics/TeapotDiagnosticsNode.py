@@ -68,14 +68,16 @@ class TeapotStatLatsNodeSetMember(DriftTEAPOT):
 		self.setLength(0.0)
 		self.position = 0.0
 		self.lattlength = 0.0
+		self.active = True
 	
 	def track(self, paramsDict):
 		"""
 			The statlats-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
-		length = self.getLength(self.getActivePartIndex())
-		bunch = paramsDict["bunch"]
-		self.statlats.writeStatLats(self.position,bunch,self.lattlength)
+		if(self.active):
+			length = self.getLength(self.getActivePartIndex())
+			bunch = paramsDict["bunch"]
+			self.statlats.writeStatLats(self.position,bunch,self.lattlength)
 	
 	def setPosition(self,pos):
 		self.position = pos
@@ -85,6 +87,13 @@ class TeapotStatLatsNodeSetMember(DriftTEAPOT):
 
 	def setLatticeLength(self, lattlength):
 		self.lattlength = lattlength
+
+	def activate(self):
+		self.active = True
+
+	def deactivate(self):
+		self.active = False
+
 
 class TeapotMomentsNode(DriftTEAPOT):
 	"""
@@ -134,14 +143,16 @@ class TeapotMomentsNodeSetMember(DriftTEAPOT):
 		self.setLength(0.0)
 		self.position = 0.0
 		self.lattlength = 0.0
+		self.active = True
 	
 	def track(self, paramsDict):
 		"""
 		The moments-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
-		length = self.getLength(self.getActivePartIndex())
-		bunch = paramsDict["bunch"]
-		self.moments.writeMoments(self.position, bunch, self.lattlength)
+		if(self.active):
+			length = self.getLength(self.getActivePartIndex())
+			bunch = paramsDict["bunch"]
+			self.moments.writeMoments(self.position, bunch, self.lattlength)
 	
 	def setPosition(self,pos):
 		self.position = pos
@@ -152,6 +163,11 @@ class TeapotMomentsNodeSetMember(DriftTEAPOT):
 	def closeMomentsSetMember(self):
 		self.file.close()
 
+	def activate(self):
+		self.active = True
+
+	def deactivate(self):
+		self.active = False
 
 class TeapotTuneAnalysisNode(DriftTEAPOT):
 	

@@ -70,6 +70,7 @@ def addTeapotStatLatsNodeSet(lattice, filename):
 	It will put one Teapot statlats node at start of each node in lattice
 	"""
 	file_out = open(filename, "w")
+	nodesetcontroller = diagnosticsNodeSetController("StatLats Set Controller")
 	lattice.initialize()
 	for node in lattice.getNodes():
 		position = lattice.getNodePositionsDict()[node][0]
@@ -77,20 +78,40 @@ def addTeapotStatLatsNodeSet(lattice, filename):
 		diagnostics_node.setPosition(position)
 		diagnostics_node.setLatticeLength(lattice.getLength())
 		node.addChildNode(diagnostics_node, node.BODY)
+		nodesetcontroller._nodelist.append(diagnostics_node)
+	return nodesetcontroller
 
 def addTeapotMomentsNodeSet(lattice, filename, order):
 	"""
 	It will put one Teapot statlats node at start of each node in lattice
 	"""
 	file_out = open(filename, "w")
+	nodesetcontroller = diagnosticsNodeSetController("Moment Set Controller)")
 	lattice.initialize()
 	for node in lattice.getNodes():
 		position = lattice.getNodePositionsDict()[node][0]
-		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order)
+		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order, "moments")
 		diagnostics_node.setPosition(position)
 		diagnostics_node.setLatticeLength(lattice.getLength())
 		node.addChildNode(diagnostics_node, node.BODY)
+		nodesetcontroller._nodelist.append(diagnostics_node)
+	return nodesetcontroller
 
+class diagnosticsNodeSetController:
+	"""
+		This class keeps lists of moment nodes and acts as a controller
+	"""
+	
+	def __init__(self, name = "Diagnostic Set Controller"):
+		self._nodelist = []
+		
+	def activate(self):
+		for node in self._nodelist:
+			node.activate()
+
+	def deactivate(self):
+		for node in self._nodelist:
+			node.deactivate()
 
 
 

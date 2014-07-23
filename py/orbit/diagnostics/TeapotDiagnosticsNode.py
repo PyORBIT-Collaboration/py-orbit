@@ -69,6 +69,7 @@ class TeapotStatLatsNodeSetMember(DriftTEAPOT):
 		self.position = 0.0
 		self.lattlength = 0.0
 		self.active = True
+		self.file = file
 	
 	def track(self, paramsDict):
 		"""
@@ -93,6 +94,10 @@ class TeapotStatLatsNodeSetMember(DriftTEAPOT):
 
 	def deactivate(self):
 		self.active = False
+
+	def resetFile(self, file):
+		self.file = file
+		self.statlats.resetFile(self.file)
 
 
 class TeapotMomentsNode(DriftTEAPOT):
@@ -138,12 +143,14 @@ class TeapotMomentsNodeSetMember(DriftTEAPOT):
 		"""
 		DriftTEAPOT.__init__(self,str(name))
 		
-		self.moments = MomentsSetMember(file, order)
+		self.file = file
+		self.moments = MomentsSetMember(self.file, order)
 		self.setType("moments teapot")
 		self.setLength(0.0)
 		self.position = 0.0
 		self.lattlength = 0.0
 		self.active = True
+		
 	
 	def track(self, paramsDict):
 		"""
@@ -168,6 +175,11 @@ class TeapotMomentsNodeSetMember(DriftTEAPOT):
 
 	def deactivate(self):
 		self.active = False
+
+	def resetFile(self, file):
+		self.file = file
+		self.moments.resetFile(self.file)
+		
 
 class TeapotTuneAnalysisNode(DriftTEAPOT):
 	

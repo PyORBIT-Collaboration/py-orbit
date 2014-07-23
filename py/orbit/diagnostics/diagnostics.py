@@ -77,6 +77,11 @@ class StatLatsSetMember:
 	def closeStatLats(self):
 		self.file_out.close()
 
+	def resetFile(self, file):
+		self.file_out = file
+
+
+
 class Moments:
 	"""
 		This class delivers the beam moments
@@ -104,6 +109,7 @@ class Moments:
 	
 	def closeMoments(self):
 		self.file_out.close()
+	
 
 
 class MomentsSetMember:
@@ -131,7 +137,9 @@ class MomentsSetMember:
 			for j in range(0,i+1):
 				self.file_out.write(str(self.bunchtwissanalysis.getBunchMoment(i-j,j)) + "\t")
 		self.file_out.write("\n")
-
 			
-	def closeMoments(self):
-		self.file_out.close()
+	def resetFile(self, file):
+		self.file_out = file
+
+
+

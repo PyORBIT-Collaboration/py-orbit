@@ -425,7 +425,7 @@ class _teapotFactory:
 			skew = 0
 			if(params.has_key("k"+str(pole)+"l")):
 				kl_param = params["k"+str(pole)+"l"]
-			if(params.has_key("t"+str(pole)+"l")):
+			if(params.has_key("t"+str(pole))):
 				skew = 1
 			if(kl_param != None):
 				poles.append(pole)

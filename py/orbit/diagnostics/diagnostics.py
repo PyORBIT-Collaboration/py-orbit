@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
 """
-This is not a parallel version! 
+This is not a parallel version!
 """
 
+# for mpi operations
+import orbit_mpi
+from orbit_mpi import mpi_comm
+from orbit_mpi import mpi_datatype
+from orbit_mpi import mpi_op
 
 import math
 import random
@@ -38,7 +43,17 @@ class StatLats:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 
-		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) +"\n")
+		# if mpi operations are enabled, this section of code will
+		# determine the rank of the present node
+		rank = 0  # default is primary node
+		mpi_init = orbit_mpi.MPI_Initialized()
+		comm = orbit_mpi.mpi_comm.MPI_COMM_WORLD
+		if (mpi_init):
+			rank = orbit_mpi.MPI_Comm_rank(comm)
+
+		# only the primary node needs to output the calculated information
+		if (rank == 0):
+			self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) +"\n")
 							
 	def closeStatLats(self):
 		self.file_out.close()
@@ -72,7 +87,17 @@ class StatLatsSetMember:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 
-		self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\n")
+		# if mpi operations are enabled, this section of code will
+		# determine the rank of the present node
+		rank = 0  # default is primary node
+		mpi_init = orbit_mpi.MPI_Initialized()
+		comm = orbit_mpi.mpi_comm.MPI_COMM_WORLD
+		if (mpi_init):
+			rank = orbit_mpi.MPI_Comm_rank(comm)
+
+		# only the primary node needs to output the calculated information
+		if (rank == 0):
+			self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\n")
 	
 	def closeStatLats(self):
 		self.file_out.close()
@@ -100,12 +125,22 @@ class Moments:
 								 
 		self.bunchtwissanalysis.analyzeBunch(bunch)
 		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order)
-				
-		self.file_out.write(str(s) + "\t" +  str(time) + "\t")						 
-		for i in range(0,self.order+1):
-			for j in range(0,i+1):
-				self.file_out.write(str(self.bunchtwissanalysis.getBunchMoment(i-j,j)) + "\t")
-		self.file_out.write("\n")
+
+		# if mpi operations are enabled, this section of code will
+		# determine the rank of the present node
+		rank = 0  # default is primary node
+		mpi_init = orbit_mpi.MPI_Initialized()
+		comm = orbit_mpi.mpi_comm.MPI_COMM_WORLD
+		if (mpi_init):
+			rank = orbit_mpi.MPI_Comm_rank(comm)
+
+		# only the primary node needs to output the calculated information
+		if (rank == 0):
+			self.file_out.write(str(s) + "\t" +  str(time) + "\t")
+			for i in range(0,self.order+1):
+				for j in range(0,i+1):
+					self.file_out.write(str(self.bunchtwissanalysis.getBunchMoment(i-j,j)) + "\t")
+			self.file_out.write("\n")
 	
 	def closeMoments(self):
 		self.file_out.close()
@@ -131,12 +166,22 @@ class MomentsSetMember:
 	
 		self.bunchtwissanalysis.analyzeBunch(bunch)
 		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order)
-				
-		self.file_out.write(str(s) + "\t" +  str(time) + "\t")
-		for i in range(0,self.order+1):
-			for j in range(0,i+1):
-				self.file_out.write(str(self.bunchtwissanalysis.getBunchMoment(i-j,j)) + "\t")
-		self.file_out.write("\n")
+
+		# if mpi operations are enabled, this section of code will
+		# determine the rank of the present node
+		rank = 0  # default is primary node
+		mpi_init = orbit_mpi.MPI_Initialized()
+		comm = orbit_mpi.mpi_comm.MPI_COMM_WORLD
+		if (mpi_init):
+			rank = orbit_mpi.MPI_Comm_rank(comm)
+
+		# only the primary node needs to output the calculated information
+		if (rank == 0):
+			self.file_out.write(str(s) + "\t" +  str(time) + "\t")
+			for i in range(0,self.order+1):
+				for j in range(0,i+1):
+					self.file_out.write(str(self.bunchtwissanalysis.getBunchMoment(i-j,j)) + "\t")
+			self.file_out.write("\n")
 			
 	def resetFile(self, file):
 		self.file_out = file

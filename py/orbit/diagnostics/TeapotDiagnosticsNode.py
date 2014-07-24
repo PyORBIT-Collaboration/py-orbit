@@ -83,9 +83,6 @@ class TeapotStatLatsNodeSetMember(DriftTEAPOT):
 	def setPosition(self,pos):
 		self.position = pos
 
-	def closeStatLatsSetMember(self):
-		self.file.close()
-
 	def setLatticeLength(self, lattlength):
 		self.lattlength = lattlength
 
@@ -127,11 +124,13 @@ class TeapotMomentsNode(DriftTEAPOT):
 	def setPosition(self,pos):
 		self.position = pos
 	
+	def closeMoments(self):
+		self.file_out.close()
+	
 	def setLatticeLength(self, lattlength):
 		self.lattlength = lattlength
 	
-	def closeStatLats(self):
-		self.file_out.close()
+
 
 class TeapotMomentsNodeSetMember(DriftTEAPOT):
 	"""
@@ -166,9 +165,6 @@ class TeapotMomentsNodeSetMember(DriftTEAPOT):
 	
 	def setLatticeLength(self, lattlength):
 		self.lattlength = lattlength
-	
-	def closeMomentsSetMember(self):
-		self.file.close()
 
 	def activate(self):
 		self.active = True

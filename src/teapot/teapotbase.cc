@@ -234,28 +234,31 @@ void wrapbunch(Bunch* bunch, double length)
 
 void kick(Bunch* bunch, double kx, double ky, double kE)
 {
+    double charge = bunch->getCharge();
+    double kxc = kx * charge;
+    double kyc = ky * charge;
+    double kEc = kE * charge;
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
-
-    if(kx != 0.)
+    if(kxc != 0.)
     {
         for(int i = 0; i < bunch->getSize(); i++)
         {
-            arr[i][1] += kx;
+            arr[i][1] += kxc;
         }
     }
-    if(ky != 0.)
+    if(kyc != 0.)
     {
         for(int i = 0; i < bunch->getSize(); i++)
         {
-            arr[i][3] += ky;
+            arr[i][3] += kyc;
         }
     }
-    if(kE != 0.)
+    if(kEc != 0.)
     {
         for(int i = 0; i < bunch->getSize(); i++)
         {
-            arr[i][5] += kE;
+            arr[i][5] += kEc;
         }
     }
 }
@@ -281,13 +284,15 @@ void kick(Bunch* bunch, double kx, double ky, double kE)
 
 void multpi(Bunch* bunch, int i, int pole, double kl, int skew)
 {
+    double charge = bunch->getCharge();
+    double klc = kl * charge;
     std::complex<double> z, zn;
     double kl1;
 
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
 
-    kl1 = kl / factorial[pole];
+    kl1 = klc / factorial[pole];
     z = std::complex<double>(arr[i][0], arr[i][2]);
 
     // take power of z to the n
@@ -330,13 +335,15 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew)
 
 void multp(Bunch* bunch, int pole, double kl, int skew)
 {
+    double charge = bunch->getCharge();
+    double klc = kl * charge;
     std::complex<double> z, zn;
     double kl1;
 
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
 
-    kl1 = kl / factorial[pole];
+    kl1 = klc / factorial[pole];
     
     for(int i = 0; i < bunch->getSize(); i++)
     {
@@ -383,6 +390,8 @@ void multp(Bunch* bunch, int pole, double kl, int skew)
 
 void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
 {
+    double charge = bunch->getCharge();
+    double klc = kl * charge;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -398,7 +407,7 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
     std::complex<double> cxlp1 = std::complex<double>(lp1, 0.0);
     std::complex<double> cxlp2 = std::complex<double>(lp2, 0.0);
 
-    double klfactlp1 = kl / (4.0 * factorial[lp1]);
+    double klfactlp1 = klc / (4.0 * factorial[lp1]);
 
     // MAD Conventions on signs of multipole terms
 
@@ -490,6 +499,8 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
 
 void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew)
 {
+    double charge = bunch->getCharge();
+    double klc = kl * charge;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -505,7 +516,7 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew)
     std::complex<double> cxlp1 = std::complex<double>(lp1, 0.0);
     std::complex<double> cxlp2 = std::complex<double>(lp2, 0.0);
 
-    double klfactlp1 = kl / (4.0 * factorial[lp1]);
+    double klfactlp1 = klc / (4.0 * factorial[lp1]);
 
     // MAD Conventions on signs of multipole terms
 
@@ -596,12 +607,13 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew)
 
 void quad1(Bunch* bunch, double length, double kq)
 {
-    if(kq == 0.)
+    double charge = bunch->getCharge();
+    double kqc = kq * charge;
+    if(kqc == 0.)
     {
         drift(bunch,length);
         return;
     }
-
     double x_init, xp_init, y_init, yp_init;
     double sqrt_kq, kqlength;
     double cx, sx, cy, sy;
@@ -619,9 +631,9 @@ void quad1(Bunch* bunch, double length, double kq)
     double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
     double dp_p_coeff = 1.0 /(syncPart->getMomentum() * syncPart->getBeta());
 
-    if(kq > 0.)
+    if(kqc > 0.)
     {
-        sqrt_kq  = pow(kq, 0.5);
+        sqrt_kq  = pow(kqc, 0.5);
         kqlength = sqrt_kq * length;
         cx = cos(kqlength);
         sx = sin(kqlength);
@@ -636,9 +648,9 @@ void quad1(Bunch* bunch, double length, double kq)
         m43 = sy * sqrt_kq;
         m44 = cy;
     }
-    else if(kq < 0.)
+    else if(kqc < 0.)
     {
-        sqrt_kq  = pow(-kq, 0.5);
+        sqrt_kq  = pow(-kqc, 0.5);
         kqlength = sqrt_kq * length;
         cx = cosh(kqlength);
         sx = sinh(kqlength);
@@ -736,6 +748,8 @@ void quad2(Bunch* bunch, double length)
 
 void quadfringeIN(Bunch* bunch, double kq)
 {
+    double charge = bunch->getCharge();
+    double kqc = kq * charge;
     double KNL, x_init, xp_init, y_init, yp_init;
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -755,21 +769,21 @@ void quadfringeIN(Bunch* bunch, double kq)
         y_init  = arr[i][2];
         yp_init = arr[i][3];
 
-        arr[i][0] += (kq * KNL / 12.) * x_init *
+        arr[i][0] += (kqc * KNL / 12.) * x_init *
                      (x_init * x_init + 3. * y_init * y_init);
 
-        arr[i][1] -= (kq * KNL / 4.) *
+        arr[i][1] -= (kqc * KNL / 4.) *
                      (xp_init * (x_init * x_init + y_init * y_init) -
                       2. * yp_init * x_init * y_init);
 
-        arr[i][2] -= (kq * KNL / 12.) * y_init *
+        arr[i][2] -= (kqc * KNL / 12.) * y_init *
                      (y_init * y_init + 3. * x_init * x_init);
 
-        arr[i][3] -= (kq * KNL / 4.) *
+        arr[i][3] -= (kqc * KNL / 4.) *
                      (-yp_init * (x_init * x_init + y_init * y_init) +
                       2. * xp_init * x_init * y_init);
 
-        arr[i][4] += (kq * KNL * KNL / 12.) *
+        arr[i][4] += (kqc * KNL * KNL / 12.) *
                      (xp_init * x_init *
                       (x_init * x_init + 3. * y_init * y_init) -
                       yp_init * y_init *
@@ -795,6 +809,8 @@ void quadfringeIN(Bunch* bunch, double kq)
 
 void quadfringeOUT(Bunch* bunch, double kq)
 {
+    double charge = bunch->getCharge();
+    double kqc = kq * charge;
     double KNL, x_init, xp_init, y_init, yp_init;
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -814,21 +830,21 @@ void quadfringeOUT(Bunch* bunch, double kq)
         y_init  = arr[i][2];
         yp_init = arr[i][3];
 
-        arr[i][0] -= (kq * KNL / 12.) * x_init *
+        arr[i][0] -= (kqc * KNL / 12.) * x_init *
                      (x_init * x_init + 3. * y_init * y_init);
 
-        arr[i][1] += (kq * KNL / 4.) *
+        arr[i][1] += (kqc * KNL / 4.) *
                      (xp_init * (x_init * x_init + y_init * y_init) -
                       2. * yp_init * x_init * y_init);
 
-        arr[i][2] += (kq * KNL / 12.) * y_init *
+        arr[i][2] += (kqc * KNL / 12.) * y_init *
                      (y_init * y_init + 3. * x_init * x_init);
 
-        arr[i][3] += (kq * KNL / 4.) *
+        arr[i][3] += (kqc * KNL / 4.) *
                      (-yp_init * (x_init * x_init + y_init * y_init) +
                       2. * xp_init * x_init * y_init);
 
-        arr[i][4] -= (kq * KNL * KNL / 12.) *
+        arr[i][4] -= (kqc * KNL * KNL / 12.) *
                      (xp_init * x_init *
                       (x_init * x_init + 3. * y_init * y_init) -
                       yp_init * y_init *
@@ -1299,6 +1315,8 @@ void bendfringeOUT(Bunch* bunch, double rho)
 
 void soln(Bunch* bunch, double length, double B)
 {
+    double charge = bunch->getCharge();
+    double Bc = B * charge;
     double KNL, phase, cs, sn;
     double cu, cpu, u_init, pu_init, u, pu, phifac;
 
@@ -1322,24 +1340,24 @@ void soln(Bunch* bunch, double length, double B)
         dp_p = arr[i][5] * dp_p_coeff;
         KNL  = 1.0 / (1.0 + dp_p);
 
-        cu      =  arr[i][2] / 2.     - arr[i][1] / B;
-        cpu     =  arr[i][0] * B / 2. + arr[i][3];
-        u_init  =  arr[i][2] / 2.     + arr[i][1] / B;
-        pu_init = -arr[i][0] * B / 2. + arr[i][3];
-        phase = KNL * B * length;
+        cu      =  arr[i][2] / 2.     - arr[i][1] / Bc;
+        cpu     =  arr[i][0] * Bc / 2. + arr[i][3];
+        u_init  =  arr[i][2] / 2.     + arr[i][1] / Bc;
+        pu_init = -arr[i][0] * Bc / 2. + arr[i][3];
+        phase = KNL * Bc * length;
         cs = cos(phase);
         sn = sin(phase);
 
-        u =   u_init * cs     + pu_init * sn / B;
-        pu = -u_init * B * sn + pu_init * cs;
+        u =   u_init * cs     + pu_init * sn / Bc;
+        pu = -u_init * Bc * sn + pu_init * cs;
 
-        arr[i][0] = (-pu + cpu) / B;
-        arr[i][1] = 0.5 * (u - cu) * B;
+        arr[i][0] = (-pu + cpu) / Bc;
+        arr[i][1] = 0.5 * (u - cu) * Bc;
         arr[i][2] = u + cu;
         arr[i][3] = 0.5 * (pu + cpu);
 
         phifac = (pu_init * pu_init +
-                  B * B * u_init * u_init +
+                  Bc * Bc * u_init * u_init +
                   dp_p * dp_p * gamma2i
                  ) / 2.0;
         phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
@@ -1453,8 +1471,8 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
 void RingRF(Bunch* bunch, double ring_length, int harmonic_numb,
             double voltage, double phase_s)
 {
-    double deltaV = 0.;
     double charge = bunch->getCharge();
+    double deltaV = 0.;
     double coeff  = charge;
 
     double Factor = 0.;

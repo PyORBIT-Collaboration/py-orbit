@@ -21,6 +21,7 @@ class InjectParts:
 	
 	def __init__(self, nparts, bunch, lostbunch, injectregion, xDistFunc, yDistFunc, lDistFunc, nmaxmacroparticles = -1, injectturninterval=1):
 		self.nparts = nparts
+		self.npartsfloat = float(nparts)
 		self.bunch = bunch
 		self.lostbunch = lostbunch
 		self.injectregion = injectregion
@@ -34,6 +35,12 @@ class InjectParts:
 	def addParticles(self):
 		(xmin,xmax,ymin,ymax) = self.injectregion
 	
+		#adjusts number of particles injected according to varying pattern width
+		if self.lDistFunc.name == "JohoLongitudinalPaint":
+			self.lDistFunc.getCoordinates()
+			self.npartsfloat = self.lDistFunc.frac_change*self.npartsfloat
+			self.nparts = int(round(self.npartsfloat))
+		
 		rank = 0
 		numprocs = 1
 		

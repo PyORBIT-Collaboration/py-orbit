@@ -53,13 +53,16 @@ class UniformLongDistPaint:
         zminFunc = sorted(zminFunc, key= lambda x: x[0])
         zmaxFunc = sorted(zmaxFunc, key= lambda x: x[0])
             
-        self.name = "JohoLongitudinal"
+        self.name = "JohoLongitudinalPaint"
         self.zminFunc = zminFunc
         self.zmaxFunc = zmaxFunc
         self.sp = sp
         self.ekinetic = sp.kinEnergy()
         self.eoffset = eoffset
         self.deltaEfrac = deltaEfrac
+		# These help vary the number of macro particles according to the PW
+        self.frac_change = 1.0
+        self.last_length = -1
         
         
     def getCoordinates(self):
@@ -67,6 +70,11 @@ class UniformLongDistPaint:
 		zminNow = interpolate(self.zminFunc,self.sp.time())
 		zmaxNow = interpolate(self.zmaxFunc,self.sp.time())
 		if zminNow >= zmaxNow: print "Warning from getCoordinates call: zmin >= zmax"
+		
+		length = zmaxNow-zminNow
+		if self.last_length != -1: self.frac_change = length/self.last_length
+		self.last_length = length
+		
 		zinj = (zminNow + (zmaxNow - zminNow) * random.random())
 		dEinj = self.eoffset + (self.ekinetic * -self.deltaEfrac * (1 - 2*random.random()))
 
@@ -278,7 +286,7 @@ class SNSESpreadDistPaint():
 		zminFunc = sorted(zminFunc, key= lambda x: x[0])
 		zmaxFunc = sorted(zmaxFunc, key= lambda x: x[0])
 
-		self.name = "JohoLongitudinal"
+		self.name = "JohoLongitudinalPaint"
 		self.lattlength = lattlength
 		self.zminFunc = zminFunc
 		self.zmaxFunc = zmaxFunc
@@ -292,6 +300,10 @@ class SNSESpreadDistPaint():
 		self.emax = emax
 		self.ecparams = ecparams
 		self.esparams = esparams
+		#These help vary the number of macro partices according to PW
+		self.frac_change = 1.0
+		self.last_length = -1
+
 
 
 
@@ -299,6 +311,11 @@ class SNSESpreadDistPaint():
 		
 		zminNow = interpolate(self.zminFunc,self.sp.time())
 		zmaxNow = interpolate(self.zmaxFunc,self.sp.time())
+		
+		length = zmaxNow-zminNow
+		if self.last_length != -1: self.frac_change = length/self.last_length
+		self.last_length = length
+
 		
 		if(random.random() > (self.tailfraction * self.lattlength / (self.lattlength - zmaxNow + zminNow))):
 			#Put it in the main distribution

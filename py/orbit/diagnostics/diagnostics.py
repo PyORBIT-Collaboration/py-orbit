@@ -33,10 +33,10 @@ class StatLats:
 		betay = self.bunchtwissanalysis.getBeta(1)
 		alphay = self.bunchtwissanalysis.getAlpha(1)
 		emity = self.bunchtwissanalysis.getEmittance(1)
-		#dispersionx = self.bunchtwissanalysis.getDispersion(0, bunch)
-		#ddispersionx = self.bunchtwissanalysis.getDispersionDerivative(0, bunch)
-		#dispersiony = self.bunchtwissanalysis.getDispersion(1, bunch)
-		#ddispersiony = self.bunchtwissanalysis.getDispersionDerivative(1, bunch)
+		dispersionx = self.bunchtwissanalysis.getDispersion(0)
+		ddispersionx = self.bunchtwissanalysis.getDispersionDerivative(0)
+		dispersiony = self.bunchtwissanalysis.getDispersion(1)
+		ddispersiony = self.bunchtwissanalysis.getDispersionDerivative(1)
 		
 		sp = bunch.getSyncParticle()
 		time = sp.time()
@@ -53,7 +53,7 @@ class StatLats:
 
 		# only the primary node needs to output the calculated information
 		if (rank == 0):
-			self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) +"\n")
+			self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) +"\t" + str(dispersionx) + "\t" + str(ddispersionx) + "\n")
 							
 	def closeStatLats(self):
 		self.file_out.close()
@@ -76,8 +76,8 @@ class StatLatsSetMember:
 		betay = self.bunchtwissanalysis.getBeta(1)
 		alphay = self.bunchtwissanalysis.getAlpha(1)
 		emity = self.bunchtwissanalysis.getEmittance(1)
-		#dispersionx = self.bunchtwissanalysis.getDispersion(0, bunch)
-		#ddispersionx = self.bunchtwissanalysis.getDispersionDerivative(0, bunch)
+		dispersionx = self.bunchtwissanalysis.getDispersion(0)
+		ddispersionx = self.bunchtwissanalysis.getDispersionDerivative(0)
 		#dispersiony = self.bunchtwissanalysis.getDispersion(1, bunch)
 		#ddispersiony = self.bunchtwissanalysis.getDispersionDerivative(1, bunch)
 		
@@ -97,7 +97,7 @@ class StatLatsSetMember:
 
 		# only the primary node needs to output the calculated information
 		if (rank == 0):
-			self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\n")
+			self.file_out.write(str(s) + "\t" +  str(time) + "\t" + str(emitx)+ "\t" + str(emity)+ "\t" + str(betax)+ "\t" + str(betay)+ "\t" + str(alphax)+ "\t" + str(alphay) + "\t" + str(dispersionx) + "\t" + str(ddispersionx) +"\n")
 	
 	def closeStatLats(self):
 		self.file_out.close()
@@ -111,10 +111,14 @@ class Moments:
 	"""
 		This class delivers the beam moments
 	"""
-	def __init__(self, filename, order):
+	def __init__(self, filename, order, nodispersion):
 		self.file_out = open(filename,"a")
 		self.bunchtwissanalysis = BunchTwissAnalysis()
 		self.order = order
+		if(nodispersion == "false"):
+			self.dispterm = -1
+		else:
+			self.dispterm = 1
 
 	def writeMoments(self, s, bunch, lattlength = 0):
 		
@@ -124,7 +128,7 @@ class Moments:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 								 
 		self.bunchtwissanalysis.analyzeBunch(bunch)
-		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order)
+		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm)
 
 		# if mpi operations are enabled, this section of code will
 		# determine the rank of the present node
@@ -151,10 +155,15 @@ class MomentsSetMember:
 	"""
 		This class delivers the beam moments
 	"""
-	def __init__(self, file, order):
+	def __init__(self, file, order, nodispersion):
 		self.file_out = file
 		self.order = order
 		self.bunchtwissanalysis = BunchTwissAnalysis()
+		if(nodispersion == "false"):
+			self.dispterm = -1
+		else:
+			self.dispterm = 1
+
 		
 	def writeMoments(self, s, bunch, lattlength = 0 ):
 		
@@ -165,7 +174,7 @@ class MomentsSetMember:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 	
 		self.bunchtwissanalysis.analyzeBunch(bunch)
-		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order)
+		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm)
 
 		# if mpi operations are enabled, this section of code will
 		# determine the rank of the present node

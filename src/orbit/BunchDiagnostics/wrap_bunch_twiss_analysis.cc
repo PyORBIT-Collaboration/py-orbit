@@ -56,15 +56,17 @@ extern "C" {
 		BunchTwissAnalysis* cpp_BunchTwissAnalysis = (BunchTwissAnalysis*)((pyORBIT_Object*) self)->cpp_obj;
 		PyObject* pyBunch;
 		int order;
-		if(!PyArg_ParseTuple(args,"Oi:computeBunchMoments",&pyBunch,&order)){
-			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, int order) - parameters are needed.");
+		int dispterm;
+		if(!PyArg_ParseTuple(args,"Oii:computeBunchMoments",&pyBunch,&order,&dispterm)){
+			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, int order, int dispterm) - parameters are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, int order) - method needs a Bunch.");
+			ORBIT_MPI_Finalize("BunchTwissAnalysis - computeBunchMoments(Bunch* bunch, int order, int dispterm) - method needs a Bunch.");
 		}
+		
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_BunchTwissAnalysis->computeBunchMoments(cpp_bunch, order);
+		cpp_BunchTwissAnalysis->computeBunchMoments(cpp_bunch, order, dispterm);
 		Py_INCREF(Py_None);
 		return Py_None;
 	

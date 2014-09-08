@@ -16,7 +16,7 @@ BunchTwissAnalysis::BunchTwissAnalysis(): CppPyWrapper(NULL)
 	corr_arr = (double* ) malloc (36*sizeof(double));
 	
 	avg_arr_MPI = (double* ) malloc (6*sizeof(double));
-	corr_arr_MPI = (double* ) malloc (36*sizeof(double));	
+	corr_arr_MPI = (double* ) malloc (36*sizeof(double));
 	
 	for(int i = 0; i < 6; i++){
 		avg_arr[i] = 0.;
@@ -29,7 +29,7 @@ BunchTwissAnalysis::BunchTwissAnalysis(): CppPyWrapper(NULL)
 			corr_arr_MPI[i+6*j] = 0.;
 		}	
 	}
-	
+		
 	count = 0;
 	_order = 0;
 	
@@ -42,7 +42,7 @@ BunchTwissAnalysis::~BunchTwissAnalysis()
 	free(avg_arr);
 	free(corr_arr);
 	free(avg_arr_MPI);
-	free(corr_arr_MPI);	
+	free(corr_arr_MPI);
 }
 
 /** Performs the Twiss analysis of the bunch */		
@@ -134,12 +134,68 @@ void BunchTwissAnalysis::analyzeBunch(Bunch* bunch){
 	bunch_momentum = syncPart->getMomentum();
 	bunch_beta = syncPart->getBeta();
 	bunch_gamma = syncPart->getGamma();
+	bunch_kinenergy = syncPart->getEnergy();
+	bunch_mass = syncPart->getMass();
+	
 }
 
-/** Performs the Twiss analysis of the bunch */
-void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
+
+/** Performs the bunch moments computations */
+void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int dispersionflag){
+	_order = order;
 	int i = 0;
 	int j = 0;
+
+	bunch->compress();
+	
+	double dispterm = 0.;
+	double m_size = 0.;
+	double xAvg = 0.;
+	double yAvg = 0.;
+	double total_macrosize = 0; //Total macrosize (can different than number of macroparticles if m_size is specified)
+	int nParts = bunch->getSize();
+	double total_macrosize_MPI = 0.;
+	double** part_coord_arr = bunch->coordArr();
+	int has_msize = bunch->hasParticleAttributes("macrosize");
+
+	analyzeBunch(bunch);
+
+	if(dispterm > 0){
+		if(has_msize > 0){
+			ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
+			double m_size = 0.;
+			for(int ip = 0; ip < nParts; ip++){
+				m_size = macroSizeAttr->macrosize(ip);
+				total_macrosize += m_size;
+				if (dispersionflag > 0) {
+					dispterm = getDispersion(0) * part_coord_arr[ip][5] / (bunch_kinenergy + bunch_mass) / (bunch_beta*bunch_beta);
+				}
+				xAvg += m_size*(part_coord_arr[ip][0] - dispterm);
+			}
+		} else {
+			m_size = 1.0;
+			for(int ip = 0; ip < nParts; ip++){
+				if (dispersionflag > 0) {
+					dispterm = getDispersion(0) * part_coord_arr[ip][5] / (bunch_kinenergy + bunch_mass) / (bunch_beta*bunch_beta);
+				}
+				xAvg += part_coord_arr[ip][0] - dispterm;
+			}
+			total_macrosize += nParts*m_size;
+			xAvg *= m_size;
+		}
+		
+	
+		ORBIT_MPI_Allreduce(&total_macrosize,&total_macrosize_MPI,1,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
+		total_macrosize = total_macrosize_MPI;
+	
+		double xAvg_MPI = 0;
+		ORBIT_MPI_Allreduce(&xAvg,&xAvg_MPI,1,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
+		xAvg = xAvg_MPI/total_macrosize;
+	}
+	else{
+		xAvg = getAverage(0);
+	}
+	yAvg = getAverage(2);
 	
 	double momX [order+1];
 	double momY [order+1];
@@ -148,8 +204,6 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 
 	for(i=0; i < order+1; i++)
 		momentXY[i] = new double[order+1];
-	
-	_order = order;
 	
 	//initialization
 	for (int n=0; n < _order+1;n++){
@@ -163,20 +217,9 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 	
 	momX[0]=1.0;
 	momY[0]=1.0;
-	analyzeBunch(bunch);
-
-	double xAvg = getAverage(0);
-	double yAvg = getAverage(2);
-	
-	total_macrosize = 0.;
-
+		
 	bunch->compress();
-	double m_size = 0.;
-	int nParts = bunch->getSize();
-	//count += nParts;
-	double** part_coord_arr = bunch->coordArr();
-	int has_msize = bunch->hasParticleAttributes("macrosize");
-	
+	total_macrosize = 0.;
 	if(has_msize > 0){
 		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
 		double m_size = 0.;
@@ -185,16 +228,20 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 			m_size = macroSizeAttr->macrosize(ip);
 			total_macrosize += m_size;
 			
+			if (dispersionflag > 0) {
+				dispterm = getDispersion(0) * part_coord_arr[ip][5] / (bunch_kinenergy + bunch_mass) / (bunch_beta*bunch_beta);
+			}
+			
 			for(i = 0; i < _order; i++)
-                momX[i+1] = momX[i]*m_size*(part_coord_arr[ip][0] - xAvg);
+                momX[i+1] = momX[i]*m_size*((part_coord_arr[ip][0] - dispterm) - xAvg);
 		
 			for(i = 0; i< _order; i++)
                 momY[i+1] = momY[i]*m_size*(part_coord_arr[ip][2] - yAvg);
 			
-			
 			for(j = 0; j<_order; j++)
 				for(i=0 ; i< _order+1-j; i++){
-					momentXY[i][j] += momX[i]/pow(sqrt(getEffectiveBeta(0)), double(i)) * momY[j]/pow(sqrt(getEffectiveBeta(1)), double(j));
+					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
+					momentXY[i][j] += momX[i] * momY[j];
 				}
 		}
 		
@@ -202,15 +249,20 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 		m_size = 1.0;
 		for(int ip = 0; ip < nParts; ip++){
 			
+			if (dispersionflag > 0) {
+				dispterm = getDispersion(0) * part_coord_arr[ip][5] / (bunch_kinenergy + bunch_mass) / (bunch_beta*bunch_beta);
+			}
+			
 			for(i = 0; i < _order; i++)
-                momX[i+1] = momX[i]*(part_coord_arr[ip][0] - xAvg);
+                momX[i+1] = momX[i]*((part_coord_arr[ip][0] - dispterm) - xAvg);
 		
 			for(i = 0; i< _order; i++)
                 momY[i+1] = momY[i]*(part_coord_arr[ip][2] - yAvg);
 			
 			for(j = 0; j<_order; j++)
 				for(i=0 ; i< _order+1-j; i++)
-					momentXY[i][j] += momX[i]/pow(sqrt(getEffectiveBeta(0)), double(i)) * momY[j]/pow(sqrt(getEffectiveBeta(1)), double(j));
+					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
+				    momentXY[i][j] += momX[i] * momY[j];
 			
 		}
 		
@@ -218,21 +270,19 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 		
 	}
 	
-		//if( nMPIsize_ > 1){
+	//if( nMPIsize_ > 1){
 	double* buff_0 = (double *) malloc (sizeof(double)*(_order+1)*(_order+1));
 	double* buff_1 = (double *) malloc (sizeof(double)*(_order+1)*(_order+1));
-		
 	int count = 0;
-	
 	for(j=0; j<_order+1; j++){
 		for(i=0 ; i< _order+1-j; i++){
 			buff_0[count]= momentXY[i][j];
 			count++;
 			}
 	}
-		//}
 	
 	//MPI_Allreduce(buff_0, buff_1, count, MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+	
 	ORBIT_MPI_Allreduce(buff_0, buff_1, count, MPI_DOUBLE, MPI_SUM, bunch->getMPI_Comm_Local()->comm);
 		
 	count = 0;
@@ -244,11 +294,7 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 	}
 	free(buff_0);
 	free(buff_1);
-	
-	double total_macrosize_MPI = 0.;
-	ORBIT_MPI_Allreduce(&total_macrosize,&total_macrosize_MPI,1,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
-	total_macrosize = total_macrosize_MPI;
-	
+		
 	for(i=0; i< _order+1; i++)
         for(j=0; j< _order+1-i ; j++)
 			momentXY[i][j] /= total_macrosize;
@@ -258,7 +304,10 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order){
 	momentXY[0][1] = yAvg;
 
 //return momentXY;
+	
 }
+
+
 
 
 /** Returns the centered correlation <(x-<x>)*(y-<y>)> = <x*y> - <x>*<y> */
@@ -372,7 +421,7 @@ double BunchTwissAnalysis::getDispersion(int ic)
 	if(ic < 0 || ic > 1 ) return 0.;
 	double x_dE_avg = this->getCorrelation(2*ic, 5);
 	double dE2_avg = fabs(this->getCorrelation(5, 5));
-	double dispersion = x_dE_avg/dE2_avg * bunch_momentum * bunch_beta;	
+	double dispersion = x_dE_avg/dE2_avg * bunch_momentum * bunch_beta;
 	return dispersion;
 }
 

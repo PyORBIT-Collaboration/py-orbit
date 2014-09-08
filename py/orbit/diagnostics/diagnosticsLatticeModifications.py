@@ -58,12 +58,10 @@ def addTeapotDiagnosticsNode(lattice, position, diagnostics_node):
 	lattice.getNodes()[node_start_ind:node_stop_ind+1] = nodes_new_arr
 	# initialize the lattice
 	lattice.initialize()
-		
 
 def addTeapotDiagnosticsNodeAsChild(lattice, AccNode, diagnostics_node):
 	AccNode.addChildNode(diagnostics_node, AccNode.ENTRANCE,0,AccNode.BEFORE)
 	lattice.initialize()
-
 
 def addTeapotStatLatsNodeSet(lattice, filename):
 	"""
@@ -81,7 +79,7 @@ def addTeapotStatLatsNodeSet(lattice, filename):
 		nodesetcontroller._nodelist.append(diagnostics_node)
 	return nodesetcontroller
 
-def addTeapotMomentsNodeSet(lattice, filename, order):
+def addTeapotMomentsNodeSet(lattice, filename, order, nodispersion = "true"):
 	"""
 	It will put one Teapot statlats node at start of each node in lattice
 	"""
@@ -90,7 +88,7 @@ def addTeapotMomentsNodeSet(lattice, filename, order):
 	lattice.initialize()
 	for node in lattice.getNodes():
 		position = lattice.getNodePositionsDict()[node][0]
-		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order, "moments")
+		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order, "moments", nodispersion)
 		diagnostics_node.setPosition(position)
 		diagnostics_node.setLatticeLength(lattice.getLength())
 		node.addChildNode(diagnostics_node, node.BODY)

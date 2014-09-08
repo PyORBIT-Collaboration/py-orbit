@@ -101,12 +101,12 @@ class TeapotMomentsNode(DriftTEAPOT):
 	"""
 	The moments node class for TEAPOT lattice
 	"""
-	def __init__(self, filename , order, name = "moments no name"):
+	def __init__(self, filename, order, nodispersion = "true", name = "moments no name"):
 		"""
 		Constructor. Creates the StatLats TEAPOT element.
 		"""
 		DriftTEAPOT.__init__(self,name)
-		self.moments = Moments(filename, order)
+		self.moments = Moments(filename, order, name)
 		self.setType("moments teapot")
 		self.setLength(0.0)
 		self.position = 0.0
@@ -136,14 +136,14 @@ class TeapotMomentsNodeSetMember(DriftTEAPOT):
 	"""
 	The moments node class for TEAPOT lattice
 	"""
-	def __init__(self, file, order, name = "moments no name"):
+	def __init__(self, file, order, nodispersion = "true", name = "moments no name"):
 		"""
 		Constructor. Creates the Moments TEAPOT element.
 		"""
 		DriftTEAPOT.__init__(self,str(name))
 		
 		self.file = file
-		self.moments = MomentsSetMember(self.file, order)
+		self.moments = MomentsSetMember(self.file, order, nodispersion="true")
 		self.setType("moments teapot")
 		self.setLength(0.0)
 		self.position = 0.0

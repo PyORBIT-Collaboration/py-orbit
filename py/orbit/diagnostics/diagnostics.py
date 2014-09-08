@@ -127,7 +127,6 @@ class Moments:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 								 
-		self.bunchtwissanalysis.analyzeBunch(bunch)
 		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm)
 
 		# if mpi operations are enabled, this section of code will
@@ -173,7 +172,6 @@ class MomentsSetMember:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 	
-		self.bunchtwissanalysis.analyzeBunch(bunch)
 		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm)
 
 		# if mpi operations are enabled, this section of code will

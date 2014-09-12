@@ -86,9 +86,10 @@ def addTeapotMomentsNodeSet(lattice, filename, order, nodispersion = True, emitn
 	file_out = open(filename, "w")
 	nodesetcontroller = diagnosticsNodeSetController(file_out, "Moment Set Controller")
 	lattice.initialize()
+	print 'In lattice modification no dispersion is ', nodispersion
 	for node in lattice.getNodes():
 		position = lattice.getNodePositionsDict()[node][0]
-		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order, "moments", nodispersion, emitnorm)
+		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order, nodispersion, emitnorm,  "moments")
 		diagnostics_node.setPosition(position)
 		diagnostics_node.setLatticeLength(lattice.getLength())
 		node.addChildNode(diagnostics_node, node.BODY)

@@ -141,7 +141,7 @@ void BunchTwissAnalysis::analyzeBunch(Bunch* bunch){
 
 
 /** Performs the bunch moments computations */
-void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int dispersionflag){
+void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int dispersionflag, int emitnormflag){
 	_order = order;
 	int i = 0;
 	int j = 0;
@@ -149,6 +149,8 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 	bunch->compress();
 	
 	double dispterm = 0.;
+	double xbetaterm = 0.;
+	double ybetaterm = 0.;
 	double m_size = 0.;
 	double xAvg = 0.;
 	double yAvg = 0.;
@@ -232,6 +234,15 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 				dispterm = getDispersion(0) * part_coord_arr[ip][5] / (bunch_kinenergy + bunch_mass) / (bunch_beta*bunch_beta);
 			}
 			
+			if(emitnormflag > 0){
+				xbetaterm = sqrt(getBeta(0)*getEmittance(0));
+				ybetaterm = sqrt(getBeta(1)*getEmittance(1));
+			}
+			else{
+				xbetaterm = sqrt(getBeta(0));
+				ybetaterm = sqrt(getBeta(1));
+			}
+			
 			for(i = 0; i < _order; i++)
                 momX[i+1] = momX[i]*m_size*((part_coord_arr[ip][0] - dispterm) - xAvg);
 		
@@ -240,7 +251,7 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 			
 			for(j = 0; j<_order; j++)
 				for(i=0 ; i< _order+1-j; i++){
-					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
+					momentXY[i][j] += momX[i]/pow(xbetaterm, double(i)) * momY[j]/pow(ybetaterm, double(j));
 					momentXY[i][j] += momX[i] * momY[j];
 				}
 		}
@@ -253,6 +264,15 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 				dispterm = getDispersion(0) * part_coord_arr[ip][5] / (bunch_kinenergy + bunch_mass) / (bunch_beta*bunch_beta);
 			}
 			
+			if(emitnormflag > 0){
+				xbetaterm = sqrt(getBeta(0)*getEmittance(0));
+				ybetaterm = sqrt(getBeta(1)*getEmittance(1));
+			}
+			else{
+				xbetaterm = sqrt(getBeta(0));
+				ybetaterm = sqrt(getBeta(1));
+			}
+			
 			for(i = 0; i < _order; i++)
                 momX[i+1] = momX[i]*((part_coord_arr[ip][0] - dispterm) - xAvg);
 		
@@ -261,8 +281,8 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 			
 			for(j = 0; j<_order; j++)
 				for(i=0 ; i< _order+1-j; i++)
-					momentXY[i][j] += momX[i]/pow(sqrt(getBeta(0)), double(i)) * momY[j]/pow(sqrt(getBeta(1)), double(j));
-				    momentXY[i][j] += momX[i] * momY[j];
+					momentXY[i][j] += momX[i]/pow(xbetaterm, double(i)) * momY[j]/pow(ybetaterm, double(j));
+					momentXY[i][j] += momX[i] * momY[j];
 			
 		}
 		

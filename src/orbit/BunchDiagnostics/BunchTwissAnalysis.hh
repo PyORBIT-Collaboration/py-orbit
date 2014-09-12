@@ -72,7 +72,7 @@ class BunchTwissAnalysis: public OrbitUtils::CppPyWrapper
 		double getDispersionDerivative(int ic);
 		
 		/** Computes the XY moments of the bunch up to a prescribed order */
-		void computeBunchMoments(Bunch* bunch, int order, int dispersionflag);
+		void computeBunchMoments(Bunch* bunch, int order, int dispersionflag, int emitnormflag);
 	
 		/** Returns the XY moment of the beam */
 		double getBunchMoment(int i, int j);

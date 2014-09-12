@@ -79,7 +79,7 @@ def addTeapotStatLatsNodeSet(lattice, filename):
 		nodesetcontroller._nodelist.append(diagnostics_node)
 	return nodesetcontroller
 
-def addTeapotMomentsNodeSet(lattice, filename, order, nodispersion = "true"):
+def addTeapotMomentsNodeSet(lattice, filename, order, nodispersion = True, emitnorm = False):
 	"""
 	It will put one Teapot statlats node at start of each node in lattice
 	"""
@@ -88,7 +88,7 @@ def addTeapotMomentsNodeSet(lattice, filename, order, nodispersion = "true"):
 	lattice.initialize()
 	for node in lattice.getNodes():
 		position = lattice.getNodePositionsDict()[node][0]
-		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order, "moments", nodispersion)
+		diagnostics_node = TeapotMomentsNodeSetMember(file_out, order, "moments", nodispersion, emitnorm)
 		diagnostics_node.setPosition(position)
 		diagnostics_node.setLatticeLength(lattice.getLength())
 		node.addChildNode(diagnostics_node, node.BODY)

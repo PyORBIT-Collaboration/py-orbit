@@ -111,14 +111,19 @@ class Moments:
 	"""
 		This class delivers the beam moments
 	"""
-	def __init__(self, filename, order, nodispersion):
+	def __init__(self, filename, order, nodispersion, emitnorm):
 		self.file_out = open(filename,"a")
 		self.bunchtwissanalysis = BunchTwissAnalysis()
 		self.order = order
-		if(nodispersion == "false"):
+		if(nodispersion == False):
 			self.dispterm = -1
 		else:
 			self.dispterm = 1
+
+		if(emitnorm == True):
+			self.emitnormterm = 1
+		else:
+			self.emitnormterm = -1
 
 	def writeMoments(self, s, bunch, lattlength = 0):
 		
@@ -127,7 +132,7 @@ class Moments:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 								 
-		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm)
+		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm, self.emitnormterm)
 
 		# if mpi operations are enabled, this section of code will
 		# determine the rank of the present node
@@ -154,15 +159,19 @@ class MomentsSetMember:
 	"""
 		This class delivers the beam moments
 	"""
-	def __init__(self, file, order, nodispersion):
+	def __init__(self, file, order, nodispersion, emitnorm):
 		self.file_out = file
 		self.order = order
 		self.bunchtwissanalysis = BunchTwissAnalysis()
-		if(nodispersion == "false"):
+		if(nodispersion == False):
 			self.dispterm = -1
 		else:
 			self.dispterm = 1
-
+		
+		if(emitnorm == True):
+			self.emitnormterm = 1
+		else:
+			self.emitnormterm = -1
 		
 	def writeMoments(self, s, bunch, lattlength = 0 ):
 		
@@ -172,7 +181,7 @@ class MomentsSetMember:
 		if lattlength > 0:
 			time = sp.time()/(lattlength/(sp.beta() * speed_of_light))
 	
-		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm)
+		self.bunchtwissanalysis.computeBunchMoments(bunch, self.order, self.dispterm, self.emitnormterm)
 
 		# if mpi operations are enabled, this section of code will
 		# determine the rank of the present node

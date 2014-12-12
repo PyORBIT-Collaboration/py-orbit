@@ -229,6 +229,8 @@ class MADX_Parser:
 		
 		if(seqlength == 0):
 			startpos = 0
+			downstreamelemlength = float(downstreamelem.getParameter("l"))
+
 		else:
 			upstreamelem = self._sequencelist[seqlength-1]
 			upstreamelemlength = float(upstreamelem.getParameter("l"))

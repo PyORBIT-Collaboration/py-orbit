@@ -1,0 +1,326 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// FILE NAME
+//   TImp.h
+//
+// AUTHOR
+//   Slava Danilov, Jeff Holmes, John Galambos, ORNL, vux@ornl.gov
+//
+// CREATED
+//   8/11/2000
+//   Revisited by Jeff Holmes 6/2014
+//
+// DESCRIPTION
+//   Header file for the transverse impedance class.
+//
+// REVISION HISTORY
+//
+/////////////////////////////////////////////////////////////////////////////
+
+#if !defined(__TImp__)
+#define __TImp__
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// include files
+//
+/////////////////////////////////////////////////////////////////////////////
+
+#include "Node.h"
+#include "fftw.h"
+#include "RealMat.h"
+#include "ComplexMat.h"
+#include "SCLTypes.h"
+
+///////////////////////////////////////////////////////////////////////////
+//
+// CLASS NAME
+//   TImp
+//
+// INHERITANCE RELATIONSHIPS
+//   TImp -> Node* -> Object
+//
+// USING/CONTAINING RELATIONSHIPS
+//   None
+//
+// DESCRIPTION
+//   Base class for storing transverse impedance information
+//
+// PUBLIC MEMBERS
+//   Integer
+//     _nBins        Reference to the number of bins
+//     _nParts_Bin   Integer Vector containing the particles/bin
+//     _nMacrosMin   Minimum number of macro particles
+//
+//   Real
+//     _deltaPhiBin  longitudinal (phi) bin width (rad)
+//     _phiCount     Vector of the number of macros in each phi bin
+//
+//   Void
+//     nameOut - dumps node name to a string
+//
+// PROTECTED MEMBERS
+//     _forceCalculated - switch indicating that
+//                        the force has been calculated
+//
+// PRIVATE MEMBERS
+//   None
+//
+///////////////////////////////////////////////////////////////////////////
+
+class TImp : public Node
+{
+  Declare_Standard_Members(TImp, Node);
+  public:
+    TImp(const String &n, const Integer &order, Integer &nBins,
+         Integer &nMacrosMin);
+    ~TImp();
+
+    virtual Void nameOut(String &wname) {wname = _name;}
+    virtual Void _updatePartAtNode(MacroPart &mp) = 0;
+    virtual Void _nodeCalculator(MacroPart &mp) = 0;
+    virtual Real _kickx(Real &angle) = 0;
+    virtual Real _kicky(Real &angle) = 0;
+    virtual Void _longBin(MacroPart &mp);
+
+    Vector(Real) _phiCount;
+    Real _deltaPhiBin;
+    Vector(Real) _xCentroid, _xpCentroid;
+    Vector(Real) _yCentroid, _ypCentroid;
+
+    Integer _nBins;
+    Integer _nMacrosMin;
+
+  protected:
+    Real _charge2TKick;
+    Integer _forceCalculated;
+
+    //===MPI stuff =====start=====
+
+      int iMPIini_;
+      int nMPIsize_;
+      int nMPIrank_;
+
+      double* buff_MPI_0_;
+      double* buff_MPI_1_;
+
+    //===MPI stuff =====stop======
+};
+
+///////////////////////////////////////////////////////////////////////////
+//
+// CLASS NAME
+//   FFTTImpedance
+//
+// INHERITANCE RELATIONSHIPS
+//   FFTTImpedance -> TImp -> Node* -> Object
+//
+// USING/CONTAINING RELATIONSHIPS
+//   None
+//
+// DESCRIPTION
+//   Class for storing transverse kick impedance information,
+//   with FFT implementation
+//
+// PUBLIC MEMBERS
+//   _useAverage  Calculate kick at bins, rather than for each particle
+//                if == 1, interpolate to particles
+//
+// PROTECTED MEMBERS
+//   None
+//
+// PRIVATE MEMBERS
+//   None
+//
+///////////////////////////////////////////////////////////////////////////
+
+class FFTTImpedance : public TImp
+{
+  Declare_Standard_Members(FFTTImpedance, TImp);
+  public:
+    FFTTImpedance(const String &n, const Integer &order, Integer &nBins,
+                  Vector(Complex) &Zxplus, Vector(Complex) &Zxminus,
+                  Vector(Complex) &Zyplus, Vector(Complex) &Zyminus,
+                  Real &b_a, Integer &useAvg, Integer &nMacrosMin);
+    ~FFTTImpedance();
+
+    Void _updatePartAtNode(MacroPart &mp);
+    Void _nodeCalculator(MacroPart &mp);
+    Real _kickx(Real &anglex);
+    Real _kicky(Real &angley);
+    Vector(Complex) _zXImped_nplus;
+    Vector(Complex) _zYImped_nplus;
+    Vector(Complex) _zXImped_nminus;
+    Vector(Complex) _zYImped_nminus;
+    Vector(Complex) _FFTResultX1;
+    Vector(Complex) _FFTResultY1;
+    Vector(Complex) _FFTResultX2;
+    Vector(Complex) _FFTResultY2;
+    Vector(Real) _FFTPhaseX;
+    Vector(Real) _FFTPhaseY;
+    Real _z_0;
+    Real _b_a;
+    Integer _useAverage;
+    Vector(Real) _zx, _chix, _zy, _chiy;
+
+ private:
+    Vector(Real) _deltaXpGrid;
+    Vector(Real) _deltaYpGrid;
+    fftw_plan _plan;
+    FFTW_COMPLEX *_in;
+    FFTW_COMPLEX *_out;
+};
+
+///////////////////////////////////////////////////////////////////////////
+//
+// CLASS NAME
+//   FreqDepTImp
+//
+// INHERITANCE RELATIONSHIPS
+//   FreqDepTImp -> TImp -> Node* -> Object
+//
+// USING/CONTAINING RELATIONSHIPS
+//   None
+//
+// DESCRIPTION
+//   Class for storing transverse impedance kick information,
+//   with FFT implementation
+//   Frequency dependence built in directly so time dependence can be
+//   incorporated by following basic ring frequency: allows acceleration
+//
+// PUBLIC MEMBERS
+//   _useAverage  Calculate kick at bins, rather than for each particle
+//                if == 1, interpolate to particles
+//
+// PROTECTED MEMBERS
+//   None
+//
+// PRIVATE MEMBERS
+//   None
+//
+///////////////////////////////////////////////////////////////////////////
+
+class FreqDepTImp : public TImp
+{
+  Declare_Standard_Members(FreqDepTImp, TImp);
+  public:
+    FreqDepTImp(const String &n, const Integer &order, Integer &nBins,
+                Integer &nTable, Vector(Real) &fTable,
+                Vector(Complex) &zxTable, Vector(Complex) &zyTable,
+                Real &b_a, Integer &useAvg, Integer &nMacrosMin);
+    ~FreqDepTImp();
+
+    Void _updatePartAtNode(MacroPart &mp);
+    Void _nodeCalculator(MacroPart &mp);
+    Real _kickx(Real &anglex);
+    Real _kicky(Real &angley);
+
+    Integer _nTable;
+    Vector(Real) _fTable;
+    Vector(Complex) _zxTable;
+    Vector(Complex) _zyTable;
+
+    Vector(Complex) _zXImped_nplus;
+    Vector(Complex) _zYImped_nplus;
+    Vector(Complex) _zXImped_nminus;
+    Vector(Complex) _zYImped_nminus;
+    Vector(Complex) _FFTResultX1;
+    Vector(Complex) _FFTResultY1;
+    Vector(Complex) _FFTResultX2;
+    Vector(Complex) _FFTResultY2;
+    Vector(Real) _FFTPhaseX;
+    Vector(Real) _FFTPhaseY;
+    Real _z_0;
+    Real _b_a;
+    Integer _useAverage;
+    Vector(Real) _zx, _chix, _zy, _chiy;
+
+ private:
+    Vector(Real) _deltaXpGrid;
+    Vector(Real) _deltaYpGrid;
+    fftw_plan _plan;
+    FFTW_COMPLEX *_in;
+    FFTW_COMPLEX *_out;
+};
+
+///////////////////////////////////////////////////////////////////////////
+//
+// CLASS NAME
+//   FreqBetDepTImp
+//
+// INHERITANCE RELATIONSHIPS
+//   FreqBetDepTImp -> TImp -> Node* -> Object
+//
+// USING/CONTAINING RELATIONSHIPS
+//   None
+//
+// DESCRIPTION
+//   Class for storing transverse impedance kick information,
+//   with FFT implementation
+//   Frequency dependence built in directly so time dependence can be
+//   incorporated by following basic ring frequency: allows acceleration
+//   Also includes beta dependence for sub-relativistic particles
+//
+// PUBLIC MEMBERS
+//   _useAverage  Calculate kick at bins, rather than for each particle
+//                if == 1, interpolate to particles
+//
+// PROTECTED MEMBERS
+//   None
+//
+// PRIVATE MEMBERS
+//   None
+//
+///////////////////////////////////////////////////////////////////////////
+
+class FreqBetDepTImp : public TImp
+{
+  Declare_Standard_Members(FreqBetDepTImp, TImp);
+  public:
+    FreqBetDepTImp(const String &n, const Integer &order, Integer &nBins,
+                   Integer &nbTable, Vector(Real) &bTable,
+                   Integer &nfTable, Vector(Real) &fTable,
+                   Matrix(Complex) &zxTable, Matrix(Complex) &zyTable,
+                   Real &b_a, Integer &useAvg, Integer &nMacrosMin);
+    ~FreqBetDepTImp();
+
+    Void _updatePartAtNode(MacroPart &mp);
+    Void _nodeCalculator(MacroPart &mp);
+    Real _kickx(Real &anglex);
+    Real _kicky(Real &angley);
+
+    Integer _nbTable, _nfTable;
+    Vector(Real) _bTable, _fTable;
+    Matrix(Complex) _zxTable;
+    Matrix(Complex) _zyTable;
+
+    Vector(Complex) _zXImped_nplus;
+    Vector(Complex) _zYImped_nplus;
+    Vector(Complex) _zXImped_nminus;
+    Vector(Complex) _zYImped_nminus;
+    Vector(Complex) _FFTResultX1;
+    Vector(Complex) _FFTResultY1;
+    Vector(Complex) _FFTResultX2;
+    Vector(Complex) _FFTResultY2;
+    Vector(Real) _FFTPhaseX;
+    Vector(Real) _FFTPhaseY;
+    Real _z_0;
+    Real _b_a;
+    Integer _useAverage;
+    Vector(Real) _zx, _chix, _zy, _chiy;
+
+ private:
+    Vector(Real) _deltaXpGrid;
+    Vector(Real) _deltaYpGrid;
+    fftw_plan _plan;
+    FFTW_COMPLEX *_in;
+    FFTW_COMPLEX *_out;
+};
+
+///////////////////////////////////////////////////////////////////////////
+//
+// END OF FILE
+//
+///////////////////////////////////////////////////////////////////////////
+
+#endif   // __TImp__

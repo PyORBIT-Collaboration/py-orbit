@@ -38,8 +38,9 @@ public:
 	longitudinal SC kicks to the macro-particles in the bunch. */
 	void trackBunch(Bunch* bunch);
 
-	/** Assigns the real and imaginary peices of the machine impedance for index i**/
-	void assignImpedanceValue(int i, double real, double imag);
+	/** Assigns the real and imaginary parts of the
+        machine impedance for index n**/
+	void assignImpedanceValue(int n, double real, double imag);
 
 	/** Routine for calculating the kick to the particle **/
 	double _kick(double angle);

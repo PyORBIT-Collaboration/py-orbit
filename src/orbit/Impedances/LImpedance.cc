@@ -27,20 +27,22 @@
 using namespace OrbitUtils;
 
 
-LImpedance::LImpedance(double length_in, int nMacrosMin_in, int nBins_in): CppPyWrapper(NULL)
+LImpedance::LImpedance(double length,
+                       int nMacrosMin,
+                       int nBins): CppPyWrapper(NULL)
 {
-  length         = length_in;
-  nMacrosMin     = nMacrosMin_in;
-  nBins          = nBins_in;
-  zGrid          = new Grid1D(nBins, length);
+  _length        = length;
+  _nMacrosMin    = nMacrosMin;
+  _nBins         = nBins;
+  zGrid          = new Grid1D(_nBins, _length);
 
-  _fftmagnitude  = new double[nBins / 2];
-  _fftphase      = new double[nBins / 2];
-  _z             = new double[nBins / 2];
-  _chi           = new double[nBins / 2];
-  _zImped_n      = new std::complex<double>[nBins / 2];
+  _fftmagnitude  = new double[_nBins / 2];
+  _fftphase      = new double[_nBins / 2];
+  _z             = new double[_nBins / 2];
+  _chi           = new double[_nBins / 2];
+  _zImped_n      = new std::complex<double>[_nBins / 2];
 
-  for(int n = 0; n < nBins / 2; n++)
+  for(int n = 0; n < _nBins / 2; n++)
   {
     _fftmagnitude[n] = 0.0;
     _fftphase[n]     = 0.0;
@@ -49,9 +51,9 @@ LImpedance::LImpedance(double length_in, int nMacrosMin_in, int nBins_in): CppPy
     _zImped_n[n] = std::complex<double>(0.0, 0.0);
   }
 
-  _in   = (fftw_complex *) fftw_malloc(nBins * sizeof(fftw_complex));
-  _out  = (fftw_complex *) fftw_malloc(nBins * sizeof(fftw_complex));
-  _plan = fftw_plan_dft_1d(nBins, _in,  _out, FFTW_FORWARD, FFTW_ESTIMATE);
+  _in   = (fftw_complex *) fftw_malloc(_nBins * sizeof(fftw_complex));
+  _out  = (fftw_complex *) fftw_malloc(_nBins * sizeof(fftw_complex));
+  _plan = fftw_plan_dft_1d(_nBins, _in,  _out, FFTW_FORWARD, FFTW_ESTIMATE);
 }
 
 
@@ -90,30 +92,26 @@ Grid1D* LImpedance::getLongGrid()
 
 void LImpedance::trackBunch(Bunch* bunch)
 {
-  double zmin, zmax;
-  double realPart, imagPart;
-  double bunchfactor = 0;
-  double zfactor     = 0;
-
   int nPartsGlobal = bunch->getSizeGlobal();
-  if(nPartsGlobal < 2) return;
+  if(nPartsGlobal < _nMacrosMin) return;
 
 // Bin the particles
 
+  double zmin, zmax;
+  double realPart, imagPart;
+
   bunchExtremaCalc->getExtremaZ(bunch, zmin, zmax);
-  double zextra = (length - (zmax - zmin)) / 2.0;
+  double zextra = (_length - (zmax - zmin)) / 2.0;
   zmax += zextra;
-  zmin  = zmax - length;
+  zmin  = zmax - _length;
   zGrid->setGridZ(zmin, zmax);
   zGrid->setZero();
   zGrid->binBunchSmoothedByParticle(bunch);
   zGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 
-  if (nPartsGlobal < nMacrosMin) return;
-
 // FFT the beam density
 
-  for(int i = 0; i < nBins; i++)
+  for(int i = 0; i < _nBins; i++)
   {
     _in[i][0] = zGrid->getValueOnGrid(i);
     _in[i][1] = 0.;
@@ -123,20 +121,20 @@ void LImpedance::trackBunch(Bunch* bunch)
 
 // Find the magnitude and phase
 
-  _fftmagnitude[0] = _out[0][0]/(double)nBins;
+  _fftmagnitude[0] = _out[0][0]/(double)_nBins;
   _fftphase[0] = 0.;
 
-  for(int n = 1; n < nBins / 2; n++)
+  for(int n = 1; n < _nBins / 2; n++)
   {
-    realPart = _out[n][0]/((double)nBins);
-    imagPart = _out[n][1]/((double)nBins);
+    realPart = _out[n][0]/((double)_nBins);
+    imagPart = _out[n][1]/((double)_nBins);
     _fftmagnitude[n] = sqrt(realPart * realPart + imagPart * imagPart);
-    _fftphase[n] = atan2(imagPart,realPart);
+    _fftphase[n] = atan2(imagPart, realPart);
   }
 
   SyncPart* sp = bunch->getSyncPart();
 
-  for(int n = 1; n < nBins / 2; n++)
+  for(int n = 1; n < _nBins / 2; n++)
   {
     realPart = std::real(_zImped_n[n]);
     imagPart = std::imag(_zImped_n[n]);
@@ -148,15 +146,11 @@ void LImpedance::trackBunch(Bunch* bunch)
 
   double charge2current = bunch->getCharge() * bunch->getMacroSize() *
                           OrbitConst::elementary_charge_MKS * sp->getBeta() *
-                          OrbitConst::c / (length / nBins);
+                          OrbitConst::c / (_length / _nBins);
 
 // Calculate and add the kick to macroparticles
 
   double kick, angle, position;
-
-// Don't do it if there are not enough particles
-
-  if(bunch->getSize() < nMacrosMin) return;
 
 // Convert particle longitudinal coordinate to phi
 
@@ -167,7 +161,7 @@ void LImpedance::trackBunch(Bunch* bunch)
   for (int j = 0; j < bunch->getSize(); j++)
   {
     z = bunch->z(j);
-    philocal = (z / length) * 2 * OrbitConst::PI;
+    philocal = (z / _length) * 2 * OrbitConst::PI;
 
 // Handle cases where the longitudinal coordinate is
 // outside of the user-specified length
@@ -208,7 +202,7 @@ double LImpedance::_kick(double angle)
   double kick = 0.;
   double cosArg;
 
-  for(int n = 1; n < nBins / 2; n++)
+  for(int n = 1; n < _nBins / 2; n++)
   {
     cosArg = n * (angle + OrbitConst::PI) + _fftphase[n] + _chi[n];
     kick += 2 * _fftmagnitude[n] * _z[n] * cos(cosArg);

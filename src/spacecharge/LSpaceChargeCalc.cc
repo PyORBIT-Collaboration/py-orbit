@@ -92,15 +92,13 @@ Grid1D* LSpaceChargeCalc::getLongGrid()
 
 void LSpaceChargeCalc::trackBunch(Bunch* bunch)
 {
-  double zmin, zmax;
-  double realPart, imagPart;
-  double bunchfactor = 0;
-  double zfactor     = 0;
-
   int nPartsGlobal = bunch->getSizeGlobal();
-  if(nPartsGlobal < 2) return;
+  if(nPartsGlobal < nMacrosMin) return;
 
 // Bin the particles
+
+  double zmin, zmax;
+  double realPart, imagPart;
 
   bunchExtremaCalc->getExtremaZ(bunch, zmin, zmax);
   double zextra = (length - (zmax - zmin)) / 2.0;
@@ -110,8 +108,6 @@ void LSpaceChargeCalc::trackBunch(Bunch* bunch)
   zGrid->setZero();
   zGrid->binBunchSmoothedByParticle(bunch);
   zGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
-
-  if (nPartsGlobal < nMacrosMin) return;
 
 // FFT the beam density
 
@@ -173,15 +169,10 @@ void LSpaceChargeCalc::trackBunch(Bunch* bunch)
 
   double kick, angle, position;
 
-// Don't do it if there are not enough particles
-
-  if(bunch->getSize() < nMacrosMin) return;
-
 // Convert particle longitudinal coordinate to phi
 
   double philocal;
   double z;
-  double phi[bunch->getSize()];
   double** coords = bunch->coordArr();
   for (int j = 0; j < bunch->getSize(); j++)
   {

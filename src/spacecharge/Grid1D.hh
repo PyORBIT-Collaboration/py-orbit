@@ -81,11 +81,25 @@ public:
       and giving each macroparticle unit weight */
   void binBunchSmoothedByParticle(Bunch* bunch);
 
+  /** Bins moment of the Bunch to the grid giving
+      each macroparticle unit weight */
+  void binBunchMoment(int propindex, Bunch* bunch, double* Moment);
+
+  /** Bins moment of the Bunch to the grid using a smoothing
+      algorithm and giving each macroparticle unit weight */
+  void binBunchSmoothedMoment(int propindex, Bunch* bunch, double* Moment);
+
   /** Bins a value to the grid */
   void binValue(double value, double z);
 
   /** Bins a value to the grid with smoothing */
   void binValueSmoothed(double value, double z);
+
+  /** Bins a moment to the grid */
+  void binMoment(double value, double z, double* Moment);
+
+  /** Bins a moment to the grid with smoothing */
+  void binMomentSmoothed(double value, double z, double* Moment);
 
   /** Calculates gradient at a position (z) */
   void calcGradient(double z, double& ez);

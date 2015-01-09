@@ -280,6 +280,44 @@ void Grid1D::binBunchSmoothedByParticle(Bunch* bunch)
 }
 
 
+/** Bins property of the Bunch to the grid giving
+    each macroparticle unit weight */
+void Grid1D::binBunchMoment(int propindex, Bunch* bunch, double* Moment)
+{
+  double property;
+  for(int i = 0; i < zSize_; i++)
+  {
+    Moment[i] = 0.0;
+  }
+  bunch->compress();
+  double** part_coord_arr = bunch->coordArr();
+  for(int i = 0; i < bunch->getSize(); i++)
+  {
+    property = part_coord_arr[i][propindex];
+    binMoment(property, part_coord_arr[i][4], Moment);
+  }
+}
+
+
+/** Bins moment of the Bunch to the grid using a smoothing
+    algorithm and giving each macroparticle unit weight */
+void Grid1D::binBunchSmoothedMoment(int propindex, Bunch* bunch, double* Moment)
+{
+  double property;
+  for(int i = 0; i < zSize_; i++)
+  {
+    Moment[i] = 0.0;
+  }
+  bunch->compress();
+  double** part_coord_arr = bunch->coordArr();
+  for(int i = 0; i < bunch->getSize(); i++)
+  {
+    property = part_coord_arr[i][propindex];
+    binMomentSmoothed(property, part_coord_arr[i][4], Moment);
+  }
+}
+
+
 /** Bins a value to the grid */
 void Grid1D::binValue(double value, double z)
 {
@@ -323,6 +361,53 @@ void Grid1D::binValueSmoothed(double value, double z)
   else if(zSize_ == 1)
   {
     arr_[iZ0] += value;
+  }
+}
+
+
+/** Bins a moment to the grid */
+void Grid1D::binMoment(double value, double z, double* Moment)
+{
+  if(z < zMin_ || z > zMax_ ) return;
+  double WZ0, WZp;
+  int iZ0, iZp;
+  getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
+  if(zSize_ > 1)
+  {
+    Moment[iZ0] += WZ0 * value;
+    Moment[iZp] += WZp * value;
+  }
+  else if(zSize_ == 1)
+  {
+    Moment[iZ0] += value;
+  }
+}
+
+
+/** Bins a moment to the grid with smoothing */
+void Grid1D::binMomentSmoothed(double value, double z, double* Moment)
+{
+  if(z < zMin_ || z > zMax_ ) return;
+  double  WZm,  WZ0,  WZp;
+  double dWZm, dWZ0, dWZp;
+  int iZm, iZ0, iZp;
+  getIndAndWZSmoothed(z, iZm,  iZ0,  iZp,
+                         WZm,  WZ0,  WZp,
+                        dWZm, dWZ0, dWZp);
+  if(zSize_ > 2)
+  {
+    Moment[iZm] += WZm * value;
+    Moment[iZ0] += WZ0 * value;
+    Moment[iZp] += WZp * value;
+  }
+  else if(zSize_ == 2)
+  {
+    Moment[iZ0] += WZ0 * value;
+    Moment[iZp] += WZp * value;
+  }
+  else if(zSize_ == 1)
+  {
+    Moment[iZ0] += value;
   }
 }
 
@@ -459,12 +544,14 @@ void Grid1D::getIndAndWZSmoothed(double z,
   {
 	double zgloc = 0;
     //double zgloc = (z - zMin_) / dz_;
-	if(length_ == 0){
+	if(length_ == 0)
+    {
 		std::cerr<<"Warning!: Lattice length should not be zero for smoothed binning.\n";
 		zgloc = (z - zMin_) / dz_;
 	}
-	else{
-		zgloc = (z + length_/2.0) / dz_;
+	else
+    {
+		zgloc = (z + length_ / 2.0) / dz_;
 	}
 	  
     iZ0 = int(zgloc + 0.5);

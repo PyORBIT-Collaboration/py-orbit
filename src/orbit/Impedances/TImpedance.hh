@@ -39,9 +39,8 @@ public:
   virtual ~TImpedance();
 
   /** Assigns the needed lattice functions **/
-  void assignLatFuncs(double qX    , double qY,
-                      double alphaX, double betaX,
-                      double alphaY, double betaY);
+  void assignLatFuncs(double qX, double alphaX, double betaX,
+                      double qY, double alphaY, double betaY);
 
   /** Assigns the real and imaginary parts of the
       horizontal impedance for index n **/
@@ -79,9 +78,9 @@ public:
   int _useY;
 
   double _qX;
-  double _qY;
   double _alphaX;
   double _betaX;
+  double _qY;
   double _alphaY;
   double _betaY;
   double _charge2TKick;

@@ -159,14 +159,13 @@ TImpedance::~TImpedance()
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void TImpedance::assignLatFuncs(double qX, double qY,
-                                double alphaX, double betaX,
-                                double alphaY, double betaY)
+void TImpedance::assignLatFuncs(double qX, double alphaX, double betaX,
+                                double qY, double alphaY, double betaY)
 {
   _qX     = qX;
-  _qY     = qY;
   _alphaX = alphaX;
   _betaX  = betaX;
+  _qY     = qY;
   _alphaY = alphaY;
   _betaY  = betaY;
 }

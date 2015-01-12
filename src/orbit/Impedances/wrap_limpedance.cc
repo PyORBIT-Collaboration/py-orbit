@@ -92,9 +92,9 @@ extern "C"
     Py_complex cmplx;
     PyObject* py_cmplx;
     double real,imag;
-    for(int i = 0; i < size; i++)
+    for(int n = 0; n < size; n++)
     {
-      py_cmplx = PySequence_Fast_GET_ITEM(py_cmplx_arr, i);
+      py_cmplx = PySequence_Fast_GET_ITEM(py_cmplx_arr, n);
       if(!PyComplex_Check(py_cmplx))
       {
         ORBIT_MPI_Finalize("ERROR! No complex numbers!");
@@ -102,7 +102,7 @@ extern "C"
       cmplx = PyComplex_AsCComplex(py_cmplx);
       real = cmplx.real;
       imag = cmplx.imag;
-      cpp_LImpedance->assignImpedanceValue(i, real, imag);
+      cpp_LImpedance->assignImpedanceValue(n, real, imag);
     }
 
     Py_INCREF(Py_None);
@@ -117,19 +117,18 @@ extern "C"
   static PyObject* LImpedance_assignImpedanceValue(PyObject *self,
                                                    PyObject *args)
   {
-
     pyORBIT_Object* pyLImpedance = (pyORBIT_Object*) self;
     LImpedance* cpp_LImpedance = (LImpedance*) pyLImpedance->cpp_obj;
 
-    int i = 0;
-    double real= 0.0;
+    int n = 0;
+    double real = 0.0;
     double imag = 0.0;
 
-    if(!PyArg_ParseTuple(args, "idd:arguments", &i, &real, &imag))
+    if(!PyArg_ParseTuple(args, "idd:arguments", &n, &real, &imag))
     {
-      ORBIT_MPI_Finalize("PyLImpedance - assignImpedanceValue(i, real, imag) - constructor needs parameters.");
+      ORBIT_MPI_Finalize("PyLImpedance - assignImpedanceValue(n, real, imag) - constructor needs parameters.");
     }
-    cpp_LImpedance->assignImpedanceValue(i, real, imag);
+    cpp_LImpedance->assignImpedanceValue(n, real, imag);
 
     Py_INCREF(Py_None);
     return Py_None;  
@@ -152,9 +151,9 @@ extern "C"
     }
 
     PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
-    if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type))
+    if(!PyObject_IsInstance(pyBunch, pyORBIT_Bunch_Type))
     {
-      ORBIT_MPI_Finalize("PyLImpedance.trackBunch(pyBunch) - pyBunch is not Bunch.");
+      ORBIT_MPI_Finalize("PyLImpedance.trackBunch(pyBunch) - pyBunch is not a Bunch.");
     }
     Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;		
     cpp_LImpedance->trackBunch(cpp_bunch);
@@ -184,12 +183,12 @@ extern "C"
 
   static PyMethodDef LImpedanceClassMethods[] =
   {
+    {"assignImpedance", assignImpedance, METH_VARARGS,
+     "assigns overall impedance - assignImpedance(Z))"},
+    {"assignImpedanceValue",  LImpedance_assignImpedanceValue, METH_VARARGS,
+     "assigns impedance for the nth mode - assignImpedanceValue(n, real, imag)"},
     {"trackBunch", LImpedance_trackBunch, METH_VARARGS,
      "trackBunch tracks the bunch - trackBunch(pyBunch)"},
-    {"assignImpedanceValue",  LImpedance_assignImpedanceValue, METH_VARARGS,
-     "assigns impedance for the ith mode - assignImpedanceValue(i, real, imag)"},
-    {"assignImpedance",  assignImpedance, METH_VARARGS,
-     "assigns overall impedance - assignImpedance(Z))"},
     {NULL}
   };
 

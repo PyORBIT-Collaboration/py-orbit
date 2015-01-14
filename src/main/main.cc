@@ -16,6 +16,7 @@
 #include "wrap_rfcavities.hh"
 #include "wrap_aperture.hh"
 #include "wrap_fieldtracker.hh"
+#include "wrap_impedances.hh"
 
 /**
  * The main function that will initialize the MPI and will
@@ -57,6 +58,7 @@ int main(int argc, char **argv)
   wrap_foil::initfoil();
   wrap_rfcavities::initrfcavities();
   wrap_fieldtracker::initfieldtracker();
+  wrap_impedances::initimpedances();
 
   // Runge-Kutta tracker package
 

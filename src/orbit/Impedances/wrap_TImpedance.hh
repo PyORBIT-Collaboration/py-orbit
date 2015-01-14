@@ -8,7 +8,7 @@ extern "C"
 {
 #endif
 
-  namespace wrap_timpedance
+  namespace wrap_impedances
   {
     void initTImpedance(PyObject* module);
   }

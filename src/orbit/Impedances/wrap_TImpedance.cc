@@ -1,7 +1,7 @@
 #include "orbit_mpi.hh"
 #include "pyORBIT_Object.hh"
 
-#include "wrap_timpedance.hh"
+#include "wrap_TImpedance.hh"
 #include "wrap_bunch.hh"
 
 #include <iostream>
@@ -10,7 +10,7 @@
 
 using namespace OrbitUtils;
 
-namespace wrap_TImpedance
+namespace wrap_impedances
 {
 
 #ifdef __cplusplus

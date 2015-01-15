@@ -45,7 +45,7 @@ class SC1D_AccNode(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        self.lspacecharge.trackBunch(bunch)		#track method goes here
+        self.lspacecharge.trackBunch(bunch)	#track method goes here
 
     def track(self, paramsDict):
         """ 
@@ -54,7 +54,7 @@ class SC1D_AccNode(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        self.lspacecharge.trackBunch(bunch)		#track method goes here
+        self.lspacecharge.trackBunch(bunch)	#track method goes here
 
     def assignImpedance(self, py_cmplx_arr):
         self.lspacecharge.assignImpedance(py_cmplx_arr)
@@ -67,14 +67,15 @@ class SC1D_AccNode(DriftTEAPOT):
 class FreqDep_SC1D_AccNode(DriftTEAPOT):
 
     def __init__(self, b_a, phaseLength, nMacrosMin, useSpaceCharge,\
-                 nBins, bunch, impeDict, name = "freq. dep long sc node"):
+                 nBins, bunch, impeDict,\
+		 name = "freq. dep. long sc node"):
         """
             Constructor. Creates the FreqDep_SC1D-teapot element.
         """
         DriftTEAPOT.__init__(self, name)
         self.lspacecharge = LSpaceChargeCalc(b_a, phaseLength, nMacrosMin,\
                                              useSpaceCharge, nBins)
-        self.setType("freq. dep long sc node")
+        self.setType("freq. dep. long sc node")
         self.setLength(0.0)
         self.phaseLength = phaseLength
         self.nBins = nBins
@@ -138,14 +139,15 @@ class FreqDep_SC1D_AccNode(DriftTEAPOT):
 class BetFreqDep_SC1D_AccNode(DriftTEAPOT):
 
     def __init__(self, b_a, phaseLength, nMacrosMin, useSpaceCharge,\
-                 nBins, bunch, impeDict, name = "freq. dep long sc node"):
+                 nBins, bunch, impeDict,\
+		 name = "freq. dep. long sc node"):
         """
             Constructor. Creates the BetFreqDep_SC1D-teapot element.
         """
         DriftTEAPOT.__init__(self, name)
         self.lspacecharge = LSpaceChargeCalc(b_a, phaseLength, nMacrosMin,\
                                              useSpaceCharge, nBins)
-        self.setType("beta-freq. dep long sc node")
+        self.setType("beta-freq. dep. long sc node")
         self.setLength(0.0)
         self.phaseLength = phaseLength
         self.nBins = nBins
@@ -267,9 +269,9 @@ def bilinterp(x, y, nx_tuple, ny_tuple, x_tuple, y_tuple, fxy):
             dxmp = dxm * dxp
             if dxmp <= 0:
                 break
-            for ny in range(ny_tuple + 1):
-                vf = (-dxp * fxy[nx][ny] + dxm * fxy[nx + 1][ny]) /\
-                     (dxm - dxp)
+	for ny in range(ny_tuple + 1):
+		vf = (-dxp * fxy[nx][ny] + dxm * fxy[nx + 1][ny]) /\
+		(dxm - dxp)
                 f_tuple.append(vf)
     f = interp(y, ny_tuple, y_tuple, f_tuple)
     return f

@@ -1,5 +1,6 @@
 """
-Module. Includes functions that will modify the accelerator lattice by inserting the one teapot node accelerator node.
+Module. Includes functions that will modify the accelerator lattice
+by inserting an impedance node into a teapot accelerator node.
 """
 # import the auxiliary classes
 from orbit.utils import orbitFinalize
@@ -8,22 +9,25 @@ from orbit.utils import orbitFinalize
 from orbit.lattice import AccLattice, AccNode,\
 AccActionsContainer, AccNodeBunchTracker
 
-# import SC acc. nodes
-from orbit.space_charge.sc1d import SC1D_AccNode
-from orbit.space_charge.sc1d import FreqDep_SC1D_AccNode
-from orbit.space_charge.sc1d import BetFreqDep_SC1D_AccNode
+# import impedance accelerator nodes
+from orbit.impedances import LImpedance_Node
+from orbit.impedances import FreqDep_LImpedance_Node
+from orbit.impedances import BetFreqDep_LImpedance_Node
+from orbit.impedances import TImpedance_Node
+from orbit.impedances import FreqDep_TImpedance_Node
+from orbit.impedances import BetFreqDep_TImpedance_Node
 
 # import teapot drift class
 from orbit.teapot import DriftTEAPOT
 
-def addLongitudinalSpaceChargeNode(lattice, position, sc1D_node):
+def addImpedanceNode(lattice, position, Impedance_Node):
 	"""
-	This will put one longitudinal space charge node into the lattice 
+	This will put one impedance node into the lattice 
 	"""
 	length_tolerance = 0.0001
 	lattice.initialize()
 	position_start = position
-	position_stop = position + sc1D_node.getLength()
+	position_stop = position + Impedance_Node.getLength()
 	(node_start_ind,node_stop_ind,z,ind) = (-1,-1, 0., 0)
 	for node in lattice.getNodes():
 		if(position_start >= z and position_start <= z + node.getLength()):
@@ -43,7 +47,7 @@ def addLongitudinalSpaceChargeNode(lattice, position, sc1D_node):
 			#print "Node=",node.getName()," type=",node.getType()," L=",node.getLength()," N children nodes=",node.getNumberOfChildren()
 			#orbitFinalize("Drift element was modified with additional functionality (SC or something else)! Add collimation first! Stop!")
 	# make array of nodes from long sc node in the center and possible two drifts if their length is more than length_tollerance [m]
-	nodes_new_arr = [sc1D_node,]
+	nodes_new_arr = [Impedance_Node,]
 	drift_node_start = lattice.getNodes()[node_start_ind]
 	drift_node_stop = lattice.getNodes()[node_stop_ind]	
 	#------now we will create two drift nodes: before the long sc node and after
@@ -61,7 +65,7 @@ def addLongitudinalSpaceChargeNode(lattice, position, sc1D_node):
 	# initialize the lattice
 	lattice.initialize()
 
-def addLongitudinalSpaceChargeNodeAsChild(lattice, AccNode, scNode):
-	AccNode.addChildNode(scNode,AccNode.BODY,0,AccNode.BEFORE)
+def addImpedanceNodeAsChild(lattice, AccNode, Impedance_Node):
+	AccNode.addChildNode(Impedance_Node,AccNode.BODY,0,AccNode.BEFORE)
 	lattice.initialize()
 

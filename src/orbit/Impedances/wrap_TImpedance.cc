@@ -140,6 +140,7 @@ extern "C"
     Py_complex cmplx;
     PyObject* py_cmplx;
 
+    int nm;
     double realp, imagp, realm, imagm;
     for(int n = 0; n < size; n++)
     {
@@ -161,18 +162,35 @@ extern "C"
       realm = cmplx.real;
       imagm = cmplx.imag;
 
+      nm = 2 * size - n;
       if(XorY == "X")
       {
         cpp_TImpedance->assignImpedanceX(n, realp, imagp, realm, imagm);
+        if(nm < 2 * size)
+        {
+          cpp_TImpedance->assignImpedanceX(nm, -realm, imagm, -realp, imagp);
+        }
       }
       else if(XorY == "Y")
       {
         cpp_TImpedance->assignImpedanceY(n, realp, imagp, realm, imagm);
+        if(nm < 2 * size)
+        {
+          cpp_TImpedance->assignImpedanceY(nm, -realm, imagm, -realp, imagp);
+        }
       }
       else
       {
         ORBIT_MPI_Finalize("ERROR! XorY wrong value!");
       }
+    }
+    if(XorY == "X")
+    {
+      cpp_TImpedance->assignImpedanceX(size, 0.0, 0.0, 0.0, 0.0);
+    }
+    if(XorY == "Y")
+    {
+      cpp_TImpedance->assignImpedanceY(size, 0.0, 0.0, 0.0, 0.0);
     }
 
     Py_INCREF(Py_None);

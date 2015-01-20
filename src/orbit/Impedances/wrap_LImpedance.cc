@@ -91,7 +91,7 @@ extern "C"
     int size = PySequence_Size(py_cmplx_arr);
     Py_complex cmplx;
     PyObject* py_cmplx;
-    double real,imag;
+    double real, imag;
     for(int n = 0; n < size; n++)
     {
       py_cmplx = PySequence_Fast_GET_ITEM(py_cmplx_arr, n);

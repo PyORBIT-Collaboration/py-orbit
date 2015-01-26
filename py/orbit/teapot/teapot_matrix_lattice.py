@@ -76,6 +76,7 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 		accContainer.addAction(twissAction,AccActionsContainer.BODY)
 		paramsDict = {}
 		paramsDict["bunch"] = self.bunch
+		paramsDict["lostbunch"] = self.bunch
 		paramsDict["position"] = 0.
 		self.teapot_lattice.trackActions(accContainer,paramsDict)		
 		self.makeOneTurnMatrix()

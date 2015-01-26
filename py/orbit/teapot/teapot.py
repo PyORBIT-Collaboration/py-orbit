@@ -19,8 +19,13 @@ from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunch
 # import the MAD parser to construct lattices of TEAPOT elements.
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement
 
+from orbit.parsers.mad_parser_gsi import MAD_GSI_Parser, MAD_GSI_LattElement
+
 # import the MADX parser to construct lattices of TEAPOT elements.
 from orbit.parsers.madx_parser import MADX_Parser, MADX_LattElement
+
+# import aperture
+from aperture import Aperture
 
 """
 Drift
@@ -39,6 +44,31 @@ class TEAPOT_Lattice(AccLattice):
 	"""
 	def __init__(self, name = "no name"):
 		AccLattice.__init__(self,name)
+
+	def readMAD_GSI(self, mad_file_name, lineName, element_to_replace1, element_value_k1,element_to_replace2, element_value_k2):
+		"""
+		It creates the teapot lattice from MAD file.
+		"""
+		parser = MAD_GSI_Parser()
+		parser.parse(mad_file_name,element_to_replace1,element_value_k1,element_to_replace2, element_value_k2)
+		accLines = parser.getMAD_LinesDict()
+		if(not accLines.has_key(lineName)):
+			print "==============================="
+			print "MAD file: ", mad_file_name
+			print "Can not find accelerator line: ", lineName
+			print "STOP."
+			sys.exit(1)
+		# accelerator lines and elements from mad_parser package
+		accMAD_Line = accLines[lineName]
+		self.setName(lineName)
+		accMADElements = accMAD_Line.getElements()
+		# make TEAPOT lattice elements by using TEAPOT
+		# element factory
+		for madElem in accMADElements:
+			elems = _teapotFactory.getElements(madElem)
+			for elem in elems:
+				self.addNode(elem)
+		self.initialize()
 
 	def readMAD(self, mad_file_name, lineName):
 		"""
@@ -78,12 +108,13 @@ class TEAPOT_Lattice(AccLattice):
 			print "Can not find accelerator sequence: ", seqName
 			print "STOP."
 			sys.exit(1)
-		   
+		
 		self.setName(parser.getSequenceName())
 		accMADElements = parser.getSequenceList()
 		# make TEAPOT lattice elements by using TEAPOT
 		# element factory
 		for madElem in accMADElements:
+			#print madElem.getParameters()
 			elems = _teapotFactory.getElements(madElem)
 			for elem in elems:
 				self.addNode(elem)
@@ -104,19 +135,20 @@ class TEAPOT_Lattice(AccLattice):
 		"""
 		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
 
-	def trackBunch(self, bunch, paramsDict = {},  index_start = -1, index_stop = -1, actionContainer = None):
+	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
 		"""
 		It tracks the bunch through the lattice.
 		"""
 		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
 		paramsDict["bunch"] = bunch
 		
+		
 		def track(paramsDict):
 			node = paramsDict["node"]
 			node.track(paramsDict)
 			
 		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict,index_start,index_stop)
+		self.trackActions(actionContainer,paramsDict)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
 
 
@@ -160,7 +192,6 @@ class TEAPOT_Ring(AccLattice):
 			"""
 		parser = MADX_Parser()
 		parser.parse(madx_file_name)
-		
 		if(not seqName == parser.getSequenceName()):
 			print "==============================="
 			print "MADX file: ", madx_file_name
@@ -220,7 +251,7 @@ class TEAPOT_Ring(AccLattice):
 			"""
 		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
 	
-	def trackBunch(self, bunch, paramsDict = {}, index_start = -1, index_stop = -1, actionContainer = None):
+	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
 		"""
 			It tracks the bunch through the lattice.
 			"""
@@ -232,7 +263,7 @@ class TEAPOT_Ring(AccLattice):
 			node.track(paramsDict)
 		
 		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict,index_start, index_stop)
+		self.trackActions(actionContainer,paramsDict)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
 
 
@@ -269,6 +300,12 @@ class _teapotFactory:
 		elem = None
 		if(madElem.getType().lower() == "drift"):
 			elem = DriftTEAPOT(madElem.getName())
+		# ============Aperture Element ==================================
+		if(madElem.getType().lower() == "aperture"):
+			elem = ApertureTEAPOT(madElem.getName())
+			if(params.has_key("apertype")):
+				elem.addParam("aperture", params["aperture"])
+				elem.addParam("apertype", params["apertype"])
 		# ============Dipole Element SBEND or RBEND ===================
 		if(madElem.getType().lower()  == "sbend" or \
 			 madElem.getType().lower()  == "rbend"):
@@ -416,6 +453,10 @@ class _teapotFactory:
 		if(tilt == True and tiltAngle != None):
 			elem.setTiltAngle(tiltAngle)
 		# set K1L,K2L,K3L,... and  T1L,T2L,T3L,...
+		if(params.has_key("kls")) and (params.has_key("poles") and params.has_key("skews")):
+			elem.addParam("kls",params["kls"])
+			elem.addParam("poles",params["poles"])
+			elem.addParam("skews",params["skews"])
 		poles = []
 		kls = []
 		skews = []
@@ -425,7 +466,7 @@ class _teapotFactory:
 			skew = 0
 			if(params.has_key("k"+str(pole)+"l")):
 				kl_param = params["k"+str(pole)+"l"]
-			if(params.has_key("t"+str(pole))):
+			if(params.has_key("t"+str(pole)+"l")):
 				skew = 1
 			if(kl_param != None):
 				poles.append(pole)
@@ -586,6 +627,41 @@ class DriftTEAPOT(NodeTEAPOT):
 		bunch = paramsDict["bunch"]
 		TPB.drift(bunch, length)
 
+
+class ApertureTEAPOT(NodeTEAPOT):
+	"""
+	Aperture TEAPOT element.
+	"""
+	def __init__(self, name = "aperture no name"):
+		"""
+		Constructor. Creates the aperutre element.
+		"""
+		NodeTEAPOT.__init__(self,name)
+		self.setType("aperture")
+		self.addParam("aperture", [])
+		self.addParam("apertype", 0.0)
+		
+	def initialize(self):
+	
+		shape = self.getParam("apertype")
+		dim = self.getParam("aperture")
+		if len(dim) > 0:
+			if shape == 1:
+				self.aperture = Aperture(shape, dim[0], 0.0, 0.0, 0.0)
+			if shape == 2:
+				self.aperture = Aperture(shape, dim[0], dim[1], 0.0, 0.0)
+			if shape == 3:
+				self.aperture = Aperture(shape, dim[0], dim[1], 0.0, 0.0)
+
+	def track(self, paramsDict):
+		"""
+		The aperture class implementation of the ApertueNode.
+		"""
+		bunch = paramsDict["bunch"]
+		lostbunch = paramsDict["lostbunch"]
+		self.aperture.checkBunch(bunch,lostbunch)
+
+
 class BunchWrapTEAPOT(NodeTEAPOT):
 	"""
 		Drift TEAPOT element.
@@ -740,6 +816,7 @@ class MultipoleTEAPOT(NodeTEAPOT):
 			TPB.drift(bunch, length)
 		return
 
+
 class QuadTEAPOT(NodeTEAPOT):
 	"""
 	Quad Combined Function TEAPOT element.
@@ -801,7 +878,7 @@ class QuadTEAPOT(NodeTEAPOT):
 		self.getNodeFringeFieldIN().setType("quad fringe in")
 		self.getNodeFringeFieldOUT().setType("quad fringe out")
 
-		self.setType("quad teapot")
+		self.setType("quad teapot with aperture")
 
 	def initialize(self):
 		"""
@@ -828,7 +905,6 @@ class QuadTEAPOT(NodeTEAPOT):
 		for i in xrange(nParts-2):
 			self.setLength(lengthStep,i+1)
 
-
 	def track(self, paramsDict):
 		"""
 		The Quad Combined Function TEAPOT  class implementation
@@ -841,7 +917,7 @@ class QuadTEAPOT(NodeTEAPOT):
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
-		bunch = paramsDict["bunch"]
+		bunch = paramsDict["bunch"] 
 		if(index == 0):
 			TPB.quad1(bunch, length, kq)
 			return

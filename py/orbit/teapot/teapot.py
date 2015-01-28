@@ -18,9 +18,6 @@ from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunch
 
 # import the MAD parser to construct lattices of TEAPOT elements.
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattElement
-
-from orbit.parsers.mad_parser_gsi import MAD_GSI_Parser, MAD_GSI_LattElement
-
 # import the MADX parser to construct lattices of TEAPOT elements.
 from orbit.parsers.madx_parser import MADX_Parser, MADX_LattElement
 
@@ -45,30 +42,6 @@ class TEAPOT_Lattice(AccLattice):
 	def __init__(self, name = "no name"):
 		AccLattice.__init__(self,name)
 
-	def readMAD_GSI(self, mad_file_name, lineName, element_to_replace1, element_value_k1,element_to_replace2, element_value_k2):
-		"""
-		It creates the teapot lattice from MAD file.
-		"""
-		parser = MAD_GSI_Parser()
-		parser.parse(mad_file_name,element_to_replace1,element_value_k1,element_to_replace2, element_value_k2)
-		accLines = parser.getMAD_LinesDict()
-		if(not accLines.has_key(lineName)):
-			print "==============================="
-			print "MAD file: ", mad_file_name
-			print "Can not find accelerator line: ", lineName
-			print "STOP."
-			sys.exit(1)
-		# accelerator lines and elements from mad_parser package
-		accMAD_Line = accLines[lineName]
-		self.setName(lineName)
-		accMADElements = accMAD_Line.getElements()
-		# make TEAPOT lattice elements by using TEAPOT
-		# element factory
-		for madElem in accMADElements:
-			elems = _teapotFactory.getElements(madElem)
-			for elem in elems:
-				self.addNode(elem)
-		self.initialize()
 
 	def readMAD(self, mad_file_name, lineName):
 		"""

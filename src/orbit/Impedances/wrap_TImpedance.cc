@@ -391,6 +391,6 @@ extern "C"
 }
 #endif
 
-//end of namespace wrap_spacecharge
+//end of namespace wrap_impedances
 }
 

@@ -58,7 +58,6 @@ class LImpedance_Node(DriftTEAPOT):
 
     def assignImpedance(self, py_cmplx_arr):
         self.limpedance.assignImpedance(py_cmplx_arr)
-        print "Assigning the impedance array"
 
 #-----------------------------------------------------------------------------
 # Node for LImpedance as function of frequency
@@ -83,12 +82,11 @@ class FreqDep_LImpedance_Node(DriftTEAPOT):
         self.freq_range = (len(self.freq_tuple) - 1)
         self.z_tuple = self.localDict["z_imp"]
         self.c = consts.speed_of_light
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
+            freq_mode = Freq0 * (n + 1)
             z_mode = interp(freq_mode, self.freq_range,\
                             self.freq_tuple, self.z_tuple)
             Z.append(z_mode)
@@ -100,12 +98,11 @@ class FreqDep_LImpedance_Node(DriftTEAPOT):
             the AccNodeBunchTracker class track(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
+            freq_mode = Freq0 * (n + 1)
             z_mode = interp(freq_mode, self.freq_range,\
                             self.freq_tuple, self.z_tuple)
             Z.append(z_mode)
@@ -119,12 +116,11 @@ class FreqDep_LImpedance_Node(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
+            freq_mode = Freq0 * (n + 1)
             z_mode = interp(freq_mode, self.freq_range,\
                             self.freq_tuple, self.z_tuple)
             Z.append(z_mode)
@@ -156,16 +152,15 @@ class BetFreqDep_LImpedance_Node(DriftTEAPOT):
         self.freq_range = (len(self.freq_tuple) - 1)
         self.z_bf = self.localDict["z_imp"]
         self.c = consts.speed_of_light
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
-            z_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.z_bf)
+            freq_mode = Freq0 * (n + 1)
+            z_mode = bilinterp(BetaRel, freq_mode,\
+		    self.bet_range, self.freq_range,\
+		    self.bet_tuple, self.freq_tuple,\
+		    self.z_bf)
             Z.append(z_mode)
         self.limpedance.assignImpedance(Z)
 
@@ -175,16 +170,15 @@ class BetFreqDep_LImpedance_Node(DriftTEAPOT):
             the AccNodeBunchTracker class track(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
-            z_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.z_bf)
+            freq_mode = Freq0 * (n + 1)
+            z_mode = bilinterp(BetaRel, freq_mode,\
+		    self.bet_range, self.freq_range,\
+		    self.bet_tuple, self.freq_tuple,\
+		    self.z_bf)
             Z.append(z_mode)
         self.limpedance.assignImpedance(Z)
         self.limpedance.trackBunch(bunch)
@@ -196,16 +190,15 @@ class BetFreqDep_LImpedance_Node(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
-            z_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.z_bf)
+            freq_mode = Freq0 * (n + 1)
+            z_mode = bilinterp(BetaRel, freq_mode,\
+		    self.bet_range, self.freq_range,\
+		    self.bet_tuple, self.freq_tuple,\
+		    self.z_bf)
             Z.append(z_mode)
         self.limpedance.assignImpedance(Z)
         self.limpedance.trackBunch(bunch)
@@ -247,11 +240,9 @@ class TImpedance_Node(DriftTEAPOT):
 
     def assignLatFuncs(self, qX, alphaX, betaX, qY, alphaY, betaY):
         self.timpedance.assignLatFuncs(qX, alphaX, betaX, qY, alphaY, betaY)
-        print "Assigning lattice functions at timpedance location"
 
     def assignImpedance(self, XorY, py_cmplx_arrp, py_cmplx_arrm):
         self.timpedance.assignImpedance(XorY, py_cmplx_arrp, py_cmplx_arrm)
-        print "Assigning the horizontal or vertical impedance arrays"
 
 #-----------------------------------------------------------------------------
 # Node for TImpedance as function of frequency
@@ -273,42 +264,15 @@ class FreqDep_TImpedance_Node(DriftTEAPOT):
         self.setLength(0.0)
         self.phaseLength = phaseLength
         self.nBins = nBins
+	self.useX = useX
+	self.useY = useY
         self.localDict = impeDict
         self.freq_tuple = self.localDict["freqs"]
         self.freq_range = (len(self.freq_tuple) - 1)
         self.c = consts.speed_of_light
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
-	if(useX != 0):
-		self.zp_tuple = self.localDict["zxp_imp"]
-		self.zm_tuple = self.localDict["zxm_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zp_tuple)
-			zm_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zm_tuple)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("X", Zp, Zm)
-	if(useY != 0):
-		self.zp_tuple = self.localDict["zyp_imp"]
-		self.zm_tuple = self.localDict["zym_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zp_tuple)
-			zm_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zm_tuple)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("Y", Zp, Zm)
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.calcImpedance(Freq0, self.qX, self.qY)
 
     def trackBunch(self, bunch):
         """
@@ -316,38 +280,9 @@ class FreqDep_TImpedance_Node(DriftTEAPOT):
             the AccNodeBunchTracker class track(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
-	if(useX != 0):
-		self.zp_tuple = self.localDict["zxp_imp"]
-		self.zm_tuple = self.localDict["zxm_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zp_tuple)
-			zm_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zm_tuple)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("X", Zp, Zm)
-	if(useY != 0):
-		self.zp_tuple = self.localDict["zyp_imp"]
-		self.zm_tuple = self.localDict["zym_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zp_tuple)
-			zm_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zm_tuple)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("Y", Zp, Zm)
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.calcImpedance(Freq0, self.qX, self.qY)
         self.timpedance.trackBunch(bunch)
 
     def track(self, paramsDict):
@@ -355,40 +290,79 @@ class FreqDep_TImpedance_Node(DriftTEAPOT):
             The FreqDep_TImpedance-teapot class implementation of
             the AccNodeBunchTracker class track(probe) method.
         """
-        length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        myBeta = bunch.getSyncParticle().beta()
-	if(useX != 0):
-		self.zp_tuple = self.localDict["zxp_imp"]
-		self.zm_tuple = self.localDict["zxm_imp"]
+        length = self.getLength(self.getActivePartIndex())
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.calcImpedance(Freq0, self.qX, self.qY)
+        self.timpedance.trackBunch(bunch)
+
+    def assignLatFuncs(self, qX, alphaX, betaX, qY, alphaY, betaY):
+	self.qX = qX
+	self.qY = qY
+        self.timpedance.assignLatFuncs(qX, alphaX, betaX, qY, alphaY, betaY)
+
+    def calcImpedance(self, Freq0, qX, qY):
+	if(self.useX != 0):
+		z_tuple = self.localDict["zx_imp"]
 		Zp = []
 		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zp_tuple)
-			zm_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zm_tuple)
+		for n in range(self.nBins / 2):
+			Freq_p = Freq0 * (n + qX)
+			Freq_m = Freq0 * (n - qX)
+			sign_m = 1.0
+			if(Freq_m < 0):
+				Freq_m = -Freq_m
+				sign_m = -1.0
+			zp_mode = interp(Freq_p, self.freq_range,\
+                            self.freq_tuple, z_tuple)
+			zm_mode = interp(Freq_m, self.freq_range,\
+                            self.freq_tuple, z_tuple)
+			zm_mode.real = sign_m * zm_mode.real
+			Zp.append(zp_mode)
+			Zm.append(zm_mode)
+		zp_mode = 0.0 + 0.0j
+		zm_mode = 0.0 + 0.0j
+		Zp.append(zp_mode)
+		Zm.append(zm_mode)
+		for n in range(1, self.nBins / 2):
+			zp_mode.real = -Zm[self.nBins / 2 - n].real
+			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
+			zm_mode.real = -Zp[self.nBins / 2 - n].real
+			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("X", Zp, Zm)
-	if(useY != 0):
-		self.zp_tuple = self.localDict["zyp_imp"]
-		self.zm_tuple = self.localDict["zym_imp"]
+	if(self.useY != 0):
+		z_tuple = self.localDict["zy_imp"]
 		Zp = []
 		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zp_tuple)
-			zm_mode = interp(freq_mode, self.freq_range,\
-                            self.freq_tuple, self.zm_tuple)
+		for n in range(self.nBins / 2):
+			Freq_p = Freq0 * (n + qY)
+			Freq_m = Freq0 * (n - qY)
+			sign_m = 1.0
+			if(Freq_m < 0):
+				Freq_m = -Freq_m
+				sign_m = -1.0
+			zp_mode = interp(Freq_p, self.freq_range,\
+                            self.freq_tuple, z_tuple)
+			zm_mode = interp(Freq_m, self.freq_range,\
+                            self.freq_tuple, z_tuple)
+			zm_mode.real = sign_m * zm_mode.real
+			Zp.append(zp_mode)
+			Zm.append(zm_mode)
+		zp_mode = 0.0 + 0.0j
+		zm_mode = 0.0 + 0.0j
+		Zp.append(zp_mode)
+		Zm.append(zm_mode)
+		for n in range(1, self.nBins / 2):
+			zp_mode.real = -Zm[self.nBins / 2 - n].real
+			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
+			zm_mode.real = -Zp[self.nBins / 2 - n].real
+			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("Y", Zp, Zm)
-        self.timpedance.trackBunch(bunch)
 
 #-----------------------------------------------------------------------------
 # Node for TImpedance as function of beta and frequency
@@ -410,49 +384,19 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
         self.setLength(0.0)
         self.phaseLength = phaseLength
         self.nBins = nBins
+	self.useX = useX
+	self.useY = useY
         self.localDict = impeDict
         self.bet_tuple = self.localDict["betas"]
         self.bet_range = (len(self.bet_tuple) - 1)
         self.freq_tuple = self.localDict["freqs"]
         self.freq_range = (len(self.freq_tuple) - 1)
+	self.zx_bf = self.localDict["zx_imp"]
+	self.zy_bf = self.localDict["zy_imp"]
         self.c = consts.speed_of_light
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
-	if(useX != 0):
-		self.zp_bf = self.localDict["zxp_imp"]
-		self.zm_bf = self.localDict["zxm_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zp_bf)
-			zm_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zm_bf)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("X", Zp, Zm)
-	if(useY != 0):
-		self.zp_bf = self.localDict["zyp_imp"]
-		self.zm_bf = self.localDict["zym_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zp_bf)
-			zm_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zm_bf)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("Y", Zp, Zm)
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.calcImpedance(BetaRel, Freq0, self.qX, self.qY)
 
     def trackBunch(self, bunch):
         """
@@ -460,43 +404,9 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
             the AccNodeBunchTracker class track(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
-	if(useX != 0):
-		self.zp_bf = self.localDict["zxp_imp"]
-		self.zm_bf = self.localDict["zxm_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zp_bf)
-			zm_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zm_bf)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("X", Zp, Zm)
-	if(useY != 0):
-		self.zp_bf = self.localDict["zyp_imp"]
-		self.zm_bf = self.localDict["zym_imp"]
-		Zp = []
-		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zp_bf)
-			zm_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zm_bf)
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		self.timpedance.assignImpedance("Y", Zp, Zm)
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.calcImpedance(BetaRel, Freq0, self.qX, self.qY)
         self.timpedance.trackBunch(bunch)
 
     def track(self, paramsDict):
@@ -504,46 +414,85 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
             The BetFreqDep_TImpedance-teapot class implementation of
             the AccNodeBunchTracker class track(probe) method.
         """
-        length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
-	if(useX != 0):
-		self.zp_bf = self.localDict["zxp_imp"]
-		self.zm_bf = self.localDict["zxm_imp"]
+        length = self.getLength(self.getActivePartIndex())
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.calcImpedance(BetaRel, Freq0, self.qX, self.qY)
+        self.timpedance.trackBunch(bunch)
+
+    def assignLatFuncs(self, qX, alphaX, betaX, qY, alphaY, betaY):
+	self.qX = qX
+	self.qY = qY
+        self.timpedance.assignLatFuncs(qX, alphaX, betaX, qY, alphaY, betaY)
+
+    def calcImpedance(self, BetaRel, Freq0, qX, qY):
+	if(self.useX != 0):
 		Zp = []
 		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zp_bf)
-			zm_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zm_bf)
+		for n in range(self.nBins / 2):
+			Freq_p = Freq0 * (n + qX)
+			Freq_m = Freq0 * (n - qX)
+			sign_m = 1.0
+			if(Freq_m < 0):
+				Freq_m = -Freq_m
+				sign_m = -1.0
+			zp_mode = bilinterp(BetaRel, Freq_p,\
+				self.bet_range, self.freq_range,\
+				self.bet_tuple, self.freq_tuple,\
+				self.zx_bf)
+			zm_mode = bilinterp(BetaRel, Freq_m,\
+				self.bet_range, self.freq_range,\
+				self.bet_tuple, self.freq_tuple,\
+				self.zx_bf)
+			zm_mode.real = sign_m * zm_mode.real
+			Zp.append(zp_mode)
+			Zm.append(zm_mode)
+		zp_mode = 0.0 + 0.0j
+		zm_mode = 0.0 + 0.0j
+		Zp.append(zp_mode)
+		Zm.append(zm_mode)
+		for n in range(1, self.nBins / 2):
+			zp_mode.real = -Zm[self.nBins / 2 - n].real
+			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
+			zm_mode.real = -Zp[self.nBins / 2 - n].real
+			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("X", Zp, Zm)
-	if(useY != 0):
-		self.zp_bf = self.localDict["zyp_imp"]
-		self.zm_bf = self.localDict["zym_imp"]
+	if(self.useY != 0):
 		Zp = []
 		Zm = []
-		for n in range(self.nBins / 2 - 1):
-			freq_mode = myFreq * (n + 1)
-			checkFrequency(n, freq_mode, self.freq_tuple)
-			zp_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zp_bf)
-			zm_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
-                               self.freq_range, self.bet_tuple,\
-                               self.freq_tuple, self.zm_bf)
+		for n in range(self.nBins / 2):
+			Freq_p = Freq0 * (n + qY)
+			Freq_m = Freq0 * (n - qY)
+			sign_m = 1.0
+			if(Freq_m < 0):
+				Freq_m = -Freq_m
+				sign_m = -1.0
+			zp_mode = bilinterp(BetaRel, Freq_p,\
+				self.bet_range, self.freq_range,\
+				self.bet_tuple, self.freq_tuple,\
+				self.zy_bf)
+			zm_mode = bilinterp(BetaRel, Freq_m,\
+				self.bet_range, self.freq_range,\
+				self.bet_tuple, self.freq_tuple,\
+				self.zy_bf)
+			zm_mode.real = sign_m * zm_mode.real
+			Zp.append(zp_mode)
+			Zm.append(zm_mode)
+		zp_mode = 0.0 + 0.0j
+		zm_mode = 0.0 + 0.0j
+		Zp.append(zp_mode)
+		Zm.append(zm_mode)
+		for n in range(1, self.nBins / 2):
+			zp_mode.real = -Zm[self.nBins / 2 - n].real
+			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
+			zm_mode.real = -Zp[self.nBins / 2 - n].real
+			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("Y", Zp, Zm)
-        self.timpedance.trackBunch(bunch)
 
 #-----------------------------------------------------------------------------
 # Methods used by LImpedance and TImpedance classes
@@ -556,13 +505,9 @@ def interp(x, n_tuple, x_tuple, y_tuple):
         at x in x_tuple. Assumes x_tuple is increasing array.
     """
     if x < x_tuple[0]:
-        print "*******************--Warning--*********************"
-        print "interp: x < Min(x_tuple)"
         y = y_tuple[0]
         return y
     if x > x_tuple[n_tuple]:
-        print "*******************--Warning--*********************"
-        print "interp: x > Max(x_tuple)"
         y = y_tuple[n_tuple]
         return y
     dxp = x - x_tuple[0]
@@ -576,7 +521,6 @@ def interp(x, n_tuple, x_tuple, y_tuple):
 		(dxm - dxp)
     return y
 
-
 def bilinterp(x, y, nx_tuple, ny_tuple, x_tuple, y_tuple, fxy):
     """
         Bilinear interpolation: Given nx-tuple + 1 x-points,
@@ -586,14 +530,10 @@ def bilinterp(x, y, nx_tuple, ny_tuple, x_tuple, y_tuple, fxy):
     """
     f_tuple = []
     if x < x_tuple[0]:
-        print "*******************--Warning--*********************"
-        print "bilinterp: x < Min(x_tuple)"
         for ny in range(ny_tuple + 1):
             vf = fxy[0][ny]
             f_tuple.append(vf)
     elif x > x_tuple[nx_tuple]:
-        print "*******************--Warning--*********************"
-        print "bilinterp: x > Max(x_tuple)"
         for ny in range(ny_tuple + 1):
             vf = fxy[x_tuple][ny]
             f_tuple.append(vf)
@@ -612,38 +552,3 @@ def bilinterp(x, y, nx_tuple, ny_tuple, x_tuple, y_tuple, fxy):
     f = interp(y, ny_tuple, y_tuple, f_tuple)
     return f
 
-def checkFrequency(n, myFreq, freq_tuple):
-    """
-        This function returns a warning that if the frequency is
-        outside the range of the provided values, the corresponding
-        impedance will be set appropriately to that at the maximum
-        or minimum frequency.
-    """
-    if myFreq < min(freq_tuple):
-        print "******************--Warning--*********************"
-        print "minError in bin %d: \n Your frequency is %f. \n This is below the minimum provided frequency of %f." % (n, myFreq, min(freq_tuple))
-        print " -The interpolation function will use the minimum provided frequency."
-        print "**************************************************"
-    elif myFreq > max(freq_tuple):
-        print "******************--Warning--*********************"
-        print "maxerror in bin %d: \n Your frequency is %f. \n This is above the maximum provided frequency of %f." % (n, myFreq, max(freq_tuple))
-        print " -The interpolation function will use the maximum provided frequency."
-        print "**************************************************"
-
-def checkBeta(myBeta, bet_tuple):
-    """
-        This function returns a warning that if the beta is
-        outside the range of the provided values, the corresponding
-        impedance will be set appropriately to that at the maximum
-        or minimum beta.
-    """
-    if myBeta < min(bet_tuple):
-        print "******************--Warning--*********************"
-        print "minError: \n Your beta is %f. \n This is below the minimum provided beta of %f." % (myBeta, min(bet_tuple))
-        print " -The interpolation function will use the minimum provided beta."
-        print "***************************************************"
-    elif myBeta > max(bet_tuple):
-        print "******************--Warning--**********************"
-        print "maxerror: \n Your beta is %f. \n This is above the maximum provided beta of %f." % (n, myBeta, max(bet_tuple))
-        print " -The interpolation function will use the maximum provided beta."
-        print "***************************************************"

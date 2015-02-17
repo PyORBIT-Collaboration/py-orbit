@@ -18,5 +18,5 @@ extern "C"
 }
 #endif  // __cplusplus
 
-#endif // WRAP_RFCAVITIES_H
+#endif // WRAP_IMPEDANCES_H
 

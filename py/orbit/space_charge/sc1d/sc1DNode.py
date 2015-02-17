@@ -58,7 +58,6 @@ class SC1D_AccNode(DriftTEAPOT):
 
     def assignImpedance(self, py_cmplx_arr):
         self.lspacecharge.assignImpedance(py_cmplx_arr)
-        print "Assigning the impedance array"
 
 #-----------------------------------------------------------------------------
 # Node for impedance as function of frequency
@@ -84,12 +83,11 @@ class FreqDep_SC1D_AccNode(DriftTEAPOT):
         self.freq_range = (len(self.freq_tuple) - 1)
         self.z_tuple = self.localDict["z_imp"]
         self.c = consts.speed_of_light
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
+            freq_mode = Freq0 * (n + 1)
             z_mode = interp(freq_mode, self.freq_range,\
                             self.freq_tuple, self.z_tuple)
             Z.append(z_mode)
@@ -101,12 +99,11 @@ class FreqDep_SC1D_AccNode(DriftTEAPOT):
             the AccNodeBunchTracker class track(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
+            freq_mode = Freq0 * (n + 1)
             z_mode = interp(freq_mode, self.freq_range,\
                             self.freq_tuple, self.z_tuple)
             Z.append(z_mode)
@@ -120,12 +117,11 @@ class FreqDep_SC1D_AccNode(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        myBeta = bunch.getSyncParticle().beta()
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
+            freq_mode = Freq0 * (n + 1)
             z_mode = interp(freq_mode, self.freq_range,\
                             self.freq_tuple, self.z_tuple)
             Z.append(z_mode)
@@ -158,14 +154,12 @@ class BetFreqDep_SC1D_AccNode(DriftTEAPOT):
         self.freq_range = (len(self.freq_tuple) - 1)
         self.z_bf = self.localDict["z_imp"]
         self.c = consts.speed_of_light
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
-            z_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
+            freq_mode = Freq0 * (n + 1)
+            z_mode = bilinterp(BetaRel, freq_mode, self.bet_range,\
                                self.freq_range, self.bet_tuple,\
                                self.freq_tuple, self.z_bf)
             Z.append(z_mode)
@@ -177,14 +171,12 @@ class BetFreqDep_SC1D_AccNode(DriftTEAPOT):
             the AccNodeBunchTracker class track(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
-            z_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
+            freq_mode = Freq0 * (n + 1)
+            z_mode = bilinterp(BetaRel, freq_mode, self.bet_range,\
                                self.freq_range, self.bet_tuple,\
                                self.freq_tuple, self.z_bf)
             Z.append(z_mode)
@@ -198,14 +190,12 @@ class BetFreqDep_SC1D_AccNode(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        myBeta = bunch.getSyncParticle().beta()
-        checkBeta(myBeta, self.bet_tuple)
-        myFreq = (myBeta * self.c) / self.phaseLength
+        BetaRel = bunch.getSyncParticle().beta()
+        Freq0 = (BetaRel * self.c) / self.phaseLength
         Z = []
         for n in range(self.nBins / 2 - 1):
-            freq_mode = myFreq * (n + 1)
-            checkFrequency(n, freq_mode, self.freq_tuple)
-            z_mode = bilinterp(myBeta, freq_mode, self.bet_range,\
+            freq_mode = Freq0 * (n + 1)
+            z_mode = bilinterp(BetaRel, freq_mode, self.bet_range,\
                                self.freq_range, self.bet_tuple,\
                                self.freq_tuple, self.z_bf)
             Z.append(z_mode)
@@ -220,13 +210,9 @@ def interp(x, n_tuple, x_tuple, y_tuple):
         at x in x_tuple. Assumes x_tuple is increasing array.
     """
     if x < x_tuple[0]:
-        print "*******************--Warning--*********************"
-        print "interp: x < Min(x_tuple)"
         y = y_tuple[0]
         return y
     if x > x_tuple[n_tuple]:
-        print "*******************--Warning--*********************"
-        print "interp: x > Max(x_tuple)"
         y = y_tuple[n_tuple]
         return y
     dxp = x - x_tuple[0]
@@ -250,14 +236,10 @@ def bilinterp(x, y, nx_tuple, ny_tuple, x_tuple, y_tuple, fxy):
     """
     f_tuple = []
     if x < x_tuple[0]:
-        print "*******************--Warning--*********************"
-        print "bilinterp: x < Min(x_tuple)"
         for ny in range(ny_tuple + 1):
             vf = fxy[0][ny]
             f_tuple.append(vf)
     elif x > x_tuple[nx_tuple]:
-        print "*******************--Warning--*********************"
-        print "bilinterp: x > Max(x_tuple)"
         for ny in range(ny_tuple + 1):
             vf = fxy[x_tuple][ny]
             f_tuple.append(vf)
@@ -276,38 +258,3 @@ def bilinterp(x, y, nx_tuple, ny_tuple, x_tuple, y_tuple, fxy):
     f = interp(y, ny_tuple, y_tuple, f_tuple)
     return f
 
-def checkFrequency(n, myFreq, freq_tuple):
-    """
-        This function returns a warning that if the frequency is
-        outside the range of the provided values, the corresponding
-        impedance will be set appropriately to that at the maximum
-        or minimum frequency.
-    """
-    if myFreq < min(freq_tuple):
-        print "******************--Warning--*********************"
-        print "minError in bin %d: \n Your frequency is %f. \n This is below the minimum provided frequency of %f." % (n, myFreq, min(freq_tuple))
-        print " -The interpolation function will use the minimum provided frequency."
-        print "**************************************************"
-    elif myFreq > max(freq_tuple):
-        print "******************--Warning--*********************"
-        print "maxerror in bin %d: \n Your frequency is %f. \n This is above the maximum provided frequency of %f." % (n, myFreq, max(freq_tuple))
-        print " -The interpolation function will use the maximum provided frequency."
-        print "**************************************************"
-
-def checkBeta(myBeta, bet_tuple):
-    """
-        This function returns a warning that if the beta is
-        outside the range of the provided values, the corresponding
-        impedance will be set appropriately to that at the maximum
-        or minimum beta.
-    """
-    if myBeta < min(bet_tuple):
-        print "******************--Warning--*********************"
-        print "minError: \n Your beta is %f. \n This is below the minimum provided beta of %f." % (myBeta, min(bet_tuple))
-        print " -The interpolation function will use the minimum provided beta."
-        print "***************************************************"
-    elif myBeta > max(bet_tuple):
-        print "******************--Warning--**********************"
-        print "maxerror: \n Your beta is %f. \n This is above the maximum provided beta of %f." % (n, myBeta, max(bet_tuple))
-        print " -The interpolation function will use the maximum provided beta."
-        print "***************************************************"

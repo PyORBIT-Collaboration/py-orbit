@@ -29,6 +29,8 @@
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 
+#include "Grid2D.hh"
+
 class Grid3D: public OrbitUtils::CppPyWrapper
 {
 public:
@@ -45,6 +47,9 @@ public:
 	
 	/** Returns the reference to one 2D slice of the inner 3D array */
   double**  getSlice2D(int zInd);
+  
+  /** Returns the reference to Grid2D slice of the inner 3D array */
+  Grid2D* getGrid2D(int zInd); 
 
   /** Returns the grid size in x-direction */
   int getSizeX(); 
@@ -169,6 +174,9 @@ protected:
 
 	//3D array
   double*** Arr3D;
+  
+  //Grid2D array
+  Grid2D** grid2dArr;
 
 // PRIVATE MEMBERS
 //    Arr3D;           holds set of double on each 3D grid points  

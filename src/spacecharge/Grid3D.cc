@@ -39,27 +39,21 @@ Grid3D::Grid3D(int nX, int nY, int nZ): CppPyWrapper(NULL)
 
 
   //Allocate memory for the 3D distribution
+  grid2dArr = new Grid2D*[nZ_];
   Arr3D = new double**[nZ_];
   for(int iz=0 ; iz < nZ_; iz++){
-    Arr3D[iz] = new double*[nX_];
-    for(int ix=0 ; ix < nX_; ix++){
-      Arr3D[iz][ix] = new double[nY_];
-      for(int iy=0 ; iy < nY_; iy++){
-	     Arr3D[iz][ix][iy] = 0.0;
-      }
-    }
+  	grid2dArr[iz] = new Grid2D(nX,nY);
+    Arr3D[iz] = grid2dArr[iz]->getArr();
   }
 }
 
 Grid3D::~Grid3D()
 {
+	delete [] Arr3D;
   for(int iz=0 ; iz < nZ_; iz++){
-    for(int ix=0 ; ix < nX_; ix++){
-      delete [] Arr3D[iz][ix];
-    }   
-    delete [] Arr3D[iz];
+  	 delete grid2dArr[iz];
   }  
-  delete [] Arr3D;
+  delete [] grid2dArr;
 }
 
 /** Returns the reference to the inner 3D array */
@@ -68,6 +62,8 @@ double*** Grid3D::getArr3D(){return Arr3D;}
 /** Returns the reference to one 2D slice of the inner 3D array */
 double** Grid3D::getSlice2D(int zInd){return Arr3D[zInd];}
 
+/** Returns the reference to Grid2D slice of the inner 3D array */
+Grid2D* Grid3D::getGrid2D(int zInd){return grid2dArr[zInd];}
 
 /** Returns the grid size in x-direction */
 int Grid3D::getSizeX(){
@@ -137,6 +133,9 @@ void Grid3D::setGridX(double xMin, double xMax){
 	xMin_ = xMin;
 	xMax_ = xMax;
 	dx_ = (xMax_ - xMin_)/(nX_ -1);
+  for(int iz=0 ; iz < nZ_; iz++){
+  	grid2dArr[iz]->setGridX(xMin,xMax);
+  }	
 }
 
 /** Sets the limits for the y-grid */
@@ -144,6 +143,9 @@ void Grid3D::setGridY(double yMin, double yMax){
 	yMin_ = yMin;
 	yMax_ = yMax;
 	dy_ = (yMax_ - yMin_)/(nY_ -1);		
+  for(int iz=0 ; iz < nZ_; iz++){
+  	grid2dArr[iz]->setGridY(yMin,yMax);
+  }
 }
 
 /** Sets the limits for the z-grid */

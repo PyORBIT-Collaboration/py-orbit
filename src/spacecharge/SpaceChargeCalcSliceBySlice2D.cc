@@ -10,7 +10,6 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "Grid2D.hh"
 #include "Grid3D.hh"
 #include "PoissonSolverFFT2D.hh"
 #include "SpaceChargeCalcSliceBySlice2D.hh"
@@ -26,10 +25,8 @@ SpaceChargeCalcSliceBySlice2D::SpaceChargeCalcSliceBySlice2D(int xSize, int ySiz
 {
 	xy_ratio = xy_ratio_in;
 	poissonSolver = new PoissonSolverFFT2D(xSize, ySize, -xy_ratio, xy_ratio, -1.0, 1.0);
-	rhoGrid3D = new Grid3D(xSize, ySize, zSize);
-	rhoGrid2D_tmp = new Grid2D(xSize, ySize);	
+	rhoGrid3D = new Grid3D(xSize, ySize, zSize);	
 	phiGrid3D = new Grid3D(xSize, ySize, zSize);
-	phiGrid2D_tmp = new Grid2D(xSize, ySize);
 	bunchExtremaCalc = new BunchExtremaCalculator();
 }
 
@@ -37,10 +34,8 @@ SpaceChargeCalcSliceBySlice2D::SpaceChargeCalcSliceBySlice2D(int xSize, int ySiz
 {
 	xy_ratio = 1.0;
 	poissonSolver = new PoissonSolverFFT2D(xSize, ySize, -xy_ratio, xy_ratio, -1.0, 1.0);
-	rhoGrid3D = new Grid3D(xSize, ySize, zSize);	
-	rhoGrid2D_tmp = new Grid2D(xSize, ySize);	
+	rhoGrid3D = new Grid3D(xSize, ySize, zSize);		
 	phiGrid3D = new Grid3D(xSize, ySize, zSize);	
-	phiGrid2D_tmp = new Grid2D(xSize, ySize);
 	bunchExtremaCalc = new BunchExtremaCalculator();		
 }
 
@@ -51,20 +46,10 @@ SpaceChargeCalcSliceBySlice2D::~SpaceChargeCalcSliceBySlice2D(){
 	} else {
 		delete rhoGrid3D;
 	}
-	if(rhoGrid2D_tmp->getPyWrapper() != NULL){
-		Py_DECREF(rhoGrid2D_tmp->getPyWrapper());
-	} else {
-		delete rhoGrid2D_tmp;
-	}
 	if(phiGrid3D->getPyWrapper() != NULL){
 		Py_DECREF(phiGrid3D->getPyWrapper());
 	} else {
 		delete phiGrid3D;
-	}
-	if(phiGrid2D_tmp->getPyWrapper() != NULL){
-		Py_DECREF(phiGrid2D_tmp->getPyWrapper());
-	} else {
-		delete phiGrid2D_tmp;
 	}			
 	delete bunchExtremaCalc;
 }
@@ -95,24 +80,16 @@ void SpaceChargeCalcSliceBySlice2D::trackBunch(Bunch* bunch, double length, Base
 	
 	for(int iz = 0; iz < nZ; iz++){
 		if(rank == iz%size){
-
-			// copy the 2D slice of the 3D grid on to a temporary 2D grid
-			this->copySlice2DtoGrid2D(rhoGrid3D, iz, rhoGrid2D_tmp);
-			
 			// calculate the potential on the temporary 2D phiGrid
-			poissonSolver->findPotential(rhoGrid2D_tmp,phiGrid2D_tmp);
+			poissonSolver->findPotential(rhoGrid3D->getGrid2D(iz), phiGrid3D->getGrid2D(iz));
 			if(boundary != NULL){        
 				//update potential with boundary condition		
-				boundary->addBoundaryPotential(rhoGrid2D_tmp,phiGrid2D_tmp);
+				boundary->addBoundaryPotential(rhoGrid3D->getGrid2D(iz), phiGrid3D->getGrid2D(iz));
 				//std::cerr<<"Boundary ADDED."<<std::endl;	
 			}
-			
-			// copy back to the 3D grid
-			this->copyGrid2DtoSlice2D(phiGrid2D_tmp, phiGrid3D, iz);
-
 		}
 		else{
-			this->setSlice2DZero(phiGrid3D, iz);
+			phiGrid3D->getGrid2D(iz)->setZero();
 		}
 	}
 
@@ -218,16 +195,10 @@ void SpaceChargeCalcSliceBySlice2D::bunchAnalysis(Bunch* bunch, double& totalMac
 	rhoGrid3D->setGridX(xMin,xMax);
 	rhoGrid3D->setGridY(yMin,yMax);	
 	rhoGrid3D->setGridZ(zMin,zMax);	
-	
-	rhoGrid2D_tmp->setGridX(xMin,xMax);
-	rhoGrid2D_tmp->setGridY(yMin,yMax);
-		
 	phiGrid3D->setGridX(xMin,xMax);
 	phiGrid3D->setGridY(yMin,yMax);
 	phiGrid3D->setGridZ(zMin,zMax);	
 
-	phiGrid2D_tmp->setGridX(xMin,xMax);
-	phiGrid2D_tmp->setGridY(yMin,yMax);
 	
 	//this one just for case boundary != null, and will work only once
 	double solver_xMin = poissonSolver->getMinX();
@@ -242,98 +213,6 @@ void SpaceChargeCalcSliceBySlice2D::bunchAnalysis(Bunch* bunch, double& totalMac
 	
 	//bin Bunch to the Grid
 	rhoGrid3D->setZero();
-
 	rhoGrid3D->binBunch(bunch);	
-
 	rhoGrid3D->synchronizeMPI(bunch->getMPI_Comm_Local());	
-}
-
-
-void SpaceChargeCalcSliceBySlice2D::copySlice2DtoGrid2D(Grid3D* SourceGrid3D, int iz, Grid2D* TargetGrid2D){
-	//check sizes of the grids
-  	if( SourceGrid3D->getSizeX() != TargetGrid2D->getSizeX() || SourceGrid3D->getSizeY() != TargetGrid2D->getSizeY() ||
-		SourceGrid3D->getMinX() != TargetGrid2D->getMinX()  || SourceGrid3D->getMinY() != TargetGrid2D->getMinY() ||
-		SourceGrid3D->getStepX() != TargetGrid2D->getStepX() || SourceGrid3D->getStepY() != TargetGrid2D->getStepY() ||
-		iz >= SourceGrid3D->getSizeZ() ){
-		int rank = 0;
-		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		if(rank == 0){
-			std::cerr << "copySlice2DtoGrid2D:" 
-			<< "The grid sizes or shape are different "<< std::endl 
-			<< "SourceGrid3D x bins ="<< SourceGrid3D->getSizeX() <<std::endl
-			<< "SourceGrid3D y bins ="<< SourceGrid3D->getSizeY() <<std::endl
-			<< "TargetGrid2D x bins ="<< TargetGrid2D->getSizeX() <<std::endl
-			<< "TargetGrid2D y bins ="<< TargetGrid2D->getSizeY() <<std::endl
-			<< "SourceGrid3D dx ="<< SourceGrid3D->getStepX() <<std::endl
-			<< "SourceGrid3D dy ="<< SourceGrid3D->getStepY() <<std::endl
-			<< "TargetGrid2D dx ="<< TargetGrid2D->getStepX() <<std::endl
-			<< "TargetGrid2D dy ="<< TargetGrid2D->getStepY() <<std::endl
-			<< "SourceGrid3D xMin ="<< SourceGrid3D->getMinX() <<std::endl
-			<< "SourceGrid3D yMin ="<< SourceGrid3D->getMinY() <<std::endl
-			<< "TargetGrid2D xMin ="<< TargetGrid2D->getMinX() <<std::endl
-			<< "TargetGrid2D yMin ="<< TargetGrid2D->getMinY() <<std::endl
-			<< "SourceGrid3D z bins ="<< SourceGrid3D->getSizeZ() <<std::endl
-			<< "iz ="<< iz <<std::endl
-			<< "Stop. \n";
-		}
-		ORBIT_MPI_Finalize();
-	}
-	
-	double** srcGrid = SourceGrid3D->getSlice2D(iz);
-	double** trgtGrid = TargetGrid2D->getArr();
-	
-	for(int ix = 0; ix < SourceGrid3D->getSizeX(); ix++){
-	  	for(int iy = 0; iy < SourceGrid3D->getSizeY(); iy++){
-			trgtGrid[ix][iy] = srcGrid[ix][iy];
-		}
-	}
-}	
-
-
-void SpaceChargeCalcSliceBySlice2D::copyGrid2DtoSlice2D(Grid2D* SourceGrid2D, Grid3D* TargetGrid3D, int iz){
-	//check sizes of the grids
-  	if( SourceGrid2D->getSizeX() != TargetGrid3D->getSizeX() || SourceGrid2D->getSizeY() != TargetGrid3D->getSizeY() ||
-		SourceGrid2D->getMinX() != TargetGrid3D->getMinX()  || SourceGrid2D->getMinY() != TargetGrid3D->getMinY() ||
-		SourceGrid2D->getStepX() != TargetGrid3D->getStepX() || SourceGrid2D->getStepY() != TargetGrid3D->getStepY() ||
-		iz >= TargetGrid3D->getSizeZ() ){
-		int rank = 0;
-		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		if(rank == 0){
-			std::cerr << "copySlice2DtoGrid2D:" 
-			<< "The grid sizes or shape are different "<< std::endl 
-			<< "SourceGrid2D x bins ="<< SourceGrid2D->getSizeX() <<std::endl
-			<< "SourceGrid2D y bins ="<< SourceGrid2D->getSizeY() <<std::endl
-			<< "TargetGrid3D x bins ="<< TargetGrid3D->getSizeX() <<std::endl
-			<< "TargetGrid3D y bins ="<< TargetGrid3D->getSizeY() <<std::endl
-			<< "SourceGrid2D dx ="<< SourceGrid2D->getStepX() <<std::endl
-			<< "SourceGrid2D dy ="<< SourceGrid2D->getStepY() <<std::endl
-			<< "TargetGrid3D dx ="<< TargetGrid3D->getStepX() <<std::endl
-			<< "TargetGrid3D dy ="<< TargetGrid3D->getStepY() <<std::endl
-			<< "SourceGrid2D xMin ="<< SourceGrid2D->getMinX() <<std::endl
-			<< "SourceGrid2D yMin ="<< SourceGrid2D->getMinY() <<std::endl
-			<< "TargetGrid3D xMin ="<< TargetGrid3D->getMinX() <<std::endl
-			<< "TargetGrid3D yMin ="<< TargetGrid3D->getMinY() <<std::endl
-			<< "TargetGrid3D z bins ="<< TargetGrid3D->getSizeZ() <<std::endl
-			<< "iz ="<< iz <<std::endl
-			<< "Stop. \n";
-		}
-		ORBIT_MPI_Finalize();
-	}
-	
-	double** srcGrid = SourceGrid2D->getArr();
-	double** trgtGrid = TargetGrid3D->getSlice2D(iz);
-	
-	for(int ix = 0; ix < SourceGrid2D->getSizeX(); ix++){
-	  	for(int iy = 0; iy < SourceGrid2D->getSizeY(); iy++){
-			trgtGrid[ix][iy] = srcGrid[ix][iy];
-		}
-	}
-}
-
-void SpaceChargeCalcSliceBySlice2D::setSlice2DZero(Grid3D* TargetGrid3D, int iz){
-	for(int ix = 0; ix < TargetGrid3D->getSizeX(); ix++){
-		for(int iy = 0; iy < TargetGrid3D->getSizeY(); iy++){
-			TargetGrid3D->setValue(0., ix, iy, iz);
-		}
-	}		
 }

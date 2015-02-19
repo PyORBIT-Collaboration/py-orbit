@@ -386,7 +386,7 @@ double Grid2D::getMaxY(){return yMax_;};
 /** Returns the min y in the grid points */ 
 double Grid2D::getMinY(){return yMin_;};
 
-/** Returns the min y in the grid points */ 
+/** Returns the sum of all grid points */ 
 double Grid2D::getSum(){
 	double sum = 0;
 	for(int ix = 0; ix < xSize_; ix++){

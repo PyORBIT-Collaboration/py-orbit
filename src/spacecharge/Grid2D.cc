@@ -386,6 +386,27 @@ double Grid2D::getMaxY(){return yMax_;};
 /** Returns the min y in the grid points */ 
 double Grid2D::getMinY(){return yMin_;};
 
+/** Returns the min y in the grid points */ 
+double Grid2D::getSum(){
+	double sum = 0;
+	for(int ix = 0; ix < xSize_; ix++){
+	  for(int iy = 0; iy < ySize_; iy++){
+			sum += arr_[ix][iy];
+		}
+	}
+	return sum;
+};
+
+
+/** Multiply all elements of Grid2D by constant coefficient */ 
+void Grid2D::multiply(double coeff){
+	for(int ix = 0; ix < xSize_; ix++){
+	  for(int iy = 0; iy < ySize_; iy++){
+			arr_[ix][iy] *= coeff;
+		}
+	}
+}
+	
 /** Sets x-grid */
 void Grid2D::setGridX(double xMin, double xMax){
 	xMin_ = xMin;

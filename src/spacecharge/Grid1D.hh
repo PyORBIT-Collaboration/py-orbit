@@ -36,6 +36,9 @@ public:
   /** Sets z-grid */
   void setGridZ(double zMin, double zMax);
 
+  /** Returns the reference to the 1D array */	
+  double* getArr();
+
   /** Returns the min z grid point value */
   double getMinZ();
 
@@ -45,14 +48,23 @@ public:
   /** Returns the number of grid points */
   int getSizeZ();
 
+  /** Returns the sum of all grid points */
+  double getSum();
+
   /** Returns the grid step size */
   double getStepZ();
 
   /** Returns the grid point for index */
   double getGridZ(int index);
+  
+  /** Returns 1 if (z) is inside the grid region, and 0 otherwise */
+  int isInside(double z);
 
   /** Sets arr_ at all grid points to zero */
   void setZero();
+  
+  /** Multiply all elements of Grid1D by constant coefficient */ 
+  void multiply(double coeff);
 
   /** Sets value of arr_ at one point on the grid */
   void setValue(double value, int iZ);

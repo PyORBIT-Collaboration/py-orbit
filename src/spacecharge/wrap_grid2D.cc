@@ -214,6 +214,26 @@ extern "C" {
 		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;	
 		return Py_BuildValue("d",cpp_Grid2D->getMaxY());
 	}		
+
+	//getSum()
+  static PyObject* Grid2D_getSum(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;	
+		return Py_BuildValue("d",cpp_Grid2D->getSum());
+	}		
+	
+	//multiply()
+  static PyObject* Grid2D_multiply(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
+		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;	
+		double coeff;
+		if(!PyArg_ParseTuple(args,"d:multiply",&coeff)){
+			ORBIT_MPI_Finalize("PyGrid2D - multiply(coeff) - parameters are needed.");
+		}
+		cpp_Grid2D->multiply(coeff);
+		Py_INCREF(Py_None);
+    	return Py_None;	
+	}		
 	
 	//isInside(x,y)
   static PyObject* Grid2D_isInside(PyObject *self, PyObject *args){
@@ -343,6 +363,8 @@ extern "C" {
 		{ "getMaxX",              Grid2D_getMaxX,              METH_VARARGS,"returns the max grid point in X dir."},
 		{ "getMinY",              Grid2D_getMinY,              METH_VARARGS,"returns the min grid point in Y dir."},
 		{ "getMaxY",              Grid2D_getMaxY,              METH_VARARGS,"returns the max grid point in Y dir."},
+		{ "getSum",               Grid2D_getSum,               METH_VARARGS,"returns the sum of all grid points."},
+		{ "multiply",             Grid2D_multiply,             METH_VARARGS,"multiplies all elements of Grid2D by constant coefficient"},
 		{ "isInside",             Grid2D_isInside,             METH_VARARGS,"returns 1 or 0 if (x,y) inside grid or not"},
 		{ "binValue",             Grid2D_binValue,             METH_VARARGS,"bins the value into the 2D mesh"},
 		{ "binValueBilinear",     Grid2D_binValueBilinear,     METH_VARARGS,"bins the value into the 2D mesh bi-linearly"},

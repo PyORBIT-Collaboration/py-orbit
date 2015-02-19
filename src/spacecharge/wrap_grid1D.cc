@@ -138,6 +138,16 @@ static PyObject* Grid1D_getGridZ(PyObject *self, PyObject *args)
 }
 
 
+// getSum()
+
+static PyObject* Grid1D_getSum(PyObject *self, PyObject *args)
+{
+  pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+  Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
+  return Py_BuildValue("d", cpp_Grid1D->getSum());
+}
+
+
 // setZero()
 
 static PyObject* Grid1D_setZero(PyObject *self, PyObject *args)
@@ -163,6 +173,23 @@ static PyObject* Grid1D_setValue(PyObject *self, PyObject *args)
     ORBIT_MPI_Finalize("PyGrid1D - setValue(val,iz) - parameters are needed.");
   }
   cpp_Grid1D->setValue(val, iz);
+  Py_INCREF(Py_None);
+  return Py_None;
+  }
+
+
+// multiply(double coeff)
+
+static PyObject* Grid1D_multiply(PyObject *self, PyObject *args)
+{
+  pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+  Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
+  double coeff;
+  if(!PyArg_ParseTuple(args,"d:multiply", &coeff))
+  {
+    ORBIT_MPI_Finalize("PyGrid1D - multiply(coeff) - parameters are needed.");
+  }
+  cpp_Grid1D->multiply(coeff);
   Py_INCREF(Py_None);
   return Py_None;
   }
@@ -339,6 +366,21 @@ static PyObject* Grid1D_binValueSmoothed(PyObject *self, PyObject *args)
 }
 
 
+//isInside(z)
+
+static PyObject* Grid1D_isInside(PyObject *self, PyObject *args)
+{
+  pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
+  Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;	
+  double z;
+  if(!PyArg_ParseTuple(args,"d:isInside",&z))
+  {
+    ORBIT_MPI_Finalize("PyGrid1D - isInside(z) - parameters are needed.");
+  }		
+  return Py_BuildValue("i",cpp_Grid1D->isInside(z));
+}		
+
+
 //calcGradient(double z)
 
 static PyObject* Grid1D_calcGradient(PyObject *self, PyObject *args)
@@ -423,8 +465,10 @@ static PyMethodDef Grid1DClassMethods[] =
   {"getSizeZ",                   Grid1D_getSizeZ,                   METH_VARARGS, "returns the size of grid in Z dir."},
   {"getStepZ",                   Grid1D_getStepZ,                   METH_VARARGS, "returns the step in Z dir."},
   {"getGridZ",                   Grid1D_getGridZ,                   METH_VARARGS, "returns the z-grid point with index ind"},
+  {"getSum",                     Grid1D_getSum,                     METH_VARARGS, "returns the sum of all grid point values."},  
   {"setZero",                    Grid1D_setZero,                    METH_VARARGS, "sets all points on the grid to zero"},
   {"setValue",                   Grid1D_setValue,                   METH_VARARGS, "sets value for (iz) point"},
+  {"multiply",                   Grid1D_multiply,                   METH_VARARGS, "multiply all elements of Grid1D by constant coefficient"},
   {"getValueOnGrid",             Grid1D_getValueOnGrid,             METH_VARARGS, "returns the value on grid with index iz"},
   {"getValue",                   Grid1D_getValue,                   METH_VARARGS, "returns value for (z) point"},
   {"getValueSmoothed",           Grid1D_getValueSmoothed,           METH_VARARGS, "returns smoothed value for (z) point"},
@@ -432,9 +476,9 @@ static PyMethodDef Grid1DClassMethods[] =
   {"binBunchSmoothed",           Grid1D_binBunchSmoothed,           METH_VARARGS, "bins the Bunch instance smoothly into the 1D mesh by macrosize"},
   {"binBunchByParticle",         Grid1D_binBunchByParticle,         METH_VARARGS, "bins the Bunch instance into the 1D mesh by particle"},
   {"binBunchSmoothedByParticle", Grid1D_binBunchSmoothedByParticle, METH_VARARGS, "bins the Bunch instance smoothly into the 1D mesh by particle"},
-
   {"binValue",                   Grid1D_binValue,                   METH_VARARGS, "bins the value into the 1D mesh"},
   {"binValueSmoothed",           Grid1D_binValueSmoothed,           METH_VARARGS, "bins the value smoothly into the 1D mesh"},
+  {"isInside",                   Grid1D_isInside,                   METH_VARARGS,"returns 1 or 0 if (z) inside grid or not"},
   {"calcGradient",               Grid1D_calcGradient,               METH_VARARGS, "returns gradient at z"},
   {"calcGradientSmoothed",       Grid1D_calcGradientSmoothed,       METH_VARARGS, "returns smoothed gradient at z"},
   {"synchronizeMPI",             Grid1D_synchronizeMPI,             METH_VARARGS, "synchronize through the MPI communicator"},

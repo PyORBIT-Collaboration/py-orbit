@@ -104,6 +104,12 @@ double Grid1D::getMaxZ()
 }
 
 
+/** Returns the reference to the 1D array */	
+double* Grid1D::getArr(){
+	return arr_;
+}
+
+
 /** Returns the number of grid points */
 int Grid1D::getSizeZ()
 {
@@ -125,12 +131,40 @@ double Grid1D::getGridZ(int index)
 }
 
 
+/** Returns the sum of all grid point values */
+double Grid1D::getSum()
+{
+  double sum = 0.;
+  for(int iz = 0; iz < zSize_; iz++)
+  {
+  	sum += arr_[iz];
+  }
+  return sum;
+}
+
+/** Returns 1 if (z) is inside the grid region, and 0 otherwise */
+int Grid1D::isInside(double z)
+{
+  if(z < zMin_ || z > zMax_) return 0;
+  return 1;
+}
+
 /** Sets arr_ at all grid points to zero */
 void Grid1D::setZero()
 {
   for(int i = 0; i < zSize_; i++)
   {
     arr_[i] = 0.;
+  }
+}
+
+
+/** Multiply all elements of Grid3D by constant coefficient */
+void Grid1D::multiply(double coeff)
+{
+  for(int i = 0; i < zSize_; i++)
+  {
+    arr_[i] *= coeff;
   }
 }
 

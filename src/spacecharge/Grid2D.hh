@@ -78,31 +78,31 @@ public:
 	/** Calculates bilinear interpolation a grid for position (x,y) */
 	void interpolateBilinear(double x, double y, double& value);
 		
-  /** Returns the grid size in x-direction */
-  int getSizeX(); 
+  	/** Returns the grid size in x-direction */
+  	int getSizeX(); 
 
-  /** Returns the grid size in y-direction */
-  int getSizeY();
+  	/** Returns the grid size in y-direction */
+  	int getSizeY();
 	
 	/** synchronizeMPI */
 	void synchronizeMPI(pyORBIT_MPI_Comm* comm);	
 	
-  /** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */
-  int isInside(double x,double y);
+  	/** Returns 1 if (x,y) is inside the grid region, and 0 otherwise */
+  	int isInside(double x,double y);
 
-  /** Returns the index and the fraction of the grid's point for particular x.
+  	/** Returns the index and the fraction of the grid's point for particular x.
       The index is a central point in three point interpolation:
       1 <= ind <= (nBins-2)
       The fraction will be : 0 <= frac <= 1.0
 	*/
-  void getIndAndFracX(double x, int& ind, double& frac);
+  	void getIndAndFracX(double x, int& ind, double& frac);
 	
-  /** Returns the index and the fraction of the grid's point for particular x.
+  	/** Returns the index and the fraction of the grid's point for particular x.
       The index is a central point in three point interpolation:
       1 <= ind <= (nBins-2)
       The fraction will be : 0 <= frac <= 1.0
 	*/	
-  void getIndAndFracY(double y, int& ind, double& frac);
+  	void getIndAndFracY(double y, int& ind, double& frac);
 	
 	/** Returns the index and the fraction of the grid's point for particular x.
 	 The index is the lower left corner for a bilinear interpolation:
@@ -118,36 +118,41 @@ public:
 	 */
 	void getBilinearIndAndFracY(double y, int& ind, double& frac);
 	
-	
-  /** Returns the grid point x-coordinate for this index. */
-  double getGridX(int index);
+	/** Returns the grid point x-coordinate for this index. */
+	double getGridX(int index);
 
-  /** Returns the grid point y-coordinate for this index. */   
-  double getGridY(int index);
+	/** Returns the grid point y-coordinate for this index. */   
+	double getGridY(int index);
 
-  /** Returns the grid step along x-axis */
-  double getStepX();
+	/** Returns the grid step along x-axis */
+	double getStepX();
 	
 	/** Returns the grid step along y-axis */
-  double getStepY();	
+	double getStepY();	
 	
-  /** Returns the maximal value of the grid in x-axis */   
-  double getMaxX();
+	/** Returns the maximal value of the grid in x-axis */   
+	double getMaxX();
 
-  /** Returns the minimal value of the grid in x-axis */   	
-  double getMinX();
-	
-  /** Returns the maximal value of the grid in y-axis */ 	
-  double getMaxY();
-	
-  /** Returns the minimal value of the grid in y-axis */ 	
-  double getMinY();	
-	
-  /** Sets x-grid */
-  void setGridX(double xMin, double xMax);
+	/** Returns the minimal value of the grid in x-axis */   	
+	double getMinX();
 
-  /** Sets y-grid */
-  void setGridY(double yMin, double yMax);
+	/** Returns the sum of all grid points */   	
+	double getSum();
+
+	/** Returns the maximal value of the grid in y-axis */ 	
+  	double getMaxY();
+
+	/** Returns the minimal value of the grid in y-axis */ 	
+	double getMinY();	
+
+	/** Multiply all elements of Grid2D by constant coefficient */ 
+	void multiply(double coeff);
+	
+	/** Sets x-grid */
+	void setGridX(double xMin, double xMax);
+
+	/** Sets y-grid */
+	void setGridY(double yMin, double yMax);
   
   private:
 	

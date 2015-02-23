@@ -71,3 +71,7 @@ class ParamsDictObject:
 		for this key. Returns False otherwise.
 		"""
 		return self.__paramsDict.has_key(key)
+		
+	def keys(self):
+		""" return the list of the keys for the parameters """
+		return self.__paramsDict.keys()

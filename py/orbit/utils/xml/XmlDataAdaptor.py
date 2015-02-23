@@ -1,6 +1,6 @@
 """
 XmlDataAdaptor is a DataAdaptor that specifically supports (reading/writing)
-(from/to) XML. XmlDataAdaptor uses xml.dom.minidom package.  In particular, 
+(from/to) XML. XmlDataAdaptor uses xml.dom.minidom package. In particular, 
 you can use the methods of DataAdaptor for all data manipulation.  
 
 To create a new, empty XML document simply invoke:
@@ -45,6 +45,7 @@ the examples listed above should provide an overview and foundation.
 """
 
 import types
+import os
 
 #import python XML DOM parser
 import xml.dom.minidom
@@ -101,10 +102,10 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		st = self.stringValue(attribute)
 		st_arr = st.split()
 		for s in st_arr:
-			arr.append(int(s))
+			arr.append(int(float(s)))
 		return arr	
 		
-	def intArrayValue(self,attribute):
+	def booleanArrayValue(self,attribute):
 		"""  array of booleans associated with the specified attribute """
 		arr = []
 		st = self.stringValue(attribute)
@@ -154,25 +155,62 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		
 	def writeToFile(self,file_name):
 		""" write the xml document to the file """
-		doc = xml.dom.minidom.Document()
-		root = doc.createElement("xml_root_node")
-		self.makeDomElement(doc,root,self)
-		doc.appendChild(root)
-		fl_out = open(file_name,"w")
-		xml_text = doc.toprettyxml(indent=" ")
+		xml_text = self.makeXmlText()
+		fl_out = open(file_name,"w")		
 		fl_out.write(xml_text)
 		fl_out.close()
 		
-	def makeDomElement(self,doc,parent_element,adaptor):
+	def makeXmlText(self):
+		""" create the xml text from the document """
+		doc = xml.dom.minidom.Document()
+		root = doc.createElement("xml_root_node")
+		self._makeDomElement(doc,doc,self)
+		xml_text = doc.toprettyxml(indent=" ")
+		return xml_text
+
+	@staticmethod	
+	def _makeDomElement(doc,parent_element,adaptor):
 		""" generate XML tree element to write it to the file """
 		element = doc.createElement(adaptor.getName())
 		for attribute in adaptor.attributes():
 			value = adaptor.stringValue(attribute)
 			element.setAttribute(attribute,value)
 		for adaptor_child in adaptor.data_adaptors:
-			self.makeDomElement(doc,element,adaptor_child)
+			XmlDataAdaptor._makeDomElement(doc,element,adaptor_child)
 		parent_element.appendChild(element)
 		
+	@staticmethod	
+	def adaptorForFile(file_name):
+		""" returns the new data adaptor created from the input file """
+		doc = xml.dom.minidom.parse(file_name)
+		if(len(doc.childNodes) != 1):
+			msg = "orbit.utils.XmlDataAdaptor.adaptorForFile("+file_name+")"
+			msg = msg + os.linesep
+			msg = msg + " input xml file has a wrong structure!"
+			msg = msg + os.linesep
+			msg = msg + "File: " + xml_file_name
+			msg = msg + os.linesep
+			msg = msg + "========================================="
+			msg = msg + os.linesep
+			orbitFinalize(msg)
+		xml_root_adaptor = 	XmlDataAdaptor(doc.childNodes[0].localName)
+		XmlDataAdaptor._makeDataAdaptor(xml_root_adaptor,doc.childNodes[0])
+		return xml_root_adaptor
 		
-			
+	@staticmethod	
+	def _makeDataAdaptor(data_adaptor,dom_node):
+		if(dom_node.nodeType == dom_node.ELEMENT_NODE):
+			#print "debug    ====== dom_node=",dom_node.localName
+			for ind in range(dom_node.attributes.length):
+				key = dom_node.attributes.item(ind).name
+				value = dom_node.attributes.item(ind).value
+				data_adaptor.setValue(key,value)
+			for child_dom_node in dom_node.childNodes:
+				if(child_dom_node.nodeType == child_dom_node.ELEMENT_NODE):
+					#print "debug    ======      child dom_node=",child_dom_node.localName
+					child_data_adaptor = data_adaptor.createChild(child_dom_node.localName)
+					XmlDataAdaptor._makeDataAdaptor(child_data_adaptor,child_dom_node)
+	
+		
+		
 

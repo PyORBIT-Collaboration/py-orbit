@@ -382,22 +382,23 @@ double BunchTwissAnalysis::getEmittance(int ic)
 /** Returns the normalized betatron emittance for index 0,1 - x,y planes. */
 double BunchTwissAnalysis::getEmittanceNormalized(int ic)
 {
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
+	if(ic == 2) return this->getEmittance(ic);
 	return this->getEmittance(ic) * bunch_gamma * bunch_beta;
 }
 
 /** Returns Twiss alpha (without dispersive part for x,y) for index 0,1,2 - x,y,z planes.*/
 double BunchTwissAnalysis::getAlpha(int ic)
 {
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
 	double x_xp_avg = this->getCorrelation(2*ic,2*ic+1);
-	double x_dE_avg = this->getCorrelation(2*ic, 5);
-	double xp_dE_avg = this->getCorrelation(2*ic+1, 5);
-	double dE2_avg = fabs(this->getCorrelation(5, 5));
 	double alpha;
 	if(ic == 2){
 		alpha = - x_xp_avg/this->getEmittance(ic);
 	} else {
+		double x_dE_avg = this->getCorrelation(2*ic, 5);
+		double xp_dE_avg = this->getCorrelation(2*ic+1, 5);
+		double dE2_avg = fabs(this->getCorrelation(5, 5));		
 		alpha = -(x_xp_avg - x_dE_avg * xp_dE_avg / dE2_avg) / this->getEmittance(ic);
 	}	
 	return alpha;
@@ -406,14 +407,15 @@ double BunchTwissAnalysis::getAlpha(int ic)
 /** Returns Twiss beta (without dispersive part for x,y) for index 0,1,2 - x,y,z planes.*/
 double BunchTwissAnalysis::getBeta(int ic)
 {
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
-	double x_dE_avg = this->getCorrelation(2*ic, 5);
-	double dE2_avg = fabs(this->getCorrelation(5, 5));
+
 	double beta;
 	if(ic == 2){
 		beta = x2_avg/this->getEmittance(ic);
 	} else {
+		double x_dE_avg = this->getCorrelation(2*ic, 5);
+		double dE2_avg = fabs(this->getCorrelation(5, 5));		
 		beta = (x2_avg - x_dE_avg * x_dE_avg / dE2_avg) / this->getEmittance(ic);
 	}
 	return beta;	
@@ -422,14 +424,14 @@ double BunchTwissAnalysis::getBeta(int ic)
 /** Returns Twiss gamma (without dispersive part for x,y) for index 0,1,2 - x,y,z planes.*/
 double BunchTwissAnalysis::getGamma(int ic)
 {	
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
 	double xp2_avg = fabs(this->getCorrelation(2*ic+1,2*ic+1));
-	double xp_dE_avg = this->getCorrelation(2*ic+1, 5);
-	double dE2_avg = fabs(this->getCorrelation(5, 5));
 	double gamma;
 	if(ic == 2){
 		gamma = xp2_avg/this->getEmittance(ic);
 	} else {
+		double xp_dE_avg = this->getCorrelation(2*ic+1, 5);
+		double dE2_avg = fabs(this->getCorrelation(5, 5));		
 		gamma = (xp2_avg - xp_dE_avg * xp_dE_avg / dE2_avg) / this->getEmittance(ic);
 	}
 	return gamma;
@@ -458,7 +460,7 @@ double BunchTwissAnalysis::getDispersionDerivative(int ic)
 /** Returns the effective emittance for index 0,1 - x,y planes. */
 double BunchTwissAnalysis::getEffectiveEmittance(int ic)
 {
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
@@ -471,7 +473,7 @@ double BunchTwissAnalysis::getEffectiveEmittance(int ic)
 /** Returns effective Twiss alpha for index 0,1 - x,y planes.*/
 double BunchTwissAnalysis::getEffectiveAlpha(int ic)
 {
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
@@ -487,7 +489,7 @@ double BunchTwissAnalysis::getEffectiveAlpha(int ic)
 /** Returns effective Twiss beta for index 0,1 - x,y planes.*/
 double BunchTwissAnalysis::getEffectiveBeta(int ic)
 {
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));
@@ -503,7 +505,7 @@ double BunchTwissAnalysis::getEffectiveBeta(int ic)
 /** Returns effective Twiss gamma for index 0,1 - x,y planes.*/
 double BunchTwissAnalysis::getEffectiveGamma(int ic)
 {	
-	if(ic < 0 || ic > 1 ) return 0.;
+	if(ic < 0 || ic > 2 ) return 0.;
 	double x_avg = this->getAverage(2*ic);
 	double xp_avg = this->getAverage(2*ic+1);
 	double x2_avg = fabs(this->getCorrelation(2*ic,2*ic));

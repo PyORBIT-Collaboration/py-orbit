@@ -73,7 +73,7 @@ extern "C"
   // and convert to c++ impedance array
   //-----------------------------------------------------
 
-  static PyObject* assignImpedance(PyObject *self, PyObject *args)
+  static PyObject* LImpedance_assignImpedance(PyObject *self, PyObject *args)
   {
     pyORBIT_Object* pyLImpedance = (pyORBIT_Object*) self;
     LImpedance* cpp_LImpedance = (LImpedance*) pyLImpedance->cpp_obj;
@@ -183,7 +183,7 @@ extern "C"
 
   static PyMethodDef LImpedanceClassMethods[] =
   {
-    {"assignImpedance", assignImpedance, METH_VARARGS,
+    {"assignImpedance", LImpedance_assignImpedance, METH_VARARGS,
      "assigns overall impedance - assignImpedance(Z))"},
     {"assignImpedanceValue",  LImpedance_assignImpedanceValue, METH_VARARGS,
      "assigns impedance for the nth mode - assignImpedanceValue(n, real, imag)"},

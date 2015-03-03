@@ -109,18 +109,18 @@ extern "C"
   // and convert to c++ X or Y impedance arrays
   //-----------------------------------------------------
 
-  static PyObject* assignImpedance(PyObject *self, PyObject *args)
+  static PyObject* TImpedance_assignImpedance(PyObject *self, PyObject *args)
   {
     pyORBIT_Object* pyTImpedance = (pyORBIT_Object*) self;
     TImpedance* cpp_TImpedance = (TImpedance*) pyTImpedance->cpp_obj;
-    const char* XorY;
+    const char* xory = NULL;
     PyObject* py_cmplx_arrp;
     PyObject* py_cmplx_arrm;
 
-    if(!PyArg_ParseTuple(args, "sOO:get_impedance", &XorY,
+    if(!PyArg_ParseTuple(args, "sOO:get_impedance", &xory,
                          &py_cmplx_arrp, &py_cmplx_arrm))
     {
-      ORBIT_MPI_Finalize("ERROR! You have to specify a parameters - XorY and two arrays of complex numbers!");
+      ORBIT_MPI_Finalize("ERROR! You have to specify a parameter - XorY and two arrays of complex numbers!");
     }
     if(PySequence_Check(py_cmplx_arrp) != 1)
     {
@@ -130,6 +130,7 @@ extern "C"
     {
       ORBIT_MPI_Finalize("ERROR! You have to specify a parameter - py_cmplx_arrm array of complex numbers!");
     }
+    std::string XorY(xory);
 
     int size = PySequence_Size(py_cmplx_arrp);
     if(size != PySequence_Size(py_cmplx_arrm))
@@ -306,8 +307,10 @@ extern "C"
 
   static PyMethodDef TImpedanceClassMethods[] =
   {
-    {"assignImpedance", assignImpedance, METH_VARARGS,
-     "assigns overall impedance - assignImpedance(XorY, Zp, Zm))"},
+    {"assignLatFuncs", TImpedance_assignLatFuncs, METH_VARARGS,
+     "assigns lattice functions at location of impedance - assignLatFuncs(qX, alphaX, betaX, qY, alphaY, betaY)"},
+    {"assignImpedance", TImpedance_assignImpedance, METH_VARARGS,
+     "assigns overall impedance - assignImpedance(XorY, Zp, Zm)"},
     {"assignImpedanceX",  TImpedance_assignImpedanceX, METH_VARARGS,
      "assigns horizontal impedance for the nth mode - assignImpedanceX(n, realp, imagp, realm, imagm)"},
     {"assignImpedanceY",  TImpedance_assignImpedanceY, METH_VARARGS,

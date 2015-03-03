@@ -373,14 +373,14 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
     def __init__(self, phaseLength, nMacrosMin, nBins,\
 	    useX, useY,\
 	    bunch, impeDict,\
-	    name = "freq. dep long sc node"):
+	    name = "betfreq. dep. TImpedance node"):
         """
             Constructor. Creates the BetFreqDep_TImpedance-teapot element.
         """
         DriftTEAPOT.__init__(self, name)
         self.timpedance = TImpedance(phaseLength, nMacrosMin, nBins,\
 		useX, useY)
-        self.setType("beta-freq. dep. timpedance node")
+        self.setType("betafreq. dep. timpedance node")
         self.setLength(0.0)
         self.phaseLength = phaseLength
         self.nBins = nBins
@@ -391,8 +391,6 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
         self.bet_range = (len(self.bet_tuple) - 1)
         self.freq_tuple = self.localDict["freqs"]
         self.freq_range = (len(self.freq_tuple) - 1)
-	self.zx_bf = self.localDict["zx_imp"]
-	self.zy_bf = self.localDict["zy_imp"]
         self.c = consts.speed_of_light
         BetaRel = bunch.getSyncParticle().beta()
         Freq0 = (BetaRel * self.c) / self.phaseLength
@@ -428,6 +426,7 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
 
     def calcImpedance(self, BetaRel, Freq0, qX, qY):
 	if(self.useX != 0):
+		z_bf = self.localDict["zx_imp"]
 		Zp = []
 		Zm = []
 		for n in range(self.nBins / 2):
@@ -440,11 +439,11 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
 			zp_mode = bilinterp(BetaRel, Freq_p,\
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
-				self.zx_bf)
+				z_bf)
 			zm_mode = bilinterp(BetaRel, Freq_m,\
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
-				self.zx_bf)
+				z_bf)
 			zm_mode.real = sign_m * zm_mode.real
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
@@ -461,6 +460,7 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("X", Zp, Zm)
 	if(self.useY != 0):
+		z_bf = self.localDict["zy_imp"]
 		Zp = []
 		Zm = []
 		for n in range(self.nBins / 2):
@@ -473,11 +473,11 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
 			zp_mode = bilinterp(BetaRel, Freq_p,\
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
-				self.zy_bf)
+				z_bf)
 			zm_mode = bilinterp(BetaRel, Freq_m,\
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
-				self.zy_bf)
+				z_bf)
 			zm_mode.real = sign_m * zm_mode.real
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)

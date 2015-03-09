@@ -80,9 +80,12 @@ class MATRIX_Lattice(AccLattice):
 		T = ring_length/(beta*c)
 		res_dict["period [sec]"] = T
 		res_dict["frequency [Hz]"] = 1./T
-		eta_ring = self.oneTurmMatrix	.get(4,5)*beta*beta*(Ekin+mass)/ring_length
+		# the minus sign needed to take into account dz = - c*beta*dt
+		eta_ring = - self.oneTurmMatrix.get(4,5)*beta*beta*(Ekin+mass)/ring_length
 		res_dict["eta"] = eta_ring
-		gamma_trans =1.0/math.sqrt( eta_ring + 1./(gamma*gamma))
+		res_tmp = 1.0/(eta_ring + 1./(gamma*gamma))
+		gamma_trans = math.sqrt(math.fabs(res_tmp))
+		if(res_tmp < 0.): gamma_trans = complex(0.,gamma_trans)
 		res_dict["gamma transition"] = gamma_trans
 		res_dict["transition energy [GeV]"] = (gamma_trans - 1.0)*mass
 		alpha_p = eta_ring + 1./(gamma*gamma)
@@ -104,6 +107,10 @@ class MATRIX_Lattice(AccLattice):
 		cos_phi_x = (mt.get(0,0)+mt.get(1,1))/2.0
 		cos_phi_y = (mt.get(2,2)+mt.get(3,3))/2.0		
 		if(abs(cos_phi_x) >= 1.0 or abs(cos_phi_x) >= 1.0):
+			txt = "Class orbit.matrix_lattice.MATRIX_Lattice."+os.linesep
+			txt = txt + "Method getRingParametersDict(momentum,mass):"+os.linesep
+			txt = txt + "The one turn matrix is unstable: Sp(Mx) or Sp(My) > 2."
+			orbitFinalize(txt)
 			return res_dict
 		sign_x = +1.0
 		if(abs(mt.get(0,1)) != 0.): sign_x = mt.get(0,1)/abs(mt.get(0,1))

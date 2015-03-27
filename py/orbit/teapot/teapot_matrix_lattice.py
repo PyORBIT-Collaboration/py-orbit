@@ -43,7 +43,9 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 		self.setName(name)
 		self.teapot_lattice = teapot_lattice
 		self.bunch = Bunch()
+		self.lost_bunch = Bunch()
 		bunch.copyEmptyBunchTo(self.bunch)
+		bunch.copyEmptyBunchTo(self.lost_bunch)
 		self.matrixGenerator = MatrixGenerator()
 		#----------make MATRIX lattice from TEAPOT		
 		def twissAction(paramsDict):
@@ -52,7 +54,7 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 			active_index = node.getActivePartIndex()
 			n_parts = node.getnParts()
 			length = node.getLength(active_index)
-			if(isinstance(node, BaseTEAPOT) == True and isinstance(node,RingRFTEAPOT) == False): 
+			if(isinstance(node,BaseTEAPOT) == True and isinstance(node,RingRFTEAPOT) == False): 
 				self.matrixGenerator.initBunch(bunch)
 				node.track(paramsDict)
 				#bunch is ready
@@ -76,8 +78,9 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 		accContainer.addAction(twissAction,AccActionsContainer.BODY)
 		paramsDict = {}
 		paramsDict["bunch"] = self.bunch
-		paramsDict["lostbunch"] = self.bunch
+		paramsDict["lostbunch"] = self.lost_bunch
 		paramsDict["position"] = 0.
+		paramsDict["useCharge"] = self.teapot_lattice.getUseRealCharge()
 		self.teapot_lattice.trackActions(accContainer,paramsDict)		
 		self.makeOneTurnMatrix()
 		self.initialize()		

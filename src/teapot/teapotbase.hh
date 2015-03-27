@@ -10,6 +10,8 @@
 //
 // Modified by Andrei Shishlo
 //   12/30/05
+//   03/27/15 useCharge added. By default the charge from Bunch will be used.
+//            if useCharge != 1 the charge will be assumed +1
 //
 // Checked by Jeff Holmes
 //   02/2012
@@ -33,21 +35,21 @@ namespace teapot_base
     void drifti(Bunch* bunch, int i, double length);
     void drift(Bunch* bunch, double length);
 
-    void multpi(Bunch* bunch, int i, int pole, double kl, int skew);
-    void multp(Bunch* bunch, int pole, double kl, int skew);
+    void multpi(Bunch* bunch, int i, int pole, double kl, int skew, int useCharge);
+    void multp(Bunch* bunch, int pole, double kl, int skew, int useCharge);
 
-    void multpfringeIN(Bunch* bunch, int pole, double kl, int skew);
-    void multpfringeOUT(Bunch* bunch, int pole, double kl, const int skew);
+    void multpfringeIN(Bunch* bunch, int pole, double kl, int skew, int useCharge);
+    void multpfringeOUT(Bunch* bunch, int pole, double kl, const int skew, int useCharge);
 
 	void wrapbunch(Bunch* bunch, double length);
 
-    void kick(Bunch* bunch, double kx, double ky, double kE);
+    void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge);
 
-    void quad1(Bunch* bunch, double length, double kq);
+    void quad1(Bunch* bunch, double length, double kq, int useCharge);
     void quad2(Bunch* bunch, double length);
 
-    void quadfringeIN(Bunch* bunch, double kq);
-    void quadfringeOUT(Bunch* bunch, double kq);
+    void quadfringeIN(Bunch* bunch, double kq, int useCharge);
+    void quadfringeOUT(Bunch* bunch, double kq, int useCharge);
 
     void wedgerotate(Bunch* bunch, double e, int frinout);
     void wedgedrift(Bunch* bunch, double e, int inout);
@@ -61,7 +63,7 @@ namespace teapot_base
     void bendfringeIN(Bunch* bunch, double rho);
     void bendfringeOUT(Bunch* bunch, double rho);
 
-    void soln(Bunch* bunch, double length, double B);
+    void soln(Bunch* bunch, double length, double B, int useCharge);
 
     void wedgebendCF(Bunch* bunch, double e, int inout,
                      double rho,
@@ -69,9 +71,9 @@ namespace teapot_base
                      std::vector<int>& pole,
                      std::vector<double>& kl,
                      std::vector<int>& skew,
-                     int nsteps);
+                     int nsteps, int useCharge);
 
-    void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s);
+    void RingRF(Bunch* bunch, double ring_length, int harmonic_numb, double voltage, double phase_s, int useCharge);
 }
 
 #endif  //TEAPOT_BASE_H

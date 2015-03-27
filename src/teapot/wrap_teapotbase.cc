@@ -76,13 +76,14 @@ extern "C"
         PyObject* pyBunch;
         int pole, skew;
         double kl;
-        if(!PyArg_ParseTuple(	args, "Oidi:multp",
-                             &pyBunch, &pole, &kl, &skew))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Oidi|i:multp",
+                             &pyBunch, &pole, &kl, &skew, &useCharge))
         {
             error("teapotbase - multp - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::multp(cpp_bunch, pole, kl, skew);
+        teapot_base::multp(cpp_bunch, pole, kl, skew, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -93,13 +94,14 @@ extern "C"
         PyObject* pyBunch;
         int pole, skew;
         double kl;
-        if(!PyArg_ParseTuple(	args, "Oidi:multpfringeIN",
-                             &pyBunch, &pole, &kl, &skew))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Oidi|i:multpfringeIN",
+                             &pyBunch, &pole, &kl, &skew, &useCharge))
         {
             error("teapotbase - multpfringeIN - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::multpfringeIN(cpp_bunch, pole, kl, skew);
+        teapot_base::multpfringeIN(cpp_bunch, pole, kl, skew, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -110,13 +112,14 @@ extern "C"
         PyObject* pyBunch;
         int pole, skew;
         double kl;
-        if(!PyArg_ParseTuple(	args, "Oidi:multpfringeOUT",
-                             &pyBunch, &pole, &kl, &skew))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Oidi|i:multpfringeOUT",
+                             &pyBunch, &pole, &kl, &skew, &useCharge))
         {
             error("teapotbase - multpfringeOUT - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::multpfringeOUT(cpp_bunch, pole, kl, skew);
+        teapot_base::multpfringeOUT(cpp_bunch, pole, kl, skew, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -126,13 +129,14 @@ extern "C"
     {
         PyObject* pyBunch;
         double kx, ky, kE;
-        if(!PyArg_ParseTuple(	args, "Oddd:kick",
-                             &pyBunch, &kx, &ky, &kE))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Oddd|i:kick",
+                             &pyBunch, &kx, &ky, &kE, &useCharge))
         {
             error("teapotbase - kick - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::kick(cpp_bunch, kx, ky, kE);
+        teapot_base::kick(cpp_bunch, kx, ky, kE, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -142,13 +146,14 @@ extern "C"
     {
         PyObject* pyBunch;
         double length, kq;
-        if(!PyArg_ParseTuple(	args, "Odd:quad1",
-                             &pyBunch, &length, &kq))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Odd|i:quad1",
+                             &pyBunch, &length, &kq, &useCharge))
         {
             error("teapotbase - quad1 - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::quad1(cpp_bunch, length, kq);
+        teapot_base::quad1(cpp_bunch, length, kq, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -174,13 +179,14 @@ extern "C"
     {
         PyObject* pyBunch;
         double kq;
-        if(!PyArg_ParseTuple(	args, "Od:quadfringeIN",
-                             &pyBunch, &kq))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Od|i:quadfringeIN",
+                             &pyBunch, &kq, &useCharge))
         {
             error("teapotbase - quadfringeIN - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::quadfringeIN(cpp_bunch, kq);
+        teapot_base::quadfringeIN(cpp_bunch, kq, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -190,13 +196,14 @@ extern "C"
     {
         PyObject* pyBunch;
         double kq;
-        if(!PyArg_ParseTuple(	args, "Od:quadfringeOUT",
-                             &pyBunch, &kq))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Od|i:quadfringeOUT",
+                             &pyBunch, &kq, &useCharge))
         {
             error("teapotbase - quadfringeOUT - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::quadfringeOUT(cpp_bunch, kq);
+        teapot_base::quadfringeOUT(cpp_bunch, kq, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -354,13 +361,14 @@ extern "C"
     {
         PyObject* pyBunch;
         double length, B;
-        if(!PyArg_ParseTuple(	args, "Odd:soln",
-                             &pyBunch, &length, &B))
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Odd|i:soln",
+                             &pyBunch, &length, &B, &useCharge))
         {
             error("teapotbase - soln - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        teapot_base::soln(cpp_bunch, length, B);
+        teapot_base::soln(cpp_bunch, length, B, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -377,9 +385,10 @@ extern "C"
         PyObject* polePySeq;
         PyObject* klPySeq;
         PyObject* skewPySeq;
-        if(!PyArg_ParseTuple(	args, "OdidiOOOi:wedgebendCF",
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "OdidiOOOi|i:wedgebendCF",
                              &pyBunch, &e, &inout, &rho, &vecnum,
-                             &polePySeq, &klPySeq, &skewPySeq, &nsteps))
+                             &polePySeq, &klPySeq, &skewPySeq, &nsteps, &useCharge))
         {
             error("teapotbase - wedgebendCF - cannot parse arguments!");
         }
@@ -426,7 +435,7 @@ extern "C"
             Py_DECREF(skewPy);
         }
 
-        teapot_base::wedgebendCF(cpp_bunch,e,inout,rho,vecnum,poleV,klV,skewV,nsteps);
+        teapot_base::wedgebendCF(cpp_bunch,e,inout,rho,vecnum,poleV,klV,skewV,nsteps,useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
@@ -437,45 +446,46 @@ extern "C"
         PyObject* pyBunch;
         double voltage, phase_s, ring_length;
         int harmonics_numb;
-        if(!PyArg_ParseTuple(	args, "Odidd:RingRF",
+        int useCharge = 1;
+        if(!PyArg_ParseTuple(	args, "Odidd|i:RingRF",
                              &pyBunch, &ring_length, &harmonics_numb,
-                             &voltage, &phase_s))
+                             &voltage, &phase_s, &useCharge))
         {
             error("teapotbase - RingRF - cannot parse arguments!");
         }
         Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
         teapot_base::RingRF(cpp_bunch, ring_length, harmonics_numb,
-                            voltage, phase_s);
+                            voltage, phase_s, useCharge);
         Py_INCREF(Py_None);
         return Py_None;
     }
 
     static PyMethodDef teapotbaseMethods[] =
     {
-        {"rotatexy",         wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
-        {"drift",            wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
-		{"wrapbunch",		 wrap_wrapbunch,		  METH_VARARGS, "Tracking a bunch through a wrapbunch routine"},
-        {"multp",            wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},
-        {"multpfringeIN",    wrap_multpfringeIN,  METH_VARARGS, "Tracking a bunch through an IN edge of a multipole "},
-        {"multpfringeOUT",   wrap_multpfringeOUT, METH_VARARGS, "Tracking a bunch through an OUT edge of a multipole"},
-        {"kick",             wrap_kick,           METH_VARARGS, "Kicker element: chnges in x-prime, y-prime and dE"},
-        {"quad1",            wrap_quad1,          METH_VARARGS, "Quadrupole element one: linear transport matrix "},
-        {"quad2",            wrap_quad2,          METH_VARARGS, "Quadrupole element two: drift in quadrupole "},
-        {"quadfringeIN",     wrap_quadfringeIN,   METH_VARARGS, "Quadrupole element IN edge"},
-        {"quadfringeOUT",    wrap_quadfringeOUT,  METH_VARARGS, "Quadrupole element OUT edge"},
-        {"wedgerotate",      wrap_wedgerotate,    METH_VARARGS, "Rotates coordinates by e for fringe fields at non-SBEND "},
-        {"wedgedrift",       wrap_wedgedrift,     METH_VARARGS, "Drifts particles through wedge for non-SBEND "},
-        {"wedgebend",        wrap_wedgebend,      METH_VARARGS, "Straight bends particles through wedge for non-SBEND "},
-        {"bend1",            wrap_bend1,          METH_VARARGS, "Linear bend transport "},
-        {"bend2",            wrap_bend2,          METH_VARARGS, "Kinetic bend transport (same as nonlinear quad transport - quad2) "},
-        {"bend3",            wrap_bend3,          METH_VARARGS, "Nonlinear curvature bend transport depending on py and dE in Hamiltonian "},
-        {"bend4",            wrap_bend4,          METH_VARARGS, "Nonlinear curvature bend transport depending on px in Hamiltonian "},
-        {"bendfringeIN",     wrap_bendfringeIN,   METH_VARARGS, "Hard edge fringe field for a bend IN"},
-        {"bendfringeOUT",    wrap_bendfringeOUT,  METH_VARARGS, "Hard edge fringe field for a bend OUT"},
-        {"soln",             wrap_soln,           METH_VARARGS, "Integration through a solenoid "},
-        {"wedgebendCF",      wrap_wedgebendCF,    METH_VARARGS, "Straight bends particles through wedge for Combined Function non-SBEND "},
-        {"RingRF",           wrap_RingRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
-        { NULL, NULL }
+			{"rotatexy",         wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
+			{"drift",            wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
+			{"wrapbunch",		 wrap_wrapbunch,		  METH_VARARGS, "Tracking a bunch through a wrapbunch routine"},
+			{"multp",            wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},
+			{"multpfringeIN",    wrap_multpfringeIN,  METH_VARARGS, "Tracking a bunch through an IN edge of a multipole "},
+			{"multpfringeOUT",   wrap_multpfringeOUT, METH_VARARGS, "Tracking a bunch through an OUT edge of a multipole"},
+			{"kick",             wrap_kick,           METH_VARARGS, "Kicker element: chnges in x-prime, y-prime and dE"},
+			{"quad1",            wrap_quad1,          METH_VARARGS, "Quadrupole element one: linear transport matrix "},
+			{"quad2",            wrap_quad2,          METH_VARARGS, "Quadrupole element two: drift in quadrupole "},
+			{"quadfringeIN",     wrap_quadfringeIN,   METH_VARARGS, "Quadrupole element IN edge"},
+			{"quadfringeOUT",    wrap_quadfringeOUT,  METH_VARARGS, "Quadrupole element OUT edge"},
+			{"wedgerotate",      wrap_wedgerotate,    METH_VARARGS, "Rotates coordinates by e for fringe fields at non-SBEND "},
+			{"wedgedrift",       wrap_wedgedrift,     METH_VARARGS, "Drifts particles through wedge for non-SBEND "},
+			{"wedgebend",        wrap_wedgebend,      METH_VARARGS, "Straight bends particles through wedge for non-SBEND "},
+			{"bend1",            wrap_bend1,          METH_VARARGS, "Linear bend transport "},
+			{"bend2",            wrap_bend2,          METH_VARARGS, "Kinetic bend transport (same as nonlinear quad transport - quad2) "},
+			{"bend3",            wrap_bend3,          METH_VARARGS, "Nonlinear curvature bend transport depending on py and dE in Hamiltonian "},
+			{"bend4",            wrap_bend4,          METH_VARARGS, "Nonlinear curvature bend transport depending on px in Hamiltonian "},
+			{"bendfringeIN",     wrap_bendfringeIN,   METH_VARARGS, "Hard edge fringe field for a bend IN"},
+			{"bendfringeOUT",    wrap_bendfringeOUT,  METH_VARARGS, "Hard edge fringe field for a bend OUT"},
+			{"soln",             wrap_soln,           METH_VARARGS, "Integration through a solenoid "},
+			{"wedgebendCF",      wrap_wedgebendCF,    METH_VARARGS, "Straight bends particles through wedge for Combined Function non-SBEND "},
+			{"RingRF",           wrap_RingRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
+			{ NULL, NULL }
     };
 
     void initteapotbase(void)

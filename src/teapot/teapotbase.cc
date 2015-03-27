@@ -232,9 +232,10 @@ void wrapbunch(Bunch* bunch, double length)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void kick(Bunch* bunch, double kx, double ky, double kE)
+void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double kxc = kx * charge;
     double kyc = ky * charge;
     double kEc = kE * charge;
@@ -282,9 +283,10 @@ void kick(Bunch* bunch, double kx, double ky, double kE)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void multpi(Bunch* bunch, int i, int pole, double kl, int skew)
+void multpi(Bunch* bunch, int i, int pole, double kl, int skew, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double klc = kl * charge;
     std::complex<double> z, zn;
     double kl1;
@@ -333,9 +335,10 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void multp(Bunch* bunch, int pole, double kl, int skew)
+void multp(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double klc = kl * charge;
     std::complex<double> z, zn;
     double kl1;
@@ -388,9 +391,10 @@ void multp(Bunch* bunch, int pole, double kl, int skew)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
+void multpfringeIN(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double klc = kl * charge;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
@@ -497,9 +501,10 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew)
+void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double klc = kl * charge;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
@@ -605,9 +610,10 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void quad1(Bunch* bunch, double length, double kq)
+void quad1(Bunch* bunch, double length, double kq, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double kqc = kq * charge;
     if(kqc == 0.)
     {
@@ -746,9 +752,10 @@ void quad2(Bunch* bunch, double length)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void quadfringeIN(Bunch* bunch, double kq)
+void quadfringeIN(Bunch* bunch, double kq, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double kqc = kq * charge;
     double KNL, x_init, xp_init, y_init, yp_init;
 
@@ -807,9 +814,10 @@ void quadfringeIN(Bunch* bunch, double kq)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void quadfringeOUT(Bunch* bunch, double kq)
+void quadfringeOUT(Bunch* bunch, double kq, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double kqc = kq * charge;
     double KNL, x_init, xp_init, y_init, yp_init;
 
@@ -1313,9 +1321,10 @@ void bendfringeOUT(Bunch* bunch, double rho)
 //
 ///////////////////////////////////////////////////////////////////////////
 
-void soln(Bunch* bunch, double length, double B)
+void soln(Bunch* bunch, double length, double B, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double Bc = B * charge;
     double KNL, phase, cs, sn;
     double cu, cpu, u_init, pu_init, u, pu, phifac;
@@ -1394,7 +1403,7 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
                  std::vector<int>& pole,
                  std::vector<double>& kl,
                  std::vector<int>& skew,
-                 int nsteps)
+                 int nsteps, int useCharge)
 {
     double ct, tn;
     double s, sm, sm2, klint;
@@ -1433,7 +1442,7 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
         for (int l = 0; l < vecnum; l++)
         {
             klint = kl[l] * sm;
-            multpi(bunch, i, pole[l], klint, skew[l]);
+            multpi(bunch, i, pole[l], klint, skew[l], useCharge);
         }
         for(int j = 1; j < nst; j++)
         {
@@ -1442,7 +1451,7 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
             for (int l = 0; l < vecnum; l++)
             {
                 klint = kl[l] * sm;
-                multpi(bunch, i, pole[l], klint, skew[l]);
+                multpi(bunch, i, pole[l], klint, skew[l], useCharge);
             }
         }
         drifti(bunch, i, sm2);
@@ -1469,9 +1478,10 @@ void wedgebendCF(Bunch* bunch, double e, int inout,
 ///////////////////////////////////////////////////////////////////////////
 
 void RingRF(Bunch* bunch, double ring_length, int harmonic_numb,
-            double voltage, double phase_s)
+            double voltage, double phase_s, int useCharge)
 {
-    double charge = bunch->getCharge();
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
     double deltaV = 0.;
     double coeff  = charge;
 

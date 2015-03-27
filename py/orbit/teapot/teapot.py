@@ -41,7 +41,7 @@ class TEAPOT_Lattice(AccLattice):
 	"""
 	def __init__(self, name = "no name"):
 		AccLattice.__init__(self,name)
-
+		self.useCharge = 1
 
 	def readMAD(self, mad_file_name, lineName):
 		"""
@@ -106,7 +106,9 @@ class TEAPOT_Lattice(AccLattice):
 		It returns the new TEAPOT_Lattice with children with indexes 
 		between index_start and index_stop inclusive
 		"""
-		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
+		new_teapot_lattice = self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
+		new_teapot_lattice.setUseRealCharge(self.getUseRealCharge())
+		return new_teapot_lattice
 
 	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
 		"""
@@ -114,7 +116,7 @@ class TEAPOT_Lattice(AccLattice):
 		"""
 		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
 		paramsDict["bunch"] = bunch
-		
+		paramsDict["useCharge"] = self.useCharge
 		
 		def track(paramsDict):
 			node = paramsDict["node"]
@@ -124,6 +126,13 @@ class TEAPOT_Lattice(AccLattice):
 		self.trackActions(actionContainer,paramsDict)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
 
+	def setUseRealCharge(self, useCharge = 1):
+		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
+		self.useCharge = useCharge
+	
+	def getUseRealCharge(self):
+		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
+		return self.useCharge
 
 class TEAPOT_Ring(AccLattice):
 	"""
@@ -132,6 +141,7 @@ class TEAPOT_Ring(AccLattice):
 		"""
 	def __init__(self, name = "no name"):
 		AccLattice.__init__(self,name)
+		self.useCharge = 1		
 	
 	def readMAD(self, mad_file_name, lineName):
 		"""
@@ -183,7 +193,6 @@ class TEAPOT_Ring(AccLattice):
 		self.addChildren()
 		self.initialize()
 
-	
 	def addChildren(self):
 		AccLattice.initialize(self)
 		for node in self.getNodes():
@@ -219,10 +228,13 @@ class TEAPOT_Ring(AccLattice):
 
 	def getSubLattice(self, index_start = -1, index_stop = -1,):
 		"""
-			It returns the new TEAPOT_Lattice with children with indexes
-			between index_start and index_stop inclusive
-			"""
-		return self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
+		It returns the new TEAPOT_Lattice with children with indexes 
+		between index_start and index_stop inclusive
+		"""
+		new_teapot_lattice = self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
+		new_teapot_lattice.setUseRealCharge(self.getUseRealCharge())
+		return new_teapot_lattice		
+		
 	
 	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
 		"""
@@ -230,6 +242,7 @@ class TEAPOT_Ring(AccLattice):
 			"""
 		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
 		paramsDict["bunch"] = bunch
+		paramsDict["useCharge"] = self.useCharge		
 		
 		def track(paramsDict):
 			node = paramsDict["node"]
@@ -238,6 +251,14 @@ class TEAPOT_Ring(AccLattice):
 		actionContainer.addAction(track, AccActionsContainer.BODY)
 		self.trackActions(actionContainer,paramsDict)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
+		
+	def setUseRealCharge(self, useCharge = 1):
+		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
+		self.useCharge = useCharge
+	
+	def getUseRealCharge(self):
+		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
+		return self.useCharge		
 
 
 class _teapotFactory:
@@ -675,8 +696,10 @@ class SolenoidTEAPOT(NodeTEAPOT):
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
 		bunch = paramsDict["bunch"]
+		useCharge = 1
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
 		B = node.getParam("B")
-		TPB.soln(bunch, length, B)
+		TPB.soln(bunch,length,B,useCharge)
 
 class MultipoleTEAPOT(NodeTEAPOT):
 	"""
@@ -704,11 +727,13 @@ class MultipoleTEAPOT(NodeTEAPOT):
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
 			bunch = paramsDict["bunch"]
+			useCharge = 1
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeIN(bunch,pole,kl/length,skew)
+				TPB.multpfringeIN(bunch,pole,kl/length,skew,useCharge)
 
 		def fringeOUT(node,paramsDict):
 			usageOUT = node.getUsage()
@@ -721,11 +746,13 @@ class MultipoleTEAPOT(NodeTEAPOT):
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
 			bunch = paramsDict["bunch"]
+			useCharge = 1
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeOUT(bunch,pole,kl/length,skew)
+				TPB.multpfringeOUT(bunch,pole,kl/length,skew,useCharge)
 
 		self.setFringeFieldFunctionIN(fringeIN)
 		self.setFringeFieldFunctionOUT(fringeOUT)
@@ -766,6 +793,8 @@ class MultipoleTEAPOT(NodeTEAPOT):
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
 		bunch = paramsDict["bunch"]
+		useCharge = 1
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
@@ -777,7 +806,7 @@ class MultipoleTEAPOT(NodeTEAPOT):
 				pole = poleArr[i]
 				kl = klArr[i]/(nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew)
+				TPB.multp(bunch,pole,kl,skew,useCharge)
 			TPB.drift(bunch, length)
 			return
 		if(index == (nParts-1)):
@@ -785,7 +814,7 @@ class MultipoleTEAPOT(NodeTEAPOT):
 				pole = poleArr[i]
 				kl = klArr[i]/(nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew)
+				TPB.multp(bunch,pole,kl,skew,useCharge)
 			TPB.drift(bunch, length)
 		return
 
@@ -816,14 +845,16 @@ class QuadTEAPOT(NodeTEAPOT):
 			skewArr = node.getParam("skews")
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
-			TPB.quadfringeIN(bunch,kq)
+			useCharge = 1
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]					
+			TPB.quadfringeIN(bunch,kq,useCharge)
 			if(length == 0.):
 				return
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeIN(bunch,pole,kl/length,skew)
+				TPB.multpfringeIN(bunch,pole,kl/length,skew,useCharge)
 
 		def fringeOUT(node,paramsDict):
 			usageOUT = node.getUsage()
@@ -835,14 +866,16 @@ class QuadTEAPOT(NodeTEAPOT):
 			skewArr = node.getParam("skews")
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
-			TPB.quadfringeOUT(bunch,kq)
+			useCharge = 1
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
+			TPB.quadfringeOUT(bunch,kq,useCharge)
 			if(length == 0.):
 				return
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeOUT(bunch,pole,kl/length,skew)
+				TPB.multpfringeOUT(bunch,pole,kl/length,skew,useCharge)
 
 		self.setFringeFieldFunctionIN(fringeIN)
 		self.setFringeFieldFunctionOUT(fringeOUT)
@@ -891,8 +924,10 @@ class QuadTEAPOT(NodeTEAPOT):
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
 		bunch = paramsDict["bunch"] 
+		useCharge = 1
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
 		if(index == 0):
-			TPB.quad1(bunch, length, kq)
+			TPB.quad1(bunch,length,kq,useCharge)
 			return
 		if(index > 0 and index < (nParts-1)):
 			TPB.quad2(bunch, length/2.0)
@@ -900,9 +935,9 @@ class QuadTEAPOT(NodeTEAPOT):
 				pole = poleArr[i]
 				kl = klArr[i]/(nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew)
-			TPB.quad2(bunch, length/2.0)
-			TPB.quad1(bunch, length, kq)
+				TPB.multp(bunch,pole,kl,skew,useCharge)
+			TPB.quad2(bunch,length/2.0)
+			TPB.quad1(bunch,length,kq,useCharge)
 			return
 		if(index == (nParts-1)):
 			TPB.quad2(bunch, length)
@@ -910,9 +945,9 @@ class QuadTEAPOT(NodeTEAPOT):
 				pole = poleArr[i]
 				kl = klArr[i]/(nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew)
-			TPB.quad2(bunch, length)
-			TPB.quad1(bunch, length, kq)
+				TPB.multp(bunch,pole,kl,skew,useCharge)
+			TPB.quad2(bunch,length)
+			TPB.quad1(bunch,length,kq,useCharge)
 		return
 
 class BendTEAPOT(NodeTEAPOT):
@@ -944,6 +979,8 @@ class BendTEAPOT(NodeTEAPOT):
 			skewArr = node.getParam("skews")[:]
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
+			useCharge = 1
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
 			nParts = paramsDict["parentNode"].getnParts()
 			if(e != 0.):
 				inout = 0
@@ -957,10 +994,10 @@ class BendTEAPOT(NodeTEAPOT):
 							pole = poleArr[i]
 							kl = klArr[i]/length
 							skew = skewArr[i]
-							TPB.multpfringeIN(bunch,pole,kl,skew)
+							TPB.multpfringeIN(bunch,pole,kl,skew,useCharge)
 					frinout = 1
 					TPB.wedgerotate(bunch, e, frinout)
-				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1)
+				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1, useCharge)
 			else:
 				if(usageIN):
 					TPB.bendfringeIN(bunch, rho)
@@ -969,7 +1006,7 @@ class BendTEAPOT(NodeTEAPOT):
 							pole = poleArr[i]
 							kl = klArr[i]/length
 							skew = skewArr[i]
-							TPB.multpfringeIN(bunch,pole,kl,skew)
+							TPB.multpfringeIN(bunch,pole,kl,skew,useCharge)
 
 		def fringeOUT(node,paramsDict):
 			usageOUT = node.getUsage()
@@ -980,10 +1017,12 @@ class BendTEAPOT(NodeTEAPOT):
 			skewArr = node.getParam("skews")[:]
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
+			useCharge = 1
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
 			nParts = paramsDict["parentNode"].getnParts()
 			if(e != 0.):
 				inout = 1
-				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1)
+				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1, useCharge)
 				if(usageOUT):
 					frinout = 0
 					TPB.wedgerotate(bunch, -e, frinout)
@@ -993,7 +1032,7 @@ class BendTEAPOT(NodeTEAPOT):
 							pole = poleArr[i]
 							kl = klArr[i]/length
 							skew = skewArr[i]
-							TPB.multpfringeOUT(bunch,pole,kl,skew)
+							TPB.multpfringeOUT(bunch,pole,kl,skew,useCharge)
 					frinout = 1
 					TPB.wedgerotate(bunch, -e, frinout)
 				TPB.wedgedrift(bunch,e,inout)
@@ -1005,7 +1044,7 @@ class BendTEAPOT(NodeTEAPOT):
 							pole = poleArr[i]
 							kl = klArr[i]/length
 							skew = skewArr[i]
-							TPB.multpfringeOUT(bunch,pole,kl,skew)
+							TPB.multpfringeOUT(bunch,pole,kl,skew,useCharge)
 
 		self.setFringeFieldFunctionIN(fringeIN)
 		self.setFringeFieldFunctionOUT(fringeOUT)
@@ -1051,6 +1090,8 @@ class BendTEAPOT(NodeTEAPOT):
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
 		bunch = paramsDict["bunch"]
+		useCharge = 1
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
 		theta = self.getParam("theta")/(nParts - 1)
 		if(index == 0):
 			TPB.bend1(bunch, length, theta/2.0)
@@ -1063,11 +1104,11 @@ class BendTEAPOT(NodeTEAPOT):
 				pole = poleArr[i]
 				kl = klArr[i]/(nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew)
+				TPB.multp(bunch,pole,kl,skew,useCharge)
 			TPB.bend4(bunch,theta/2.0)
-			TPB.bend3(bunch, theta/2.0)
-			TPB.bend2(bunch, length/2.0)
-			TPB.bend1(bunch, length, theta)
+			TPB.bend3(bunch,theta/2.0)
+			TPB.bend2(bunch,length/2.0)
+			TPB.bend1(bunch,length,theta)
 			return
 		if(index == (nParts-1)):
 			TPB.bend2(bunch, length)
@@ -1077,7 +1118,7 @@ class BendTEAPOT(NodeTEAPOT):
 				pole = poleArr[i]
 				kl = klArr[i]/(nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew)
+				TPB.multp(bunch,pole,kl,skew,useCharge)
 			TPB.bend4(bunch, theta/2.0)
 			TPB.bend3(bunch, theta/2.0)
 			TPB.bend2(bunch, length)
@@ -1144,11 +1185,13 @@ class RingRFTEAPOT(NodeTEAPOT):
 		phaseArr = self.getParam("phases")
 		ring_length = self.getParam("ring_length")
 		bunch = paramsDict["bunch"]
+		useCharge = 1
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]	
 		length = self.getLength(self.getActivePartIndex())
 		for i in range(len(harmArr)):
 			#print "debug rl=",ring_length," harm=",harmArr[i]," v=",voltArr[i],
 			#print " ph0=",phaseArr[i]," L=",self.getLength()
-			TPB.RingRF(bunch,ring_length,harmArr[i],voltArr[i],phaseArr[i])
+			TPB.RingRF(bunch,ring_length,harmArr[i],voltArr[i],phaseArr[i],useCharge)
 		
 class KickTEAPOT(NodeTEAPOT):
 	"""
@@ -1202,18 +1245,19 @@ class KickTEAPOT(NodeTEAPOT):
 		strength = 1.0
 		if(self.waveform):
 			strength = self.waveform.getKickFactor()
-					
 		kx = strength * self.getParam("kx")/(nParts-1)
 		ky = strength * self.getParam("ky")/(nParts-1)
 		dE = self.getParam("dE")/(nParts-1)
 		bunch = paramsDict["bunch"]
+		useCharge = 1
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 		if(index == 0):
 			TPB.drift(bunch, length)
-			TPB.kick(bunch,kx,ky,dE)
+			TPB.kick(bunch,kx,ky,dE,useCharge)
 			return
 		if(index > 0 and index < (nParts-1)):
 			TPB.drift(bunch, length)
-			TPB.kick(bunch,kx,ky,dE)
+			TPB.kick(bunch,kx,ky,dE,useCharge)
 			return
 		if(index == (nParts-1)):
 			TPB.drift(bunch, length)

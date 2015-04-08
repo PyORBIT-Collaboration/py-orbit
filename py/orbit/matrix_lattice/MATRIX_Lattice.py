@@ -1,7 +1,7 @@
 """
-The general Matrix lattice. The matrices track the bunch as 
+The general Matrix lattice. The matrices track the bunch as
 the linear transport elements. It is a base class for TEAPOT_MATRIX_Lattice,
-but it can be used by itself if user specifies the transport matrices by using 
+but it can be used by itself if user specifies the transport matrices by using
 addNode(BaseMATRIX). After adding nodes the user has to initialize() the lattice.
 The initialization will create one turn matrix, but the user can ignore it if
 the lattice is a linac lattice.
@@ -10,7 +10,7 @@ The  This class cannot calculate chromaticities.
 import os
 import math
 
-#import bunch
+# import bunch
 from bunch import Bunch
 
 # import the function that creates multidimensional arrays
@@ -35,16 +35,16 @@ class MATRIX_Lattice(AccLattice):
 	def __init__(self, name = None):
 		AccLattice.__init__(self,name)
 		self.oneTurmMatrix = Matrix(7,7)
-		self.oneTurmMatrix.unit()		
-		
+		self.oneTurmMatrix.unit()	
+
 	def initialize(self):
 		"""
-		Method. Initializes the matrix lattice, child node structures, and calculates 
+		Method. Initializes the matrix lattice, child node structures, and calculates
 		the one turn matrix.
 		"""
-		AccLattice.initialize(self)	
+		AccLattice.initialize(self)
 		self.makeOneTurnMatrix()
-		
+
 	def makeOneTurnMatrix(self):
 		"""
 		Calculates the one turn matrix.
@@ -59,8 +59,8 @@ class MATRIX_Lattice(AccLattice):
 		"""
 		Returns the one turn matrix.
 		"""
-		return self.oneTurmMatrix		
-		
+		return self.oneTurmMatrix
+
 	def getRingParametersDict(self,momentum,mass):
 		"""
 		Returns the dictionary with different ring parametrs
@@ -80,16 +80,6 @@ class MATRIX_Lattice(AccLattice):
 		T = ring_length/(beta*c)
 		res_dict["period [sec]"] = T
 		res_dict["frequency [Hz]"] = 1./T
-		# the minus sign needed to take into account dz = - c*beta*dt
-		eta_ring = - self.oneTurmMatrix.get(4,5)*beta*beta*(Ekin+mass)/ring_length
-		res_dict["eta"] = eta_ring
-		res_tmp = 1.0/(eta_ring + 1./(gamma*gamma))
-		gamma_trans = math.sqrt(math.fabs(res_tmp))
-		if(res_tmp < 0.): gamma_trans = complex(0.,gamma_trans)
-		res_dict["gamma transition"] = gamma_trans
-		res_dict["transition energy [GeV]"] = (gamma_trans - 1.0)*mass
-		alpha_p = eta_ring + 1./(gamma*gamma)
-		res_dict["momentum compaction"] = alpha_p
 		#transverse twiss parameters
 		mt = self.oneTurmMatrix
 		res_dict["fractional tune x"] = None
@@ -107,10 +97,6 @@ class MATRIX_Lattice(AccLattice):
 		cos_phi_x = (mt.get(0,0)+mt.get(1,1))/2.0
 		cos_phi_y = (mt.get(2,2)+mt.get(3,3))/2.0		
 		if(abs(cos_phi_x) >= 1.0 or abs(cos_phi_x) >= 1.0):
-			txt = "Class orbit.matrix_lattice.MATRIX_Lattice."+os.linesep
-			txt = txt + "Method getRingParametersDict(momentum,mass):"+os.linesep
-			txt = txt + "The one turn matrix is unstable: Sp(Mx) or Sp(My) > 2."
-			orbitFinalize(txt)
 			return res_dict
 		sign_x = +1.0
 		if(abs(mt.get(0,1)) != 0.): sign_x = mt.get(0,1)/abs(mt.get(0,1))
@@ -130,7 +116,7 @@ class MATRIX_Lattice(AccLattice):
 		gamma_x = -mt.get(1,0)/sin_phi_x
 		gamma_y = -mt.get(3,2)/sin_phi_y
 		# dispersion and dispersion prime
-		m_coeff =  momentum*momentum/(mass + Ekin)
+		m_coeff =  momentum * momentum / Etotal
 		disp_x = m_coeff*(mt.get(0,5)*(1-mt.get(1,1))+mt.get(0,1)*mt.get(1,5))/(2-mt.get(0,0)-mt.get(1,1)) 
 		disp_y = m_coeff*(mt.get(2,5)*(1-mt.get(3,3))+mt.get(2,3)*mt.get(3,5))/(2-mt.get(2,2)-mt.get(3,3)) 
 		disp_pr_x = m_coeff*(mt.get(1,0)*mt.get(0,5)+mt.get(1,5)*(1-mt.get(0,0)))/(2-mt.get(0,0)-mt.get(1,1))
@@ -145,6 +131,23 @@ class MATRIX_Lattice(AccLattice):
 		res_dict["dispersion y [m]"] = disp_y 
 		res_dict["dispersion prime x"] = disp_pr_x
 		res_dict["dispersion prime y"] = disp_pr_y
+		#more longitudinal params
+		termx  = mt.get(4,0) * disp_x
+		termxp = mt.get(4,1) * disp_pr_x
+		termy  = mt.get(4,2) * disp_y
+		termyp = mt.get(4,3) * disp_pr_y
+		termdE = mt.get(4,5) * beta * beta * Etotal
+		eta_ring = -(termx + termxp + termy + termyp + termdE)\
+			/ ring_length	
+		res_dict["eta"] = eta_ring
+		alpha_p = eta_ring + 1. / (gamma * gamma)
+		sqarg = alpha_p
+		if(alpha_p  < 0.):
+			sqarg = -alpha_p
+		gamma_trans = 1.0 / math.sqrt(sqarg)
+		res_dict["gamma transition"] = gamma_trans
+		res_dict["transition energy [GeV]"] = (gamma_trans - 1.0)*mass
+		res_dict["momentum compaction"] = alpha_p
 		return res_dict
 
 	def getRingTwissDataX(self,momentum,mass):
@@ -208,11 +211,6 @@ class MATRIX_Lattice(AccLattice):
 				mt = matrixNode.getMatrix()
 				ind0 = 0+dir_ind
 				ind1 = 1+dir_ind
-				#if(count < 5):
-				#	print "debug =========count =",count, " position=",position
-				#	print "debug a00=",mt.get(ind0,ind0)," a01=",mt.get(ind0,ind1)
-				#	print "debug a10=",mt.get(ind1,ind0)," a11=",mt.get(ind1,ind1)
-				#	print "debug OLD aplha =",track_v.get(0)," beta=",track_v.get(1)," gamma=",track_v.get(2)
 				track_m.set(0,0,mt.get(ind0,ind0)*mt.get(ind1,ind1)+mt.get(ind0,ind1)*mt.get(ind1,ind0))
 				track_m.set(0,1,-mt.get(ind0,ind0)*mt.get(ind1,ind0))
 				track_m.set(0,2,-mt.get(ind0,ind1)*mt.get(ind1,ind1))
@@ -227,8 +225,6 @@ class MATRIX_Lattice(AccLattice):
 				delta_phi = math.atan(	mt.get(ind0,ind1)/(	beta_0*mt.get(ind0,ind0) - alpha_0*mt.get(ind0,ind1)))
 				phi = phi + delta_phi
 				track_v = track_m.mult(track_v)	
-				#if(count < 5):
-				#	print "debug NEW aplha =",track_v.get(0)," beta=",track_v.get(1)," gamma=",track_v.get(2)			
 				position_old = position
 				beta_old = beta_0
 				position = position + matrixNode.getLength()
@@ -314,11 +310,6 @@ class MATRIX_Lattice(AccLattice):
 				mt = matrixNode.getMatrix()
 				ind0 = 0+dir_ind
 				ind1 = 1+dir_ind
-				#if(count < 200):
-				#	print "debug =========count =",count, " position=",position
-				#	print "debug a00=",mt.get(ind0,ind0)," a01=",mt.get(ind0,ind1)," a02=",mt.get(ind0,5)
-				#	print "debug a10=",mt.get(ind1,ind0)," a11=",mt.get(ind1,ind1)," a12=",mt.get(ind0,5)
-				#	print "debug OLD disp =",track_v.get(0)," disp_prime=",track_v.get(1)
 				track_m.set(0,0,mt.get(ind0,ind0))
 				track_m.set(0,1,mt.get(ind0,ind1))
 				track_m.set(1,0,mt.get(ind1,ind0))
@@ -326,10 +317,7 @@ class MATRIX_Lattice(AccLattice):
 				track_m.set(0,2,mt.get(ind0,5)*m_coeff)
 				track_m.set(1,2,mt.get(ind1,5)*m_coeff)
 				track_v = track_m.mult(track_v)	
-				#if(count < 200):
-				#		print "debug NEW disp =",track_v.get(0)," disp_prime=",track_v.get(1)
 				position = position + matrixNode.getLength()
-				#count = count + 1
 		pos_arr.append(position)
 		disp_arr.append(track_v.get(0))
 		disp_p_arr.append(track_v.get(1))

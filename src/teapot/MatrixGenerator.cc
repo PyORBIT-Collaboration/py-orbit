@@ -96,8 +96,8 @@ namespace teapot_base
         {
             for(int j = 0; j < 6; j++)
             {
-                x1 = step_arr[j]/step_reduce;
-                x2 = step_arr[j];
+                x1 = step_arr[i]/step_reduce;
+                x2 = step_arr[i];
                 y0 = coord_arr[0][j];
                 y1 = coord_arr[i+1][j];
                 y2 = coord_arr[i+1+6][j];

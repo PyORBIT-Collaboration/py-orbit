@@ -68,9 +68,6 @@ public:
   /** Routine for calculating the transverse kick to the particle **/
   double _kick(double macrophase);
 
-  /** Returns the 1D grid with a longitudinal density **/
-  Grid1D* getLongGrid();
-
   double _length;
   int _nMacrosMin;
   int _nBins;
@@ -114,4 +111,3 @@ public:
 };
 //end of TIMPEDANCE_H
 #endif
-

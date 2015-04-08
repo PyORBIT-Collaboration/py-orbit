@@ -45,9 +45,6 @@ public:
   /** Routine for calculating the kick to the particle **/
   double _kick(double angle);
 
-  /** Returns the 1D grid with a longitudinal density **/
-  Grid1D* getLongGrid();
-
 
 //private:
   double _length;
@@ -65,7 +62,6 @@ public:
   double* _chi;
 
   std::complex<double>* _zImped_n;
-  //vector<complex> _zImped_n;
 
   fftw_plan _plan;
   fftw_complex* _in;
@@ -73,4 +69,3 @@ public:
 };
 //end of LIMPEDANCE_H
 #endif
-

@@ -84,12 +84,6 @@ void LImpedance::assignImpedanceValue(int n, double real, double imag)
 }
 
 
-Grid1D* LImpedance::getLongGrid()
-{
-  return zGrid;
-}
-
-
 void LImpedance::trackBunch(Bunch* bunch)
 {
   int nPartsGlobal = bunch->getSizeGlobal();

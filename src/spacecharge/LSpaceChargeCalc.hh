@@ -45,9 +45,6 @@ public:
 	/** Routine for calculating the kick to the particle **/
 	double _kick(double angle);
 
-	/** Returns the 1D grid with a longitudinal density. **/
-	Grid1D* getLongGrid();
-
 
 //private:
 	double b_a;

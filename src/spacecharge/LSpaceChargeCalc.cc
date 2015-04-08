@@ -84,12 +84,6 @@ void LSpaceChargeCalc::assignImpedanceValue(int n, double real, double imag)
 }
 
 
-Grid1D* LSpaceChargeCalc::getLongGrid()
-{
-  return zGrid;
-}
-
-
 void LSpaceChargeCalc::trackBunch(Bunch* bunch)
 {
   int nPartsGlobal = bunch->getSizeGlobal();

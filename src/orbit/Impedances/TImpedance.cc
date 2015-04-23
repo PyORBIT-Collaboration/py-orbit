@@ -48,33 +48,28 @@ TImpedance::TImpedance(double length,
   _alpha   = 0.0;
   _beta    = 0.0;
 
-  if(_useX)
+  _xCentroid      = new double[_nBins];
+  _xpCentroid     = new double[_nBins];
+  _zXImped_nplus  = new std::complex<double>[_nBins];
+  _zXImped_nminus = new std::complex<double>[_nBins];
+  for(int n = 0; n < _nBins; n++)
   {
-    _xCentroid      = new double[_nBins];
-    _xpCentroid     = new double[_nBins];
-    _zXImped_nplus  = new std::complex<double>[_nBins];
-    _zXImped_nminus = new std::complex<double>[_nBins];
-    for(int n = 0; n < _nBins; n++)
-    {
-      _xCentroid[n]      = 0.0;
-      _xpCentroid[n]     = 0.0;
-      _zXImped_nplus[n]  = std::complex<double>(0.0, 0.0);
-      _zXImped_nminus[n] = std::complex<double>(0.0, 0.0);
-    }
+    _xCentroid[n]      = 0.0;
+    _xpCentroid[n]     = 0.0;
+    _zXImped_nplus[n]  = std::complex<double>(0.0, 0.0);
+    _zXImped_nminus[n] = std::complex<double>(0.0, 0.0);
   }
-  if(_useY)
+
+  _yCentroid      = new double[_nBins];
+  _ypCentroid     = new double[_nBins];
+  _zYImped_nplus  = new std::complex<double>[_nBins];
+  _zYImped_nminus = new std::complex<double>[_nBins];
+  for(int n = 0; n < _nBins; n++)
   {
-    _yCentroid      = new double[_nBins];
-    _ypCentroid     = new double[_nBins];
-    _zYImped_nplus  = new std::complex<double>[_nBins];
-    _zYImped_nminus = new std::complex<double>[_nBins];
-    for(int n = 0; n < _nBins; n++)
-    {
-      _yCentroid[n]      = 0.0;
-      _ypCentroid[n]     = 0.0;
-      _zYImped_nplus[n]  = std::complex<double>(0.0, 0.0);
-      _zYImped_nminus[n] = std::complex<double>(0.0, 0.0);
-    }
+    _yCentroid[n]      = 0.0;
+    _ypCentroid[n]     = 0.0;
+    _zYImped_nplus[n]  = std::complex<double>(0.0, 0.0);
+    _zYImped_nminus[n] = std::complex<double>(0.0, 0.0);
   }
 
   _phiCount      = new double[_nBins];
@@ -110,23 +105,20 @@ TImpedance::~TImpedance()
   {
     delete zGrid;
   }
-  if(_useX)
-  {
-    delete[] _xCentroid;
-    delete[] _xpCentroid;
-    delete[] _zXImped_nplus;
-    delete[] _zXImped_nminus;
-  }
-  if(_useY)
-  {
-    delete[] _yCentroid;
-    delete[] _ypCentroid;
-    delete[] _zYImped_nplus;
-    delete[] _zYImped_nminus;
-  }
+
+  delete[] _xCentroid;
+  delete[] _xpCentroid;
+  delete[] _zXImped_nplus;
+  delete[] _zXImped_nminus;
+
+  delete[] _yCentroid;
+  delete[] _ypCentroid;
+  delete[] _zYImped_nplus;
+  delete[] _zYImped_nminus;
+
+  delete[] _phiCount;
   delete[] _FFTResult1;
   delete[] _FFTResult2;  
-  delete[] _phiCount;
   delete[] _Centroid;
   delete[] _pCentroid;
   delete[] _zImped_nplus;
@@ -152,7 +144,6 @@ TImpedance::~TImpedance()
 //   betaX  - horizontal Twiss parameter
 //   alphaY - vertical   Twiss parameter
 //   betaY  - vertical   Twiss parameter
-
 //
 // RETURNS
 //   Nothing
@@ -293,7 +284,7 @@ void TImpedance::trackBunch(Bunch* bunch)
   double macrophase;
   double** part_coord_arr = bunch->coordArr();
 
-  // Horizontal calculation
+  // FFT harmonics for X
 
   if(_useX)
   {

@@ -220,6 +220,7 @@ class TImpedance_Node(DriftTEAPOT):
 		useX, useY)
         self.setType("timpedance node")
         self.setLength(0.0)
+	self.nBins = nBins
 
     def trackBunch(self, bunch):
         """
@@ -242,7 +243,21 @@ class TImpedance_Node(DriftTEAPOT):
         self.timpedance.assignLatFuncs(qX, alphaX, betaX, qY, alphaY, betaY)
 
     def assignImpedance(self, XorY, py_cmplx_arrp, py_cmplx_arrm):
-        self.timpedance.assignImpedance(XorY, py_cmplx_arrp, py_cmplx_arrm)
+	size = self.nBins / 2
+	if(len(py_cmplx_arrp) < size):
+		start = len(py_cmplx_arrp)
+		for n in range(start, size):
+			py_cmplx_arrp.append(py_cmplx_arrp[start - 1])
+	if(len(py_cmplx_arrm) < size):
+		start = len(py_cmplx_arrm)
+		for n in range(start, size):
+			py_cmplx_arrm.append(py_cmplx_arrm[start - 1])
+	Zp = []
+	Zm = []
+	for n in range(self.nBins / 2):
+		Zp.append(py_cmplx_arrp[n])
+		Zm.append(py_cmplx_arrm[n])
+	self.timpedance.assignImpedance(XorY, Zp, Zm)
 
 #-----------------------------------------------------------------------------
 # Node for TImpedance as function of frequency
@@ -253,6 +268,7 @@ class FreqDep_TImpedance_Node(DriftTEAPOT):
     def __init__(self, phaseLength, nMacrosMin, nBins,\
 	    useX, useY,\
 	    bunch, impeDict,\
+	    qX, alphaX, betaX, qY, alphaY, betaY,\
 	    name = "freq. dep. TImpedance node"):
         """
             Constructor. Creates the FreqDep_TImpedance-teapot element.
@@ -272,6 +288,7 @@ class FreqDep_TImpedance_Node(DriftTEAPOT):
         self.c = consts.speed_of_light
         BetaRel = bunch.getSyncParticle().beta()
         Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.assignLatFuncs(qX, alphaX, betaX, qY, alphaY, betaY)
 	self.calcImpedance(Freq0, self.qX, self.qY)
 
     def trackBunch(self, bunch):
@@ -316,20 +333,11 @@ class FreqDep_TImpedance_Node(DriftTEAPOT):
 				sign_m = -1.0
 			zp_mode = interp(Freq_p, self.freq_range,\
                             self.freq_tuple, z_tuple)
-			zm_mode = interp(Freq_m, self.freq_range,\
+			zm_tmp  = interp(Freq_m, self.freq_range,\
                             self.freq_tuple, z_tuple)
-			zm_mode.real = sign_m * zm_mode.real
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		zp_mode = 0.0 + 0.0j
-		zm_mode = 0.0 + 0.0j
-		Zp.append(zp_mode)
-		Zm.append(zm_mode)
-		for n in range(1, self.nBins / 2):
-			zp_mode.real = -Zm[self.nBins / 2 - n].real
-			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
-			zm_mode.real = -Zp[self.nBins / 2 - n].real
-			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
+			zm_r = sign_m * zm_tmp.real
+			zm_i = zm_tmp.imag
+			zm_mode = complex(zm_r, zm_i)
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("X", Zp, Zm)
@@ -346,20 +354,11 @@ class FreqDep_TImpedance_Node(DriftTEAPOT):
 				sign_m = -1.0
 			zp_mode = interp(Freq_p, self.freq_range,\
                             self.freq_tuple, z_tuple)
-			zm_mode = interp(Freq_m, self.freq_range,\
+			zm_tmp  = interp(Freq_m, self.freq_range,\
                             self.freq_tuple, z_tuple)
-			zm_mode.real = sign_m * zm_mode.real
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		zp_mode = 0.0 + 0.0j
-		zm_mode = 0.0 + 0.0j
-		Zp.append(zp_mode)
-		Zm.append(zm_mode)
-		for n in range(1, self.nBins / 2):
-			zp_mode.real = -Zm[self.nBins / 2 - n].real
-			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
-			zm_mode.real = -Zp[self.nBins / 2 - n].real
-			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
+			zm_r = sign_m * zm_tmp.real
+			zm_i = zm_tmp.imag
+			zm_mode = complex(zm_r, zm_i)
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("Y", Zp, Zm)
@@ -373,6 +372,7 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
     def __init__(self, phaseLength, nMacrosMin, nBins,\
 	    useX, useY,\
 	    bunch, impeDict,\
+	    qX, alphaX, betaX, qY, alphaY, betaY,\
 	    name = "betfreq. dep. TImpedance node"):
         """
             Constructor. Creates the BetFreqDep_TImpedance-teapot element.
@@ -394,6 +394,7 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
         self.c = consts.speed_of_light
         BetaRel = bunch.getSyncParticle().beta()
         Freq0 = (BetaRel * self.c) / self.phaseLength
+	self.assignLatFuncs(qX, alphaX, betaX, qY, alphaY, betaY)
 	self.calcImpedance(BetaRel, Freq0, self.qX, self.qY)
 
     def trackBunch(self, bunch):
@@ -440,22 +441,13 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
 				z_bf)
-			zm_mode = bilinterp(BetaRel, Freq_m,\
+			zm_tmp  = bilinterp(BetaRel, Freq_m,\
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
 				z_bf)
-			zm_mode.real = sign_m * zm_mode.real
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		zp_mode = 0.0 + 0.0j
-		zm_mode = 0.0 + 0.0j
-		Zp.append(zp_mode)
-		Zm.append(zm_mode)
-		for n in range(1, self.nBins / 2):
-			zp_mode.real = -Zm[self.nBins / 2 - n].real
-			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
-			zm_mode.real = -Zp[self.nBins / 2 - n].real
-			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
+			zm_r = sign_m * zm_tmp.real
+			zm_i = zm_tmp.imag
+			zm_mode = complex(zm_r, zm_i)
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("X", Zp, Zm)
@@ -474,22 +466,13 @@ class BetFreqDep_TImpedance_Node(DriftTEAPOT):
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
 				z_bf)
-			zm_mode = bilinterp(BetaRel, Freq_m,\
+			zm_tmp  = bilinterp(BetaRel, Freq_m,\
 				self.bet_range, self.freq_range,\
 				self.bet_tuple, self.freq_tuple,\
 				z_bf)
-			zm_mode.real = sign_m * zm_mode.real
-			Zp.append(zp_mode)
-			Zm.append(zm_mode)
-		zp_mode = 0.0 + 0.0j
-		zm_mode = 0.0 + 0.0j
-		Zp.append(zp_mode)
-		Zm.append(zm_mode)
-		for n in range(1, self.nBins / 2):
-			zp_mode.real = -Zm[self.nBins / 2 - n].real
-			zp_mode.imag =  Zm[self.nBins / 2 - n].imag
-			zm_mode.real = -Zp[self.nBins / 2 - n].real
-			zp_mode.imag =  Zp[self.nBins / 2 - n].imag
+			zm_r = sign_m * zm_tmp.real
+			zm_i = zm_tmp.imag
+			zm_mode = complex(zm_r, zm_i)
 			Zp.append(zp_mode)
 			Zm.append(zm_mode)
 		self.timpedance.assignImpedance("Y", Zp, Zm)
@@ -535,7 +518,7 @@ def bilinterp(x, y, nx_tuple, ny_tuple, x_tuple, y_tuple, fxy):
             f_tuple.append(vf)
     elif x > x_tuple[nx_tuple]:
         for ny in range(ny_tuple + 1):
-            vf = fxy[x_tuple][ny]
+            vf = fxy[nx_tuple][ny]
             f_tuple.append(vf)
     else:
         dxp = x - x_tuple[0]

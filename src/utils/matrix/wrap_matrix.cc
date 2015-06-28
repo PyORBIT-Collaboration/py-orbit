@@ -117,7 +117,7 @@ extern "C" {
 		int n = cpp_Matrix->rows();
 		int m = cpp_Matrix->columns();
 		PyObject* mod = PyImport_ImportModule("orbit_utils");
-		PyObject* pyMatr = PyObject_CallMethod(mod,"Matrix","ii",n,m);
+		PyObject* pyMatr = PyObject_CallMethod(mod,const_cast<char*>("Matrix"),const_cast<char*>("ii"),n,m);
 		pyORBIT_Object* pyMatrix_child = (pyORBIT_Object*) pyMatr;
 		Matrix* cpp_Matrix_child = (Matrix*) pyMatrix_child->cpp_obj;
 		if(!cpp_Matrix->copyTo(cpp_Matrix_child)){
@@ -164,7 +164,7 @@ extern "C" {
 	//  invert() - returns the inverted matrix, or None
   static PyObject* Matrix_invert(PyObject *self, PyObject *args){
 		PyObject* mod = PyImport_ImportModule("orbit_utils");
-		PyObject* pyMtrx = PyObject_CallMethod(mod,"Matrix","O",self);
+		PyObject* pyMtrx = PyObject_CallMethod(mod,const_cast<char*>("Matrix"),const_cast<char*>("O"),self);
 		Matrix* cpp_mtrx = (Matrix*) ((pyORBIT_Object*) pyMtrx)->cpp_obj;
 		Py_DECREF(mod);
 		int res = MatrixOperations::invert(cpp_mtrx);
@@ -188,7 +188,7 @@ extern "C" {
 				error("PyMatrix - add(number) - input parameter is needed.");
 			}		
 			PyObject* mod = PyImport_ImportModule("orbit_utils");
-			PyObject* pyMtrx = PyObject_CallMethod(mod,"Matrix","O",self);
+			PyObject* pyMtrx = PyObject_CallMethod(mod,const_cast<char*>("Matrix"),const_cast<char*>("O"),self);
 			Matrix* cpp_mtrx = (Matrix*) ((pyORBIT_Object*) pyMtrx)->cpp_obj;
 			cpp_mtrx->add(val);
 			Py_DECREF(mod);
@@ -197,7 +197,7 @@ extern "C" {
 		PyObject* pyORBIT_Matrix_Type = getOrbitUtilsType("Matrix");
 		if(PyObject_IsInstance(pyIn,pyORBIT_Matrix_Type)){
 			PyObject* mod = PyImport_ImportModule("orbit_utils");
-			PyObject* pyMtrx = PyObject_CallMethod(mod,"Matrix","O",self);
+			PyObject* pyMtrx = PyObject_CallMethod(mod,const_cast<char*>("Matrix"),const_cast<char*>("O"),self);
 			Matrix* cpp_mtrx = (Matrix*) ((pyORBIT_Object*) pyMtrx)->cpp_obj;
 			Py_DECREF(mod);
 			cpp_mtrx->add((Matrix*)(((pyORBIT_Object*) pyIn)->cpp_obj));
@@ -222,7 +222,7 @@ extern "C" {
 				error("PyMatrix - mult(number) - input parameter is needed.");
 			}		
 			PyObject* mod = PyImport_ImportModule("orbit_utils");
-			PyObject* pyMtrx = PyObject_CallMethod(mod,"Matrix","O",self);
+			PyObject* pyMtrx = PyObject_CallMethod(mod,const_cast<char*>("Matrix"),const_cast<char*>("O"),self);
 			Matrix* cpp_mtrx = (Matrix*) ((pyORBIT_Object*) pyMtrx)->cpp_obj;
 			cpp_mtrx->mult(val);
 			Py_DECREF(mod);
@@ -231,7 +231,7 @@ extern "C" {
 		PyObject* pyORBIT_Matrix_Type = getOrbitUtilsType("Matrix");
 		if(PyObject_IsInstance(pyIn,pyORBIT_Matrix_Type)){
 			PyObject* mod = PyImport_ImportModule("orbit_utils");
-			PyObject* pyMtrx = PyObject_CallMethod(mod,"Matrix","O",self);
+			PyObject* pyMtrx = PyObject_CallMethod(mod,const_cast<char*>("Matrix"),const_cast<char*>("O"),self);
 			Matrix* cpp_mtrx = (Matrix*) ((pyORBIT_Object*) pyMtrx)->cpp_obj;
 			Py_DECREF(mod);
 			cpp_mtrx->mult((Matrix*)(((pyORBIT_Object*) pyIn)->cpp_obj));
@@ -244,7 +244,7 @@ extern "C" {
 				error("PyMatrix - mult(vector) - unequal sizes of columns and vectors.");
 			}
 			PyObject* mod = PyImport_ImportModule("orbit_utils");
-			PyObject* pyVctr = PyObject_CallMethod(mod,"PhaseVector","i",cpp_Matrix->rows());
+			PyObject* pyVctr = PyObject_CallMethod(mod,const_cast<char*>("PhaseVector"),const_cast<char*>("i"),cpp_Matrix->rows());
 			MatrixOperations::mult(cpp_Matrix,cpp_PhaseVector,(PhaseVector*) ((pyORBIT_Object*)pyVctr)->cpp_obj);
 			Py_DECREF(mod);
 			return pyVctr;

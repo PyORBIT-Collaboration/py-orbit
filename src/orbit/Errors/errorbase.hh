@@ -52,6 +52,11 @@ namespace error_base
   void RotationF(Bunch* bunch, double anglef, double rhoi,
   	             double theta, double length,
                  std::string et, std::string type);
+  double drand(double r);
+  double derf(double x);
+  double root_normal(double errtest, double ymin,
+                     double ymax, double tol);
+  double getGauss(double mean, double sigma, double cutoff);
 }
 
 #endif  //ERROR_BASE_H

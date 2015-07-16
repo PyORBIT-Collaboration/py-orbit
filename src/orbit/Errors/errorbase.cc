@@ -893,4 +893,203 @@ void RotationF(Bunch* bunch, double anglef, double rhoi, double theta,
   }
 }
 
+///////////////////////////////////////////////////////////////////////////
+//
+// NAME
+//
+//   drand
+//
+// DESCRIPTION
+//   Returns random number
+//    
+// PARAMETERS
+//   r - seed value
+//
+// RETURNS
+//   random
+//
+///////////////////////////////////////////////////////////////////////////
+
+double drand (double r)
+{
+  int a1 = 1536, a0 = 1029, a1ma0 = 507, c = 1731;
+  static int x1 = 0, x0 = 0;
+  int y1, y0, r_int, rand_int;
+  double x1_real, r_rem, random;
+
+  if(r == 0.0)
+  {
+    y0 = a0 * x0;
+    y1 = a1 * x1 + a1ma0 * (x0 - x1) + y0;
+    y0 = y0 + c;
+    x0 = y0 - 2048 * (y0 / 2048);
+    y1 = y1 + (y0 - x0) / 2048;
+    x1 = y1 - 2048 * (y1 / 2048);
+  }
+
+  if(r > 0.0)
+  {
+    r_int = int(r);
+    r_rem = r - double(r_int);
+    x1_real = r_rem * 4194304.0 + 0.5;
+    x1 = int(x1_real);
+    x0 = x1 - 2048 * (x1 / 2048);
+    x1 = (x1 - x0) / 2048;
+  }
+
+  rand_int = x1 * 2048 + x0;
+  random = double(rand_int) / 4194304.0;
+  return random;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+// NAME
+//   derf
+//
+// DESCRIPTION
+//   This function returns the error function ERF(x) with fractional
+//   error everywhere less than 1.2 * 10-7.
+//   Adapted from the book "Numerical Recipes"
+//
+// PARAMETERS
+//   x:  argument
+//
+// RETURNS
+//   The value of the error function at x
+//
+//////////////////////////////////////////////////////////////////////////
+
+double derf(double x)
+{
+  double zx, t, erfcc;
+  if(x < 9.0)
+  {
+    zx = x;
+    if(x < 0.0) zx = -x;
+    t = 1.0 / (1.0 + 0.5 * zx);
+
+    erfcc = t * exp(-(zx * zx) - 1.26551223 +
+            t * ( 1.00002368 +
+            t * ( 0.37409196 +
+            t * ( 0.09678418 +
+            t * (-0.18628806 +
+            t * ( 0.27886807 +
+            t * (-1.13520398 +
+            t * ( 1.48851587 +
+            t * (-0.82215223 +
+            t *   0.17087277)))))))));
+
+  if(x < 0.0)
+    erfcc = 2.0 - erfcc;
+  }
+  else
+  {
+    erfcc = 0.0;
+  }
+
+  return (1.0 - erfcc);
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+// NAME
+//   root_normal
+//
+// DESCRIPTION
+//    
+// PARAMETERS
+//   errtest
+//   ymin
+//   ymax
+//   tol
+//
+// RETURNS
+//   rtbis
+//
+//////////////////////////////////////////////////////////////////////////
+
+double root_normal(double errtest, double ymin,
+                   double ymax, double tol)
+{
+  int i, imax = 50;
+  double rtbis = 0.0, dx, xmid, fmid;
+
+  if((derf(ymin) - errtest) < 0.0)
+  {
+    rtbis = ymin;
+    dx = ymax - ymin;
+  }
+  else
+  {
+    rtbis = ymax;
+    dx = ymin - ymax;
+  }
+  if(dx < 0.0) dx = -dx;
+  for(i = 0; i < imax; i++)
+  {
+    dx = dx * 0.5;
+    xmid = rtbis + dx;
+    fmid = derf(xmid) - errtest;
+    if(fmid <= 0.0) rtbis = xmid;
+    if(dx < tol || fmid == 0.0)
+    return rtbis;
+  }
+
+  return rtbis;
+}
+
+/////////////////////////////////////////////////////////////////////////
+//
+// NAME
+//   getGauss
+//
+// DESCRIPTION
+//   Gaussian Distribution
+//
+// PARAMETERS
+//   mean
+//   sigma
+//   cutoff
+//
+// RETURNS
+//   gerr
+//
+//////////////////////////////////////////////////////////////////////////
+
+double getGauss(double mean, double sigma, double cutoff)
+{
+  double area, root, errtest, gerr;
+
+  double tol   = 1.0e-14;
+  double gmin  = 0.0;
+  double gmax  = 10.0;
+  double pmin  = 0.0;
+  double pmax  = 1.0;
+  double sqrt2 = pow(2.0, 0.5);
+
+  if(cutoff > 0.0)
+  {
+    pmin = 0.5 - 0.5 * derf((cutoff) / sqrt2);
+    pmax = 0.5 + 0.5 * derf((cutoff) / sqrt2);
+  }
+
+  area = pmin + (pmax - pmin) * drand(0);
+  errtest = 2.0 * area - 1.0;
+  if(errtest < 0.0) errtest = -errtest;
+  gmax = 10.0;
+  while((derf(gmax) - errtest) < 0.0) gmax *= 10.0; 
+  root = root_normal(errtest, gmin, gmax, tol);
+  if(area >= 0.5)
+  {
+    gerr = mean + sqrt2 *sigma*root;
+  }
+  else
+  {
+    gerr = mean - sqrt2 *sigma*root;
+  }
+
+  return gerr;
+}
+
 }  //end of namespace error_base

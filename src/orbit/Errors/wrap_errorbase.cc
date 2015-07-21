@@ -325,76 +325,128 @@ extern "C"
     return Py_None;
   }
 
-
-
-
-
-
-    //Integration through a very simple ring type RF cavity
-    static PyObject* wrap_RingRF(PyObject *self, PyObject *args)
+  // General rotation error to a bunch entering element
+  static PyObject* wrap_RotationI(PyObject *self, PyObject *args)
+  {
+    PyObject* pyBunch;
+    double anglei, rhoi, theta, length;
+    const char* et   = NULL;
+    const char* type = NULL;
+    if(!PyArg_ParseTuple(args, "Oddddss:RotationI",
+                         &pyBunch, &anglei, &rhoi, &theta,
+                         &length, &et, &type))
     {
-        PyObject* pyBunch;
-        double voltage, phase_s, ring_length;
-        int harmonics_numb;
-        int useCharge = 1;
-        if(!PyArg_ParseTuple(	args, "Odidd|i:RingRF",
-                             &pyBunch, &ring_length, &harmonics_numb,
-                             &voltage, &phase_s, &useCharge))
-        {
-            error("errorbase - RingRF - cannot parse arguments!");
-        }
-        Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-        error_base::RingRF(cpp_bunch, ring_length, harmonics_numb,
-                            voltage, phase_s, useCharge);
-        Py_INCREF(Py_None);
-        return Py_None;
+      error("errorbase - RotationI - cannot parse arguments!");
     }
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+    error_base::RotationI(cpp_bunch, anglei, rhoi, theta,
+                          length, et, type);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    static PyMethodDef errorbaseMethods[] =
+  // General rotation error to a bunch leaving element
+  static PyObject* wrap_RotationF(PyObject *self, PyObject *args)
+  {
+    PyObject* pyBunch;
+    double anglef, rhoi, theta, length;
+    const char* et   = NULL;
+    const char* type = NULL;
+    if(!PyArg_ParseTuple(args, "Odddd:RotationF",
+                         &pyBunch, &anglef, &rhoi, &theta,
+                         &length, &et, &type))
     {
-			{"rotatexy",         wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
-			{"drift",            wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
-			{"wrapbunch",		 wrap_wrapbunch,		  METH_VARARGS, "Tracking a bunch through a wrapbunch routine"},
-			{"multp",            wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},
-			{"multpfringeIN",    wrap_multpfringeIN,  METH_VARARGS, "Tracking a bunch through an IN edge of a multipole "},
-			{"multpfringeOUT",   wrap_multpfringeOUT, METH_VARARGS, "Tracking a bunch through an OUT edge of a multipole"},
-			{"kick",             wrap_kick,           METH_VARARGS, "Kicker element: chnges in x-prime, y-prime and dE"},
-			{"quad1",            wrap_quad1,          METH_VARARGS, "Quadrupole element one: linear transport matrix "},
-			{"quad2",            wrap_quad2,          METH_VARARGS, "Quadrupole element two: drift in quadrupole "},
-			{"quadfringeIN",     wrap_quadfringeIN,   METH_VARARGS, "Quadrupole element IN edge"},
-			{"quadfringeOUT",    wrap_quadfringeOUT,  METH_VARARGS, "Quadrupole element OUT edge"},
-			{"wedgerotate",      wrap_wedgerotate,    METH_VARARGS, "Rotates coordinates by e for fringe fields at non-SBEND "},
-			{"wedgedrift",       wrap_wedgedrift,     METH_VARARGS, "Drifts particles through wedge for non-SBEND "},
-			{"wedgebend",        wrap_wedgebend,      METH_VARARGS, "Straight bends particles through wedge for non-SBEND "},
-			{"bend1",            wrap_bend1,          METH_VARARGS, "Linear bend transport "},
-			{"bend2",            wrap_bend2,          METH_VARARGS, "Kinetic bend transport (same as nonlinear quad transport - quad2) "},
-			{"bend3",            wrap_bend3,          METH_VARARGS, "Nonlinear curvature bend transport depending on py and dE in Hamiltonian "},
-			{"bend4",            wrap_bend4,          METH_VARARGS, "Nonlinear curvature bend transport depending on px in Hamiltonian "},
-			{"bendfringeIN",     wrap_bendfringeIN,   METH_VARARGS, "Hard edge fringe field for a bend IN"},
-			{"bendfringeOUT",    wrap_bendfringeOUT,  METH_VARARGS, "Hard edge fringe field for a bend OUT"},
-			{"soln",             wrap_soln,           METH_VARARGS, "Integration through a solenoid "},
-			{"wedgebendCF",      wrap_wedgebendCF,    METH_VARARGS, "Straight bends particles through wedge for Combined Function non-SBEND "},
-			{"RingRF",           wrap_RingRF,         METH_VARARGS, "Tracking particles through a simple ring RF cavity."},
-			{ NULL, NULL }
-    };
-
-    void initerrorbase(void)
-    {
-        PyObject *m, *d;
-        m = Py_InitModule((char*)"error_base", errorbaseMethods);
-        d = PyModule_GetDict(m);
-        error_base::init_factorial();
-        wrap_errorbase_matrix_generator::initMatrixGenerator(m);
+      error("errorbase - RotationF - cannot parse arguments!");
     }
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+    error_base::RotationF(cpp_bunch, anglef, rhoi, theta,
+                          length, et, type);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
-    PyObject* getBaseERRORType(char* name)
+  // Error function
+  static PyObject* wrap_derf(PyObject *self, PyObject *args)
+  {
+    double x;
+    if(!PyArg_ParseTuple(args, "d:derf", &x))
     {
-        PyObject* mod = PyImport_ImportModule("error_base");
-        PyObject* pyType = PyObject_GetAttrString(mod, name);
-        Py_DECREF(mod);
-        Py_DECREF(pyType);
-        return pyType;
+      error("errorbase - derf - cannot parse arguments!");
     }
+    double errf = error_base::derf(x);
+    return Py_BuildValue("d", errf);
+  }
+
+  // Helps find Gaussian distribution
+  static PyObject* wrap_root_normal(PyObject *self, PyObject *args)
+  {
+    double errtest, ymin, ymax, tol;
+    if(!PyArg_ParseTuple(args, "dddd:root_normal",
+                         &errtest, &ymin, &ymax, &tol))
+    {
+      error("errorbase - root_normal - cannot parse arguments!");
+    }
+    double root = error_base::root_normal(errtest, ymin, ymax, tol);
+    return Py_BuildValue("d", root);
+  }
+
+  // Returns Gaussian distribution
+  static PyObject* wrap_getGauss(PyObject *self, PyObject *args)
+  {
+    double mean, sigma, cutoff;
+    if(!PyArg_ParseTuple(args, "ddd:getGauss",
+                         &mean, &sigma, &cutoff))
+    {
+      error("errorbase - getGauss - cannot parse arguments!");
+    }
+    double sample = error_base::getGauss(mean, sigma, cutoff);
+    return Py_BuildValue("d", sample);
+  }
+
+  static PyMethodDef errorbaseMethods[] =
+  {
+    {"drifti",              wrap_drifti,              METH_VARARGS, "Drifts a macroparticle"},
+    {"CoordDisplacement",   wrap_CoordDisplacement,   METH_VARARGS, "Displace the coordinates of a bunch"},
+    {"QuadKicker",          wrap_QuadKicker,          METH_VARARGS, "Quadrupole kick a bunch"},
+    {"QuadKickerOsc",       wrap_QuadKickerOsc,       METH_VARARGS, "Oscillating quadrupole kick a bunch"},
+    {"DipoleKickerOsc",     wrap_DipoleKickerOsc,     METH_VARARGS, "Oscillating dipole kick a bunch"},
+    {"LongDisplacement",    wrap_LongDisplacement,    METH_VARARGS, "Longitudinally displace a bunch"},
+    {"StraightRotationXY",  wrap_StraightRotationXY,  METH_VARARGS, "XY rotate a bunch"},
+    {"StraightRotationXSI", wrap_StraightRotationXSI, METH_VARARGS, "XS rotate a bunch entering element"},
+    {"StraightRotationXSF", wrap_StraightRotationXSF, METH_VARARGS, "XS rotate a bunch leaving element"},
+    {"StraightRotationYSI", wrap_StraightRotationYSI, METH_VARARGS, "YS rotate a bunch entering element"},
+    {"StraightRotationYSF", wrap_StraightRotationYSF, METH_VARARGS, "YS rotate a bunch leaving element"},
+    {"BendFieldI",          wrap_BendFieldI,          METH_VARARGS, "Bend field strength error to a bunch entering element"},
+    {"BendFieldF",          wrap_BendFieldF,          METH_VARARGS, "Bend field strength error to a bunch leaving element"},
+    {"BendDisplacementXI",  wrap_BendDisplacementXI,  METH_VARARGS, "X displacement error to a bunch entering bend"},
+    {"BendDisplacementXF",  wrap_BendDisplacementXF,  METH_VARARGS, "X displacement error to a bunch leaving bend"},
+    {"BendDisplacementYI",  wrap_BendDisplacementYI,  METH_VARARGS, "Y displacement error to a bunch entering bend"},
+    {"BendDisplacementYF",  wrap_BendDisplacementYF,  METH_VARARGS, "Y displacement error to a bunch leaving bend"},
+    {"BendDisplacementLI",  wrap_BendDisplacementLI,  METH_VARARGS, "L displacement error to a bunch entering bend"},
+    {"BendDisplacementLF",  wrap_BendDisplacementLF,  METH_VARARGS, "L displacement error to a bunch leaving bend"},
+    {"RotationI",           wrap_RotationI,           METH_VARARGS, "General rotation error to a bunch entering element"},
+    {"RotationF",           wrap_RotationF,           METH_VARARGS, "General rotation error to a bunch leaving element"},
+    {"derf",                wrap_derf,                METH_VARARGS, "Error function"},
+    {"wrap_root_normal",    wrap_root_normal,         METH_VARARGS, "Helps find Gaussian distribution"},
+    {"wrap_getGauss",       wrap_getGauss ,           METH_VARARGS, "Returns Gaussian distribution"},
+    { NULL, NULL }
+  };
+
+  void initerrorbase(void)
+  {
+    PyObject *m, *d;
+    m = Py_InitModule((char*)"error_base", errorbaseMethods);
+    d = PyModule_GetDict(m);
+  }
+
+  PyObject* getBaseERRORType(char* name)
+  {
+    PyObject* mod = PyImport_ImportModule("error_base");
+    PyObject* pyType = PyObject_GetAttrString(mod, name);
+    Py_DECREF(mod);
+    Py_DECREF(pyType);
+    return pyType;
+  }
 	
 #ifdef __cplusplus
 }

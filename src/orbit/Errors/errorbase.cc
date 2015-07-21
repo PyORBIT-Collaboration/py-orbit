@@ -25,6 +25,7 @@
 #include "errorbase.hh"
 #include "OrbitConst.hh"
 #include "SyncPart.hh"
+#include "Random.hh"
 
 #include <complex>
 
@@ -893,55 +894,6 @@ void RotationF(Bunch* bunch, double anglef, double rhoi, double theta,
   }
 }
 
-///////////////////////////////////////////////////////////////////////////
-//
-// NAME
-//
-//   drand
-//
-// DESCRIPTION
-//   Returns random number
-//    
-// PARAMETERS
-//   r - seed value
-//
-// RETURNS
-//   random
-//
-///////////////////////////////////////////////////////////////////////////
-
-double drand (double r)
-{
-  int a1 = 1536, a0 = 1029, a1ma0 = 507, c = 1731;
-  static int x1 = 0, x0 = 0;
-  int y1, y0, r_int, rand_int;
-  double x1_real, r_rem, random;
-
-  if(r == 0.0)
-  {
-    y0 = a0 * x0;
-    y1 = a1 * x1 + a1ma0 * (x0 - x1) + y0;
-    y0 = y0 + c;
-    x0 = y0 - 2048 * (y0 / 2048);
-    y1 = y1 + (y0 - x0) / 2048;
-    x1 = y1 - 2048 * (y1 / 2048);
-  }
-
-  if(r > 0.0)
-  {
-    r_int = int(r);
-    r_rem = r - double(r_int);
-    x1_real = r_rem * 4194304.0 + 0.5;
-    x1 = int(x1_real);
-    x0 = x1 - 2048 * (x1 / 2048);
-    x1 = (x1 - x0) / 2048;
-  }
-
-  rand_int = x1 * 2048 + x0;
-  random = double(rand_int) / 4194304.0;
-  return random;
-}
-
 /////////////////////////////////////////////////////////////////////////
 //
 // NAME
@@ -1073,8 +1025,11 @@ double getGauss(double mean, double sigma, double cutoff)
     pmin = 0.5 - 0.5 * derf((cutoff) / sqrt2);
     pmax = 0.5 + 0.5 * derf((cutoff) / sqrt2);
   }
-
-  area = pmin + (pmax - pmin) * drand(0);
+  
+  long idum = (unsigned)time(0);
+  idum = -idum;
+  
+  area = pmin + (pmax - pmin) * Random::ran1(idum);
   errtest = 2.0 * area - 1.0;
   if(errtest < 0.0) errtest = -errtest;
   gmax = 10.0;

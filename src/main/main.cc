@@ -8,6 +8,7 @@
 #include "wrap_bunch.hh"
 #include "wrap_utils.hh"
 #include "wrap_teapotbase.hh"
+#include "wrap_errorbase.hh"
 #include "wrap_trackerrk4.hh"
 #include "wrap_spacecharge.hh"
 #include "wrap_linacmodule.hh"
@@ -52,6 +53,7 @@ int main(int argc, char **argv)
   wrap_orbit_bunch::initbunch();
   wrap_orbit_utils::initutils();
   wrap_teapotbase::initteapotbase();
+  wrap_errorbase::initerrorbase();
   wrap_linac::initlinac();
   wrap_collimator::initcollimator();
   wrap_aperture::initaperture();

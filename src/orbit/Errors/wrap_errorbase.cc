@@ -427,8 +427,8 @@ extern "C"
     {"RotationI",           wrap_RotationI,           METH_VARARGS, "General rotation error to a bunch entering element"},
     {"RotationF",           wrap_RotationF,           METH_VARARGS, "General rotation error to a bunch leaving element"},
     {"derf",                wrap_derf,                METH_VARARGS, "Error function"},
-    {"wrap_root_normal",    wrap_root_normal,         METH_VARARGS, "Helps find Gaussian distribution"},
-    {"wrap_getGauss",       wrap_getGauss ,           METH_VARARGS, "Returns Gaussian distribution"},
+    {"root_normal",         wrap_root_normal,         METH_VARARGS, "Helps find Gaussian distribution"},
+    {"getGauss",            wrap_getGauss ,           METH_VARARGS, "Returns Gaussian distribution"},
     { NULL, NULL }
   };
 

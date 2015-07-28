@@ -152,7 +152,7 @@ class AccLattice(NamedObject, TypedObject):
 		
 	def trackActions(self, actionsContainer, paramsDict = {}, index_start = -1, index_stop = -1):
 		"""
-		Method. Tracks the actions through all nodes in the lattice.
+		Method. Tracks the actions through all nodes in the lattice. The indexes are inclusive.
 		"""
 		paramsDict["lattice"] = self
 		paramsDict["actions"] = actionsContainer

@@ -47,7 +47,7 @@ from error_base import getGauss
 
 
 # Displace the coordinates of a bunch
-class CoordDisplacement(DriftTEAPOT):
+class coorddisplacement(DriftTEAPOT):
 
     def __init__(self, dx, dxp, dy, dyp, dz, dE,\
 	    name = "Coordinate Displacement"):
@@ -95,7 +95,7 @@ class CoordDisplacement(DriftTEAPOT):
 
 
 # Quadrupole kick a bunch
-class QuadKicker(DriftTEAPOT):
+class quadkicker(DriftTEAPOT):
 
     def __init__(self, k,\
 	    name = "Quad Kicker"):
@@ -105,6 +105,12 @@ class QuadKicker(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("quadrupole kicker node")
         self.setLength(0.0)
+        self.k = k
+
+    def setkick(self, k):
+        """
+            Sets or changes kick values.
+        """
         self.k = k
 
     def trackBunch(self, bunch):
@@ -128,7 +134,7 @@ class QuadKicker(DriftTEAPOT):
 
 
 # Oscillating quadrupole kick a bunch
-class QuadKickerOsc(DriftTEAPOT):
+class quadkickerosc(DriftTEAPOT):
 
     def __init__(self, k, phaselength, phase,\
 	    name = "Quad Kicker Osc"):
@@ -166,8 +172,51 @@ class QuadKickerOsc(DriftTEAPOT):
         QuadKickerOsc(bunch, k, phaselength, phase)
 
 
+# Dipole kick a bunch
+class dipolekicker(DriftTEAPOT):
+
+    def __init__(self, dxp, dyp,\
+	    name = "Dipole Kicker"):
+        """
+            Constructor. Creates DipoleKicker element.
+        """
+        DriftTEAPOT.__init__(self, name)
+        self.setType("dipole kicker node")
+        self.setLength(0.0)
+        self.dxp = dxp
+        self.dyp = dyp
+
+    def setkick(self, dxp, dyp):
+        """
+            Sets or changes kick values.
+        """
+        self.dxp = dxp
+        self.dyp = dyp
+
+    def trackBunch(self, bunch):
+        """
+            The DipoleKicker-teapot class implementation of the
+            AccNodeBunchTracker class trackBunch(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        dxp = self.dxp
+        dyp = self.dyp
+        CoordDisplacement(bunch, 0.0, dxp, 0.0, dyp, 0.0, 0.0)
+
+    def track(self, paramsDict):
+        """ 
+            The DipoleKicker-teapot class implementation of the
+            AccNodeBunchTracker class track(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        bunch = paramsDict["bunch"]
+        dxp = self.dxp
+        dyp = self.dyp
+        CoordDisplacement(bunch, 0.0, dxp, 0.0, dyp, 0.0, 0.0)
+
+
 # Oscillating dipole kick a bunch
-class DipoleKickerOsc(DriftTEAPOT):
+class dipolekickerosc(DriftTEAPOT):
 
     def __init__(self, k, phaselength, phase,\
 	    name = "Dipole Kicker Osc"):
@@ -206,7 +255,7 @@ class DipoleKickerOsc(DriftTEAPOT):
 
 
 # Longitudinally displace a bunch
-class LongDisplacement(DriftTEAPOT):
+class longdisplacement(DriftTEAPOT):
 
     def __init__(self, ds,\
 	    name = "Longitudinal Displacement"):
@@ -239,7 +288,7 @@ class LongDisplacement(DriftTEAPOT):
 
 
 # XY rotate a bunch
-class StraightRotationXY(DriftTEAPOT):
+class straightrotationxy(DriftTEAPOT):
 
     def __init__(self, anglexy,\
 	    name = "XY Rotation"):
@@ -272,7 +321,7 @@ class StraightRotationXY(DriftTEAPOT):
 
 
 # XS rotate a bunch entering element
-class StraightRotationXSI(DriftTEAPOT):
+class straightrotationxsi(DriftTEAPOT):
 
     def __init__(self, anglexsi, lengthelt,\
 	    name = "XSI Rotation"):
@@ -308,7 +357,7 @@ class StraightRotationXSI(DriftTEAPOT):
 
 
 # XS rotate a bunch leaving element
-class StraightRotationXSF(DriftTEAPOT):
+class straightrotationxsf(DriftTEAPOT):
 
     def __init__(self, anglexsf, lengthelt,\
 	    name = "XSF Rotation"):
@@ -344,7 +393,7 @@ class StraightRotationXSF(DriftTEAPOT):
 
 
 # YS rotate a bunch entering element
-class StraightRotationYSI(DriftTEAPOT):
+class straightrotationysi(DriftTEAPOT):
 
     def __init__(self, angleysi, lengthelt,\
 	    name = "YSI Rotation"):
@@ -380,7 +429,7 @@ class StraightRotationYSI(DriftTEAPOT):
 
 
 # YS rotate a bunch leaving element
-class StraightRotationYSF(DriftTEAPOT):
+class straightrotationysf(DriftTEAPOT):
 
     def __init__(self, angleysf, lengthelt,\
 	    name = "YSF Rotation"):
@@ -416,7 +465,7 @@ class StraightRotationYSF(DriftTEAPOT):
 
 
 # Bend field strength error to a bunch entering element
-class BendFieldI(DriftTEAPOT):
+class bendfieldi(DriftTEAPOT):
 
     def __init__(self, drho,\
 	    name = "BendI Field"):
@@ -449,7 +498,7 @@ class BendFieldI(DriftTEAPOT):
 
 
 # Bend field strength error to a bunch leaving element
-class BendFieldF(DriftTEAPOT):
+class bendfieldf(DriftTEAPOT):
 
     def __init__(self, drho,\
 	    name = "BendF Field"):
@@ -482,7 +531,7 @@ class BendFieldF(DriftTEAPOT):
 
 
 # X displacement error to a bunch entering bend
-class BendDisplacementXI(DriftTEAPOT):
+class benddisplacementxi(DriftTEAPOT):
 
     def __init__(self, anglexi, disp,\
 	    name = "BendXI Displacement"):
@@ -518,7 +567,7 @@ class BendDisplacementXI(DriftTEAPOT):
 
 
 # X displacement error to a bunch leaving bend
-class BendDisplacementXF(DriftTEAPOT):
+class benddisplacementxf(DriftTEAPOT):
 
     def __init__(self, anglexf, disp,\
 	    name = "BendXF Displacement"):
@@ -554,7 +603,7 @@ class BendDisplacementXF(DriftTEAPOT):
 
 
 # Y displacement error to a bunch entering bend
-class BendDisplacementYI(DriftTEAPOT):
+class benddisplacementyi(DriftTEAPOT):
 
     def __init__(self, disp,\
 	    name = "BendYI Displacement"):
@@ -587,7 +636,7 @@ class BendDisplacementYI(DriftTEAPOT):
 
 
 # Y displacement error to a bunch leaving bend
-class BendDisplacementYF(DriftTEAPOT):
+class benddisplacementyf(DriftTEAPOT):
 
     def __init__(self, disp,\
 	    name = "BendYF Displacement"):
@@ -620,7 +669,7 @@ class BendDisplacementYF(DriftTEAPOT):
 
 
 # L displacement error to a bunch entering bend
-class BendDisplacementLI(DriftTEAPOT):
+class benddisplacementli(DriftTEAPOT):
 
     def __init__(self, angleli, disp,\
 	    name = "BendLI Displacement"):
@@ -656,7 +705,7 @@ class BendDisplacementLI(DriftTEAPOT):
 
 
 # L displacement error to a bunch leaving bend
-class BendDisplacementLF(DriftTEAPOT):
+class benddisplacementlf(DriftTEAPOT):
 
     def __init__(self, anglelf, disp,\
 	    name = "BendLF Displacement"):
@@ -692,7 +741,7 @@ class BendDisplacementLF(DriftTEAPOT):
 
 
 # General rotation error to a bunch entering element
-class RotationI(DriftTEAPOT):
+class rotationi(DriftTEAPOT):
 
     def __init__(self, anglei, rhoi, theta, lengthelt, et, rotype,\
 	    name = "RotationI General"):
@@ -740,7 +789,7 @@ class RotationI(DriftTEAPOT):
 
 
 # General rotation error to a bunch leaving element
-class RotationF(DriftTEAPOT):
+class rotationf(DriftTEAPOT):
 
     def __init__(self, anglef, rhoi, theta, lengthelt, et, rotype,\
 	    name = "RotationF General"):
@@ -785,3 +834,102 @@ class RotationF(DriftTEAPOT):
         et = self.et
         rotype = self.rotype
         RotationF(bunch, anglef, rhoi, theta, lengthelt, et, rotype)
+
+
+######################################################################
+
+
+# Drift a particle
+def drifti(bunch, i, length):
+	"""
+	Drifts macroparticle i from bunch by length.
+	"""
+	drifti(bunch, i, length)
+
+
+# Error function
+def erf(x):
+	"""
+	Returns error function of x.
+	"""
+	return derf(x)
+
+
+# Helps find Gaussian distribution
+def root_normal(errtest, ymin, ymax, tol):
+	"""
+	Returns error function of x.
+	"""
+	return root_normal(errtest, ymin, ymax, tol)
+
+
+# Returns Gaussian distribution
+def getGauss(mean, sigma, cutoff):
+	"""
+	Returns sample point from Guassian distribution.
+	"""
+	return getGauss(mean, sigma, cutoff)
+
+
+######################################################################
+
+
+# Add an error node
+class AddErrorNode():
+
+    def __init__(self, lattice, positioni, positionf, paramsDict,\
+	    name = "Error Node"):
+        """
+            Constructor. Adds the node.
+        """
+        self.lattice = lattice
+        self.positioni = positioni
+        self.positionf = positionf
+        self.nodeIndexi = FindNode(positioni)
+        self.nodeIndexf = FindNode(positionf)
+        self.localDict = paramsDict
+        self.errtype = self.localDict["errtype"]
+        if(self.errtype == "TransDispError"):
+        	self.AddTransDispError()
+
+    def FindNode(position):
+        """
+            Finds node at position.
+        """
+        lattice = self.lattice
+        lattice.initialize()
+        nodeIndex = 0
+        z = 0.0
+        for node in lattice.getNodes():
+        	z += node.getLength()
+        	if(position >= z):
+        		nodeIndex += 1
+        if(position >= lattice.getLength()):
+        	nodeIndex -= 1
+        return nodeIndex
+
+    def AddTransDispError():
+        """
+            Adds a TransDispError to nodes
+            between nodeIndexi and nodeIndexf.
+        """
+        lattice = self.lattice
+        lattice.initialize()
+        nodeIndexi = self.nodeIndexi
+        nodeIndexf = self.nodeIndexf
+        nodei = lattice.getNodes()[nodeIndexi]
+        if(isinstance(nodei, BendTEAPOT)):
+        	print "Bend nodei = ", nodei.getName(), " type = ",\
+			nodei.getType(), " L = ", nodei.getLength()
+			orbitFinalize("Cant add TransDispError to a Bend! Stop!")
+		nodef = lattice.getNodes()[nodeIndexf]
+        if(isinstance(nodef, BendTEAPOT)):
+        	print "Bend nodef = ", nodef.getName(), " type = ",\
+			nodef.getType(), " L = ", nodef.getLength()
+			orbitFinalize("Cant add TransDispError to a Bend! Stop!")
+		dx = self.localDict["dx"]
+		dy = self.localDict["dy"]
+		errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
+		errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
+		addErrorNodeAsChild_In( lattice, nodef, errorf)
+		addErrorNodeAsChild_Out(lattice, nodei, errori)

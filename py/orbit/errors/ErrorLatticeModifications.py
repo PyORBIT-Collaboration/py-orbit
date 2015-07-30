@@ -109,10 +109,10 @@ def addErrorNodeAsChild(lattice, AccNode, Error_Node):
 	AccNode.addChildNode(Error_Node, AccNode.BODY, 0, AccNode.BEFORE)
 	lattice.initialize()
 
-def addErrorNodeAsChild_In(lattice, AccNode, Error_Node):
+def addErrorNodeAsChild_I(lattice, AccNode, Error_Node):
 	AccNode.addChildNode(Error_Node, AccNode.ENTRANCE)
 	lattice.initialize()
 
-def addErrorNodeAsChild_Out(lattice, AccNode, Error_Node):
+def addErrorNodeAsChild_F(lattice, AccNode, Error_Node):
 	AccNode.addChildNode(Error_Node, AccNode.EXIT)
 	lattice.initialize()

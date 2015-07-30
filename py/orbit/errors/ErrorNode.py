@@ -840,7 +840,7 @@ class rotationf(DriftTEAPOT):
 
 
 # Drift a particle
-def drifti(bunch, i, length):
+def driftone(bunch, i, length):
 	"""
 	Drifts macroparticle i from bunch by length.
 	"""
@@ -856,7 +856,7 @@ def erf(x):
 
 
 # Helps find Gaussian distribution
-def root_normal(errtest, ymin, ymax, tol):
+def rootnormal(errtest, ymin, ymax, tol):
 	"""
 	Returns error function of x.
 	"""
@@ -864,7 +864,7 @@ def root_normal(errtest, ymin, ymax, tol):
 
 
 # Returns Gaussian distribution
-def getGauss(mean, sigma, cutoff):
+def getgauss(mean, sigma, cutoff):
 	"""
 	Returns sample point from Guassian distribution.
 	"""
@@ -931,5 +931,5 @@ class AddErrorNode():
 		dy = self.localDict["dy"]
 		errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
 		errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
-		addErrorNodeAsChild_In( lattice, nodef, errorf)
-		addErrorNodeAsChild_Out(lattice, nodei, errori)
+		addErrorNodeAsChild_I( lattice, nodef, errorf)
+		addErrorNodeAsChild_F(lattice, nodei, errori)

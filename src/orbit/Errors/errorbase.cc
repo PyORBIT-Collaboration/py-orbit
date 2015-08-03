@@ -33,42 +33,6 @@ namespace error_base
 {
 
 ///////////////////////////////////////////////////////////////////////////
-// NAME
-//   drifti
-//
-// DESCRIPTION
-//   Drifts a single particle. Length < 0 is allowed.
-//
-// PARAMETERS
-//   bunch = reference to the macro-particle bunch
-//   i = particle index
-//   length = length of the drift
-//
-///////////////////////////////////////////////////////////////////////////
-
-void drifti(Bunch* bunch, int i, double length)
-{
-  double KNL, phifac, dp_p;
-
-  SyncPart* syncPart = bunch->getSyncPart();
-
-  double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
-  double dp_p_coeff = 1.0 / (syncPart->getMomentum() * syncPart->getBeta());
-
-  //coordinate array [part. index][x,xp,y,yp,z,dE]
-  double** arr = bunch->coordArr();
-
-  dp_p = arr[i][5] * dp_p_coeff;
-  KNL  = 1.0 / (1.0 + dp_p);
-  arr[i][0] += KNL * length * arr[i][1];
-  arr[i][2] += KNL * length * arr[i][3];
-  phifac = (arr[i][1] * arr[i][1] + arr[i][3] * arr[i][3] +
-            dp_p * dp_p * gamma2i) / 2.0;
-  phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
-  arr[i][4] -= length * phifac;
-}
-
-///////////////////////////////////////////////////////////////////////////
 //
 // NAME
 //   CoordDisplacement
@@ -97,91 +61,6 @@ void CoordDisplacement(Bunch* bunch,
     arr[i][3] += dyp;
     arr[i][4] += dz;
     arr[i][5] += dE;
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// NAME
-//   QuadKicker
-//
-// DESCRIPTION
-//   Performs quadrupole kick
-//
-// PARAMETERS
-//   k
-//
-///////////////////////////////////////////////////////////////////////////
-
-void QuadKicker(Bunch* bunch, double k)
-{
-  //coordinate array [part. index][x,xp,y,yp,z,dE]
-  double** arr = bunch->coordArr();
-
-  for(int i = 0; i < bunch->getSize(); i++)
-  {
-    arr[i][1] += k * arr[i][0];
-    arr[i][3] -= k * arr[i][2];
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// NAME
-//   QuadKickerOsc
-//
-// DESCRIPTION
-//   Performs oscillating quadrupole kick
-//
-// PARAMETERS
-//   k, phaselength, phase
-//
-///////////////////////////////////////////////////////////////////////////
-
-void QuadKickerOsc(Bunch* bunch, double k,
-                   double phaselength, double phase)
-{
-  double ztophi = 2.0 * OrbitConst::PI / phaselength;
-  double kick;
-
-  //coordinate array [part. index][x,xp,y,yp,z,dE]
-  double** arr = bunch->coordArr();
-
-  for(int i = 0; i < bunch->getSize(); i++)
-  {
-    kick = k * sin(ztophi * arr[i][4] + phase);
-    arr[i][1] += kick * arr[i][0];
-    arr[i][3] -= kick * arr[i][2];
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////
-//
-// NAME
-//   DipoleKickerOsc
-//
-// DESCRIPTION
-//   Performs oscillating dipole kick
-//
-// PARAMETERS
-//   k, phaselength, phase
-//
-///////////////////////////////////////////////////////////////////////////
-
-void DipoleKickerOsc(Bunch* bunch, double k,
-                     double phaselength, double phase)
-{
-  double ztophi = 2.0 * OrbitConst::PI / phaselength;
-  double kick;
-
-  //coordinate array [part. index][x,xp,y,yp,z,dE]
-  double** arr = bunch->coordArr();
-
-  for(int i = 0; i < bunch->getSize(); i++)
-  {
-    kick = k * sin(ztophi * arr[i][4] + phase);
-    arr[i][1] += kick;
-    arr[i][3] -= kick;
   }
 }
 
@@ -892,6 +771,127 @@ void RotationF(Bunch* bunch, double anglef, double rhoi, double theta,
     s = lengtho2 - vr3;
     drifti(bunch, i, s);
   }
+}
+
+///////////////////////////////////////////////////////////////////////////
+//
+// NAME
+//   DipoleKickerOsc
+//
+// DESCRIPTION
+//   Performs oscillating dipole kick
+//
+// PARAMETERS
+//   k, phaselength, phase
+//
+///////////////////////////////////////////////////////////////////////////
+
+void DipoleKickerOsc(Bunch* bunch, double k,
+                     double phaselength, double phase)
+{
+  double ztophi = 2.0 * OrbitConst::PI / phaselength;
+  double kick;
+
+  //coordinate array [part. index][x,xp,y,yp,z,dE]
+  double** arr = bunch->coordArr();
+
+  for(int i = 0; i < bunch->getSize(); i++)
+  {
+    kick = k * sin(ztophi * arr[i][4] + phase);
+    arr[i][1] += kick;
+    arr[i][3] -= kick;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////
+//
+// NAME
+//   QuadKicker
+//
+// DESCRIPTION
+//   Performs quadrupole kick
+//
+// PARAMETERS
+//   k
+//
+///////////////////////////////////////////////////////////////////////////
+
+void QuadKicker(Bunch* bunch, double k)
+{
+  //coordinate array [part. index][x,xp,y,yp,z,dE]
+  double** arr = bunch->coordArr();
+
+  for(int i = 0; i < bunch->getSize(); i++)
+  {
+    arr[i][1] += k * arr[i][0];
+    arr[i][3] -= k * arr[i][2];
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////
+//
+// NAME
+//   QuadKickerOsc
+//
+// DESCRIPTION
+//   Performs oscillating quadrupole kick
+//
+// PARAMETERS
+//   k, phaselength, phase
+//
+///////////////////////////////////////////////////////////////////////////
+
+void QuadKickerOsc(Bunch* bunch, double k,
+                   double phaselength, double phase)
+{
+  double ztophi = 2.0 * OrbitConst::PI / phaselength;
+  double kick;
+
+  //coordinate array [part. index][x,xp,y,yp,z,dE]
+  double** arr = bunch->coordArr();
+
+  for(int i = 0; i < bunch->getSize(); i++)
+  {
+    kick = k * sin(ztophi * arr[i][4] + phase);
+    arr[i][1] += kick * arr[i][0];
+    arr[i][3] -= kick * arr[i][2];
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////
+// NAME
+//   drifti
+//
+// DESCRIPTION
+//   Drifts a single particle. Length < 0 is allowed.
+//
+// PARAMETERS
+//   bunch = reference to the macro-particle bunch
+//   i = particle index
+//   length = length of the drift
+//
+///////////////////////////////////////////////////////////////////////////
+
+void drifti(Bunch* bunch, int i, double length)
+{
+  double KNL, phifac, dp_p;
+
+  SyncPart* syncPart = bunch->getSyncPart();
+
+  double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
+  double dp_p_coeff = 1.0 / (syncPart->getMomentum() * syncPart->getBeta());
+
+  //coordinate array [part. index][x,xp,y,yp,z,dE]
+  double** arr = bunch->coordArr();
+
+  dp_p = arr[i][5] * dp_p_coeff;
+  KNL  = 1.0 / (1.0 + dp_p);
+  arr[i][0] += KNL * length * arr[i][1];
+  arr[i][2] += KNL * length * arr[i][3];
+  phifac = (arr[i][1] * arr[i][1] + arr[i][3] * arr[i][3] +
+            dp_p * dp_p * gamma2i) / 2.0;
+  phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
+  arr[i][4] -= length * phifac;
 }
 
 /////////////////////////////////////////////////////////////////////////

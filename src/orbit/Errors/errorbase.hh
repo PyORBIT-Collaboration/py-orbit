@@ -22,16 +22,10 @@
 
 namespace error_base
 {
-  void drifti(Bunch* bunch, int i, double length);
   void CoordDisplacement(Bunch* bunch,
                          double dx, double dxp,
                          double dy, double dyp,
                          double dz, double dE);
-  void QuadKicker(Bunch* bunch, double k);
-  void QuadKickerOsc(Bunch* bunch, double k,
-                     double phaselength, double phase);
-  void DipoleKickerOsc(Bunch* bunch, double k,
-                       double phaselength, double phase);
   void LongDisplacement(Bunch* bunch, double ds);
   void StraightRotationXY(Bunch* bunch, double anglexy);
   void StraightRotationXSI(Bunch* bunch, double anglexsi, double length);
@@ -52,6 +46,12 @@ namespace error_base
   void RotationF(Bunch* bunch, double anglef, double rhoi,
   	             double theta, double length,
                  std::string et, std::string type);
+  void DipoleKickerOsc(Bunch* bunch, double k,
+                       double phaselength, double phase);
+  void QuadKicker(Bunch* bunch, double k);
+  void QuadKickerOsc(Bunch* bunch, double k,
+                     double phaselength, double phase);
+  void drifti(Bunch* bunch, int i, double length);
   double derf(double x);
   double root_normal(double errtest, double ymin,
                      double ymax, double tol);

@@ -20,23 +20,6 @@ extern "C"
   // errorbase method wrappers
   //---------------------------------------------------------
 
-  // Drift a particle
-  static PyObject* wrap_drifti(PyObject *self, PyObject *args)
-  {
-    PyObject* pyBunch;
-    int i;
-    double length;
-    if(!PyArg_ParseTuple(args, "Oid:drifti",
-                         &pyBunch, &i, &length))
-    {
-      error("errorbase - drifti - cannot parse arguments!");
-    }
-    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-    error_base::drifti(cpp_bunch, i, length);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
   // Displace the coordinates of a bunch
   static PyObject* wrap_CoordDisplacement(PyObject *self, PyObject *args)
   {
@@ -49,54 +32,6 @@ extern "C"
     }
     Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
     error_base::CoordDisplacement(cpp_bunch, dx, dxp, dy, dyp, dz, dE);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  // Quadrupole kick a bunch
-  static PyObject* wrap_QuadKicker(PyObject *self, PyObject *args)
-  {
-    PyObject* pyBunch;
-    double k;
-    if(!PyArg_ParseTuple(args, "Od:QuadKicker",
-                         &pyBunch, &k))
-    {
-      error("errorbase - QuadKicker - cannot parse arguments!");
-    }
-    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-    error_base::QuadKicker(cpp_bunch, k);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  // Oscillating quadrupole kick a bunch
-  static PyObject* wrap_QuadKickerOsc(PyObject *self, PyObject *args)
-  {
-    PyObject* pyBunch;
-    double k, phaselength, phase;
-    if(!PyArg_ParseTuple(args, "Oddd:QuadKickerOsc",
-                         &pyBunch, &k, &phaselength, &phase))
-    {
-      error("errorbase - QuadKickerOsc - cannot parse arguments!");
-    }
-    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-    error_base::QuadKickerOsc(cpp_bunch, k, phaselength, phase);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  // Oscillating dipole kick a bunch
-  static PyObject* wrap_DipoleKickerOsc(PyObject *self, PyObject *args)
-  {
-    PyObject* pyBunch;
-    double k, phaselength, phase;
-    if(!PyArg_ParseTuple(args, "Oddd:DipoleKickerOsc",
-                         &pyBunch, &k, &phaselength, &phase))
-    {
-      error("errorbase - DipoleKickerOsc - cannot parse arguments!");
-    }
-    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-    error_base::DipoleKickerOsc(cpp_bunch, k, phaselength, phase);
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -365,6 +300,71 @@ extern "C"
     return Py_None;
   }
 
+  // Oscillating dipole kick a bunch
+  static PyObject* wrap_DipoleKickerOsc(PyObject *self, PyObject *args)
+  {
+    PyObject* pyBunch;
+    double k, phaselength, phase;
+    if(!PyArg_ParseTuple(args, "Oddd:DipoleKickerOsc",
+                         &pyBunch, &k, &phaselength, &phase))
+    {
+      error("errorbase - DipoleKickerOsc - cannot parse arguments!");
+    }
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+    error_base::DipoleKickerOsc(cpp_bunch, k, phaselength, phase);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  // Quadrupole kick a bunch
+  static PyObject* wrap_QuadKicker(PyObject *self, PyObject *args)
+  {
+    PyObject* pyBunch;
+    double k;
+    if(!PyArg_ParseTuple(args, "Od:QuadKicker",
+                         &pyBunch, &k))
+    {
+      error("errorbase - QuadKicker - cannot parse arguments!");
+    }
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+    error_base::QuadKicker(cpp_bunch, k);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  // Oscillating quadrupole kick a bunch
+  static PyObject* wrap_QuadKickerOsc(PyObject *self, PyObject *args)
+  {
+    PyObject* pyBunch;
+    double k, phaselength, phase;
+    if(!PyArg_ParseTuple(args, "Oddd:QuadKickerOsc",
+                         &pyBunch, &k, &phaselength, &phase))
+    {
+      error("errorbase - QuadKickerOsc - cannot parse arguments!");
+    }
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+    error_base::QuadKickerOsc(cpp_bunch, k, phaselength, phase);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  // Drift a particle
+  static PyObject* wrap_drifti(PyObject *self, PyObject *args)
+  {
+    PyObject* pyBunch;
+    int i;
+    double length;
+    if(!PyArg_ParseTuple(args, "Oid:drifti",
+                         &pyBunch, &i, &length))
+    {
+      error("errorbase - drifti - cannot parse arguments!");
+    }
+    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+    error_base::drifti(cpp_bunch, i, length);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
   // Error function
   static PyObject* wrap_derf(PyObject *self, PyObject *args)
   {
@@ -405,11 +405,7 @@ extern "C"
 
   static PyMethodDef errorbaseMethods[] =
   {
-    {"drifti",              wrap_drifti,              METH_VARARGS, "Drifts a macroparticle"},
     {"CoordDisplacement",   wrap_CoordDisplacement,   METH_VARARGS, "Displace the coordinates of a bunch"},
-    {"QuadKicker",          wrap_QuadKicker,          METH_VARARGS, "Quadrupole kick a bunch"},
-    {"QuadKickerOsc",       wrap_QuadKickerOsc,       METH_VARARGS, "Oscillating quadrupole kick a bunch"},
-    {"DipoleKickerOsc",     wrap_DipoleKickerOsc,     METH_VARARGS, "Oscillating dipole kick a bunch"},
     {"LongDisplacement",    wrap_LongDisplacement,    METH_VARARGS, "Longitudinally displace a bunch"},
     {"StraightRotationXY",  wrap_StraightRotationXY,  METH_VARARGS, "XY rotate a bunch"},
     {"StraightRotationXSI", wrap_StraightRotationXSI, METH_VARARGS, "XS rotate a bunch entering element"},
@@ -426,6 +422,10 @@ extern "C"
     {"BendDisplacementLF",  wrap_BendDisplacementLF,  METH_VARARGS, "L displacement error to a bunch leaving bend"},
     {"RotationI",           wrap_RotationI,           METH_VARARGS, "General rotation error to a bunch entering element"},
     {"RotationF",           wrap_RotationF,           METH_VARARGS, "General rotation error to a bunch leaving element"},
+    {"DipoleKickerOsc",     wrap_DipoleKickerOsc,     METH_VARARGS, "Oscillating dipole kick a bunch"},
+    {"QuadKicker",          wrap_QuadKicker,          METH_VARARGS, "Quadrupole kick a bunch"},
+    {"QuadKickerOsc",       wrap_QuadKickerOsc,       METH_VARARGS, "Oscillating quadrupole kick a bunch"},
+    {"drifti",              wrap_drifti,              METH_VARARGS, "Drifts a macroparticle"},
     {"derf",                wrap_derf,                METH_VARARGS, "Error function"},
     {"root_normal",         wrap_root_normal,         METH_VARARGS, "Helps find Gaussian distribution"},
     {"getGauss",            wrap_getGauss ,           METH_VARARGS, "Returns Gaussian distribution"},

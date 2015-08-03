@@ -18,13 +18,10 @@ from orbit.lattice import AccLattice, AccNode,\
 
 # import teapot drift class
 from orbit.teapot import DriftTEAPOT
+from orbit.teapot import BendTEAPOT
 
-#import error packages
-from error_base import drifti
+# import error packages
 from error_base import CoordDisplacement
-from error_base import QuadKicker
-from error_base import QuadKickerOsc
-from error_base import DipoleKickerOsc
 from error_base import LongDisplacement
 from error_base import StraightRotationXY
 from error_base import StraightRotationXSI
@@ -41,10 +38,19 @@ from error_base import BendDisplacementLI
 from error_base import BendDisplacementLF
 from error_base import RotationI
 from error_base import RotationF
+from error_base import DipoleKickerOsc
+from error_base import QuadKicker
+from error_base import QuadKickerOsc
+from error_base import drifti
 from error_base import derf
 from error_base import root_normal
 from error_base import getGauss
 
+# import node adders
+from orbit.errors.ErrorLatticeModifications import addErrorNode
+from orbit.errors.ErrorLatticeModifications import addErrorNodeAsChild
+from orbit.errors.ErrorLatticeModifications import addErrorNodeAsChild_I
+from orbit.errors.ErrorLatticeModifications import addErrorNodeAsChild_F
 
 # Displace the coordinates of a bunch
 class coorddisplacement(DriftTEAPOT):
@@ -92,166 +98,6 @@ class coorddisplacement(DriftTEAPOT):
         dz  = self.dz
         dE  = self.dE
         CoordDisplacement(bunch, dx, dxp, dy, dyp, dz, dE)
-
-
-# Quadrupole kick a bunch
-class quadkicker(DriftTEAPOT):
-
-    def __init__(self, k,\
-	    name = "Quad Kicker"):
-        """
-            Constructor. Creates QuadKicker element.
-        """
-        DriftTEAPOT.__init__(self, name)
-        self.setType("quadrupole kicker node")
-        self.setLength(0.0)
-        self.k = k
-
-    def setkick(self, k):
-        """
-            Sets or changes kick values.
-        """
-        self.k = k
-
-    def trackBunch(self, bunch):
-        """
-            The QuadKicker-teapot class implementation of the
-            AccNodeBunchTracker class trackBunch(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        k = self.k
-        QuadKicker(bunch, k)
-
-    def track(self, paramsDict):
-        """ 
-            The QuadKicker-teapot class implementation of the
-            AccNodeBunchTracker class track(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        bunch = paramsDict["bunch"]
-        k = self.k
-        QuadKicker(bunch, k)
-
-
-# Oscillating quadrupole kick a bunch
-class quadkickerosc(DriftTEAPOT):
-
-    def __init__(self, k, phaselength, phase,\
-	    name = "Quad Kicker Osc"):
-        """
-            Constructor. Creates QuadKickerOsc element.
-        """
-        DriftTEAPOT.__init__(self, name)
-        self.setType("oscillating quadrupole kicker node")
-        self.setLength(0.0)
-        self.k = k
-        self.phaselength = phaselength
-        self.phase = phase
-
-    def trackBunch(self, bunch):
-        """
-            The QuadKickerOsc-teapot class implementation of the
-            AccNodeBunchTracker class trackBunch(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        k = self.k
-        phaselength = self.phaselength
-        phase = self.phase
-        QuadKickerOsc(bunch, k, phaselength, phase)
-
-    def track(self, paramsDict):
-        """ 
-            The QuadKickerOsc-teapot class implementation of the
-            AccNodeBunchTracker class track(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        bunch = paramsDict["bunch"]
-        k = self.k
-        phaselength = self.phaselength
-        phase = self.phase
-        QuadKickerOsc(bunch, k, phaselength, phase)
-
-
-# Dipole kick a bunch
-class dipolekicker(DriftTEAPOT):
-
-    def __init__(self, dxp, dyp,\
-	    name = "Dipole Kicker"):
-        """
-            Constructor. Creates DipoleKicker element.
-        """
-        DriftTEAPOT.__init__(self, name)
-        self.setType("dipole kicker node")
-        self.setLength(0.0)
-        self.dxp = dxp
-        self.dyp = dyp
-
-    def setkick(self, dxp, dyp):
-        """
-            Sets or changes kick values.
-        """
-        self.dxp = dxp
-        self.dyp = dyp
-
-    def trackBunch(self, bunch):
-        """
-            The DipoleKicker-teapot class implementation of the
-            AccNodeBunchTracker class trackBunch(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        dxp = self.dxp
-        dyp = self.dyp
-        CoordDisplacement(bunch, 0.0, dxp, 0.0, dyp, 0.0, 0.0)
-
-    def track(self, paramsDict):
-        """ 
-            The DipoleKicker-teapot class implementation of the
-            AccNodeBunchTracker class track(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        bunch = paramsDict["bunch"]
-        dxp = self.dxp
-        dyp = self.dyp
-        CoordDisplacement(bunch, 0.0, dxp, 0.0, dyp, 0.0, 0.0)
-
-
-# Oscillating dipole kick a bunch
-class dipolekickerosc(DriftTEAPOT):
-
-    def __init__(self, k, phaselength, phase,\
-	    name = "Dipole Kicker Osc"):
-        """
-            Constructor. Creates DipoleKickerOsc element.
-        """
-        DriftTEAPOT.__init__(self, name)
-        self.setType("oscillating dipole kicker node")
-        self.setLength(0.0)
-        self.k = k
-        self.phaselength = phaselength
-        self.phase = phase
-
-    def trackBunch(self, bunch):
-        """
-            The DipoleKickerOsc-teapot class implementation of the
-            AccNodeBunchTracker class trackBunch(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        k = self.k
-        phaselength = self.phaselength
-        phase = self.phase
-        DipoleKickerOsc(bunch, k, phaselength, phase)
-
-    def track(self, paramsDict):
-        """ 
-            The DipoleKickerOsc-teapot class implementation of the
-            AccNodeBunchTracker class track(probe) method.
-        """
-        length = self.getLength(self.getActivePartIndex())
-        bunch = paramsDict["bunch"]
-        k = self.k
-        phaselength = self.phaselength
-        phase = self.phase
-        DipoleKickerOsc(bunch, k, phaselength, phase)
 
 
 # Longitudinally displace a bunch
@@ -836,6 +682,166 @@ class rotationf(DriftTEAPOT):
         RotationF(bunch, anglef, rhoi, theta, lengthelt, et, rotype)
 
 
+# Dipole kick a bunch
+class dipolekicker(DriftTEAPOT):
+
+    def __init__(self, dxp, dyp,\
+	    name = "Dipole Kicker"):
+        """
+            Constructor. Creates DipoleKicker element.
+        """
+        DriftTEAPOT.__init__(self, name)
+        self.setType("dipole kicker node")
+        self.setLength(0.0)
+        self.dxp = dxp
+        self.dyp = dyp
+
+    def setkick(self, dxp, dyp):
+        """
+            Sets or changes kick values.
+        """
+        self.dxp = dxp
+        self.dyp = dyp
+
+    def trackBunch(self, bunch):
+        """
+            The DipoleKicker-teapot class implementation of the
+            AccNodeBunchTracker class trackBunch(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        dxp = self.dxp
+        dyp = self.dyp
+        CoordDisplacement(bunch, 0.0, dxp, 0.0, dyp, 0.0, 0.0)
+
+    def track(self, paramsDict):
+        """ 
+            The DipoleKicker-teapot class implementation of the
+            AccNodeBunchTracker class track(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        bunch = paramsDict["bunch"]
+        dxp = self.dxp
+        dyp = self.dyp
+        CoordDisplacement(bunch, 0.0, dxp, 0.0, dyp, 0.0, 0.0)
+
+
+# Oscillating dipole kick a bunch
+class dipolekickerosc(DriftTEAPOT):
+
+    def __init__(self, k, phaselength, phase,\
+	    name = "Dipole Kicker Osc"):
+        """
+            Constructor. Creates DipoleKickerOsc element.
+        """
+        DriftTEAPOT.__init__(self, name)
+        self.setType("oscillating dipole kicker node")
+        self.setLength(0.0)
+        self.k = k
+        self.phaselength = phaselength
+        self.phase = phase
+
+    def trackBunch(self, bunch):
+        """
+            The DipoleKickerOsc-teapot class implementation of the
+            AccNodeBunchTracker class trackBunch(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        k = self.k
+        phaselength = self.phaselength
+        phase = self.phase
+        DipoleKickerOsc(bunch, k, phaselength, phase)
+
+    def track(self, paramsDict):
+        """ 
+            The DipoleKickerOsc-teapot class implementation of the
+            AccNodeBunchTracker class track(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        bunch = paramsDict["bunch"]
+        k = self.k
+        phaselength = self.phaselength
+        phase = self.phase
+        DipoleKickerOsc(bunch, k, phaselength, phase)
+
+
+# Quadrupole kick a bunch
+class quadkicker(DriftTEAPOT):
+
+    def __init__(self, k,\
+	    name = "Quad Kicker"):
+        """
+            Constructor. Creates QuadKicker element.
+        """
+        DriftTEAPOT.__init__(self, name)
+        self.setType("quadrupole kicker node")
+        self.setLength(0.0)
+        self.k = k
+
+    def setkick(self, k):
+        """
+            Sets or changes kick values.
+        """
+        self.k = k
+
+    def trackBunch(self, bunch):
+        """
+            The QuadKicker-teapot class implementation of the
+            AccNodeBunchTracker class trackBunch(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        k = self.k
+        QuadKicker(bunch, k)
+
+    def track(self, paramsDict):
+        """ 
+            The QuadKicker-teapot class implementation of the
+            AccNodeBunchTracker class track(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        bunch = paramsDict["bunch"]
+        k = self.k
+        QuadKicker(bunch, k)
+
+
+# Oscillating quadrupole kick a bunch
+class quadkickerosc(DriftTEAPOT):
+
+    def __init__(self, k, phaselength, phase,\
+	    name = "Quad Kicker Osc"):
+        """
+            Constructor. Creates QuadKickerOsc element.
+        """
+        DriftTEAPOT.__init__(self, name)
+        self.setType("oscillating quadrupole kicker node")
+        self.setLength(0.0)
+        self.k = k
+        self.phaselength = phaselength
+        self.phase = phase
+
+    def trackBunch(self, bunch):
+        """
+            The QuadKickerOsc-teapot class implementation of the
+            AccNodeBunchTracker class trackBunch(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        k = self.k
+        phaselength = self.phaselength
+        phase = self.phase
+        QuadKickerOsc(bunch, k, phaselength, phase)
+
+    def track(self, paramsDict):
+        """ 
+            The QuadKickerOsc-teapot class implementation of the
+            AccNodeBunchTracker class track(probe) method.
+        """
+        length = self.getLength(self.getActivePartIndex())
+        bunch = paramsDict["bunch"]
+        k = self.k
+        phaselength = self.phaselength
+        phase = self.phase
+        QuadKickerOsc(bunch, k, phaselength, phase)
+
+
 ######################################################################
 
 
@@ -885,14 +891,18 @@ class AddErrorNode():
         self.lattice = lattice
         self.positioni = positioni
         self.positionf = positionf
-        self.nodeIndexi = FindNode(positioni)
-        self.nodeIndexf = FindNode(positionf)
+        self.nodeIndexi = self.FindNode(positioni)
+        self.nodeIndexf = self.FindNode(positionf)
         self.localDict = paramsDict
         self.errtype = self.localDict["errtype"]
         if(self.errtype == "TransDispError"):
         	self.AddTransDispError()
+        if(self.errtype == "LongDispError"):
+        	self.AddLongDispError()
+        if(self.errtype == "StraightRotationError"):
+        	self.AddStraightRotationError()
 
-    def FindNode(position):
+    def FindNode(self, position):
         """
             Finds node at position.
         """
@@ -908,28 +918,79 @@ class AddErrorNode():
         	nodeIndex -= 1
         return nodeIndex
 
-    def AddTransDispError():
-        """
-            Adds a TransDispError to nodes
-            between nodeIndexi and nodeIndexf.
-        """
-        lattice = self.lattice
-        lattice.initialize()
-        nodeIndexi = self.nodeIndexi
-        nodeIndexf = self.nodeIndexf
-        nodei = lattice.getNodes()[nodeIndexi]
-        if(isinstance(nodei, BendTEAPOT)):
-        	print "Bend nodei = ", nodei.getName(), " type = ",\
-			nodei.getType(), " L = ", nodei.getLength()
-			orbitFinalize("Cant add TransDispError to a Bend! Stop!")
-		nodef = lattice.getNodes()[nodeIndexf]
-        if(isinstance(nodef, BendTEAPOT)):
-        	print "Bend nodef = ", nodef.getName(), " type = ",\
-			nodef.getType(), " L = ", nodef.getLength()
-			orbitFinalize("Cant add TransDispError to a Bend! Stop!")
-		dx = self.localDict["dx"]
-		dy = self.localDict["dy"]
-		errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
-		errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
-		addErrorNodeAsChild_I( lattice, nodef, errorf)
-		addErrorNodeAsChild_F(lattice, nodei, errori)
+    def AddTransDispError(self):
+    	"""
+    		Adds a TransDispError to nodes
+    		between nodeIndexi and nodeIndexf.
+    	"""
+    	lattice = self.lattice
+    	lattice.initialize()
+    	nodeIndexi = self.nodeIndexi
+    	nodeIndexf = self.nodeIndexf
+    	nodei = lattice.getNodes()[nodeIndexi]
+    	if(isinstance(nodei, BendTEAPOT)):
+    		print "Bend nodei = ", nodei.getName(), " type = ",\
+    		nodei.getType(), " L = ", nodei.getLength()
+    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
+    	nodef = lattice.getNodes()[nodeIndexf]
+    	if(isinstance(nodef, BendTEAPOT)):
+    		print "Bend nodef = ", nodef.getName(), " type = ",\
+    		nodef.getType(), " L = ", nodef.getLength()
+    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
+    	dx = self.localDict["dx"]
+    	dy = self.localDict["dy"]
+    	errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
+    	errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
+    	addErrorNodeAsChild_I(lattice, nodei, errori)
+    	addErrorNodeAsChild_F(lattice, nodef, errorf)
+
+    def AddLongDispError(self):
+    	"""
+    		Adds a LongDispError to nodes
+    		between nodeIndexi and nodeIndexf.
+    	"""
+    	lattice = self.lattice
+    	lattice.initialize()
+    	nodeIndexi = self.nodeIndexi
+    	nodeIndexf = self.nodeIndexf
+    	nodei = lattice.getNodes()[nodeIndexi]
+    	if(isinstance(nodei, BendTEAPOT)):
+    		print "Bend nodei = ", nodei.getName(), " type = ",\
+    		nodei.getType(), " L = ", nodei.getLength()
+    		orbitFinalize("Cant add LongDispError to a Bend! Stop!")
+    	nodef = lattice.getNodes()[nodeIndexf]
+    	if(isinstance(nodef, BendTEAPOT)):
+    		print "Bend nodef = ", nodef.getName(), " type = ",\
+    		nodef.getType(), " L = ", nodef.getLength()
+    		orbitFinalize("Cant add LongDispError to a Bend! Stop!")
+    	ds = self.localDict["ds"]
+    	errori = longdisplacement(ds)
+    	errorf = longdisplacement(-ds)
+    	addErrorNodeAsChild_I(lattice, nodei, errori)
+    	addErrorNodeAsChild_F(lattice, nodef, errorf)
+
+    def AddStraightRotationError(self):
+    	"""
+    		Adds a StraightRotationError to nodes
+    		between nodeIndexi and nodeIndexf.
+    	"""
+    	lattice = self.lattice
+    	lattice.initialize()
+    	nodeIndexi = self.nodeIndexi
+    	nodeIndexf = self.nodeIndexf
+    	nodei = lattice.getNodes()[nodeIndexi]
+    	if(isinstance(nodei, BendTEAPOT)):
+    		print "Bend nodei = ", nodei.getName(), " type = ",\
+    		nodei.getType(), " L = ", nodei.getLength()
+    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
+    	nodef = lattice.getNodes()[nodeIndexf]
+    	if(isinstance(nodef, BendTEAPOT)):
+    		print "Bend nodef = ", nodef.getName(), " type = ",\
+    		nodef.getType(), " L = ", nodef.getLength()
+    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
+    	dx = self.localDict["dx"]
+    	dy = self.localDict["dy"]
+    	errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
+    	errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
+    	addErrorNodeAsChild_I(lattice, nodei, errori)
+    	addErrorNodeAsChild_F(lattice, nodef, errorf)

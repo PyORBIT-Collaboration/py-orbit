@@ -9,10 +9,6 @@
 ##                  node to the lattice
 
 from orbit.errors.ErrorNode import coorddisplacement
-from orbit.errors.ErrorNode import quadkicker
-from orbit.errors.ErrorNode import quadkickerosc
-from orbit.errors.ErrorNode import dipolekicker
-from orbit.errors.ErrorNode import dipolekickerosc
 from orbit.errors.ErrorNode import longdisplacement
 from orbit.errors.ErrorNode import straightrotationxy
 from orbit.errors.ErrorNode import straightrotationxsi
@@ -29,6 +25,10 @@ from orbit.errors.ErrorNode import benddisplacementli
 from orbit.errors.ErrorNode import benddisplacementlf
 from orbit.errors.ErrorNode import rotationi
 from orbit.errors.ErrorNode import rotationf
+from orbit.errors.ErrorNode import dipolekicker
+from orbit.errors.ErrorNode import dipolekickerosc
+from orbit.errors.ErrorNode import quadkicker
+from orbit.errors.ErrorNode import quadkickerosc
 from orbit.errors.ErrorNode import driftone
 from orbit.errors.ErrorNode import erf
 from orbit.errors.ErrorNode import rootnormal

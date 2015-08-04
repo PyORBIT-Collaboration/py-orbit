@@ -18,6 +18,10 @@ from orbit.lattice import AccLattice, AccNode,\
 
 # import teapot drift class
 from orbit.teapot import DriftTEAPOT
+from orbit.teapot import KickTEAPOT
+from orbit.teapot import SolenoidTEAPOT
+from orbit.teapot import MultipoleTEAPOT
+from orbit.teapot import QuadTEAPOT
 from orbit.teapot import BendTEAPOT
 
 # import error packages
@@ -891,106 +895,144 @@ class AddErrorNode():
         self.lattice = lattice
         self.positioni = positioni
         self.positionf = positionf
-        self.nodeIndexi = self.FindNode(positioni)
-        self.nodeIndexf = self.FindNode(positionf)
+        (self.nodeIndexi, self.zi, f) = FindNode(lattice, positioni)
+        (self.nodeIndexf, i, self.zf) = FindNode(lattice, positionf)
         self.localDict = paramsDict
         self.errtype = self.localDict["errtype"]
-        if(self.errtype == "TransDispError"):
-        	self.AddTransDispError()
-        if(self.errtype == "LongDispError"):
-        	self.AddLongDispError()
-        if(self.errtype == "StraightRotationError"):
-        	self.AddStraightRotationError()
+        if(self.errtype == "StraightError"):
+        	self.AddStraightError()
+        if(self.errtype == "FieldError"):
+        	self.AddFieldError()
 
-    def FindNode(self, position):
-        """
-            Finds node at position.
-        """
-        lattice = self.lattice
-        lattice.initialize()
-        nodeIndex = 0
-        z = 0.0
-        for node in lattice.getNodes():
-        	z += node.getLength()
-        	if(position >= z):
-        		nodeIndex += 1
-        if(position >= lattice.getLength()):
-        	nodeIndex -= 1
-        return nodeIndex
-
-    def AddTransDispError(self):
+    def AddStraightError(self):
     	"""
-    		Adds a TransDispError to nodes
+    		Adds a StraightError to nodes
     		between nodeIndexi and nodeIndexf.
     	"""
     	lattice = self.lattice
     	lattice.initialize()
     	nodeIndexi = self.nodeIndexi
     	nodeIndexf = self.nodeIndexf
+    	for node in lattice.getNodes()[nodeIndexi : nodeIndexf + 1]:
+    		if(isinstance(node, BendTEAPOT)):
+    			print "Bend node = ", node.getName(), " type = ",\
+    			node.getType(), " L = ", node.getLength()
+    			orbitFinalize("Cant add StraightError around a Bend! Stop!")
     	nodei = lattice.getNodes()[nodeIndexi]
-    	if(isinstance(nodei, BendTEAPOT)):
-    		print "Bend nodei = ", nodei.getName(), " type = ",\
-    		nodei.getType(), " L = ", nodei.getLength()
-    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
     	nodef = lattice.getNodes()[nodeIndexf]
-    	if(isinstance(nodef, BendTEAPOT)):
-    		print "Bend nodef = ", nodef.getName(), " type = ",\
-    		nodef.getType(), " L = ", nodef.getLength()
-    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
-    	dx = self.localDict["dx"]
-    	dy = self.localDict["dy"]
-    	errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
-    	errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
+    	if(self.localDict["subtype"] == "TransDisp"):
+    		dx = self.localDict["dx"]
+    		dy = self.localDict["dy"]
+    		errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
+    		errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
+    	if(self.localDict["subtype"] == "LongDisp"):
+    		ds = self.localDict["ds"]
+    		errori = longdisplacement(ds)
+    		errorf = longdisplacement(-ds)
+    	if(self.localDict["subtype"] == "XYRot"):
+    		anglexy = self.localDict["anglexy"]
+    		errori = straightrotationxy( anglexy)
+    		errorf = straightrotationxy(-anglexy)
+    	if(self.localDict["subtype"] == "XSRot"):
+    		anglexs = self.localDict["anglexs"]
+    		lengtherr = self.zf - self.zi
+    		errori = straightrotationxsi(anglexs, lengtherr)
+    		errorf = straightrotationxsf(anglexs, lengtherr)
+    	if(self.localDict["subtype"] == "YSRot"):
+    		angleys = self.localDict["angleys"]
+    		lengtherr = self.zf - self.zi
+    		errori = straightrotationysi(angleys, lengtherr)
+    		errorf = straightrotationysf(angleys, lengtherr)
     	addErrorNodeAsChild_I(lattice, nodei, errori)
     	addErrorNodeAsChild_F(lattice, nodef, errorf)
 
-    def AddLongDispError(self):
+    def AddFieldError(self):
     	"""
-    		Adds a LongDispError to nodes
-    		between nodeIndexi and nodeIndexf.
+    		Adds a FieldError to node at nodeIndex.
     	"""
     	lattice = self.lattice
     	lattice.initialize()
-    	nodeIndexi = self.nodeIndexi
-    	nodeIndexf = self.nodeIndexf
-    	nodei = lattice.getNodes()[nodeIndexi]
-    	if(isinstance(nodei, BendTEAPOT)):
-    		print "Bend nodei = ", nodei.getName(), " type = ",\
-    		nodei.getType(), " L = ", nodei.getLength()
-    		orbitFinalize("Cant add LongDispError to a Bend! Stop!")
-    	nodef = lattice.getNodes()[nodeIndexf]
-    	if(isinstance(nodef, BendTEAPOT)):
-    		print "Bend nodef = ", nodef.getName(), " type = ",\
-    		nodef.getType(), " L = ", nodef.getLength()
-    		orbitFinalize("Cant add LongDispError to a Bend! Stop!")
-    	ds = self.localDict["ds"]
-    	errori = longdisplacement(ds)
-    	errorf = longdisplacement(-ds)
+    	nodeIndex = self.nodeIndexi
+    	node = lattice.getNodes()[nodeIndex]
+    	if(self.localDict["subtype"] == "KickField"):
+    		if(not isinstance(node, KickTEAPOT)):
+    			print "node = ", node.getName(), " type = ",\
+    			node.getType(), " L = ", node.getLength()
+    			orbitFinalize("Field Error: Wanted a Kick node! Stop!")
+    		kx = node.getParam("kx")
+    		ky = node.getParam("ky")
+    		kx *= (1.0 + self.localDict["fracerr"])
+    		ky *= (1.0 + self.localDict["fracerr"])
+    		node.setParam("kx", kx)
+       		node.setParam("ky", ky)
+     	if(self.localDict["subtype"] == "SolenoidField"):
+    		if(not isinstance(node, SolenoidTEAPOT)):
+    			print "node = ", node.getName(), " type = ",\
+    			node.getType(), " L = ", node.getLength()
+    			orbitFinalize("Field Error: Wanted a Solenoid node! Stop!")
+    		kx = node.getParam("kx")
+    		ky = node.getParam("ky")
+    		kx *= (1.0 + self.localDict["fracerr"])
+    		ky *= (1.0 + self.localDict["fracerr"])
+    		node.setParam("kx", kx)
+       		node.setParam("ky", ky)
+		
+
+
+    	if(self.localDict["subtype"] == "TransDisp"):
+    		dx = self.localDict["dx"]
+    		dy = self.localDict["dy"]
+    		errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
+    		errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
+    	if(self.localDict["subtype"] == "LongDisp"):
+    		ds = self.localDict["ds"]
+    		errori = longdisplacement(ds)
+    		errorf = longdisplacement(-ds)
+    	if(self.localDict["subtype"] == "XYRot"):
+    		anglexy = self.localDict["anglexy"]
+    		errori = straightrotationxy( anglexy)
+    		errorf = straightrotationxy(-anglexy)
+    	if(self.localDict["subtype"] == "XSRot"):
+    		anglexs = self.localDict["anglexs"]
+    		lengtherr = self.zf - self.zi
+    		errori = straightrotationxsi(anglexs, lengtherr)
+    		errorf = straightrotationxsf(anglexs, lengtherr)
+    	if(self.localDict["subtype"] == "YSRot"):
+    		angleys = self.localDict["angleys"]
+    		lengtherr = self.zf - self.zi
+    		errori = straightrotationysi(angleys, lengtherr)
+    		errorf = straightrotationysf(angleys, lengtherr)
     	addErrorNodeAsChild_I(lattice, nodei, errori)
     	addErrorNodeAsChild_F(lattice, nodef, errorf)
 
-    def AddStraightRotationError(self):
-    	"""
-    		Adds a StraightRotationError to nodes
-    		between nodeIndexi and nodeIndexf.
-    	"""
-    	lattice = self.lattice
-    	lattice.initialize()
-    	nodeIndexi = self.nodeIndexi
-    	nodeIndexf = self.nodeIndexf
-    	nodei = lattice.getNodes()[nodeIndexi]
-    	if(isinstance(nodei, BendTEAPOT)):
-    		print "Bend nodei = ", nodei.getName(), " type = ",\
-    		nodei.getType(), " L = ", nodei.getLength()
-    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
-    	nodef = lattice.getNodes()[nodeIndexf]
-    	if(isinstance(nodef, BendTEAPOT)):
-    		print "Bend nodef = ", nodef.getName(), " type = ",\
-    		nodef.getType(), " L = ", nodef.getLength()
-    		orbitFinalize("Cant add TransDispError to a Bend! Stop!")
-    	dx = self.localDict["dx"]
-    	dy = self.localDict["dy"]
-    	errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
-    	errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
-    	addErrorNodeAsChild_I(lattice, nodei, errori)
-    	addErrorNodeAsChild_F(lattice, nodef, errorf)
+
+
+from orbit.teapot import KickTEAPOT
+from orbit.teapot import SolenoidTEAPOT
+from orbit.teapot import MultipoleTEAPOT
+from orbit.teapot import QuadTEAPOT
+from orbit.teapot import BendTEAPOT
+
+
+
+def FindNode(lattice, position):
+	"""
+	Finds node at position in lattice.
+	"""
+	lattice.initialize()
+	nodeIndex = 0
+	zf = 0.0
+	yes = 1
+	for node in lattice.getNodes():
+		if(yes == 1):
+			zi = zf
+			zf += node.getLength()
+		else:
+			return (nodeIndex, zi, zf)
+		if(position >= zf):
+			nodeIndex += 1
+		else:
+			yes = 0
+		if(position >= lattice.getLength()):
+			nodeIndex -= 1
+	return (nodeIndex, zi, zf)

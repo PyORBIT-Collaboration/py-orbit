@@ -970,50 +970,45 @@ class AddErrorNode():
     			print "node = ", node.getName(), " type = ",\
     			node.getType(), " L = ", node.getLength()
     			orbitFinalize("Field Error: Wanted a Solenoid node! Stop!")
-    		kx = node.getParam("kx")
-    		ky = node.getParam("ky")
-    		kx *= (1.0 + self.localDict["fracerr"])
-    		ky *= (1.0 + self.localDict["fracerr"])
-    		node.setParam("kx", kx)
-       		node.setParam("ky", ky)
-		
-
-
-    	if(self.localDict["subtype"] == "TransDisp"):
-    		dx = self.localDict["dx"]
-    		dy = self.localDict["dy"]
-    		errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
-    		errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
-    	if(self.localDict["subtype"] == "LongDisp"):
-    		ds = self.localDict["ds"]
-    		errori = longdisplacement(ds)
-    		errorf = longdisplacement(-ds)
-    	if(self.localDict["subtype"] == "XYRot"):
-    		anglexy = self.localDict["anglexy"]
-    		errori = straightrotationxy( anglexy)
-    		errorf = straightrotationxy(-anglexy)
-    	if(self.localDict["subtype"] == "XSRot"):
-    		anglexs = self.localDict["anglexs"]
-    		lengtherr = self.zf - self.zi
-    		errori = straightrotationxsi(anglexs, lengtherr)
-    		errorf = straightrotationxsf(anglexs, lengtherr)
-    	if(self.localDict["subtype"] == "YSRot"):
-    		angleys = self.localDict["angleys"]
-    		lengtherr = self.zf - self.zi
-    		errori = straightrotationysi(angleys, lengtherr)
-    		errorf = straightrotationysf(angleys, lengtherr)
-    	addErrorNodeAsChild_I(lattice, nodei, errori)
-    	addErrorNodeAsChild_F(lattice, nodef, errorf)
-
-
-
-from orbit.teapot import KickTEAPOT
-from orbit.teapot import SolenoidTEAPOT
-from orbit.teapot import MultipoleTEAPOT
-from orbit.teapot import QuadTEAPOT
-from orbit.teapot import BendTEAPOT
-
-
+    		B = node.getParam("B")
+    		B *= (1.0 + self.localDict["fracerr"])
+    		node.setParam("B", B)
+     	if(self.localDict["subtype"] == "MultipoleField"):
+    		if(not isinstance(node, MultipoleTEAPOT)):
+    			print "node = ", node.getName(), " type = ",\
+    			node.getType(), " L = ", node.getLength()
+    			orbitFinalize("Field Error: Wanted a Multipole node! Stop!")
+    		klArr = node.getParam("kls")
+    		for i in xrange(len(klArr)):
+    			klArr[i] *= (1.0 + self.localDict["fracerr"])
+    		node.setParam("kls", klArr)
+     	if(self.localDict["subtype"] == "QuadField"):
+    		if(not isinstance(node, QuadTEAPOT)):
+    			print "node = ", node.getName(), " type = ",\
+    			node.getType(), " L = ", node.getLength()
+    			orbitFinalize("Field Error: Wanted a Quadrupole node! Stop!")
+    		kq = node.getParam("kq")
+    		klArr = node.getParam("kls")
+    		kq *= (1.0 + self.localDict["fracerr"])
+    		for i in xrange(len(klArr)):
+    			klArr[i] *= (1.0 + self.localDict["fracerr"])
+    		node.setParam("kq", kq)
+    		node.setParam("kls", klArr)
+     	if(self.localDict["subtype"] == "BendField"):
+    		if(not isinstance(node, BendTEAPOT)):
+    			print "node = ", node.getName(), " type = ",\
+    			node.getType(), " L = ", node.getLength()
+    			orbitFinalize("Field Error: Wanted a Bend node! Stop!")
+    		drho = -node.getParam("rho") *\
+    		self.localDict["fracerr"] / (1.0 + self.localDict["fracerr"])
+    		klArr = node.getParam("kls")
+    		for i in xrange(len(klArr)):
+    			klArr[i] *= (1.0 + self.localDict["fracerr"])
+    		node.setParam("kls", klArr)
+    		errori = bendfieldi(drho)
+    		errorf = bendfieldf(drho)
+    	addErrorNodeAsChild_I(lattice, node, errori)
+    	addErrorNodeAsChild_F(lattice, node, errorf)
 
 def FindNode(lattice, position):
 	"""

@@ -698,7 +698,7 @@ class SolenoidTEAPOT(NodeTEAPOT):
 		bunch = paramsDict["bunch"]
 		useCharge = 1
 		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
-		B = node.getParam("B")
+		B = self.getParam("B")
 		TPB.soln(bunch,length,B,useCharge)
 
 class MultipoleTEAPOT(NodeTEAPOT):

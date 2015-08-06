@@ -1007,8 +1007,8 @@ class AddErrorNode():
     		node.setParam("kls", klArr)
     		errori = bendfieldi(drho)
     		errorf = bendfieldf(drho)
-    	addErrorNodeAsChild_I(lattice, node, errori)
-    	addErrorNodeAsChild_F(lattice, node, errorf)
+    		addErrorNodeAsChild_I(lattice, node, errori)
+    		addErrorNodeAsChild_F(lattice, node, errorf)
 
 def FindNode(lattice, position):
 	"""

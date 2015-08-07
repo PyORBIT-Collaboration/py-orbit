@@ -41,7 +41,7 @@ extern "C" {
 		return 0;
   }
 
-	//SuperFishFieldSource_getEMField - returns components of the electric and magnetic filds.
+	//SuperFishFieldSource_getEMField - returns components of the electric and magnetic fields.
   static PyObject* SuperFishFieldSource_getElectricMagneticField(PyObject *self, PyObject *args){
     pyORBIT_Object* pySuperFishFieldSource = (pyORBIT_Object*) self;
 		SuperFishFieldSource* cpp_SuperFishFieldSource = (SuperFishFieldSource*) pySuperFishFieldSource->cpp_obj;

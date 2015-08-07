@@ -3,6 +3,12 @@
    by using the second order polynomial approximation of the field on the axis.
    The model includes non-linearity in transverse direction.
    The field is defined by three points at positions -dz, 0., and +dz.
+	 
+
+   The description of the models can be found in
+   A. Shishlo, J. Holmes, 
+   "Physical Models for Particle Tracking Simulations in the RF Gap", 
+   ORNL Tech. Note ORNL/TM-2015/247, June 2015	 
 */
 
 #include <iostream>

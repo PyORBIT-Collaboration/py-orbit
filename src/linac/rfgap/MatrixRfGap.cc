@@ -2,6 +2,11 @@
 This class represents a simplified RF gap. It acts on the coordinates like a transport matrix. 
 There are no nonlinear effects. It should be analog of RF Gap of XAL online model or Trace3D.
 For this RF gap we know the E0TL, frequency, and phase only.
+
+The description of the models can be found in
+A. Shishlo, J. Holmes, 
+"Physical Models for Particle Tracking Simulations in the RF Gap", 
+ORNL Tech. Note ORNL/TM-2015/247, June 2015
 */
 
 #include "MatrixRfGap.hh"
@@ -27,9 +32,10 @@ MatrixRfGap::~MatrixRfGap()
 }
 
 /** Tracks the Bunch trough the RF gap. */	
-void MatrixRfGap::trackBunch(Bunch* bunch, double frequency, double ampl, double E0TL, double phase){
-	//we do not use the ampl amplitude of the field in the gap
-	//it can be used in other models of the gap	
+void MatrixRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double phase){	
+	// E0TL is a maximal energy gain in the gap. It is in GeV.
+	// RF frequency is in Hz
+	// RF phase in radians	
 	bunch->compress();
 	SyncPart* syncPart = bunch->getSyncPart();
 	double gamma = syncPart->getGamma();

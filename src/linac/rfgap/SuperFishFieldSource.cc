@@ -106,7 +106,7 @@ void SuperFishFieldSource::setGrid2D_Fields(Grid2D* grid2D_Ez_in,Grid2D* grid2D_
 }	
 	
 /** 
-  Returns components of the electric and magnetic filds.
+  Returns components of the electric and magnetic fields.
 	There are three possible cases:
 	1) symm == 1 and z_direction == +1 : we have the half of the gap with z > 0, field_center_pos = 0
 	2) symm == 0 and z_direction == +1 : we have the whole cavity, no transformation needed

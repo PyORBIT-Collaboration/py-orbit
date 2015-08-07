@@ -1,5 +1,12 @@
-// This class represents a simple RF gap.
-// For this RF gap we know the E0TL parameter only.
+/**
+This class represents a simple RF gap.
+For this RF gap model we need the E0TL parameter only.
+
+The description of the models can be found in
+A. Shishlo, J. Holmes, 
+"Physical Models for Particle Tracking Simulations in the RF Gap", 
+ORNL Tech. Note ORNL/TM-2015/247, June 2015
+*/
 
 #include "BaseRfGap.hh"
 #include "ParticleMacroSize.hh"
@@ -28,11 +35,11 @@ BaseRfGap::~BaseRfGap()
  non-linearity.
 */
 
-void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double ampl,
-                           double E0TL , double phase)
+void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double phase)
 {
-	//we do not use the ampl amplitude of the field in the gap
-	//it can be used in other models of the gap
+	// E0TL is a maximal energy gain in the gap. It is in GeV.
+	// RF frequency is in Hz
+	// RF phase in radians
   bunch->compress();
   SyncPart* syncPart   = bunch->getSyncPart();
   double gamma         = syncPart->getGamma();
@@ -40,7 +47,7 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double ampl,
   double mass          = bunch->getMass();
   double charge        = bunch->getCharge();
   double eKin_in       = syncPart->getEnergy();
-  double chargeE0TLsin = charge * E0TL * sin(phase);	
+  //double chargeE0TLsin = charge * E0TL * sin(phase);	
   double delta_eKin    = charge * E0TL * cos(phase);
 
   //calculate params in the middle of the gap

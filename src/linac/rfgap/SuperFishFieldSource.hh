@@ -27,7 +27,7 @@ public:
   /** Destructor */
   virtual ~SuperFishFieldSource();
 	
-	/** Returns components of the electric and magnetic filds. */
+	/** Returns components of the electric and magnetic fields. */
 	void getElectricMagneticField(
 			double x, double y, double z, double t, 
 			double& E_x, double& E_y, double& E_z,

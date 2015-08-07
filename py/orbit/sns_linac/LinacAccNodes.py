@@ -734,7 +734,7 @@ class BaseRF_Gap(BaseLinacNode):
 			phase = math.fmod(frequency*(arrival_time - designArrivalTime)*2.0*math.pi+rfPhase,2.0*math.pi)	
 		#------------------------------------------------------
 		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
-		self.cppGapModel.trackBunch(bunch,frequency,rf_ampl,E0TL,phase)
+		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
 		self.setGapPhase(phase)
 		#print "debug delta_time in deg=",frequency*(arrival_time - designArrivalTime)*380.
 		#print "debug RF =",self.getName()," E0TL=",E0TL," phase=",(phase*180./math.pi - 180.)," eKin[MeV]=",bunch.getSyncParticle().kinEnergy()*1.0e+3		
@@ -773,7 +773,7 @@ class BaseRF_Gap(BaseLinacNode):
 		#print "debug name=",self.getName()," arr_time=",arrival_time," phase=",phase*180./math.pi," E0TL=",E0TL*1.0e+3," freq=",frequency
 		#------------------------------------------------------
 		#call rf gap with E0TL phase phase of the gap and a longitudinal shift parameter	
-		self.cppGapModel.trackBunch(bunch,frequency,rf_ampl,E0TL,phase)
+		self.cppGapModel.trackBunch(bunch,frequency,E0TL,phase)
 		self.setGapPhase(phase)
 		#syncPart = bunch.getSyncParticle()
 		#eKin = syncPart.kinEnergy()

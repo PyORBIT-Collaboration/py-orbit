@@ -52,10 +52,6 @@ namespace error_base
   void QuadKickerOsc(Bunch* bunch, double k,
                      double phaselength, double phase);
   void drifti(Bunch* bunch, int i, double length);
-  double derf(double x);
-  double root_normal(double errtest, double ymin,
-                     double ymax, double tol);
-  double getGauss(double mean, double sigma, double cutoff);
 }
 
 #endif  //ERROR_BASE_H

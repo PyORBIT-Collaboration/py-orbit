@@ -6,6 +6,10 @@ import sys
 import os
 import math
 
+# import random number generators
+from random import random
+from random import gauss
+
 # import the function that finalizes the execution
 from orbit.utils import orbitFinalize
 
@@ -45,10 +49,6 @@ from error_base import RotationF
 from error_base import DipoleKickerOsc
 from error_base import QuadKicker
 from error_base import QuadKickerOsc
-from error_base import drifti
-from error_base import derf
-from error_base import root_normal
-from error_base import getGauss
 
 # import node adders
 from orbit.errors.ErrorLatticeModifications import addErrorNode
@@ -140,7 +140,7 @@ class longdisplacement(DriftTEAPOT):
 # XY rotate a bunch
 class straightrotationxy(DriftTEAPOT):
 
-    def __init__(self, anglexy,\
+    def __init__(self, angle,\
 	    name = "XY Rotation"):
         """
             Constructor. Creates StraightRotationXY element.
@@ -148,7 +148,7 @@ class straightrotationxy(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("xy rotation node")
         self.setLength(0.0)
-        self.anglexy = anglexy
+        self.angle = angle
 
     def trackBunch(self, bunch):
         """
@@ -156,8 +156,8 @@ class straightrotationxy(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglexy = self.anglexy
-        LongDisplacement(bunch, anglexy)
+        angle = self.angle
+        StraightRotationXY(bunch, angle)
 
     def track(self, paramsDict):
         """ 
@@ -166,14 +166,14 @@ class straightrotationxy(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglexy = self.anglexy
-        LongDisplacement(bunch, anglexy)
+        angle = self.angle
+        StraightRotationXY(bunch, angle)
 
 
 # XS rotate a bunch entering element
 class straightrotationxsi(DriftTEAPOT):
 
-    def __init__(self, anglexsi, lengthelt,\
+    def __init__(self, angle, lengthelt,\
 	    name = "XSI Rotation"):
         """
             Constructor. Creates StraightRotationXSI element.
@@ -181,7 +181,7 @@ class straightrotationxsi(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("xsi rotation node")
         self.setLength(0.0)
-        self.anglexsi = anglexsi
+        self.angle = angle
         self.lengthelt = lengthelt
 
     def trackBunch(self, bunch):
@@ -190,9 +190,9 @@ class straightrotationxsi(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglexsi = self.anglexsi
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationXSI(bunch, anglexsi, lengthelt)
+        StraightRotationXSI(bunch, angle, lengthelt)
 
     def track(self, paramsDict):
         """ 
@@ -201,15 +201,15 @@ class straightrotationxsi(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglexsi = self.anglexsi
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationXSI(bunch, anglexsi, lengthelt)
+        StraightRotationXSI(bunch, angle, lengthelt)
 
 
 # XS rotate a bunch leaving element
 class straightrotationxsf(DriftTEAPOT):
 
-    def __init__(self, anglexsf, lengthelt,\
+    def __init__(self, angle, lengthelt,\
 	    name = "XSF Rotation"):
         """
             Constructor. Creates StraightRotationXSF element.
@@ -217,7 +217,7 @@ class straightrotationxsf(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("xsf rotation node")
         self.setLength(0.0)
-        self.anglexsf = anglexsf
+        self.angle = angle
         self.lengthelt = lengthelt
 
     def trackBunch(self, bunch):
@@ -226,9 +226,9 @@ class straightrotationxsf(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglexsf = self.anglexsf
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationXSF(bunch, anglexsf, lengthelt)
+        StraightRotationXSF(bunch, angle, lengthelt)
 
     def track(self, paramsDict):
         """ 
@@ -237,15 +237,15 @@ class straightrotationxsf(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglexsf = self.anglexsf
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationXSF(bunch, anglexsf, lengthelt)
+        StraightRotationXSF(bunch, angle, lengthelt)
 
 
 # YS rotate a bunch entering element
 class straightrotationysi(DriftTEAPOT):
 
-    def __init__(self, angleysi, lengthelt,\
+    def __init__(self, angle, lengthelt,\
 	    name = "YSI Rotation"):
         """
             Constructor. Creates StraightRotationYSI element.
@@ -253,7 +253,7 @@ class straightrotationysi(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("ysi rotation node")
         self.setLength(0.0)
-        self.angleysi = angleysi
+        self.angle = angle
         self.lengthelt = lengthelt
 
     def trackBunch(self, bunch):
@@ -262,9 +262,9 @@ class straightrotationysi(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        angleysi = self.angleysi
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationYSI(bunch, angleysi, lengthelt)
+        StraightRotationYSI(bunch, angle, lengthelt)
 
     def track(self, paramsDict):
         """ 
@@ -273,15 +273,15 @@ class straightrotationysi(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        angleysi = self.angleysi
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationYSI(bunch, angleysi, lengthelt)
+        StraightRotationYSI(bunch, angle, lengthelt)
 
 
 # YS rotate a bunch leaving element
 class straightrotationysf(DriftTEAPOT):
 
-    def __init__(self, angleysf, lengthelt,\
+    def __init__(self, angle, lengthelt,\
 	    name = "YSF Rotation"):
         """
             Constructor. Creates StraightRotationYSF element.
@@ -289,7 +289,7 @@ class straightrotationysf(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("ysf rotation node")
         self.setLength(0.0)
-        self.angleysf = angleysf
+        self.angle = angle
         self.lengthelt = lengthelt
 
     def trackBunch(self, bunch):
@@ -298,9 +298,9 @@ class straightrotationysf(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        angleysf = self.angleysf
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationYSF(bunch, angleysf, lengthelt)
+        StraightRotationYSF(bunch, angle, lengthelt)
 
     def track(self, paramsDict):
         """ 
@@ -309,9 +309,9 @@ class straightrotationysf(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        angleysf = self.angleysf
+        angle = self.angle
         lengthelt = self.lengthelt
-        StraightRotationYSF(bunch, angleysf, lengthelt)
+        StraightRotationYSF(bunch, angle, lengthelt)
 
 
 # Bend field strength error to a bunch entering element
@@ -383,7 +383,7 @@ class bendfieldf(DriftTEAPOT):
 # X displacement error to a bunch entering bend
 class benddisplacementxi(DriftTEAPOT):
 
-    def __init__(self, anglexi, disp,\
+    def __init__(self, theta, disp,\
 	    name = "BendXI Displacement"):
         """
             Constructor. Creates BendDisplacementXI element.
@@ -391,7 +391,7 @@ class benddisplacementxi(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("xi bend displacement node")
         self.setLength(0.0)
-        self.anglexi = anglexi
+        self.theta = theta
         self.disp = disp
 
     def trackBunch(self, bunch):
@@ -400,9 +400,9 @@ class benddisplacementxi(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglexi = self.anglexi
+        theta = self.theta
         disp = self.disp
-        BendDisplacementXI(bunch, anglexi, disp)
+        BendDisplacementXI(bunch, theta, disp)
 
     def track(self, paramsDict):
         """ 
@@ -411,15 +411,15 @@ class benddisplacementxi(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglexi = self.anglexi
+        theta = self.theta
         disp = self.disp
-        BendDisplacementXI(bunch, anglexi, disp)
+        BendDisplacementXI(bunch, theta, disp)
 
 
 # X displacement error to a bunch leaving bend
 class benddisplacementxf(DriftTEAPOT):
 
-    def __init__(self, anglexf, disp,\
+    def __init__(self, theta, disp,\
 	    name = "BendXF Displacement"):
         """
             Constructor. Creates BendDisplacementXF element.
@@ -427,7 +427,7 @@ class benddisplacementxf(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("xf bend displacement node")
         self.setLength(0.0)
-        self.anglexf = anglexf
+        self.theta = theta
         self.disp = disp
 
     def trackBunch(self, bunch):
@@ -436,9 +436,9 @@ class benddisplacementxf(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglexf = self.anglexf
+        theta = self.theta
         disp = self.disp
-        BendDisplacementXF(bunch, anglexf, disp)
+        BendDisplacementXF(bunch, theta, disp)
 
     def track(self, paramsDict):
         """ 
@@ -447,9 +447,9 @@ class benddisplacementxf(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglexf = self.anglexf
+        theta = self.theta
         disp = self.disp
-        BendDisplacementXF(bunch, anglexf, disp)
+        BendDisplacementXF(bunch, theta, disp)
 
 
 # Y displacement error to a bunch entering bend
@@ -521,7 +521,7 @@ class benddisplacementyf(DriftTEAPOT):
 # L displacement error to a bunch entering bend
 class benddisplacementli(DriftTEAPOT):
 
-    def __init__(self, angleli, disp,\
+    def __init__(self, theta, disp,\
 	    name = "BendLI Displacement"):
         """
             Constructor. Creates BendDisplacementLI element.
@@ -529,7 +529,7 @@ class benddisplacementli(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("li bend displacement node")
         self.setLength(0.0)
-        self.angleli = angleli
+        self.theta = theta
         self.disp = disp
 
     def trackBunch(self, bunch):
@@ -538,9 +538,9 @@ class benddisplacementli(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        angleli = self.angleli
+        theta = self.theta
         disp = self.disp
-        BendDisplacementLI(bunch, angleli, disp)
+        BendDisplacementLI(bunch, theta, disp)
 
     def track(self, paramsDict):
         """ 
@@ -549,15 +549,15 @@ class benddisplacementli(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        angleli = self.angleli
+        theta = self.theta
         disp = self.disp
-        BendDisplacementLI(bunch, angleli, disp)
+        BendDisplacementLI(bunch, theta, disp)
 
 
 # L displacement error to a bunch leaving bend
 class benddisplacementlf(DriftTEAPOT):
 
-    def __init__(self, anglelf, disp,\
+    def __init__(self, theta, disp,\
 	    name = "BendLF Displacement"):
         """
             Constructor. Creates BendDisplacementLF element.
@@ -565,7 +565,7 @@ class benddisplacementlf(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("lf bend displacement node")
         self.setLength(0.0)
-        self.anglelf = anglelf
+        self.theta = theta
         self.disp = disp
 
     def trackBunch(self, bunch):
@@ -574,9 +574,9 @@ class benddisplacementlf(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglelf = self.anglelf
+        theta = self.theta
         disp = self.disp
-        BendDisplacementLF(bunch, anglelf, disp)
+        BendDisplacementLF(bunch, theta, disp)
 
     def track(self, paramsDict):
         """ 
@@ -585,15 +585,15 @@ class benddisplacementlf(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglelf = self.anglelf
+        theta = self.theta
         disp = self.disp
-        BendDisplacementLF(bunch, anglelf, disp)
+        BendDisplacementLF(bunch, theta, disp)
 
 
 # General rotation error to a bunch entering element
 class rotationi(DriftTEAPOT):
 
-    def __init__(self, anglei, rhoi, theta, lengthelt, et, rotype,\
+    def __init__(self, angle, rhoi, theta, lengthelt, et, rotype,\
 	    name = "RotationI General"):
         """
             Constructor. Creates RotationI element.
@@ -601,7 +601,7 @@ class rotationi(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("generali rotation node")
         self.setLength(0.0)
-        self.anglei = anglei
+        self.angle = angle
         self.rhoi = rhoi
         self.theta = theta
         self.lengthelt = lengthelt
@@ -614,13 +614,13 @@ class rotationi(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglei = self.anglei
+        angle = self.angle
         rhoi = self.rhoi
         theta = self.theta
         lengthelt = self.lengthelt
         et = self.et
         rotype = self.rotype
-        RotationI(bunch, anglei, rhoi, theta, lengthelt, et, rotype)
+        RotationI(bunch, angle, rhoi, theta, lengthelt, et, rotype)
 
     def track(self, paramsDict):
         """ 
@@ -629,19 +629,19 @@ class rotationi(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglei = self.anglei
+        angle = self.angle
         rhoi = self.rhoi
         theta = self.theta
         lengthelt = self.lengthelt
         et = self.et
         rotype = self.rotype
-        RotationI(bunch, anglei, rhoi, theta, lengthelt, et, rotype)
+        RotationI(bunch, angle, rhoi, theta, lengthelt, et, rotype)
 
 
 # General rotation error to a bunch leaving element
 class rotationf(DriftTEAPOT):
 
-    def __init__(self, anglef, rhoi, theta, lengthelt, et, rotype,\
+    def __init__(self, angle, rhoi, theta, lengthelt, et, rotype,\
 	    name = "RotationF General"):
         """
             Constructor. Creates RotationF element.
@@ -649,7 +649,7 @@ class rotationf(DriftTEAPOT):
         DriftTEAPOT.__init__(self, name)
         self.setType("generalf rotation node")
         self.setLength(0.0)
-        self.anglef = anglef
+        self.angle = angle
         self.rhoi = rhoi
         self.theta = theta
         self.lengthelt = lengthelt
@@ -662,13 +662,13 @@ class rotationf(DriftTEAPOT):
             AccNodeBunchTracker class trackBunch(probe) method.
         """
         length = self.getLength(self.getActivePartIndex())
-        anglef = self.anglef
+        angle = self.angle
         rhoi = self.rhoi
         theta = self.theta
         lengthelt = self.lengthelt
         et = self.et
         rotype = self.rotype
-        RotationF(bunch, anglef, rhoi, theta, lengthelt, et, rotype)
+        RotationF(bunch, angle, rhoi, theta, lengthelt, et, rotype)
 
     def track(self, paramsDict):
         """ 
@@ -677,13 +677,13 @@ class rotationf(DriftTEAPOT):
         """
         length = self.getLength(self.getActivePartIndex())
         bunch = paramsDict["bunch"]
-        anglef = self.anglef
+        angle = self.angle
         rhoi = self.rhoi
         theta = self.theta
         lengthelt = self.lengthelt
         et = self.et
         rotype = self.rotype
-        RotationF(bunch, anglef, rhoi, theta, lengthelt, et, rotype)
+        RotationF(bunch, angle, rhoi, theta, lengthelt, et, rotype)
 
 
 # Dipole kick a bunch
@@ -849,41 +849,6 @@ class quadkickerosc(DriftTEAPOT):
 ######################################################################
 
 
-# Drift a particle
-def driftone(bunch, i, length):
-	"""
-	Drifts macroparticle i from bunch by length.
-	"""
-	drifti(bunch, i, length)
-
-
-# Error function
-def erf(x):
-	"""
-	Returns error function of x.
-	"""
-	return derf(x)
-
-
-# Helps find Gaussian distribution
-def rootnormal(errtest, ymin, ymax, tol):
-	"""
-	Returns error function of x.
-	"""
-	return root_normal(errtest, ymin, ymax, tol)
-
-
-# Returns Gaussian distribution
-def getgauss(mean, sigma, cutoff):
-	"""
-	Returns sample point from Guassian distribution.
-	"""
-	return getGauss(mean, sigma, cutoff)
-
-
-######################################################################
-
-
 # Add an error node
 class AddErrorNode():
 
@@ -903,6 +868,10 @@ class AddErrorNode():
         	self.AddStraightError()
         if(self.errtype == "FieldError"):
         	self.AddFieldError()
+        if(self.errtype == "BendDisplacementError"):
+        	self.AddBendDisplacementError()
+        if(self.errtype == "RotationError"):
+        	self.AddRotationError()
 
     def AddStraightError(self):
     	"""
@@ -913,102 +882,439 @@ class AddErrorNode():
     	lattice.initialize()
     	nodeIndexi = self.nodeIndexi
     	nodeIndexf = self.nodeIndexf
-    	for node in lattice.getNodes()[nodeIndexi : nodeIndexf + 1]:
+    	Indexf     = nodeIndexf + 1
+    	if(nodeIndexi > nodeIndexf):
+    		Indexf = len(lattice.getNodes())
+    		for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    			if(isinstance(node, BendTEAPOT)):
+    				print "Bend node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Can't add StraightError around a Bend! Stop!")
+    	for node in lattice.getNodes()[nodeIndexi : Indexf]:
     		if(isinstance(node, BendTEAPOT)):
     			print "Bend node = ", node.getName(), " type = ",\
     			node.getType(), " L = ", node.getLength()
-    			orbitFinalize("Cant add StraightError around a Bend! Stop!")
+    			orbitFinalize("Can't add StraightError around a Bend! Stop!")
     	nodei = lattice.getNodes()[nodeIndexi]
     	nodef = lattice.getNodes()[nodeIndexf]
+    	sample = self.localDict["sample"]
     	if(self.localDict["subtype"] == "TransDisp"):
-    		dx = self.localDict["dx"]
-    		dy = self.localDict["dy"]
+    		multdx = 1.0
+    		multdy = 1.0
+    		if(sample == "Uniform"):
+    			minimum = self.localDict["minimum"]
+    			maximum = self.localDict["maximum"]
+    			multdx  = minimum + (maximum - minimum) * random()
+    			multdy  = minimum + (maximum - minimum) * random()
+    		if(sample == "Gaussian"):
+    			mean   = self.localDict["mean"]
+    			sigma  = self.localDict["sigma"]
+    			multdx = gauss(mean, sigma)
+    			multdy = gauss(mean, sigma)
+    		dx = self.localDict["dx"] * multdx
+    		dy = self.localDict["dy"] * multdy
     		errori = coorddisplacement( dx, 0.0,  dy, 0.0, 0.0, 0.0)
     		errorf = coorddisplacement(-dx, 0.0, -dy, 0.0, 0.0, 0.0)
     	if(self.localDict["subtype"] == "LongDisp"):
-    		ds = self.localDict["ds"]
+    		multds = 1.0
+    		if(sample == "Uniform"):
+    			minimum = self.localDict["minimum"]
+    			maximum = self.localDict["maximum"]
+    			multds  = minimum + (maximum - minimum) * random()
+    		if(sample == "Gaussian"):
+    			mean   = self.localDict["mean"]
+    			sigma  = self.localDict["sigma"]
+    			multds = gauss(mean, sigma)
+    		ds = self.localDict["ds"] * multds
     		errori = longdisplacement(ds)
     		errorf = longdisplacement(-ds)
     	if(self.localDict["subtype"] == "XYRot"):
-    		anglexy = self.localDict["anglexy"]
-    		errori = straightrotationxy( anglexy)
-    		errorf = straightrotationxy(-anglexy)
+    		multangle = 1.0
+    		if(sample == "Uniform"):
+    			minimum = self.localDict["minimum"]
+    			maximum = self.localDict["maximum"]
+    			multangle  = minimum + (maximum - minimum) * random()
+    		if(sample == "Gaussian"):
+    			mean   = self.localDict["mean"]
+    			sigma  = self.localDict["sigma"]
+    			multangle = gauss(mean, sigma)
+    		angle = self.localDict["angle"] * multangle
+    		errori = straightrotationxy( angle)
+    		errorf = straightrotationxy(-angle)
     	if(self.localDict["subtype"] == "XSRot"):
-    		anglexs = self.localDict["anglexs"]
-    		lengtherr = self.zf - self.zi
-    		errori = straightrotationxsi(anglexs, lengtherr)
-    		errorf = straightrotationxsf(anglexs, lengtherr)
+    		multangle = 1.0
+    		if(sample == "Uniform"):
+    			minimum = self.localDict["minimum"]
+    			maximum = self.localDict["maximum"]
+    			multangle  = minimum + (maximum - minimum) * random()
+    		if(sample == "Gaussian"):
+    			mean   = self.localDict["mean"]
+    			sigma  = self.localDict["sigma"]
+    			multangle = gauss(mean, sigma)
+    		angle = self.localDict["angle"] * multangle
+    		if(self.zf >= self.zi):
+    			lengtherr = self.zf - self.zi
+    		else:
+    			lengtherr = lattice.getLength() - self.zf + self.zi
+    		errori = straightrotationxsi(angle, lengtherr)
+    		errorf = straightrotationxsf(angle, lengtherr)
     	if(self.localDict["subtype"] == "YSRot"):
-    		angleys = self.localDict["angleys"]
-    		lengtherr = self.zf - self.zi
-    		errori = straightrotationysi(angleys, lengtherr)
-    		errorf = straightrotationysf(angleys, lengtherr)
+    		multangle = 1.0
+    		if(sample == "Uniform"):
+    			minimum = self.localDict["minimum"]
+    			maximum = self.localDict["maximum"]
+    			multangle  = minimum + (maximum - minimum) * random()
+    		if(sample == "Gaussian"):
+    			mean   = self.localDict["mean"]
+    			sigma  = self.localDict["sigma"]
+    			multangle = gauss(mean, sigma)
+    		angle = self.localDict["angle"] * multangle
+    		if(self.zf >= self.zi):
+    			lengtherr = self.zf - self.zi
+    		else:
+    			lengtherr = lattice.getLength() - self.zf + self.zi
+    		errori = straightrotationysi(angle, lengtherr)
+    		errorf = straightrotationysf(angle, lengtherr)
     	addErrorNodeAsChild_I(lattice, nodei, errori)
     	addErrorNodeAsChild_F(lattice, nodef, errorf)
 
     def AddFieldError(self):
     	"""
-    		Adds a FieldError to node at nodeIndex.
+    		Adds a FieldError to nodes at nodeIndexi to nodeIndexf
     	"""
     	lattice = self.lattice
     	lattice.initialize()
-    	nodeIndex = self.nodeIndexi
-    	node = lattice.getNodes()[nodeIndex]
+    	nodeIndexi = self.nodeIndexi
+    	nodeIndexf = self.nodeIndexf
+    	Indexf     = nodeIndexf + 1
+    	if(nodeIndexi > nodeIndexf):
+    		Indexf = len(lattice.getNodes())
+    	sample = self.localDict["sample"]
+    	multfrac = 1.0
+    	if(sample == "Uniform"):
+    		minimum = self.localDict["minimum"]
+    		maximum = self.localDict["maximum"]
+    		multfrac  = minimum + (maximum - minimum) * random()
+    	if(sample == "Gaussian"):
+    		mean   = self.localDict["mean"]
+    		sigma  = self.localDict["sigma"]
+    		multfrac = gauss(mean, sigma)
+    	fracerr = self.localDict["fracerr"] * multfrac
     	if(self.localDict["subtype"] == "KickField"):
-    		if(not isinstance(node, KickTEAPOT)):
-    			print "node = ", node.getName(), " type = ",\
-    			node.getType(), " L = ", node.getLength()
-    			orbitFinalize("Field Error: Wanted a Kick node! Stop!")
-    		kx = node.getParam("kx")
-    		ky = node.getParam("ky")
-    		kx *= (1.0 + self.localDict["fracerr"])
-    		ky *= (1.0 + self.localDict["fracerr"])
-    		node.setParam("kx", kx)
-       		node.setParam("ky", ky)
-     	if(self.localDict["subtype"] == "SolenoidField"):
-    		if(not isinstance(node, SolenoidTEAPOT)):
-    			print "node = ", node.getName(), " type = ",\
-    			node.getType(), " L = ", node.getLength()
-    			orbitFinalize("Field Error: Wanted a Solenoid node! Stop!")
-    		B = node.getParam("B")
-    		B *= (1.0 + self.localDict["fracerr"])
-    		node.setParam("B", B)
-     	if(self.localDict["subtype"] == "MultipoleField"):
-    		if(not isinstance(node, MultipoleTEAPOT)):
-    			print "node = ", node.getName(), " type = ",\
-    			node.getType(), " L = ", node.getLength()
-    			orbitFinalize("Field Error: Wanted a Multipole node! Stop!")
-    		klArr = node.getParam("kls")
-    		for i in xrange(len(klArr)):
-    			klArr[i] *= (1.0 + self.localDict["fracerr"])
-    		node.setParam("kls", klArr)
-     	if(self.localDict["subtype"] == "QuadField"):
-    		if(not isinstance(node, QuadTEAPOT)):
-    			print "node = ", node.getName(), " type = ",\
-    			node.getType(), " L = ", node.getLength()
-    			orbitFinalize("Field Error: Wanted a Quadrupole node! Stop!")
-    		kq = node.getParam("kq")
-    		klArr = node.getParam("kls")
-    		kq *= (1.0 + self.localDict["fracerr"])
-    		for i in xrange(len(klArr)):
-    			klArr[i] *= (1.0 + self.localDict["fracerr"])
-    		node.setParam("kq", kq)
-    		node.setParam("kls", klArr)
-     	if(self.localDict["subtype"] == "BendField"):
+    		if(nodeIndexi > nodeIndexf):
+    			for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    				if(not isinstance(node, KickTEAPOT)):
+    					print "node = ", node.getName(), " type = ",\
+    					node.getType(), " L = ", node.getLength()
+    					orbitFinalize("Field Error: Wanted a Kick node! Stop!")
+    				kx = node.getParam("kx") * (1.0 + fracerr)
+    				ky = node.getParam("ky") * (1.0 + fracerr)
+    				node.setParam("kx", kx)
+    				node.setParam("ky", ky)
+    		for node in lattice.getNodes()[nodeIndexi : Indexf]:
+    			if(not isinstance(node, KickTEAPOT)):
+    				print "node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Field Error: Wanted a Kick node! Stop!")
+    			kx = node.getParam("kx") * (1.0 + fracerr)
+    			ky = node.getParam("ky") * (1.0 + fracerr)
+    			node.setParam("kx", kx)
+    			node.setParam("ky", ky)
+    	if(self.localDict["subtype"] == "SolenoidField"):
+    		if(nodeIndexi > nodeIndexf):
+    			for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    				if(not isinstance(node, SolenoidTEAPOT)):
+    					print "node = ", node.getName(), " type = ",\
+    					node.getType(), " L = ", node.getLength()
+    					orbitFinalize("Field Error: Wanted a Solenoid node! Stop!")
+    				B = node.getParam("B") * (1.0 + fracerr)
+    				node.setParam("B", B)
+    		for node in lattice.getNodes()[nodeIndexi : Indexf]:
+    			if(not isinstance(node, SolenoidTEAPOT)):
+    				print "node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Field Error: Wanted a Solenoid node! Stop!")
+    			B = node.getParam("B") * (1.0 + fracerr)
+    			node.setParam("B", B)
+    	if(self.localDict["subtype"] == "MultipoleField"):
+    		if(nodeIndexi > nodeIndexf):
+    			for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    				if(not isinstance(node, MultipoleTEAPOT)):
+    					print "node = ", node.getName(), " type = ",\
+    					node.getType(), " L = ", node.getLength()
+    					orbitFinalize("Field Error: Wanted a Multipole node! Stop!")
+    				klArr = node.getParam("kls")
+    				for i in xrange(len(klArr)):
+    					klArr[i] *= (1.0 + fracerr)
+    				node.setParam("kls", klArr)
+    		for node in lattice.getNodes()[nodeIndexi : Indexf]:
+    			if(not isinstance(node, MultipoleTEAPOT)):
+    				print "node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Field Error: Wanted a Multipole node! Stop!")
+    			klArr = node.getParam("kls")
+    			for i in xrange(len(klArr)):
+    				klArr[i] *= (1.0 + fracerr)
+    			node.setParam("kls", klArr)
+    	if(self.localDict["subtype"] == "QuadField"):
+    		if(nodeIndexi > nodeIndexf):
+    			for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    				if(not isinstance(node, QuadTEAPOT)):
+    					print "node = ", node.getName(), " type = ",\
+    					node.getType(), " L = ", node.getLength()
+    					orbitFinalize("Field Error: Wanted a Quadrupole node! Stop!")
+    				kq = node.getParam("kq") * (1.0 + fracerr)
+    				node.setParam("kq", kq)
+    				klArr = node.getParam("kls")
+    				for i in xrange(len(klArr)):
+    					klArr[i] *= (1.0 + fracerr)
+    				node.setParam("kls", klArr)
+    		for node in lattice.getNodes()[nodeIndexi : Indexf]:
+    			if(not isinstance(node, QuadTEAPOT)):
+    				print "node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Field Error: Wanted a Quadrupole node! Stop!")
+    			kq = node.getParam("kq") * (1.0 + fracerr)
+    			node.setParam("kq", kq)
+    			klArr = node.getParam("kls")
+    			for i in xrange(len(klArr)):
+    				klArr[i] *= (1.0 + fracerr)
+    			node.setParam("kls", klArr)
+    	if(self.localDict["subtype"] == "BendField"):
+    		if(nodeIndexi > nodeIndexf):
+    			for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    				if(not isinstance(node, BendTEAPOT)):
+    					print "node = ", node.getName(), " type = ",\
+    					node.getType(), " L = ", node.getLength()
+    					orbitFinalize("Field Error: Wanted a Bend node! Stop!")
+    				klArr = node.getParam("kls")
+    				for i in xrange(len(klArr)):
+    					klArr[i] *= (1.0 + fracerr)
+    				node.setParam("kls", klArr)
+    		for node in lattice.getNodes()[nodeIndexi : Indexf]:
+    			if(not isinstance(node, BendTEAPOT)):
+    				print "node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Field Error: Wanted a Bend node! Stop!")
+    			klArr = node.getParam("kls")
+    			for i in xrange(len(klArr)):
+    				klArr[i] *= (1.0 + fracerr)
+    			node.setParam("kls", klArr)
+    		nodei = lattice.getNodes()[nodeIndexi]
+    		nodef = lattice.getNodes()[nodeIndexf]
+    		drhoi = -nodei.getParam("rho") * fracerr / (1.0 + fracerr)
+    		drhof = -nodef.getParam("rho") * fracerr / (1.0 + fracerr)
+    		errori = bendfieldi(drhoi)
+    		errorf = bendfieldf(drhof)
+    		addErrorNodeAsChild_I(lattice, nodei, errori)
+    		addErrorNodeAsChild_F(lattice, nodef, errorf)
+
+    def AddBendDisplacementError(self):
+    	"""
+    		Adds a BendDisplacementError to nodes
+    		between nodeIndexi and nodeIndexf.
+    	"""
+    	lattice = self.lattice
+    	lattice.initialize()
+    	nodeIndexi = self.nodeIndexi
+    	nodeIndexf = self.nodeIndexf
+    	Indexf = nodeIndexf + 1
+    	sample = self.localDict["sample"]
+    	multfrac = 1.0
+    	if(sample == "Uniform"):
+    		minimum = self.localDict["minimum"]
+    		maximum = self.localDict["maximum"]
+    		multfrac  = minimum + (maximum - minimum) * random()
+    	if(sample == "Gaussian"):
+    		mean   = self.localDict["mean"]
+    		sigma  = self.localDict["sigma"]
+    		multfrac = gauss(mean, sigma)
+    	disp = self.localDict["disp"] * multfrac
+    	theta = 0.0
+    	if(nodeIndexi > nodeIndexf):
+    		Indexf = len(lattice.getNodes())
+    		for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    			if(not isinstance(node, BendTEAPOT)):
+    				print "Node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Can't add BendError around a Straight! Stop!")
+    			else:
+    				theta += node.getParam("theta")
+    	for node in lattice.getNodes()[nodeIndexi : Indexf]:
     		if(not isinstance(node, BendTEAPOT)):
-    			print "node = ", node.getName(), " type = ",\
+    			print "Node = ", node.getName(), " type = ",\
     			node.getType(), " L = ", node.getLength()
-    			orbitFinalize("Field Error: Wanted a Bend node! Stop!")
-    		drho = -node.getParam("rho") *\
-    		self.localDict["fracerr"] / (1.0 + self.localDict["fracerr"])
-    		klArr = node.getParam("kls")
-    		for i in xrange(len(klArr)):
-    			klArr[i] *= (1.0 + self.localDict["fracerr"])
-    		node.setParam("kls", klArr)
-    		errori = bendfieldi(drho)
-    		errorf = bendfieldf(drho)
-    		addErrorNodeAsChild_I(lattice, node, errori)
-    		addErrorNodeAsChild_F(lattice, node, errorf)
+    			orbitFinalize("Can't add BendError around a Straight! Stop!")
+    		else:
+    			theta += node.getParam("theta")
+    	nodei = lattice.getNodes()[nodeIndexi]
+    	nodef = lattice.getNodes()[nodeIndexf]
+    	if(self.localDict["subtype"] == "XDisp"):
+    		errori = benddisplacementxi(theta, disp)
+    		errorf = benddisplacementxf(theta, disp)
+    	if(self.localDict["subtype"] == "YDisp"):
+    		errori = benddisplacementyi(disp)
+    		errorf = benddisplacementyf(disp)
+    	if(self.localDict["subtype"] == "LongDisp"):
+    		errori = benddisplacementli(theta, disp)
+    		errorf = benddisplacementlf(theta, disp)
+    	addErrorNodeAsChild_I(lattice, nodei, errori)
+    	addErrorNodeAsChild_F(lattice, nodef, errorf)
+
+    def AddRotationError(self):
+    	"""
+    		Adds a RotationError to nodes
+    		between nodeIndexi and nodeIndexf.
+    	"""
+    	lattice = self.lattice
+    	lattice.initialize()
+    	nodeIndexi = self.nodeIndexi
+    	nodeIndexf = self.nodeIndexf
+    	Indexf = nodeIndexf + 1
+    	sample = self.localDict["sample"]
+    	multfrac = 1.0
+    	if(sample == "Uniform"):
+    		minimum = self.localDict["minimum"]
+    		maximum = self.localDict["maximum"]
+    		multfrac  = minimum + (maximum - minimum) * random()
+    	if(sample == "Gaussian"):
+    		mean   = self.localDict["mean"]
+    		sigma  = self.localDict["sigma"]
+    		multfrac = gauss(mean, sigma)
+    	angle = self.localDict["angle"] * multfrac
+    	print "multfrac, angle = ", multfrac, angle
+    	rhoi = 0.0
+    	theta = 0.0
+    	if(self.zf >= self.zi):
+    		lengtherr = self.zf - self.zi
+    	else:
+    		lengtherr = lattice.getLength() - self.zf + self.zi
+    	et = self.localDict["elementtype"]
+    	rotype = self.localDict["subtype"]
+    	if((et == "SBEN") or (et == "sbend") or (et == "rbend")):
+    		if(nodeIndexi > nodeIndexf):
+    			Indexf = len(lattice.getNodes())
+    			for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    				if(not isinstance(node, BendTEAPOT)):
+    					print "Node = ", node.getName(), " type = ",\
+    					node.getType(), " L = ", node.getLength()
+    					orbitFinalize("Can't add BendError around a Straight! Stop!")
+    				else:
+    					rhoi = 1.0 / node.getParam("rho")
+    					theta += node.getParam("theta")
+    		for node in lattice.getNodes()[nodeIndexi : Indexf]:
+    			if(not isinstance(node, BendTEAPOT)):
+    				print "Node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Can't add BendError around a Straight! Stop!")
+    			else:
+    				rhoi = 1.0 / node.getParam("rho")
+    				theta += node.getParam("theta")
+    	else:
+    		if(nodeIndexi > nodeIndexf):
+    			Indexf = len(lattice.getNodes())
+    			for node in lattice.getNodes()[0 : nodeIndexf + 1]:
+    				if(isinstance(node, BendTEAPOT)):
+    					print "Node = ", node.getName(), " type = ",\
+    					node.getType(), " L = ", node.getLength()
+    					orbitFinalize("Can't add StraigtError around a Bend! Stop!")
+    		for node in lattice.getNodes()[nodeIndexi : Indexf]:
+    			if(isinstance(node, BendTEAPOT)):
+    				print "Node = ", node.getName(), " type = ",\
+    				node.getType(), " L = ", node.getLength()
+    				orbitFinalize("Can't add StraigtError around a Bend! Stop!")
+    	nodei = lattice.getNodes()[nodeIndexi]
+    	nodef = lattice.getNodes()[nodeIndexf]
+    	errori = rotationi(angle, rhoi, theta, lengtherr, et, rotype)
+    	errorf = rotationf(angle, rhoi, theta, lengtherr, et, rotype)
+    	addErrorNodeAsChild_I(lattice, nodei, errori)
+    	addErrorNodeAsChild_F(lattice, nodef, errorf)
+
+
+######################################################################
+
+
+# Add a set of error nodes
+class AddErrorSet():
+
+    def __init__(self, lattice, positioni, positionf, setDict, paramsDict,\
+	    name = "Error Set"):
+        """
+            Constructor. Adds the nodes.
+        """
+        et   = setDict["elementtype"]
+        ringline = setDict["ringline"]
+        errnodecandidates = []
+        index = -1
+        zf = 0.0
+        for node in lattice.getNodes():
+        	index += 1
+        	zi = zf
+        	zf += node.getLength()
+        	status = []
+        	status.append(index)
+        	status.append(zi)
+        	status.append(zf)
+        	onoff = 0
+        	if((et == "drift") and isinstance(node, DriftTEAPOT)):
+        		onoff = 1
+        	if((et == "kick")  and isinstance(node, KickTEAPOT)):
+        		onoff = 1
+        	if((et == "soln")  and isinstance(node, SolenoidTEAPOT)):
+        		onoff = 1
+        	if((et == "mult")  and isinstance(node, MultipoleTEAPOT)):
+        		onoff = 1
+        	if((et == "quad")  and isinstance(node, QuadTEAPOT)):
+        		onoff = 1
+        	if((et == "SBEN") or (et == "sbend") or (et == "rbend")):
+        		if(isinstance(node, BendTEAPOT)): onoff = 1
+        	status.append(onoff)
+        	errnodecandidates.append(status)
+        nodelist = []
+        onoff = 0
+        for index in range(0, len(errnodecandidates)):
+        	if(errnodecandidates[index][3]) == 0:
+        		if(onoff == 1):
+        			status = []
+        			status.append(istart)
+        			status.append(istop)
+        			status.append(zi)
+        			status.append(zf)
+        			nodelist.append(status)
+        		onoff = 0
+        	else:
+        		if(onoff == 0):
+        			istart = index
+        			istop  = index
+        			zi     = errnodecandidates[index][1]
+        			zf     = errnodecandidates[index][2]
+        		else:
+        			istop  = index
+        			zf     = errnodecandidates[index][2]
+        		onoff = 1
+        if(onoff == 1):
+        	if(ringline == "line"):
+        		status = []
+        		status.append(istart)
+        		status.append(istop)
+        		status.append(zi)
+        		status.append(zf)
+        		nodelist.append(status)
+        	elif(nodelist[0][0] == 0):
+        		nodelist[0][0] = istart
+        		nodelist[0][2] = zi
+        tiny = 1.0e-07
+        for index in range(0, len(nodelist)):
+        	zi = nodelist[index][2] + tiny
+        	zf = nodelist[index][3] - tiny
+        	if(((positioni <= zf) and (zf <=  positionf)) or \
+        		((positioni <= zi) and (zi <=  positionf)) or \
+        		((zi <= positioni) and (positionf <= zf))):
+        		AddErrorNode(lattice, zi, zf, paramsDict)
+        		print "zi, zf = ", zi, zf
+
+######################################################################
+
 
 def FindNode(lattice, position):
 	"""

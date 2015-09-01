@@ -29,11 +29,8 @@ from orbit.errors.ErrorNode import dipolekicker
 from orbit.errors.ErrorNode import dipolekickerosc
 from orbit.errors.ErrorNode import quadkicker
 from orbit.errors.ErrorNode import quadkickerosc
-from orbit.errors.ErrorNode import driftone
-from orbit.errors.ErrorNode import erf
-from orbit.errors.ErrorNode import rootnormal
-from orbit.errors.ErrorNode import getgauss
 from orbit.errors.ErrorNode import AddErrorNode
+from orbit.errors.ErrorNode import AddErrorSet
 
 from orbit.errors.ErrorLatticeModifications import addErrorNode
 from orbit.errors.ErrorLatticeModifications import addErrorNodeAsChild

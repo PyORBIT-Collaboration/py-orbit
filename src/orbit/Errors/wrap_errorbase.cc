@@ -287,7 +287,7 @@ extern "C"
     double anglef, rhoi, theta, length;
     const char* et   = NULL;
     const char* type = NULL;
-    if(!PyArg_ParseTuple(args, "Odddd:RotationF",
+    if(!PyArg_ParseTuple(args, "Oddddss:RotationF",
                          &pyBunch, &anglef, &rhoi, &theta,
                          &length, &et, &type))
     {
@@ -365,44 +365,6 @@ extern "C"
     return Py_None;
   }
 
-  // Error function
-  static PyObject* wrap_derf(PyObject *self, PyObject *args)
-  {
-    double x;
-    if(!PyArg_ParseTuple(args, "d:derf", &x))
-    {
-      error("errorbase - derf - cannot parse arguments!");
-    }
-    double errf = error_base::derf(x);
-    return Py_BuildValue("d", errf);
-  }
-
-  // Helps find Gaussian distribution
-  static PyObject* wrap_root_normal(PyObject *self, PyObject *args)
-  {
-    double errtest, ymin, ymax, tol;
-    if(!PyArg_ParseTuple(args, "dddd:root_normal",
-                         &errtest, &ymin, &ymax, &tol))
-    {
-      error("errorbase - root_normal - cannot parse arguments!");
-    }
-    double root = error_base::root_normal(errtest, ymin, ymax, tol);
-    return Py_BuildValue("d", root);
-  }
-
-  // Returns Gaussian distribution
-  static PyObject* wrap_getGauss(PyObject *self, PyObject *args)
-  {
-    double mean, sigma, cutoff;
-    if(!PyArg_ParseTuple(args, "ddd:getGauss",
-                         &mean, &sigma, &cutoff))
-    {
-      error("errorbase - getGauss - cannot parse arguments!");
-    }
-    double sample = error_base::getGauss(mean, sigma, cutoff);
-    return Py_BuildValue("d", sample);
-  }
-
   static PyMethodDef errorbaseMethods[] =
   {
     {"CoordDisplacement",   wrap_CoordDisplacement,   METH_VARARGS, "Displace the coordinates of a bunch"},
@@ -426,9 +388,6 @@ extern "C"
     {"QuadKicker",          wrap_QuadKicker,          METH_VARARGS, "Quadrupole kick a bunch"},
     {"QuadKickerOsc",       wrap_QuadKickerOsc,       METH_VARARGS, "Oscillating quadrupole kick a bunch"},
     {"drifti",              wrap_drifti,              METH_VARARGS, "Drifts a macroparticle"},
-    {"derf",                wrap_derf,                METH_VARARGS, "Error function"},
-    {"root_normal",         wrap_root_normal,         METH_VARARGS, "Helps find Gaussian distribution"},
-    {"getGauss",            wrap_getGauss ,           METH_VARARGS, "Returns Gaussian distribution"},
     { NULL, NULL }
   };
 

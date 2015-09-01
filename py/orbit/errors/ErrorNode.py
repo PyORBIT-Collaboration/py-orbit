@@ -1182,7 +1182,6 @@ class AddErrorNode():
     		sigma  = self.localDict["sigma"]
     		multfrac = gauss(mean, sigma)
     	angle = self.localDict["angle"] * multfrac
-    	print "multfrac, angle = ", multfrac, angle
     	rhoi = 0.0
     	theta = 0.0
     	if(self.zf >= self.zi):
@@ -1311,7 +1310,7 @@ class AddErrorSet():
         		((positioni <= zi) and (zi <=  positionf)) or \
         		((zi <= positioni) and (positionf <= zf))):
         		AddErrorNode(lattice, zi, zf, paramsDict)
-        		print "zi, zf = ", zi, zf
+
 
 ######################################################################
 

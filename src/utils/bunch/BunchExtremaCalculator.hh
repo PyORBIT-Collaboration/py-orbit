@@ -1,7 +1,7 @@
 //////////////////////////////// -*- C++ -*- //////////////////////////////
 //
 // FILE NAME
-//   BunchExtremaCalculator.cc
+//   BunchExtremaCalculator.hh
 //
 // AUTHOR
 //    A. Shishlo

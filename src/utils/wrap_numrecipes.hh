@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
   namespace wrap_numrecipes{
-    void initNumrecipes(const char* num_recipes_name);
+    void initNumrecipes(PyObject* module, const char* num_recipes_name);
   }
 
 #ifdef __cplusplus

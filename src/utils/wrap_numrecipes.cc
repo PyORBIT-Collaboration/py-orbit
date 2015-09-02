@@ -89,9 +89,10 @@ extern "C" {
 	//--------------------------------------------------
 	//Initialization functions of the numrecipes module
 	//--------------------------------------------------
-  void initNumrecipes(const char* num_recipes_name){
+  void initNumrecipes(PyObject* module, const char* num_recipes_name){
     //create numrecipes module
-    PyObject* module_nr = Py_InitModule(num_recipes_name,NumrecipesModuleMethods);			
+    PyObject* module_nr = Py_InitModule(num_recipes_name,NumrecipesModuleMethods);
+		PyModule_AddObject(module, num_recipes_name, module_nr);
 	}
 
 #ifdef __cplusplus

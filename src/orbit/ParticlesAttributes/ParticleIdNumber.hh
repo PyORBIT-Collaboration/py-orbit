@@ -48,7 +48,11 @@ public:
   ParticleIdNumber(Bunch* bunch);
   ~ParticleIdNumber();
 
-  //int& getIdNumber(int particle_index);
+	/** Returns the Id number for the particle with index. */
+  int getIdNumber(int particle_index);
+	
+	/** Sets the Id number for the particle with index. */
+	void setIdNumber(int particle_index, int id);	
 
 };
 

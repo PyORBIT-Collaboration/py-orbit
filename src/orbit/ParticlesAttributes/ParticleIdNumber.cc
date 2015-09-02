@@ -30,8 +30,18 @@ ParticleIdNumber::~ParticleIdNumber()
 {
 }
 
-//int& ParticleIdNumber::getIdNumber(int particle_index){
-//  return attValue(particle_index,0);//}
+/** Returns the Id number for the particle with index. */
+int ParticleIdNumber::getIdNumber(int particle_index)
+{
+	double id = attValue(particle_index,0);
+	return int(id);
+}
+
+/** Sets the Id number for the particle with index. */
+void ParticleIdNumber::setIdNumber(int particle_index, int id)
+{
+	attValue(particle_index,0) = 1.0*id;
+}
 
 
 

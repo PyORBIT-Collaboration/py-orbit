@@ -15,8 +15,9 @@ class ParticleIdNumber:
 	""" 
 	This routine adds id numbers to particle in a bunch.
 	"""
-
-	def addParticleIdNumbers(self, b, fixedidnumber = -1):
+	
+	@staticmethod
+	def addParticleIdNumbers(b, fixedidnumber = -1):
 
 		rank = 0
 		numprocs = 1

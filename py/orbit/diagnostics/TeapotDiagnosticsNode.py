@@ -11,12 +11,14 @@ from orbit.utils import orbitFinalize, NamedObject, ParamsDictObject
 # import general accelerator elements and lattice
 from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
 
-# import teapot drift class
-from orbit.teapot import DriftTEAPOT
 
 # import Diagnostics classes
 from diagnostics import StatLats, StatLatsSetMember
-from diagnostics import Moments, MomentsSetMember
+from diagnostics import Moments, MomentsSetMember, BPMSignal
+
+# import teapot drift class
+from orbit.teapot import DriftTEAPOT
+
 
 #import Bunch diagnostics
 from bunch import BunchTuneAnalysis
@@ -207,3 +209,37 @@ class TeapotTuneAnalysisNode(DriftTEAPOT):
 
 	def assignTwiss(self, betax, alphax, etax, etapx, betay, alphay):
 		self.bunchtune.assignTwiss(betax, alphax, etax, etapx, betay, alphay)
+
+class TeapotBPMSignalNode(DriftTEAPOT):
+	
+			
+	def __init__(self, name = "BPMSignal no name"):
+		"""
+		Constructor. Creates the StatLats TEAPOT element.
+		"""
+		DriftTEAPOT.__init__(self,name)
+		self.bpm = BPMSignal()
+		self.setType("BPMSignal")
+		self.lattlength = 0.0
+		self.setLength(0.0)
+		self.position = 0.0
+	
+	def track(self, paramsDict):
+		"""
+		The bunchtuneanalysis-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
+		"""
+		length = self.getLength(self.getActivePartIndex())
+		bunch = paramsDict["bunch"]
+		self.bpm.analyzeSignal(bunch)
+		
+	def setPosition(self,pos):
+		self.position = pos
+	
+	def setLatticeLength(self, lattlength):
+		self.lattlength = lattlength
+
+	def getSignal(self):
+		xAvg = self.bpm.getSignalX()
+		yAvg = self.bpm.getSignalY()
+		return xAvg, yAvg
+		

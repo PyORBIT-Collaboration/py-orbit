@@ -201,6 +201,48 @@ class MomentsSetMember:
 			
 	def resetFile(self, file):
 		self.file_out = file
+		
+class BPMSignal:
+	"""
+		This class delivers the average value for coordinate x and y 
+	"""
+	def __init__(self):
+		self.bunchtwissanalysis = BunchTwissAnalysis()
+		self.xAvg = 0.0
+		self.yAvg = 0.0
+		self.xpAvg = 0.0
+		self.ypAvg = 0.0
+		
 
+		
+	def analyzeSignal(self, bunch):
+		
+		self.bunchtwissanalysis.analyzeBunch(bunch)
 
+		# if mpi operations are enabled, this section of code will
+		# determine the rank of the present node
+		rank = 0  # default is primary node
+		mpi_init = orbit_mpi.MPI_Initialized()
+		comm = orbit_mpi.mpi_comm.MPI_COMM_WORLD
+		if (mpi_init):
+			rank = orbit_mpi.MPI_Comm_rank(comm)
 
+		# only the primary node needs to output the calculated information
+		if (rank == 0):
+			self.xAvg = self.bunchtwissanalysis.getAverage(0)
+			self.xpAvg = self.bunchtwissanalysis.getAverage(1)
+			self.yAvg = self.bunchtwissanalysis.getAverage(2)
+			self.ypAvg = self.bunchtwissanalysis.getAverage(3)
+			
+	def getSignalX(self):
+		return self.xAvg
+		
+	def getSignalXP(self):
+		return self.xpAvg
+	
+	def getSignalY(self):
+		return self.yAvg
+	
+	def getSignalYP(self):
+		return self.ypAvg
+	

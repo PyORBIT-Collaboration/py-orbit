@@ -11,7 +11,7 @@ class _possibleElementType:
 		"""
 	def __init__(self):
 		"""
-			Constructor. Creates list of element types.
+			Constructor. Creates list of element types. 
 			"""
 		self.__names_type = []
 		self.__names_type.append("drift")

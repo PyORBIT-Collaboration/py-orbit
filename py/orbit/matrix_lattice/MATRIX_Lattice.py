@@ -152,7 +152,7 @@ class MATRIX_Lattice(AccLattice):
 
 	def getRingTwissDataX(self,momentum,mass):
 		"""
-		Returns the tuple (tuneX, [(position, alphaX),...],[(position,betaX),...] ). 
+		Returns the tuple ([(position, phase advanceX)/2/pi,...],[(position, alphaX),...],[(position,betaX),...] ).
 		"""
 		res_dict = self.getRingParametersDict(momentum,mass)
 		alpha_x = res_dict["alpha x"]
@@ -161,7 +161,7 @@ class MATRIX_Lattice(AccLattice):
 	
 	def getRingTwissDataY(self,momentum,mass):
 		"""
-		Returns the tuple (tuneY, [(position, alphaY),...],[(position,betaY),...] ).
+		Returns the tuple ([(position, phase advanceY/2/pi),...],[(position, alphaY),...],[(position,betaY),...] ).
 		"""
 		res_dict = self.getRingParametersDict(momentum,mass)
 		alpha_y = res_dict["alpha y"]
@@ -170,7 +170,7 @@ class MATRIX_Lattice(AccLattice):
 
 	def trackTwissData(self, alpha, beta, direction = "x"):
 		"""
-		Returns the tuple (tune, [(position, alpha),...],[(position,beta),...] ). 
+		Returns the tuple ([(position, phase advance/2/pi),...], [(position, alpha),...],[(position,beta),...] ).
 		The tracking starts from the values specified as the initial parameters. 
 		The possible values for direction parameter "x" or "y".
 		"""
@@ -194,8 +194,11 @@ class MATRIX_Lattice(AccLattice):
 		beta_arr = []
 		#phi is for tune accumulation
 		phi = 0.
+		#phase advance 
+		mu_arr = []
 		#put in array the initial twiss
 		pos_arr.append(position)
+		mu_arr.append(phi)
 		alpha_arr.append(track_v.get(0))
 		beta_arr.append(track_v.get(1))
 		position_old = position
@@ -208,6 +211,7 @@ class MATRIX_Lattice(AccLattice):
 					pos_arr.append(position)
 					alpha_arr.append(track_v.get(0))
 					beta_arr.append(track_v.get(1))
+					mu_arr.append(phi/(2*math.pi))
 				mt = matrixNode.getMatrix()
 				ind0 = 0+dir_ind
 				ind1 = 1+dir_ind
@@ -232,14 +236,17 @@ class MATRIX_Lattice(AccLattice):
 		pos_arr.append(position)
 		alpha_arr.append(track_v.get(0))
 		beta_arr.append(track_v.get(1))
+		mu_arr.append(phi/(2*math.pi))
 		#pack the resulting tuple
 		tune = phi/(2*math.pi)	
 		graph_alpha_arr = []
 		graph_beta_arr = []
+		graph_mu_arr = []
 		for i in range(len(pos_arr)):
+			graph_mu_arr.append((pos_arr[i], mu_arr[i]))
 			graph_alpha_arr.append((pos_arr[i],alpha_arr[i]))
 			graph_beta_arr.append((pos_arr[i],beta_arr[i]))
-		return (tune,graph_alpha_arr,graph_beta_arr)
+		return (graph_mu_arr,graph_alpha_arr,graph_beta_arr)
 
 	def getRingDispersionDataX(self,momentum,mass):
 		"""
@@ -300,7 +307,7 @@ class MATRIX_Lattice(AccLattice):
 		#count = 0
 		for matrixNode in self.getNodes():
 			if(isinstance(matrixNode,BaseMATRIX) == True):
-				disp = track_v.get(0)
+				disp = track_v.get(0)				
 				if(abs(position_old-position) > eps_length or abs(disp_old - disp) > eps_length):
 					pos_arr.append(position)
 					disp_arr.append(track_v.get(0))

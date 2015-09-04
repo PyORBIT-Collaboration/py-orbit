@@ -177,7 +177,7 @@ public:
 
 	//copy methods
 
-	//copy only bunch attributes and syncPart
+	//copy only bunch attributes, particle attributes, and syncPart
 	void copyEmptyBunchTo(Bunch* bunch);
 	//copy all structure and macro-particles
 	void copyBunchTo(Bunch* bunch);

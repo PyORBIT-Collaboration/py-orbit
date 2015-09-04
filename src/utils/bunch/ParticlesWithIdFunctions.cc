@@ -83,7 +83,6 @@ namespace OrbitUtils{
 			It returns 0 if unsuccessful or the size of the statistics otherwise.
 	*/
 	int transport_mtrx(Bunch* bunch_in, Bunch* bunch_out, Matrix* A_mtr){
-		
 		int size_MPI,rank_MPI;
 		ORBIT_MPI_Comm_size(bunch_in->getMPI_Comm_Local()->comm, &size_MPI);
 		ORBIT_MPI_Comm_rank(bunch_in->getMPI_Comm_Local()->comm, &rank_MPI);		
@@ -142,134 +141,136 @@ namespace OrbitUtils{
 		A_mtr->zero();
 		int n_parts =  b_in_tmp->getSize();
 		int n_parts_global = b_in_tmp->getSizeGlobal();
-		if(n_parts_global == 0) return 0;
-		
-		int buff_index0 = 0;
-		int buff_index1 = 0;
-		int buff_index2 = 0;
-		int buff_index3 = 0;
-		int buff_index4 = 0;
-		int buff_index5 = 0;		
-		double* arr_avg_in  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,6);
-		double* arr_avg_out = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,6);
-		double* arr_avg_in_mpi  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index2,6);
-		double* arr_avg_out_mpi = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index3,6);	
-		double* mtrx_arr  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index4,36);
-		double* mtrx_arr_mpi = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index5,36);				
-		
-		for (int i = 0; i < 6; i++){
-			arr_avg_in[i] = 0.; arr_avg_out[i] = 0.;
-		}
-		for(int ind = 0; ind < n_parts; ind++){
+		if(n_parts_global > 6){
+			
+			int buff_index0 = -1;
+			int buff_index1 = -1;
+			int buff_index2 = -1;
+			int buff_index3 = -1;
+			int buff_index4 = -1;
+			int buff_index5 = -1;		
+			double* arr_avg_in  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,6);
+			double* arr_avg_out = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,6);
+			double* arr_avg_in_mpi  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index2,6);
+			double* arr_avg_out_mpi = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index3,6);	
+			double* mtrx_arr  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index4,36);
+			double* mtrx_arr_mpi = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index5,36);				
+			
 			for (int i = 0; i < 6; i++){
-				arr_avg_in[i] += b_in_tmp->coordArr()[ind][i]; 
-				arr_avg_out[i] += b_out_tmp->coordArr()[ind][i];
-			}			
-		}
-		
-		ORBIT_MPI_Allreduce(arr_avg_in,arr_avg_in_mpi,6,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
-		ORBIT_MPI_Allreduce(arr_avg_out,arr_avg_out_mpi,6,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
-		
-		for (int i = 0; i < 6; i++){
-			arr_avg_in_mpi[i] /= n_parts_global; 
-			arr_avg_out_mpi[i] /= n_parts_global;
-		}			
-		//--- now we have avg values for coordinates in and out
-		
-		for(int ind = 0; ind < n_parts; ind++){
+				arr_avg_in[i] = 0.; arr_avg_out[i] = 0.;
+			}
+			for(int ind = 0; ind < n_parts; ind++){
+				for (int i = 0; i < 6; i++){
+					arr_avg_in[i] += b_in_tmp->coordArr()[ind][i]; 
+					arr_avg_out[i] += b_out_tmp->coordArr()[ind][i];
+				}			
+			}
+			
+			ORBIT_MPI_Allreduce(arr_avg_in,arr_avg_in_mpi,6,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
+			ORBIT_MPI_Allreduce(arr_avg_out,arr_avg_out_mpi,6,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
+			
 			for (int i = 0; i < 6; i++){
-				b_in_tmp->coordArr()[ind][i] -= arr_avg_in_mpi[i]; 
-				b_out_tmp->coordArr()[ind][i] -= arr_avg_out_mpi[i];
+				arr_avg_in_mpi[i] /= n_parts_global; 
+				arr_avg_out_mpi[i] /= n_parts_global;
 			}			
-		}	
-		
-		// A = (X^T * X)^-1 * (X^T *Y)  start
-		Matrix* XTXmtrx = new Matrix(6,6);
-		Matrix* XTYmtrx = new Matrix(6,6);
-		Matrix* Amtrx = new Matrix(6,6);
-		XTXmtrx->zero();
-		XTYmtrx->zero();
-		Amtrx->zero();
-		for (int i = 0; i < 6; i++){
-			for (int j = i; j < 6; j++){
-				for(int ind = 0; ind < n_parts; ind++){
-					 XTXmtrx->getArray()[i][j] += b_in_tmp->coordArr()[ind][i]*b_in_tmp->coordArr()[ind][j];
+			//--- now we have avg values for coordinates in and out
+			
+			for(int ind = 0; ind < n_parts; ind++){
+				for (int i = 0; i < 6; i++){
+					b_in_tmp->coordArr()[ind][i] -= arr_avg_in_mpi[i]; 
+					b_out_tmp->coordArr()[ind][i] -= arr_avg_out_mpi[i];
+				}			
+			}	
+			
+			// A = (X^T * X)^-1 * (X^T *Y)  start
+			Matrix* XTXmtrx = new Matrix(6,6);
+			Matrix* XTYmtrx = new Matrix(6,6);
+			Matrix* Amtrx = new Matrix(6,6);
+			XTXmtrx->zero();
+			XTYmtrx->zero();
+			Amtrx->zero();
+			for (int i = 0; i < 6; i++){
+				for (int j = i; j < 6; j++){
+					for(int ind = 0; ind < n_parts; ind++){
+						XTXmtrx->getArray()[i][j] += b_in_tmp->coordArr()[ind][i]*b_in_tmp->coordArr()[ind][j];
+					}
 				}
 			}
-		}
-		for (int i = 0; i < 6; i++){
-			for (int j = 0; j < i; j++){
-				XTXmtrx->getArray()[i][j] = XTXmtrx->getArray()[j][i];
-			}
-		}
-		for (int i = 0; i < 6; i++){
-			for (int j = 0; j < 6; j++){
-				for(int ind = 0; ind < n_parts; ind++){
-					XTYmtrx->getArray()[i][j] += b_in_tmp->coordArr()[ind][i]*b_out_tmp->coordArr()[ind][j];
+			for (int i = 0; i < 6; i++){
+				for (int j = 0; j < i; j++){
+					XTXmtrx->getArray()[i][j] = XTXmtrx->getArray()[j][i];
 				}
 			}
+			for (int i = 0; i < 6; i++){
+				for (int j = 0; j < 6; j++){
+					for(int ind = 0; ind < n_parts; ind++){
+						XTYmtrx->getArray()[i][j] += b_in_tmp->coordArr()[ind][i]*b_out_tmp->coordArr()[ind][j];
+					}
+				}
+			}	
+			
+			//----- sum XTXmtrx and XTYmtrx over MPI
+			int count = 0;
+			for (int i = 0; i < 6; i++){
+				for (int j = 0; j < 6; j++){
+					mtrx_arr[count] = XTXmtrx->getArray()[i][j];
+					count++;
+				}
+			}
+			ORBIT_MPI_Allreduce(mtrx_arr,mtrx_arr_mpi,36,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
+			count = 0;
+			for (int i = 0; i < 6; i++){
+				for (int j = 0; j < 6; j++){
+					XTXmtrx->getArray()[i][j] = mtrx_arr_mpi[count];
+					count++;
+				}
+			}		
+			
+			count = 0;
+			for (int i = 0; i < 6; i++){
+				for (int j = 0; j < 6; j++){
+					mtrx_arr[count] = XTYmtrx->getArray()[i][j];
+					count++;
+				}
+			}
+			ORBIT_MPI_Allreduce(mtrx_arr,mtrx_arr_mpi,36,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
+			count = 0;
+			for (int i = 0; i < 6; i++){
+				for (int j = 0; j < 6; j++){
+					XTYmtrx->getArray()[i][j] = mtrx_arr_mpi[count];
+					count++;
+				}
+			}		
+			
+			// A = (X^T * X)^-1 * (X^T *Y)
+			XTXmtrx->copyTo(Amtrx);
+			MatrixOperations::invert(Amtrx);
+			
+			Amtrx->mult(XTYmtrx);
+			for (int i = 0; i < 6; i++){
+				A_mtr->getArray()[i][6] = 0.;
+				for (int j = 0; j < 6; j++){
+					A_mtr->getArray()[i][j] = Amtrx->getArray()[i][j];
+					A_mtr->getArray()[i][6] -= Amtrx->getArray()[i][j]*arr_avg_in_mpi[j];
+				}
+				A_mtr->getArray()[i][6] += arr_avg_out_mpi[i];
+			}
+			
+			A_mtr->getArray()[6][6] = 1.0;
+			
+			delete XTXmtrx;
+			delete XTYmtrx;
+			delete Amtrx;
+			OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+			OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);			
+			OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index2);
+			OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index3);			
+			OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index4);
+			OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index5);	
 		}	
-		
-		//----- sum XTXmtrx and XTYmtrx over MPI
-		int count = 0;
-		for (int i = 0; i < 6; i++){
-			for (int j = 0; j < 6; j++){
-				mtrx_arr[count] = XTXmtrx->getArray()[i][j];
-				count++;
-			}
-		}
-		ORBIT_MPI_Allreduce(mtrx_arr,mtrx_arr_mpi,36,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
-		count = 0;
-		for (int i = 0; i < 6; i++){
-			for (int j = 0; j < 6; j++){
-				XTXmtrx->getArray()[i][j] = mtrx_arr_mpi[count];
-				count++;
-			}
-		}		
-		
-		count = 0;
-		for (int i = 0; i < 6; i++){
-			for (int j = 0; j < 6; j++){
-				mtrx_arr[count] = XTYmtrx->getArray()[i][j];
-				count++;
-			}
-		}
-		ORBIT_MPI_Allreduce(mtrx_arr,mtrx_arr_mpi,36,MPI_DOUBLE,MPI_SUM,b_in_tmp->getMPI_Comm_Local()->comm);
-		count = 0;
-		for (int i = 0; i < 6; i++){
-			for (int j = 0; j < 6; j++){
-				XTYmtrx->getArray()[i][j] = mtrx_arr_mpi[count];
-				count++;
-			}
-		}		
-		
-		// A = (X^T * X)^-1 * (X^T *Y)
-		MatrixOperations::invert(Amtrx);		
-		XTXmtrx->copyTo(Amtrx);
-		MatrixOperations::invert(Amtrx);
-		
-		Amtrx->mult(XTYmtrx);
-		for (int i = 0; i < 6; i++){
-			A_mtr->getArray()[i][6] = 0.;
-			for (int j = 0; j < 6; j++){
-				A_mtr->getArray()[i][j] = Amtrx->getArray()[i][j];
-				A_mtr->getArray()[i][6] -= Amtrx->getArray()[i][j]*arr_avg_in_mpi[j];
-			}
-			A_mtr->getArray()[i][6] += arr_avg_out_mpi[i];
-		}
-		A_mtr->getArray()[6][6] = 1.0;
 		
 		delete b_in_tmp;
-		delete b_out_tmp;
-		delete XTXmtrx;
-		delete XTYmtrx;
-		delete Amtrx;
-		OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
-		OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);			
-		OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index2);
-		OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index3);			
-		OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index4);
-		OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index5);			
+		delete b_out_tmp;		
 		
 		return n_parts_global;
 	}

@@ -58,7 +58,12 @@ int MatrixOperations::invert(double **a, int n){
 			}
 			indxr[i]=irow;
 			indxc[i]=icol;
-			if (a[icol][icol] == 0.0) return 0;
+			if (a[icol][icol] == 0.0) {
+				BufferStore::getBufferStore()->setUnusedIntArr(buff_index0);
+				BufferStore::getBufferStore()->setUnusedIntArr(buff_index1);
+				BufferStore::getBufferStore()->setUnusedIntArr(buff_index2);					
+				return 0;
+			}
 			pivinv=1.0/a[icol][icol];
 			a[icol][icol]=1.0;
 			for (l=0;l<n;l++) a[icol][l] *= pivinv;

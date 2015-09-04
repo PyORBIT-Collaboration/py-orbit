@@ -58,6 +58,7 @@ extern "C" {
 		Bunch* bunch_in = (Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj;
 		Bunch* bunch_out = (Bunch*) ((pyORBIT_Object*) pyOut)->cpp_obj;
 		Matrix* mtrx = (Matrix*) ((pyORBIT_Object*) pyM)->cpp_obj;
+		
 		int n_stat = transport_mtrx(bunch_in,bunch_out,mtrx);
     return Py_BuildValue("i", n_stat);	
 	}		

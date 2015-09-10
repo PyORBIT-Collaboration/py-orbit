@@ -166,6 +166,7 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		root = doc.createElement("xml_root_node")
 		self._makeDomElement(doc,doc,self)
 		xml_text = doc.toprettyxml(indent=" ")
+		doc.unlink()
 		return xml_text
 
 	@staticmethod	

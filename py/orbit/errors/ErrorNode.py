@@ -7,7 +7,7 @@ import os
 import math
 
 # import random number generators
-from random import random
+from random import random, seed
 from random import gauss
 
 # import the function that finalizes the execution
@@ -1182,6 +1182,7 @@ class AddErrorNode():
     		sigma  = self.localDict["sigma"]
     		multfrac = gauss(mean, sigma)
     	angle = self.localDict["angle"] * multfrac
+    	#print "multfrac, angle = ", multfrac, angle
     	rhoi = 0.0
     	theta = 0.0
     	if(self.zf >= self.zi):
@@ -1237,7 +1238,7 @@ class AddErrorNode():
 class AddErrorSet():
 
     def __init__(self, lattice, positioni, positionf, setDict, paramsDict,\
-	    name = "Error Set"):
+	    name = "Error Set", seed_value=None):
         """
             Constructor. Adds the nodes.
         """
@@ -1303,6 +1304,8 @@ class AddErrorSet():
         		nodelist[0][0] = istart
         		nodelist[0][2] = zi
         tiny = 1.0e-07
+        if not seed_value == "None":
+            seed(seed_value)
         for index in range(0, len(nodelist)):
         	zi = nodelist[index][2] + tiny
         	zf = nodelist[index][3] - tiny
@@ -1310,7 +1313,7 @@ class AddErrorSet():
         		((positioni <= zi) and (zi <=  positionf)) or \
         		((zi <= positioni) and (positionf <= zf))):
         		AddErrorNode(lattice, zi, zf, paramsDict)
-
+        		#print "zi, zf = ", zi, zf
 
 ######################################################################
 

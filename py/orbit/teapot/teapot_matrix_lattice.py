@@ -84,6 +84,7 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 		self.teapot_lattice.trackActions(accContainer,paramsDict)		
 		self.makeOneTurnMatrix()
 		self.initialize()		
+		
 					
 	def getKinEnergy(self):
 		return self.bunch.getSyncParticle().kinEnergy()
@@ -122,7 +123,25 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 		momentum = self.bunch.getSyncParticle().momentum()
 		mass = self.bunch.getSyncParticle().mass()	
 		return MATRIX_Lattice.getRingParametersDict(self, momentum, mass)
+	
+	def getRingMatrix(self):
+		"""
+		Returns the dictionary with different ring parametrs
+		calculated from the one turn transport matrix. It overloads the 
+		getRingParametersDict(p,m) method from the parent MATRIX_Lattice 
+		class.
+		"""
+		return MATRIX_Lattice.getOneTurnMatrix(self)
 
+	def getRingOrbit(self,z0):
+		"""
+		Returns the tuple ([(position, X),...],[(position,Y),...] ). 
+		It overloads the getRingTwissDataX(p,m) method from the parent MATRIX_Lattice 
+		class.
+		"""
+		return self.trackOrbit(z0)
+		
+		
 	def getRingTwissDataX(self):
 		"""
 		Returns the tuple (tuneX, [(position, alphaX),...],[(position,betaX),...] ). 
@@ -177,6 +196,8 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 		"""
 		(tuneX,tmp0,tmp1) = self.getRingTwissDataX()
 		(tuneY,tmp0,tmp1) = self.getRingTwissDataY()
+		tuneX = tuneX[1][-1]
+		tuneY = tuneY[1][-1]
 		self.matrixGenerator.initBunchChromCoeff(self.bunch)
 		#track bunch through the TEAPOT nodes
 		def twissAction(paramsDict):

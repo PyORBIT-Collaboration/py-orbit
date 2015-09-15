@@ -62,6 +62,15 @@ class correction:
 		self.bpm_x = []
 		self.bpm_y = []
 		
+		self.solution_x = 0.0
+		self.solution_y = 0.0
+		
+	def get_solution_x(self):
+		return self.solution_x
+		
+	def get_solution_y(self):
+		return self.solution_y
+		
 	def orbit_corr(self):
 	
 		self.kicker_x, self.kicker_y = self.find_elements("monitor", "kicker")
@@ -70,12 +79,6 @@ class correction:
 		print "Numbers of monitor found", len(self.bpm_x)
 		print "Numbers of corrector found", len(self.kicker_x)
 		
-		#for i in range(len(self.kicker_x)):
-		#	print self.kicker_x[i]
-	
-		#for i in range(len(self.bpm_x)):
-		#	print self.bpm_x[i]
-		
 
 		p0 = np.zeros(len(self.kicker_x))
 		plsq_x = leastsq(self.optimzation_function, p0, args=(self.kicker_x,self.bpm_x))
@@ -83,7 +86,6 @@ class correction:
 		solution_x = plsq_x[0]
 		solution_y = plsq_y[0]
 		
-
 		m = 0
 		nodes = self.lattice.getNodes()
 		for node in nodes:
@@ -91,30 +93,44 @@ class correction:
 				node.setParam("kx",solution_x[m])
 				node.setParam("ky",solution_y[m])
 				m = m + 1
+		
+	#======================green function===============
+	def cos_function(self,phi,tune):
+		if phi < 0:
+			phi = phi + tune
+		return  math.cos((tune/2-phi)* 2.0*math.pi)
+	#======================green function===============
 	
-	def get_position(self,j,n,kick, bpm,kicker):
+	#======================green function===============
+	def sin_function(self,phi,tune):
+		if phi < 0:
+			phi = phi + tune
+		return  math.sin((tune/2-phi)* 2.0*math.pi)
+	#======================green function===============
+	
+		
+	#======================get x information with green function===============
+	def get_x(self,kick,j,bpm,kicker):
 		mu_s = bpm[j][0]
 		beta_s = bpm[j][1]
 		alpha_s = bpm[j][2]
-		tmp1 = tmp2 = 0
-		for i in range(n):
+		tmp = 0
+		tune = bpm[j][7]
+		for i in range(len(kick)):
 			mu_i = kicker[i][0]
 			beta_i = kicker[i][1]
 			alpha_i = kicker[i][2]
-			phi = mu_s-mu_i
-			if phi < 0:
-				phi = phi + tuneX
-			tmp1 = tmp1 + math.sqrt(beta_i*beta_s) * kick[i] * math.sin(2.0*math.pi*(phi)) #
-			tmp2 = tmp2 + kick[i]* math.sqrt(beta_i/beta_s) * (math.cos(2.0*math.pi*(phi))  - alpha_s * math.sin(2.0*math.pi*(phi)))
-		return tmp1
+			tmp = tmp + math.sqrt(beta_i) * kick[i] * self.cos_function((mu_s-mu_i),tune)
+		tmp = tmp*math.sqrt(beta_s)/2/math.sin(tune/2*2*math.pi)
+		return tmp
+	#======================get position information with green function===============
 
 
 	def optimzation_function(self,kick,kicker,bpm):
 		err = np.zeros(len(bpm))
-		# which coo. x or xp
 		for j in range(len(bpm)):
-			x = self.get_position(j,bpm[j][6],kick, bpm,kicker)
-			err[j] = (bpm[j][3] + x)**2
+			x = self.get_x(kick,j,bpm,kicker) 
+			err[j] =  (x + bpm[j][6])**2
 		return err
 
 	def find_elements(self,count_el, find_el):
@@ -122,6 +138,8 @@ class correction:
 		matrix_lattice = TEAPOT_MATRIX_Lattice(self.lattice,self.bunch)
 		(muX, arrPosAlphaX, arrPosBetaX) = matrix_lattice.getRingTwissDataX()
 		(muY, arrPosAlphaY, arrPosBetaY) = matrix_lattice.getRingTwissDataY()
+						
+		OrbitX, OrbitY = orbit(self.lattice,self.bunch).get_orbit()
 		
 		bpm_x = []
 		bpm_y = []
@@ -138,7 +156,6 @@ class correction:
 						pos_old = pos
 						pos = self.lattice.getNodePositionsDict()[node][1]
 						if(abs(pos_old-pos) > eps_length):
-							mt = matrix_lattice.makeMatrix(pos) 
-							bpm_x.append([muX[j][1], arrPosBetaX[j][1], arrPosAlphaX[j][1], mt.get(0,6), mt.get(1,6) ,pos,m,node.getName()])
-							bpm_y.append([muY[j][1], arrPosBetaY[j][1], arrPosAlphaY[j][1], mt.get(2,6), mt.get(3,6) ,pos,m,node.getName()])
+							bpm_x.append([muX[j][1], arrPosBetaX[j][1], arrPosAlphaX[j][1], pos,m,node.getName(),OrbitX[j][1],muX[-1][1]])
+							bpm_y.append([muY[j][1], arrPosBetaY[j][1], arrPosAlphaY[j][1], pos,m,node.getName(),OrbitY[j][1],muY[-1][1]])
 		return bpm_x,bpm_y

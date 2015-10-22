@@ -47,8 +47,12 @@ the examples listed above should provide an overview and foundation.
 import types
 import os
 
-#import python XML DOM parser
+#import python XML DOM parser for pretty printing only!
+#Bevare: xml.dom.minidom has a memory leak! 2015.10.08
 import xml.dom.minidom
+
+#import python XML ElementTree parser
+import xml.etree.ElementTree as ET
 
 from orbit.utils import NamedObject, ParamsDictObject
 
@@ -162,55 +166,46 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		
 	def makeXmlText(self):
 		""" create the xml text from the document """
-		doc = xml.dom.minidom.Document()
-		root = doc.createElement("xml_root_node")
-		self._makeDomElement(doc,doc,self)
+		root = ET.Element(self.getName())
+		for atribute in self.attributes():
+			root.set(atribute,self.stringValue(atribute))
+		for adaptor_child in self.data_adaptors:
+			self._makeDomElement(root,adaptor_child)
+		xml_text = ET.tostring(root)
+		doc = xml.dom.minidom.parseString(xml_text)
 		xml_text = doc.toprettyxml(indent=" ")
 		doc.unlink()
+		del doc
 		return xml_text
 
 	@staticmethod	
-	def _makeDomElement(doc,parent_element,adaptor):
+	def _makeDomElement(parent_element,adaptor):
 		""" generate XML tree element to write it to the file """
-		element = doc.createElement(adaptor.getName())
+		element = ET.SubElement(parent_element,adaptor.getName())
 		for attribute in adaptor.attributes():
 			value = adaptor.stringValue(attribute)
-			element.setAttribute(attribute,value)
+			element.set(attribute,value)
 		for adaptor_child in adaptor.data_adaptors:
-			XmlDataAdaptor._makeDomElement(doc,element,adaptor_child)
-		parent_element.appendChild(element)
+			XmlDataAdaptor._makeDomElement(element,adaptor_child)
 		
 	@staticmethod	
 	def adaptorForFile(file_name):
 		""" returns the new data adaptor created from the input file """
-		doc = xml.dom.minidom.parse(file_name)
-		if(len(doc.childNodes) != 1):
-			msg = "orbit.utils.XmlDataAdaptor.adaptorForFile("+file_name+")"
-			msg = msg + os.linesep
-			msg = msg + " input xml file has a wrong structure!"
-			msg = msg + os.linesep
-			msg = msg + "File: " + xml_file_name
-			msg = msg + os.linesep
-			msg = msg + "========================================="
-			msg = msg + os.linesep
-			orbitFinalize(msg)
-		xml_root_adaptor = 	XmlDataAdaptor(doc.childNodes[0].localName)
-		XmlDataAdaptor._makeDataAdaptor(xml_root_adaptor,doc.childNodes[0])
+		et = ET.parse(file_name)
+		root = et.getroot()
+		xml_root_adaptor = XmlDataAdaptor(root.tag)
+		XmlDataAdaptor._makeDataAdaptor(xml_root_adaptor,root)
 		return xml_root_adaptor
 		
 	@staticmethod	
 	def _makeDataAdaptor(data_adaptor,dom_node):
-		if(dom_node.nodeType == dom_node.ELEMENT_NODE):
-			#print "debug    ====== dom_node=",dom_node.localName
-			for ind in range(dom_node.attributes.length):
-				key = dom_node.attributes.item(ind).name
-				value = dom_node.attributes.item(ind).value
-				data_adaptor.setValue(key,value)
-			for child_dom_node in dom_node.childNodes:
-				if(child_dom_node.nodeType == child_dom_node.ELEMENT_NODE):
-					#print "debug    ======      child dom_node=",child_dom_node.localName
-					child_data_adaptor = data_adaptor.createChild(child_dom_node.localName)
-					XmlDataAdaptor._makeDataAdaptor(child_data_adaptor,child_dom_node)
+		#print "debug    ====== Element dom_node=",dom_node.tag
+		for [key,value] in dom_node.items():
+			data_adaptor.setValue(key,value)
+		for child_dom_node in list(dom_node):
+			#print "   debug    ======      child dom_node=",child_dom_node.tag
+			child_data_adaptor = data_adaptor.createChild(child_dom_node.tag)
+			XmlDataAdaptor._makeDataAdaptor(child_data_adaptor,child_dom_node)
 	
 		
 		

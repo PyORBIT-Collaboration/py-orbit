@@ -112,6 +112,63 @@ class AccLattice(NamedObject, TypedObject):
 		"""	
 		self.__children	 = childrenNodes
 
+	def getNodeForName(self,name):
+		"""
+		Method. Returns the node with certain name.
+		"""
+		nodes = []
+		for node in self.__children:
+			if(node.getName().find(name) == 0):
+				nodes.append(node)
+		if(len(nodes) == 1):
+			return nodes[0]
+		else:
+			if(len(nodes) == 0):
+				return None
+			else:
+				msg = "The AccLattice class. Method getNodeForName found many nodes instead of one!"
+				msg = msg + os.linesep
+				msg = msg + "looking for name=",name
+				msg = msg + os.linesep
+				msg = msg + "found nodes:"
+				for node in nodes:
+					msg = msg + " " + node.getName()
+				msg = msg + os.linesep
+				msg = "Please use getNodesForName method instead."
+				msg = msg + os.linesep				
+				orbitFinalize(msg)
+				
+	def getNodesForName(self,name):
+		"""
+		Method. Returns nodes with a certain name.
+		"""
+		nodes = []
+		for node in self.__children:
+			if(node.getName().find(name) == 0):
+				nodes.append(node)
+		return nodes
+		
+	def getNodesForSubstring(self,sub, no_sub = None):
+		"""
+		Method. Returns nodes with names each of them has the certain substring. 
+		It is also possible to specify the unwanted substring as no_sub parameter.
+		"""
+		nodes = []
+		for node in self.__children:
+			if(no_sub == None):
+				if(node.getName().find(sub) >= 0):
+					nodes.append(node)
+			else:
+				if(node.getName().find(sub) >= 0 and node.getName().find(no_sub) < 0):
+					nodes.append(node)		
+		return nodes		
+		
+	def getNodeIndex(self,node):
+		"""
+		Method. Returns the index of the node in the upper level of the lattice children-nodes.
+		"""		
+		return self.__children.index(node)
+
 	def getNodePositionsDict(self):
 		"""
 		Method. Returns a dictionary of

@@ -39,7 +39,7 @@ class ParticleIdNumber:
 	
 		nparts_arr = orbit_mpi.MPI_Allreduce(nparts_arr_local,data_type,op,comm)
 
-		if(b.hasBunchAttrInt("ParticleIdNumber")==0):
+		if(b.hasPartAttr("ParticleIdNumber")==0):
 			b.addPartAttr("ParticleIdNumber")
 
 		if(fixedidnumber >= 0):

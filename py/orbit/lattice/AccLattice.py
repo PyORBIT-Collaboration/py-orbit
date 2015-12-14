@@ -213,6 +213,7 @@ class AccLattice(NamedObject, TypedObject):
 		"""
 		paramsDict["lattice"] = self
 		paramsDict["actions"] = actionsContainer
+		paramsDict["path_length"] = 0.
 		if(index_start < 0): index_start = 0
 		if(index_stop < 0): index_stop = len(self.__children) - 1 		
 		for node in self.__children[index_start:index_stop+1]:

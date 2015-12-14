@@ -185,6 +185,10 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		paramsDict["node"] = self
 		parentNode = None
 		if(paramsDict.has_key("parentNode")): parentNode = paramsDict["parentNode"]
+		if(not paramsDict.has_key("path_length")): paramsDict["path_length"] = 0.
+		has_length = False
+		if(self.getLength() > 0.):
+			has_length = True
 		self.__activePartIndex = -1
 		#start ENTRANCE
 		actionsContainer.performActions(paramsDict, AccNode.ENTRANCE)
@@ -207,8 +211,9 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 			paramsDict["node"] = self
 			paramsDict["parentNode"] = parentNode
 			actionsContainer.performActions(paramsDict, AccNode.BODY)
-			#track actions for child nodes after the i-th part
-			#of body
+			#track actions for child nodes after the i-th part of body
+			if(has_length):
+				paramsDict["path_length"] += self.getLength(i)
 			for node in self.__childNodesArr[AccNode.BODY][i][AccNode.AFTER]:
 				paramsDict["parentNode"] = self
 				node.trackActions(actionsContainer, paramsDict)

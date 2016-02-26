@@ -16,6 +16,8 @@ from orbit.utils.NamedObject      import NamedObject
 from orbit.utils.TypedObject      import TypedObject
 from orbit.utils.ParamsDictObject import ParamsDictObject
 
+from orbit.utils.phaseOperations  import phaseNearTargetPhase, phaseNearTargetPhaseDeg
+
 __all__ = []
 __all__.append("multiDimDoubleArray")
 __all__.append("multiDimIntArray")
@@ -23,4 +25,6 @@ __all__.append("orbitFinalize")
 __all__.append("NamedObject")
 __all__.append("TypedObject")
 __all__.append("ParamsDictObject")
+__all__.append("phaseNearTargetPhase")
+__all__.append("phaseNearTargetPhaseDeg")
 

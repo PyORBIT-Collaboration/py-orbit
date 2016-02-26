@@ -11,7 +11,7 @@ import os
 import math
 
 # import the function that creates multidimensional arrays
-from orbit.utils import orbitFinalize, NamedObject, ParamsDictObject
+from orbit.utils import orbitFinalize, NamedObject, ParamsDictObject, phaseNearTargetPhase
 
 # import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccNode, AccActionsContainer
@@ -140,7 +140,6 @@ class LinacAccLattice(AccLattice):
 	def addSequence(self,seq):
 		if(isinstance(seq, Sequence) == True):
 			self.__sequences.append(seq)
-			print "debug add seq=",seq.getName()
 		else:
 			msg = "The LinacAccLattice, method addSequence(seq)!"
 			msg = msg + os.linesep
@@ -280,9 +279,29 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 		else:
 			rfGap.setAsFirstRFGap(False)
 		
+	def getAvgGapPhase(self):
+		""" Returns average phase for all RF gaps in the cavity """ 
+		avg_phase = 0.
+		phase = 0.
+		phase_arr = []
+		if(len(self.__rfGaps) > 0): 
+				phase = phaseNearTargetPhase(self.__rfGaps[0].getGapPhase(),0.)				
+		for rfGap in self.__rfGaps:
+			phase_new = phaseNearTargetPhase(rfGap.getGapPhase(),phase)
+			phase_arr.append(phase_new*180./math.pi)
+			avg_phase += phase_new
+			phase = phase_new
+		if(len(self.__rfGaps) > 0): avg_phase /= len(self.__rfGaps)
+		return avg_phase
+		
+	def getAvgGapPhaseDeg(self):
+		""" Returns average phase in degrees for all RF gaps in the cavity """
+		return self.getAvgGapPhase()*180./math.pi	
+		
 	def getRF_GapNodes(self):
 		""" Returns the array with rf gaps. """
 		return self.__rfGaps[:]
+
 	
 class Sequence(NamedObject,ParamsDictObject):
 	"""

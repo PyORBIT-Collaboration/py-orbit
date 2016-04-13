@@ -79,7 +79,8 @@ extern "C" {
   void initParticlesWithIdFunctions(PyObject* module, const char* part_with_id_module_name){
     //create numrecipes module
     PyObject* module_partId = Py_InitModule(part_with_id_module_name,NumrecipesModuleMethods);
-		PyModule_AddObject(module,part_with_id_module_name,module_partId);	
+		PyModule_AddObject(module,part_with_id_module_name,module_partId);
+		Py_INCREF(module_partId);
 	}
 
 #ifdef __cplusplus

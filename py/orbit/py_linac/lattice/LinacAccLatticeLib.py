@@ -171,6 +171,40 @@ class LinacAccLattice(AccLattice):
 					if(node.getSequence() == seq):
 						quads.append(node)
 		return quads
+		
+	def getNodesOfClass(self, Class, seq = None):
+		""" 
+		Returns the list of all nodes which are instances of Class
+		or these nodes which are also belong to a particular sequence. 
+		""" 
+		nodes = []
+		for node in self.getNodes():
+			if(isinstance(node,Class)):
+				if(seq == None):
+					nodes.append(node)
+				else:
+					if(node.getSequence() == seq):
+						nodes.append(node)
+		return nodes
+		
+	def getNodesOfClasses(self, Classes, seq = None):
+		""" 
+		Returns the list of all nodes which are instances of any Class in Classes array
+		or these nodes which are also belong to a particular sequence. 
+		""" 
+		nodes = []
+		for node in self.getNodes():
+			info = False
+			for Class in Classes:
+				if(isinstance(node,Class)):
+					info = True
+			if(info):
+				if(seq == None):
+					nodes.append(node)
+				else:
+					if(node.getSequence() == seq):
+						nodes.append(node)
+		return nodes	
 
 	def getRF_Gaps(self, rf_cav = None):
 		""" Returns the list of all RF gaps or just gaps belong to a particular RF cavity. """

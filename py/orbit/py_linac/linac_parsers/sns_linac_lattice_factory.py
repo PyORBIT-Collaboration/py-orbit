@@ -178,6 +178,9 @@ class SNS_LinacLatticeFactory():
 					if(0.5*accNode.getLength() > self.maxDriftLength):
 						accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 					accNode.setParam("pos",node_pos)
+					if(params_da.hasAttribute("aperture") and params_da.hasAttribute("aprt_type")):
+						accNode.setParam("aprt_type",params_da.intValue("aprt_type"))
+						accNode.setParam("aperture",params_da.doubleValue("aperture"))
 					accSeq.addNode(accNode)
 				#------------BEND-----------------
 				elif(node_type == "BEND"):

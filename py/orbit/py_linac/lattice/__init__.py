@@ -7,9 +7,14 @@
 ## - LinacRfGapNodes       - Module. Collection of RF Gap models
 
 from LinacAccLatticeLib import LinacAccLattice, RF_Cavity, Sequence
-from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode, MarkerLinacNode, Drift, Quad, AbstractRF_Gap, Bend
+from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode
+from LinacAccNodes import MarkerLinacNode, Drift, Quad, AbstractRF_Gap, Bend
 from LinacAccNodes import DCorrectorH, DCorrectorV
 from LinacRfGapNodes import BaseRF_Gap
+from LinacApertureNodes import LinacApertureNode
+from LinacApertureNodes import CircleLinacApertureNode
+from LinacApertureNodes import EllipseLinacApertureNode
+from LinacApertureNodes import RectangleLinacApertureNode
 
 __all__ = []
 __all__.append("LinacAccLattice")
@@ -25,6 +30,11 @@ __all__.append("AbstractRF_Gap")
 __all__.append("DCorrectorH")
 __all__.append("DCorrectorV")
 __all__.append("Bend")
+
+__all__.append("LinacApertureNode")
+__all__.append("CircleLinacApertureNode")
+__all__.append("EllipseLinacApertureNode")
+__all__.append("RectangleLinacApertureNode")
 
 __all__.append("RF_Cavity")
 __all__.append("Sequence")

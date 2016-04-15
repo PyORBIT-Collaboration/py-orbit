@@ -8,7 +8,7 @@
 #include <cfloat>
 #include <cstdlib>
 
-
+#include "ParticleAttributes.hh"
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -42,7 +42,7 @@ Aperture::Aperture(int shape, double a, double b, double c, double d, double pos
 }
 
 void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
-         
+	         
   //Removes particle if located outside aperture from main bunch and adds it to the lost bunch.
 
 	int j = 1, coll_flag = 0, lastArg, trackit;
@@ -53,49 +53,109 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	int shape = shape_;
        
 	bunch->compress();
+	if(lostbunch != NULL) lostbunch->compress();
 	double m_size = 0.;
 	int nParts = bunch->getSize();
 	double** coord = bunch->coordArr();
-
-	for (int count = 0; count < nParts; count++){
 	
-	    if(shape == 1)
-	      if((pow((coord[count][0]-c), 2) + pow((coord[count][2]-d), 2)) >= pow(a, 2)){
-                    lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
-				if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
-					lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
-					}
-				if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
-					lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(count,0);
-				}
-                    bunch->deleteParticleFast(count);
-	        }
-
-		if(shape == 2)
-	      if((pow((coord[count][0]-c), 2)/pow(a,2) + pow((coord[count][2]-d), 2)/pow(b,2)) >= 1){
-                    lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
-			  if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
-				  lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
-			  }
-			  if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
-				  lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(count,0);
-			  }
-                    bunch->deleteParticleFast(count);
-	        }
 	
-	    if(shape == 3)
-	      if((abs((coord[count][0])-c)>=a)||(abs((coord[count][2]-d))>=b)){
-	          lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
-			  if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
-				  lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_; //position in lattice where particle is lost
-			  }
-			  if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
-				  lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(count,0);
-			  }
-        	    bunch->deleteParticleFast(count);
-	      }
-	}
+	ParticleAttributes* lostPartAttr = NULL;
+	
+	ParticleAttributes* partIdNumbAttr = NULL;
+	ParticleAttributes* partIdNumbInitAttr = NULL;
+	
+	ParticleAttributes* partMacroAttr = NULL;
+	ParticleAttributes* partMacroInitAttr = NULL;	
+	
+	if(lostbunch != NULL) {
+		if(lostbunch->hasParticleAttributes("LostParticleAttributes") <= 0){
+			std::map<std::string,double> params_dict;
+			lostbunch->addParticleAttributes("LostParticleAttributes",params_dict);
+		}
+		lostPartAttr = lostbunch->getParticleAttributes("LostParticleAttributes");
 		
+		
+		if(bunch->hasParticleAttributes("ParticleIdNumber") > 0){
+			partIdNumbInitAttr = bunch->getParticleAttributes("ParticleIdNumber");
+			if(lostbunch->hasParticleAttributes("ParticleIdNumber") <= 0){
+				std::map<std::string,double> params_dict;
+				lostbunch->addParticleAttributes("ParticleIdNumber",params_dict);
+				partIdNumbAttr = lostbunch->getParticleAttributes("ParticleIdNumber");
+			}	
+		}
+		
+		if(bunch->hasParticleAttributes("macrosize") > 0){
+			partMacroInitAttr = bunch->getParticleAttributes("macrosize");
+			if(lostbunch->hasParticleAttributes("macrosize") <= 0){
+				std::map<std::string,double> params_dict;
+				lostbunch->addParticleAttributes("macrosize",params_dict);
+				partMacroAttr = lostbunch->getParticleAttributes("macrosize");
+			}	
+		}	
+		
+		lostbunch->setMacroSize(bunch->getMacroSize());
+	}
+	
+	// shape = 1              ===circular aperture===
+	if(shape == 1){
+	  for (int count = 0; count < nParts; count++){
+	  	if((pow((coord[count][0]-c), 2) + pow((coord[count][2]-d), 2)) >= pow(a, 2)){
+	  		if(lostbunch != NULL) {
+	  			lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+	  			//pos_ is a position in lattice where particle is lost
+	  			lostPartAttr->attValue(lostbunch->getSize() - 1, 0) = pos_;
+	  			if(partIdNumbAttr != NULL){
+	  				partIdNumbAttr->attValue(lostbunch->getSize() - 1, 0) = partIdNumbInitAttr->attValue(count,0);
+	  			}
+	  			if(partMacroAttr != NULL){
+	  				partMacroAttr->attValue(lostbunch->getSize() - 1, 0) = partMacroInitAttr->attValue(count,0);
+	  			}
+	  		}
+	  		bunch->deleteParticleFast(count);
+	  	}
+	  }
+	}
+	
+	// shape = 2              ===elipital aperture===
+	if(shape == 2){
+	  for (int count = 0; count < nParts; count++){
+	  	if((pow((coord[count][0]-c), 2)/pow(a,2) + pow((coord[count][2]-d), 2)/pow(b,2)) >= 1){
+	  		if(lostbunch != NULL) {
+	  			lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+	  			//pos_ is a position in lattice where particle is lost
+	  			lostPartAttr->attValue(lostbunch->getSize() - 1, 0) = pos_;
+	  			if(partIdNumbAttr != NULL){
+	  				partIdNumbAttr->attValue(lostbunch->getSize() - 1, 0) = partIdNumbInitAttr->attValue(count,0);
+	  			}
+	  			if(partMacroAttr != NULL){
+	  				partMacroAttr->attValue(lostbunch->getSize() - 1, 0) = partMacroInitAttr->attValue(count,0);
+	  			}
+	  		}
+	  		bunch->deleteParticleFast(count);
+	  	}
+	  }
+	}
+	
+	// shape = 3              ===rectangular aperture===
+	if(shape == 3){
+	  for (int count = 0; count < nParts; count++){
+	  	if((abs((coord[count][0])-c)>=a)||(abs((coord[count][2]-d))>=b)){
+	  		if(lostbunch != NULL) {
+	  			lostbunch->addParticle(coord[count][0], coord[count][1], coord[count][2], coord[count][3], coord[count][4], coord[count][5]);
+	  			//pos_ is a position in lattice where particle is lost
+	  			lostPartAttr->attValue(lostbunch->getSize() - 1, 0) = pos_;
+	  			if(partIdNumbAttr != NULL){
+	  				partIdNumbAttr->attValue(lostbunch->getSize() - 1, 0) = partIdNumbInitAttr->attValue(count,0);
+	  			}
+	  			if(partMacroAttr != NULL){
+	  				partMacroAttr->attValue(lostbunch->getSize() - 1, 0) = partMacroInitAttr->attValue(count,0);
+	  			}
+	  		}
+	  		bunch->deleteParticleFast(count);
+	  	}
+	  }
+	}
+				
 	//Update synchronous particle, compress bunch
 	bunch->compress();
 }

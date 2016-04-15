@@ -52,17 +52,30 @@ extern "C" {
 	  Aperture* cpp_Aperture = (Aperture*)((pyORBIT_Object*) self)->cpp_obj;
 		PyObject* pyBunch;
 		PyObject* pyLostBunch;
-		if(!PyArg_ParseTuple(args,"OO:checkBunch",&pyBunch, &pyLostBunch)){
-			ORBIT_MPI_Finalize("Aperture - checkBunch(Bunch* bunch, Bunch* bunch) - parameter are needed.");
+		int nVars = PyTuple_Size(args);
+		if(nVars == 2){
+			if(!PyArg_ParseTuple(args,"OO:checkBunch",&pyBunch, &pyLostBunch)){
+				ORBIT_MPI_Finalize("Aperture - checkBunch(Bunch* bunch, Bunch* bunch) - parameters are needed.");
+			}
+			PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+			if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type) || !PyObject_IsInstance(pyLostBunch,pyORBIT_Bunch_Type)){
+				ORBIT_MPI_Finalize("Aperture - checkBunch(Bunch* bunch, Bunch* bunch) - method needs a Bunch.");
+			}
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+			Bunch* cpp_lostbunch = (Bunch*) ((pyORBIT_Object*)pyLostBunch)->cpp_obj;
+			cpp_Aperture->checkBunch(cpp_bunch, cpp_lostbunch);
 		}
-		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
-		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type) || !PyObject_IsInstance(pyLostBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("Aperture - checkBunch(Bunch* bunch, Bunch* bunch) - method needs a Bunch.");
+		else{
+			if(!PyArg_ParseTuple(args,"O:checkBunch",&pyBunch)){
+				ORBIT_MPI_Finalize("Aperture - checkBunch(Bunch* bunch) - parameter is needed.");
+			}
+			PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+			if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+				ORBIT_MPI_Finalize("Aperture - checkBunch(Bunch* bunch) - method needs a Bunch.");
+			}
+			Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+			cpp_Aperture->checkBunch(cpp_bunch, NULL);			
 		}
-	  
-		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		Bunch* cpp_lostbunch = (Bunch*) ((pyORBIT_Object*)pyLostBunch)->cpp_obj;
-		cpp_Aperture->checkBunch(cpp_bunch, cpp_lostbunch);
 		Py_INCREF(Py_None);
 		return Py_None;
   }

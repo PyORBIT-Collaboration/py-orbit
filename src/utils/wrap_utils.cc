@@ -40,7 +40,7 @@ extern "C" {
 		wrap_polynomial::initPolynomial(module);		
 		//this call creates the module orbit_utils.numrecipes with functions
 		wrap_numrecipes::initNumrecipes(module,"num_recipes");
-		wrap_utils_bunch_functions::initParticlesWithIdFunctions(module,"bunch_utils_functions");
+		wrap_utils_bunch_functions::initBunchUtilsFunctions(module,"bunch_utils_functions");	
   }
 
 	PyObject* getOrbitUtilsType(const char* name){

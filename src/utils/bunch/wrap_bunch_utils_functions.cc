@@ -7,6 +7,7 @@
 #include "wrap_utils.hh"
 
 #include "ParticlesWithIdFunctions.hh"
+#include "TwissFilteringFunctions.hh"
 
 using namespace OrbitUtils;
 
@@ -40,45 +41,65 @@ extern "C" {
 	
 	static PyObject* wrap_transport_mtrx(PyObject* self, PyObject* args)
 	{
-
 		PyObject *pyIn;
 		PyObject *pyOut;
 		PyObject *pyM;
-		if(!PyArg_ParseTuple(args,"OOO:trasportMtrx",&pyIn,&pyOut,&pyM)){
-			error("trasportMtrx(Bunch in,Bunch out,Matrix) - Bunches and Matrix are needed.");
+		int info_x = 0, info_y = 0, info_z = 0;
+		if(!PyArg_ParseTuple(args,"OOO|iii:trasport_with_twiss_Mtrx",&pyIn,&pyOut,&pyM,&info_x,&info_y,&info_z)){
+			error("trasport_with_twiss_Mtrx(Bunch in,Bunch out,Matrix, info_x, info_y, info_z) - Bunches and Matrix are needed.");
 		}			
 		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
 		if((!PyObject_IsInstance(pyIn,pyBunchType)) || (!PyObject_IsInstance(pyOut,pyBunchType)) ){
-			error("trasportMtrx(Bunch in,Bunch out,Matrix) - 1st or 2nd input parameter is not Bunch");
+			error("trasport_with_twiss_Mtrx(Bunch in,Bunch out,Matrix, info_x, info_y, info_z) - 1st or 2nd input parameter is not Bunch");
 		}	
 		PyObject* pyORBIT_Matrix_Type = wrap_orbit_utils::getOrbitUtilsType("Matrix");
 		if(!PyObject_IsInstance(pyM,pyORBIT_Matrix_Type)){
-			error("trasportMtrx(Bunch in,Bunch out,Matrix) - function needs a matrix.");
+			error("trasport_with_twiss_Mtrx(Bunch in,Bunch out,Matrix, info_x, info_y, info_z) - function needs a matrix.");
 		}		
 		Bunch* bunch_in = (Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj;
 		Bunch* bunch_out = (Bunch*) ((pyORBIT_Object*) pyOut)->cpp_obj;
 		Matrix* mtrx = (Matrix*) ((pyORBIT_Object*) pyM)->cpp_obj;
 		
-		int n_stat = transport_mtrx(bunch_in,bunch_out,mtrx);
+		int n_stat = transport_mtrx(bunch_in,bunch_out,mtrx,info_x,info_y,info_z);
     return Py_BuildValue("i", n_stat);	
-	}		
-
-	// defenition of the memebers of the python ParticlesWithIdFunctions wrapper module for functions
+	}			
+	
+	static PyObject* wrap_bunch_twiss_filtering(PyObject* self, PyObject* args)
+	{
+		PyObject *pyIn;
+		PyObject *pyOut;
+		double coeff_x = -1.0, coeff_y = -1.0, coeff_z = -1.0;
+		if(!PyArg_ParseTuple(args,"OO|ddd:bunch_twiss_filtering",&pyIn,&pyOut,&coeff_x,&coeff_y,&coeff_z)){
+			error("bunchTwissFiltering(Bunch in,Bunch out, coeff_x, coeff_y, coeff_z) - Bunches and Matrix are needed.");
+		}			
+		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
+		if((!PyObject_IsInstance(pyIn,pyBunchType)) || (!PyObject_IsInstance(pyOut,pyBunchType)) ){
+			error("bunchTwissFiltering(Bunch in,Bunch out, coeff_x, coeff_y, coeff_z) - 1st or 2nd input parameter is not Bunch");
+		}	
+		Bunch* bunch_in = (Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj;
+		Bunch* bunch_bad = (Bunch*) ((pyORBIT_Object*) pyOut)->cpp_obj;
+		
+		int n_removed = bunch_twiss_filtering(bunch_in,bunch_bad, coeff_x, coeff_y, coeff_z);
+    return Py_BuildValue("i", n_removed);	
+	}			
+	
+	// defenition of the memebers of the python bunch_utils_functions wrapper module for functions
 	// they will be vailable from python level
-	static PyMethodDef NumrecipesModuleMethods[] = { 		
+	static PyMethodDef BunchUtilsFunctionMethods[] = { 		
 		{"bunchSortId",  part_wit_id_sort    , METH_VARARGS, "bunchSortId(bunch) - Sorting bunch according to the Id particles attributes."},
 		{"trasportMtrx", wrap_transport_mtrx , METH_VARARGS, "trasportMtrx(bunch in, bunch out, matrix) - calculates transport matrix."},
+		{"bunchTwissFiltering",  wrap_bunch_twiss_filtering, METH_VARARGS, "bunchTwissFiltering(bunch_in,bunch_bad, x_lim, y_lim, z_lim) - bunch Twiss filtering"},		
 		{NULL, NULL, 0, NULL}        /* Sentinel */
 	};
 
 	//--------------------------------------------------
 	//Initialization function of the pyParticlesWithIdFunctions module
-	//It will be called from Bunch wrapper initialization
+	//It will be called from utils wrapper initialization
 	//--------------------------------------------------
 	
-  void initParticlesWithIdFunctions(PyObject* module, const char* part_with_id_module_name){
-    //create numrecipes module
-    PyObject* module_partId = Py_InitModule(part_with_id_module_name,NumrecipesModuleMethods);
+  void initBunchUtilsFunctions(PyObject* module, const char* part_with_id_module_name){
+    //create ==operations with bunches== module
+    PyObject* module_partId = Py_InitModule(part_with_id_module_name,BunchUtilsFunctionMethods);
 		PyModule_AddObject(module,part_with_id_module_name,module_partId);
 		Py_INCREF(module_partId);
 	}

@@ -12,7 +12,7 @@
 #include "wrap_gauss_legendre_integrator.hh"
 #include "wrap_polynomial.hh"
 #include "wrap_numrecipes.hh"
-#include "wrap_particles_with_id_functions.hh"
+#include "wrap_bunch_utils_functions.hh"
 
 namespace wrap_orbit_utils{
 

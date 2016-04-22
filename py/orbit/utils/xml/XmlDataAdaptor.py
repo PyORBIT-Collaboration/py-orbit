@@ -71,9 +71,22 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		ParamsDictObject.__init__(self)	
 		self.data_adaptors = []	
 		
+	def getDeepCopy(self):
+		""" Returns the deep copy of the XmlDataAdaptor. """
+		adaptor = XmlDataAdaptor(self.getName())
+		for attribute in self.getAttributes():
+			adaptor.setValue(attribute,self.stringValue(attribute))
+		for adaptor_chld in self.data_adaptors:
+			adaptor.addChildAdaptor(adaptor_chld.getDeepCopy())
+		return adaptor
+
 	def hasAttribute(self,attribute):
 		""" Returns true or false if the node has the specified attribute """
 		return self.hasParam(attribute)
+		
+	def getAttributes(self):
+		""" Returns list of attributes. """
+		return ParamsDictObject.keys(self)	
 		
 	def stringValue(self,attribute):
 		""" string value associated with the specified attribute """
@@ -148,6 +161,13 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		self.data_adaptors.append(adaptor)
 		return adaptor
 		
+	def addChildAdaptor(self,adaptor,index = -1):
+		""" Adds or inserts the adaptor as a child """
+		if(index < 0):
+			self.data_adaptors.append(adaptor)
+		else:
+			self.data_adaptors.insert(index,adaptor)
+
 	def attributes(self):
 		""" return the list of attributes """
 		return self.keys()

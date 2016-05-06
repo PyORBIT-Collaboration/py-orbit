@@ -10,7 +10,7 @@ The Cavity class keeps the refernce to RF gaps and a value of the cavity amplitu
 import os
 import math
 
-# import the function that creates multidimensional arrays
+# import the utilities
 from orbit.utils import orbitFinalize, NamedObject, ParamsDictObject, phaseNearTargetPhase
 
 # import general accelerator elements and lattice
@@ -125,6 +125,7 @@ class LinacAccLattice(AccLattice):
 		actionContainer.addAction(trackDesign, AccActionsContainer.BODY)
 		self.trackActions(actionContainer,paramsDict,index_start,index_stop)
 		actionContainer.removeAction(trackDesign, AccActionsContainer.BODY)
+		return bunch
 
 	def getRF_Cavity(self,name):
 		""" Returns the cavity instance according to the name """

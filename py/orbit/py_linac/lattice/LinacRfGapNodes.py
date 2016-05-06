@@ -224,7 +224,6 @@ class BaseRF_Gap(AbstractRF_Gap):
 		arrival_time = bunch.getSyncParticle().time()
 		frequency = rfCavity.getFrequency()
 		phase = rfCavity.getPhase() + modePhase
-		rf_ampl = rfCavity.getDesignAmp()
 		if(self.__isFirstGap):
 			rfCavity.setDesignArrivalTime(arrival_time)
 			rfCavity.setDesignSetUp(True)		
@@ -235,9 +234,10 @@ class BaseRF_Gap(AbstractRF_Gap):
 			#print "debug name=",self.getName()," delta_phase=",frequency*(arrival_time - first_gap_arr_time)*360.0," phase=",phase*180/math.pi
 			phase = math.fmod(frequency*(arrival_time - first_gap_arr_time)*2.0*math.pi+phase,2.0*math.pi)		
 		#print "debug name=",self.getName()," arr_time=",arrival_time," phase=",phase*180./math.pi," E0TL=",E0TL*1.0e+3," freq=",frequency
-		#---- rf gap input phase -----
+		#---- rf gap input phase -----	
 		self.setGapPhase(phase)		
 		#call rf gap model to track the bunch
+		rf_ampl = rfCavity.getDesignAmp()	
 		if(isinstance(self.cppGapModel,MatrixRfGap) or isinstance(self.cppGapModel,BaseRfGap)):
 			self.cppGapModel.trackBunch(bunch,frequency,E0TL*rf_ampl,phase)
 		else:

@@ -62,7 +62,12 @@ int ORBIT_MPI_Finalize(const char* message){
     Py_Exit(1);
   }
   else{
-    exit(1);
+  	if(message != NULL){
+  		exit(1);
+  	}
+  	else{
+  		exit(0);
+  	}
   }
   return res;
 }

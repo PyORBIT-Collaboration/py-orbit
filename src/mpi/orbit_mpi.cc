@@ -44,7 +44,7 @@ int ORBIT_MPI_Finalize(const char* message){
     res = MPI_Finalize();
   }
 #else
-  res  = 1;
+  if(message != NULL){res  = 1;}
 #endif
   if(rank == 0){
     if(Py_IsInitialized()){
@@ -53,13 +53,16 @@ int ORBIT_MPI_Finalize(const char* message){
       PyRun_SimpleString("import traceback; traceback.print_stack()");
     }
     if(message != NULL){
-      std::cerr<<"Error PyORBIT Message:"<<std::endl;
       std::cerr<<message<<std::endl;
-      std::cerr<<"Stop."<<std::endl;
     }
   }
   if(Py_IsInitialized()){
-    Py_Exit(1);
+  	if(message != NULL){
+  		Py_Exit(1);
+  	}
+  	else{
+  		Py_Exit(0);
+  	}
   }
   else{
   	if(message != NULL){

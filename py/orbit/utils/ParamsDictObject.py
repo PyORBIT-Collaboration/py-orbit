@@ -20,6 +20,13 @@ class ParamsDictObject:
 		Method. Adds a parameter to the object.
 		"""
 		self.__paramsDict[key] = value
+		
+	def removeParam(self, key):
+		"""
+		Method. Removes a parameter.
+		"""
+		if(self.__paramsDict.has_key(key)):
+			del  self.__paramsDict[key]
 
 	def setParam(self, key, value):
 		"""

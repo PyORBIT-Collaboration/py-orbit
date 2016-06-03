@@ -86,7 +86,11 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		
 	def getAttributes(self):
 		""" Returns list of attributes. """
-		return ParamsDictObject.keys(self)	
+		return ParamsDictObject.keys(self)
+		
+	def removeAttribute(self,attribute):
+		""" Removes a particular attribute from the adaptor. """
+		self.removeParam(attribute)
 		
 	def stringValue(self,attribute):
 		""" string value associated with the specified attribute """

@@ -147,7 +147,6 @@ class correction:
 		pos_old = pos = 0.0
 		nodes = self.lattice.getNodes()
 		for node in nodes:
-			print node.getType()
 			if node.getType() == count_el:
 				m = m + 1
 			if node.getType() == find_el:

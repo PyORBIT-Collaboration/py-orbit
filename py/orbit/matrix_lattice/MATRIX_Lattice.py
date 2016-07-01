@@ -10,6 +10,7 @@ The  This class cannot calculate chromaticities.
 import os
 import math
 
+
 # import bunch
 from bunch import Bunch
 
@@ -34,8 +35,11 @@ class MATRIX_Lattice(AccLattice):
 	"""
 	def __init__(self, name = None):
 		AccLattice.__init__(self,name)
-		self.oneTurmMatrix = Matrix(7,7)
-		self.oneTurmMatrix.unit()	
+		self.oneTurnMatrix = Matrix(7,7)
+		self.oneTurnMatrix.unit()	
+		
+		self.Matrix = Matrix(7,7)
+		self.Matrix.unit()
 
 	def initialize(self):
 		"""
@@ -49,17 +53,40 @@ class MATRIX_Lattice(AccLattice):
 		"""
 		Calculates the one turn matrix.
 		"""
-		self.oneTurmMatrix.unit()
+		self.oneTurnMatrix.unit()
+		eps_length = 0.00001 # 10^-6 meter
+		
+		position = 0.0
+		position_old = position
 		for matrixNode in self.getNodes():
 			if(isinstance(matrixNode,BaseMATRIX) == True):
-				self.oneTurmMatrix = matrixNode.getMatrix().mult(self.oneTurmMatrix)
-		return self.oneTurmMatrix
+				self.oneTurnMatrix = matrixNode.getMatrix().mult(self.oneTurnMatrix)
+				"""
+				if(abs(position_old-position) > eps_length):
+					print position, self.oneTurnMatrix.get(0,6)
+				position_old = position
+				position = position + matrixNode.getLength()
+				"""
+		return self.oneTurnMatrix
+		
+	def makeMatrix(self, pos):
+		"""
+		Calculates the one turn matrix.
+		"""
+		self.Matrix.unit()
+		position = 0.0
+		for matrixNode in self.getNodes():
+			if(isinstance(matrixNode,BaseMATRIX) == True and position < pos):
+				self.Matrix = matrixNode.getMatrix().mult(self.Matrix)
+				position = position + matrixNode.getLength()
+				#print position, self.Matrix.get(0,6)
+		return self.Matrix
 
 	def getOneTurnMatrix(self):
 		"""
 		Returns the one turn matrix.
 		"""
-		return self.oneTurmMatrix
+		return self.oneTurnMatrix
 
 	def getRingParametersDict(self,momentum,mass):
 		"""
@@ -81,7 +108,7 @@ class MATRIX_Lattice(AccLattice):
 		res_dict["period [sec]"] = T
 		res_dict["frequency [Hz]"] = 1./T
 		#transverse twiss parameters
-		mt = self.oneTurmMatrix
+		mt = self.oneTurnMatrix
 		res_dict["fractional tune x"] = None
 		res_dict["fractional tune y"] = None
 		res_dict["alpha x"] = None
@@ -212,7 +239,7 @@ class MATRIX_Lattice(AccLattice):
 					alpha_arr.append(track_v.get(0))
 					beta_arr.append(track_v.get(1))
 					mu_arr.append(phi/(2*math.pi))
-				mt = matrixNode.getMatrix()
+				mt = matrixNode.getMatrix()				
 				ind0 = 0+dir_ind
 				ind1 = 1+dir_ind
 				track_m.set(0,0,mt.get(ind0,ind0)*mt.get(ind1,ind1)+mt.get(ind0,ind1)*mt.get(ind1,ind0))
@@ -226,7 +253,7 @@ class MATRIX_Lattice(AccLattice):
 				track_m.set(2,2,mt.get(ind1,ind1)*mt.get(ind1,ind1))
 				alpha_0 = track_v.get(0)
 				beta_0 = track_v.get(1)
-				delta_phi = math.atan(	mt.get(ind0,ind1)/(	beta_0*mt.get(ind0,ind0) - alpha_0*mt.get(ind0,ind1)))
+				delta_phi = math.atan(mt.get(ind0,ind1)/(beta_0*mt.get(ind0,ind0) - alpha_0*mt.get(ind0,ind1)))
 				phi = phi + delta_phi
 				track_v = track_m.mult(track_v)	
 				position_old = position
@@ -335,6 +362,87 @@ class MATRIX_Lattice(AccLattice):
 			graph_disp_arr.append((pos_arr[i],disp_arr[i]))
 			graph_disp_p_arr.append((pos_arr[i],disp_p_arr[i]))
 		return (graph_disp_arr,graph_disp_p_arr)
+		
+	def getRingOrbit(self,z0):
+		"""
+		Returns the tuple ([(position, x] ).
+		"""
+		return self.trackOrbit(z0)
+		
+	def trackOrbit(self,z0):
+		"""
+		Returns the tuple ([(position, x),...], [(position, y),...] ).
+		The tracking starts from the values specified as the initial parameters. 
+		z0 fulfill: z0 = Mz0 with M as one turn matrix
+		"""
+		
+		eps_length = 0.00001 # 10^-6 meter
+		
+		pos_arr = []
+		orbitX_arr = []
+		orbitY_arr = []
+		orbitXP_arr = []
+		orbitYP_arr = []
+		
+		position = 0.
+		pos_arr.append(position)
+		
+		
+		track_o = Matrix(6,6)
+		
+		track_ov = PhaseVector(6)
+		track_ov.set(0,z0[0])
+		track_ov.set(1,z0[1])
+		track_ov.set(2,z0[2])
+		track_ov.set(3,z0[3])
+		track_ov.set(4,z0[4])
+		track_ov.set(5,z0[5])
+		
+		orbitX_arr.append(track_ov.get(0))
+		orbitY_arr.append(track_ov.get(2))
+		orbitXP_arr.append(track_ov.get(1))
+		orbitYP_arr.append(track_ov.get(3))
+
+		position_old = position
+
+		
+		for matrixNode in self.getNodes():
+			if(isinstance(matrixNode,BaseMATRIX) == True):
+				if(abs(position_old-position) > eps_length):
+					pos_arr.append(position)
+					orbitX_arr.append(track_ov.get(0))
+					orbitY_arr.append(track_ov.get(2))
+					orbitXP_arr.append(track_ov.get(1))
+					orbitYP_arr.append(track_ov.get(3))
+					
+				mt = matrixNode.getMatrix()
+				
+				for i in range(6):
+					for j in range(6):
+						track_o.set(i,j,mt.get(i,j))
+				track_ov = track_o.mult(track_ov)
+				
+				for i in range(6):
+					tmp = track_ov.get(i)
+					track_ov.set(i,tmp + mt.get(i,6))
+
+				position_old = position
+				position = position + matrixNode.getLength()
+
+		pos_arr.append(position)
+		orbitX_arr.append(track_ov.get(0))
+		orbitY_arr.append(track_ov.get(2))
+		orbitXP_arr.append(track_ov.get(1))
+		orbitYP_arr.append(track_ov.get(3))
+		#pack the resulting tuple
+		graph_orbitX_arr = []
+		graph_orbitY_arr = []
+		for i in range(len(pos_arr)):
+			graph_orbitX_arr.append((pos_arr[i], orbitX_arr[i], orbitXP_arr[i]))
+			graph_orbitY_arr.append((pos_arr[i], orbitY_arr[i], orbitYP_arr[i]))
+
+		return (graph_orbitX_arr, graph_orbitY_arr)
+		
 	
 	def getSubLattice(self, index_start = -1, index_stop = -1,):
 		"""

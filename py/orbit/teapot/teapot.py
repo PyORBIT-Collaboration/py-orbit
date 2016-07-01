@@ -24,6 +24,10 @@ from orbit.parsers.madx_parser import MADX_Parser, MADX_LattElement
 # import aperture
 from aperture import Aperture
 
+# monitor
+from bunch import BunchTwissAnalysis
+
+
 """
 Drift
 Bend
@@ -32,6 +36,7 @@ Multipole
 Solenoid
 Kicker
 RingRF
+monitor
 """
 
 class TEAPOT_Lattice(AccLattice):
@@ -430,9 +435,17 @@ class _teapotFactory:
 			return [drft_1,elem,drft_2]
 		# ==========Others elements such as markers,monitor,rcollimator
 		if(madElem.getType().lower() == "marker" or \
-			 madElem.getType().lower() == "monitor" or \
+			 #madElem.getType().lower() == "monitor" or \
+			 #madElem.getType().lower() == "hmonitor" or \
+			 #madElem.getType().lower() == "vmonitor" or \
 			 madElem.getType().lower() == "rcolimator"):
 			elem = NodeTEAPOT(madElem.getName())
+		if(madElem.getType().lower() =="monitor"):
+			elem = 	MonitorTEAPOT(madElem.getName())
+			xAvg = 0.0
+			yAvg = 0.0
+			elem.addParam("xAvg",xAvg)
+			elem.addParam("yAvg",yAvg)			
 		# ------------------------------------------------
 		# ready to finish
 		# ------------------------------------------------
@@ -655,6 +668,29 @@ class ApertureTEAPOT(NodeTEAPOT):
 		lostbunch = paramsDict["lostbunch"]
 		self.aperture.checkBunch(bunch,lostbunch)
 
+class MonitorTEAPOT(NodeTEAPOT):
+	"""
+	Monitor TEAPOT element.
+	"""
+	def __init__(self, name = "Monitor no name"):
+		"""
+		Constructor. Creates the aperutre element.
+		"""
+		NodeTEAPOT.__init__(self,name)
+		self.setType("monitor teapot")
+		self.twiss =  BunchTwissAnalysis()
+			
+	def track(self, paramsDict):
+		"""
+		The bunchtuneanalysis-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
+		"""
+		length = self.getLength(self.getActivePartIndex())
+		bunch = paramsDict["bunch"]
+		self.twiss.analyzeBunch(bunch)
+		self.addParam("xAvg",self.twiss.getAverage(0))
+		self.addParam("xpAvg",self.twiss.getAverage(1))
+		self.addParam("yAvg",self.twiss.getAverage(2))
+		self.addParam("ypAvg",self.twiss.getAverage(3))
 
 class BunchWrapTEAPOT(NodeTEAPOT):
 	"""

@@ -73,8 +73,8 @@ class correction:
 		
 	def orbit_corr(self):
 	
-		self.kicker_x, self.kicker_y = self.find_elements("monitor", "kicker")
-		self.bpm_x, self.bpm_y = self.find_elements("kicker", "monitor")
+		self.kicker_x, self.kicker_y = self.find_elements("monitor teapot", "kick teapot")
+		self.bpm_x, self.bpm_y = self.find_elements("kick teapot", "monitor teapot")
 
 		print "Numbers of monitor found", len(self.bpm_x)
 		print "Numbers of corrector found", len(self.kicker_x)
@@ -89,7 +89,7 @@ class correction:
 		m = 0
 		nodes = self.lattice.getNodes()
 		for node in nodes:
-			if node.getType() == "kicker":
+			if node.getType() == "kick teapot":
 				node.setParam("kx",solution_x[m])
 				node.setParam("ky",solution_y[m])
 				m = m + 1
@@ -140,7 +140,6 @@ class correction:
 		(muY, arrPosAlphaY, arrPosBetaY) = matrix_lattice.getRingTwissDataY()
 						
 		OrbitX, OrbitY = orbit(self.lattice,self.bunch).get_orbit()
-		
 		bpm_x = []
 		bpm_y = []
 		eps_length = 1e-6
@@ -148,6 +147,7 @@ class correction:
 		pos_old = pos = 0.0
 		nodes = self.lattice.getNodes()
 		for node in nodes:
+			print node.getType()
 			if node.getType() == count_el:
 				m = m + 1
 			if node.getType() == find_el:

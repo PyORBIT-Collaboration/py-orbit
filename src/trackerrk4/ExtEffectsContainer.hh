@@ -31,8 +31,8 @@ using namespace OrbitUtils;
 		/** It initializes effects. */
 		void setupEffects(Bunch* bunch);
 		
-		/*it memorizes initial coordinates and impulses before rk step*/
-		void memorizeInitParams(Bunch* bunch);
+		/*it prepares initial coordinates and impulses before rk step*/
+		void prepareEffects(Bunch* bunch, double t);
 		
 		/** It finalizes effects. */
 		void finalizeEffects(Bunch* bunch);
@@ -54,7 +54,7 @@ using namespace OrbitUtils;
 			
 			vector<ExternalEffects*>	ref;			
 			vector<ExternalEffects*>	ref_setup;
-			vector<ExternalEffects*>	ref_memorize;
+			vector<ExternalEffects*>	ref_prepare;
 			vector<ExternalEffects*>	ref_apply;
 			vector<ExternalEffects*>	ref_finalize;
 

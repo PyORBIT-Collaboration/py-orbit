@@ -507,7 +507,7 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 		
 		t = t_begin + i*t_step;
 		
-		if(extEff != NULL) extEff->memorizeInitParams(bunch);
+		if(extEff != NULL) extEff->prepareEffects(bunch, t);
 		
 		for(int ip = 0, nParts = bunch->getSize(); ip < nParts; ip++){
 			flag = bunch->flag(ip);
@@ -549,6 +549,87 @@ void RungeKuttaTracker::track(Bunch* bunch,double t_begin, double t_period, doub
 	//------------------------------------------------		
 }
 
+
+
+void RungeKuttaTracker::track(std::vector<Bunch*> vbunch, double t_begin, double t_period, double t_step_in, 
+	                            BaseFieldSource* fieldSource, ExternalEffects* extEff)
+{
+                          
+        int nb = vbunch.size();        
+	c_light = OrbitConst::c;
+
+	n_steps = int(t_period/t_step_in + 0.5);
+	if(n_steps < 1){ n_steps = 1;}
+	t_step = t_period/n_steps;	
+	double vpt = 0.;
+
+	int flag = 0;
+	double t = t_begin;
+	//------------------------------------------------
+	//performs the necessary actions before tracking
+
+	if(extEff != NULL) extEff->setupEffects(vbunch, this);	
+	//------------------------------------------------	
+          
+	for (int i = 0; i < n_steps; i++){
+		
+		t = t_begin + i*t_step;		
+
+	if(extEff != NULL) extEff->prepareEffects(vbunch, t);               
+        fieldSource->prepareElectricMagneticField(vbunch, t);
+                
+		for (int j = 0; j < nb; j++)    {            
+                double** partCoordArr = vbunch[j]->coordArr();
+                charge = vbunch[j]->getCharge();
+                mass = vbunch[j]->getMass();
+                mass2 = mass*mass;
+                
+		for(int ip = 0, nParts = vbunch[j]->getSize(); ip < nParts; ip++){
+			flag = vbunch[j]->flag(ip);               
+                        
+			if(flag > 0){
+				y_in_vct[0] = partCoordArr[ip][0];
+				y_in_vct[1] = partCoordArr[ip][2];
+				y_in_vct[2] = partCoordArr[ip][4];
+				y_in_vct[3] = partCoordArr[ip][1];
+				y_in_vct[4] = partCoordArr[ip][3];
+				y_in_vct[5] = partCoordArr[ip][5];
+				if(!isOutside(y_in_vct)){
+					rk4Step(t,t_step,fieldSource);	
+				} else {
+					vpt = mass2 + y_in_vct[3]*y_in_vct[3] + y_in_vct[4]*y_in_vct[4] + y_in_vct[5]*y_in_vct[5];
+					vpt = c_light*t_step/sqrt(vpt);
+					y_out_vct[0] = y_in_vct[0] + vpt*y_in_vct[3];
+					y_out_vct[1] = y_in_vct[1] + vpt*y_in_vct[4];
+					y_out_vct[2] = y_in_vct[2] + vpt*y_in_vct[5];
+					y_out_vct[3] = y_in_vct[3];
+					y_out_vct[4] = y_in_vct[4];
+					y_out_vct[5] = y_in_vct[5];
+				}
+			  partCoordArr[ip][0] = y_out_vct[0];
+			  partCoordArr[ip][2] = y_out_vct[1];
+			  partCoordArr[ip][4] = y_out_vct[2];
+			  partCoordArr[ip][1] = y_out_vct[3];
+			  partCoordArr[ip][3] = y_out_vct[4];
+			  partCoordArr[ip][5] = y_out_vct[5];	
+			}
+			if(extEff != NULL) extEff->applyEffectsForEach(vbunch[j], ip,y_in_vct , y_out_vct, t, t_step, fieldSource, this);
+		}
+                
+        }
+                
+               		//apply the external effects
+
+		if(extEff != NULL) extEff->applyEffects(vbunch, t, t_step, fieldSource, this); 
+		
+	}
+	//------------------------------------------------
+	//performs the necessary actions after tracking
+
+	if(extEff != NULL) extEff->finalizeEffects(vbunch, this);
+	//------------------------------------------------
+       
+}
 //--------------------------------------------------
 // private methods of the RungeKuttaTracker class
 //--------------------------------------------------

@@ -39,7 +39,7 @@ namespace TrackerRK4{
 		virtual void setupEffects(Bunch* bunch);
 		
 		/*it memorizes initial coordinates and impulses before rk step*/
-		virtual void memorizeInitParams(Bunch* bunch);
+		virtual void prepareEffects(Bunch* bunch, double t);
 		
 		/** It finalizes effects. */
 		virtual void finalizeEffects(Bunch* bunch);
@@ -66,13 +66,13 @@ namespace TrackerRK4{
 		
 
 		int getRankSetup();
-		int getRankMemorize();
+		int getRankPrepare();
 		int getRankApply();
 		int getRankFinalize();
 		
 
 		void setRankSetup(int i);
-		void setRankMemorize(int i);
+		void setRankPrepare(int i);
 		void setRankApply(int i);
 		void setRankFinalize(int i);
 		
@@ -82,7 +82,7 @@ namespace TrackerRK4{
 
 			
 			int rank_setup;
-			int rank_memorize;
+			int rank_prepare;
 			int rank_apply;
 			int rank_finalize;
 			

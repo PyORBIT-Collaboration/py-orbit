@@ -56,7 +56,7 @@ void ExtEffectsContainer::AddEffect(ExternalEffects* eff)	{
 	ref.push_back(eff);
 	
 	ref_setup.push_back(eff);
-	ref_memorize.push_back(eff);
+	ref_prepare.push_back(eff);
 	ref_apply.push_back(eff);
 	ref_finalize.push_back(eff);
 }
@@ -82,15 +82,15 @@ void ExtEffectsContainer::setupEffects(Bunch* bunch){
 	}
 	}
 	
-	for (int i=0; i<ref_memorize.size(); i++)	{
-		min=ref_memorize[i]->getRankMemorize();
-	for (int j=i+1; j<ref_memorize.size(); j++)	{
+	for (int i=0; i<ref_prepare.size(); i++)	{
+		min=ref_prepare[i]->getRankPrepare();
+	for (int j=i+1; j<ref_prepare.size(); j++)	{
 		
-		if(ref_memorize[j]->getRankMemorize()<min)	{
-			min=ref_memorize[j]->getRankMemorize();		
-			exchange = ref_memorize[i];
-			ref_memorize[i] = ref_memorize[j];
-			ref_memorize[j] = exchange;
+		if(ref_prepare[j]->getRankPrepare()<min)	{
+			min=ref_prepare[j]->getRankPrepare();		
+			exchange = ref_prepare[i];
+			ref_prepare[i] = ref_prepare[j];
+			ref_prepare[j] = exchange;
 
 		}
 		
@@ -138,10 +138,10 @@ void ExtEffectsContainer::setupEffects(Bunch* bunch){
 
 }
 
-void ExtEffectsContainer::memorizeInitParams(Bunch* bunch){	
+void ExtEffectsContainer::prepareEffects(Bunch* bunch, double t){	
 
-	for (int i=0;i<ref_memorize.size();i++){
-		ref_memorize[i]->memorizeInitParams(bunch);
+	for (int i=0;i<ref_prepare.size();i++){
+		ref_prepare[i]->prepareEffects(bunch, t);
 	}
 }
 

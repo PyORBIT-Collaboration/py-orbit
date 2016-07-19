@@ -49,7 +49,7 @@ namespace TrackerRK4{
 		void setupEffects(Bunch* bunch);
 		
 		/*it memorizes initial coordinates and impulses before rk step*/
-		void memorizeInitParams(Bunch* bunch);
+		void prepareEffects(Bunch* bunch, double t);
 		
 		/** It finalizes effects. */
 		void finalizeEffects(Bunch* bunch);

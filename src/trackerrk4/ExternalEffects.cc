@@ -26,7 +26,7 @@ ExternalEffects::ExternalEffects(){
 	name = "empty";
 
 	rank_setup=0;
-	rank_memorize=0;
+	rank_prepare=0;
 	rank_apply=0;
 	rank_finalize=0;
 }
@@ -38,14 +38,22 @@ ExternalEffects::~ExternalEffects(){
 void ExternalEffects::setupEffects(Bunch* bunch){
 }
 
+void ExternalEffects::setupEffects(std::vector<Bunch*> vbunch, RungeKuttaTracker* tracker){
+}
+
 /*it memorizes initial coordinates and impulses before rk step*/
-void ExternalEffects::memorizeInitParams(Bunch* bunch){
+void ExternalEffects::prepareEffects(Bunch* bunch, double t){
+}
+
+void ExternalEffects::prepareEffects(std::vector<Bunch*> vbunch, double t){
 }
 
 /** It finalizes effects. */
 void ExternalEffects::finalizeEffects(Bunch* bunch){
 }
 
+void ExternalEffects::finalizeEffects(std::vector<Bunch*> vbunch, RungeKuttaTracker* tracker){
+}
 /** 
     It applies the external effects to a particle with certain index. 
     y_in_vct and y_out_vct are double[6] vectors with initial and final
@@ -84,8 +92,8 @@ int ExternalEffects::getRankSetup()	{
 	return rank_setup;
 }
 
-int ExternalEffects::getRankMemorize()	{
-	return rank_memorize;
+int ExternalEffects::getRankPrepare()	{
+	return rank_prepare;
 }
 
 int ExternalEffects::getRankApply()	{
@@ -100,8 +108,8 @@ void ExternalEffects::setRankSetup(int i)	{
 	rank_setup = i;
 }
 
-void ExternalEffects::setRankMemorize(int i)	{
-	rank_memorize = i;
+void ExternalEffects::setRankPrepare(int i)	{
+	rank_prepare = i;
 }
 
 void ExternalEffects::setRankApply(int i)	{

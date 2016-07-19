@@ -31,6 +31,7 @@
 
 #include "PyExternalEffects.hh"
 #include "RungeKuttaTracker.hh"
+//#include <c++/4.4.6/bits/stl_vector.h>
 
 using namespace TrackerRK4;
 using namespace OrbitUtils;
@@ -52,10 +53,10 @@ void PyExternalEffects::setupEffects(Bunch* bunch){
 	Py_DECREF(res_tuple);
 }
 
-void PyExternalEffects::memorizeInitParams(Bunch* bunch){
+void PyExternalEffects::prepareEffects(Bunch* bunch, double t){
 	PyObject* py_wrp = getPyWrapper();
 	PyObject* py_bunch = bunch->getPyWrapper();
-	PyObject* res_tuple = PyObject_CallMethod(py_wrp,"memorizeInitParams","O",py_bunch);
+	PyObject* res_tuple = PyObject_CallMethod(py_wrp,"prepareEffects","Od",py_bunch, time);
 	Py_DECREF(res_tuple);
 }
 		

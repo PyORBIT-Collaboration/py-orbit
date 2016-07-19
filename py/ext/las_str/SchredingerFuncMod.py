@@ -14,7 +14,6 @@ from orbit_mpi import mpi_comm,mpi_datatype,mpi_op
 #from ext.las_str.StarkEffectSS  import *
 
 
-
        
 class SchredingerFunc:    
 
@@ -50,15 +49,15 @@ class SchredingerFunc:
         
         self.cut_par = 1000
         self.n_states = 3
-        
+
         if (self.method == 2):
-            self.St = Stark(os.environ["ORBIT_ROOT"] + "/ext/laserstripping/Hydrogen_data/",self.n_states)
+            self.St = Stark(os.environ["ORBIT_ROOT"] + "/ext/laserstripping/Hydrogen_data/StarkEG/",self.n_states)
         if (self.method == 3):
             self.StSf = StarkStrongField(os.environ["ORBIT_ROOT"] + "/ext/laserstripping/Hydrogen_data/",0,0,1)
         if (self.method == 4):
             self.continuum_spectr = TDMcontinuum(os.environ["ORBIT_ROOT"] + "/ext/laserstripping/Hydrogen_data/TDMcontinuum/001/")
         
-        
+
         self.EMfield = []
         self.Nevol = 0
         self.print_file = False
@@ -66,9 +65,6 @@ class SchredingerFunc:
         self.Bx = 0
         self.By = 0
         self.Bz = 0
-
-
-
 
 
 
@@ -88,11 +84,10 @@ class SchredingerFunc:
         N_part = bunch.getSize()
         TK = self.TK
         n_step = self.n_step
-        n_sigma = self.n_sigma
         power = self.power
         n_states = self.n_states
         cut_par = self.cut_par
-        sigma_beam = self.sigma_beam
+        sigmaZ_beam = self.sigmaZ_beam
         env_sigma = self.env_sigma
         Nevol = self.Nevol
         print_file = self.print_file 
@@ -150,11 +145,14 @@ class SchredingerFunc:
         la0 = 2*math.pi*5.291772108e-11/7.297352570e-3/delta_E
         te = TK - bunch.mass()*(la/la0-1)
         kz = te/math.sqrt(P*P-te*te)
-        print "angle = ",math.atan2(1,-kz)*360/2/math.pi
+        #kz = math.tan(2*math.pi*(39.23-90)/360)
+        print "angle = ",math.atan2(1,-kz)*360/2/math.pi, "kz = ", kz
+        #kz = -1.22020387566
+        #print sigmaZ_beam
 
     
 
-        zb = -5*sigma_beam*vz
+        zb = -5*sigmaZ_beam
         zl = zb*E/P
         time_step = (2*abs(zb)/vz)/n_step
 

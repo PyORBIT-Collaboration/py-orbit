@@ -116,7 +116,7 @@ class BunchGen:
         #vz = 299792458*P/E
         
         #beta = P/E
-        #gamma = E/self.mass
+        gamma = E/self.mass
         
         #bg = beta*gamma
         
@@ -127,9 +127,12 @@ class BunchGen:
 
         for i in range(self.N_part):
 
-            x,xp = self.getCoords(self.alphaX, self.betaX, self.emtX, math.sqrt(self.emtX*self.betaX)*3.0)
-            y,yp = self.getCoords(self.alphaY, self.betaY, self.emtY, math.sqrt(self.emtY*self.betaY)*3.0)
-            z,zp = self.getCoords(self.alphaZ, self.betaZ, self.emtZ, math.sqrt(self.emtZ*self.betaZ)*3.0)             
+            x,xp = self.getCoords(self.alphaX, self.betaX, self.emtX, math.sqrt(self.emtX*self.betaX)*5.0)
+            y,yp = self.getCoords(self.alphaY, self.betaY, self.emtY, math.sqrt(self.emtY*self.betaY)*5.0)
+            z,zp = self.getCoords(self.alphaZ, self.betaZ, self.emtZ, math.sqrt(self.emtZ*self.betaZ)*5.0)
+            #zp = dbeta/beta XAL definition
+            zp = zp*gamma*gamma
+            #zp = dp/p
             
             x += self.dispD*zp
             xp += self.dispDP*zp           

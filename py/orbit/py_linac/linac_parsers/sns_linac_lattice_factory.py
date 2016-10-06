@@ -130,9 +130,12 @@ class SNS_LinacLatticeFactory():
 			accSeq.setLength(seq_da.doubleValue("length"))
 			accSeq.setPosition(seqPosition)
 			seqPosition = seqPosition + accSeq.getLength()
+			#---- BPM frequnecy for this sequence ----
+			if(seq_da.hasAttribute("bpmFrequency")):
+				bpmFrequency = seq_da.doubleValue("bpmFrequency")
+				accSeq.addParam("bpmFrequency",bpmFrequency)
+			#-----------------------------------------
 			accSeqs.append(accSeq)
-			#---- BPM frequnecy for this sequence
-			bpmFrequency = seq_da.doubleValue("bpmFrequency")
 			#---- create RF Cavities
 			if(len(seq_da.childAdaptors("Cavities")) == 1):
 				cavs_da = seq_da.childAdaptors("Cavities")[0]	
@@ -168,13 +171,16 @@ class SNS_LinacLatticeFactory():
 					accNode = Quad(node_da.stringValue("name"))				
 					accNode.setParam("dB/dr",params_da.doubleValue("field"))
 					accNode.setParam("field",params_da.doubleValue("field"))
-					accNode.setLength(params_da.doubleValue("effLength"))
+					accNode.setLength(node_length)
 					if(params_da.hasAttribute("poles")):
-						accNode.setParam("poles",[int(x) for x in eval(params_da.stringValue("poles"))])
+						#accNode.setParam("poles",[int(x) for x in eval(params_da.stringValue("poles"))])
+						accNode.setParam("poles",params_da.intArrayValue("poles"))
 					if(params_da.hasAttribute("kls")):
-						accNode.setParam("kls", [x for x in eval(params_da.stringValue("kls"))])
+						#accNode.setParam("kls", [x for x in eval(params_da.stringValue("kls"))])
+						accNode.setParam("kls",params_da.doubleArrayValue("kls"))
 					if(params_da.hasAttribute("skews")):
-						accNode.setParam("skews",[int(x) for x in eval(params_da.stringValue("skews"))])					
+						#accNode.setParam("skews",[int(x) for x in eval(params_da.stringValue("skews"))])
+						accNode.setParam("skews",params_da.intArrayValue("skews"))
 					if(0.5*accNode.getLength() > self.maxDriftLength):
 						accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 					accNode.setParam("pos",node_pos)
@@ -186,15 +192,22 @@ class SNS_LinacLatticeFactory():
 				elif(node_type == "BEND"):
 					accNode = Bend(node_da.stringValue("name"))                                                                                					
 					if(params_da.hasAttribute("poles")):
-						accNode.setParam("poles",[int(x) for x in eval(params_da.stringValue("poles"))])
+						#accNode.setParam("poles",[int(x) for x in eval(params_da.stringValue("poles"))])
+						accNode.setParam("poles",params_da.intArrayValue("poles"))
 					if(params_da.hasAttribute("kls")):
-						accNode.setParam("kls", [x for x in eval(params_da.stringValue("kls"))])
+						#accNode.setParam("kls", [x for x in eval(params_da.stringValue("kls"))])
+						accNode.setParam("kls",params_da.doubleArrayValue("kls"))
 					if(params_da.hasAttribute("skews")):
-						accNode.setParam("skews",[int(x) for x in eval(params_da.stringValue("skews"))])
+						#accNode.setParam("skews",[int(x) for x in eval(params_da.stringValue("skews"))])
+						accNode.setParam("skews",params_da.intArrayValue("skews"))
 					accNode.setParam("ea1",params_da.doubleValue("ea1"))
 					accNode.setParam("ea2",params_da.doubleValue("ea2"))
 					accNode.setParam("theta",params_da.doubleValue("theta"))
-					accNode.setLength(params_da.doubleValue("effLength"))
+					if(params_da.hasAttribute("aperture_x") and params_da.hasAttribute("aperture_y") and params_da.hasAttribute("aprt_type")):
+						accNode.setParam("aprt_type",params_da.intValue("aprt_type"))
+						accNode.setParam("aperture_x",params_da.doubleValue("aperture_x"))
+						accNode.setParam("aperture_y",params_da.doubleValue("aperture_y"))
+					accNode.setLength(node_length)
 					if(0.5*accNode.getLength() > self.maxDriftLength):
 						accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 					accNode.setParam("pos",node_pos)
@@ -256,6 +269,8 @@ class SNS_LinacLatticeFactory():
 						if(node_type == "DCV"): accNode = DCorrectorV(node_da.stringValue("name"))
 						if(node_type == "DCH"): accNode = DCorrectorH(node_da.stringValue("name"))
 						accNode.setParam("effLength",params_da.doubleValue("effLength"))
+						if(params_da.hasAttribute("B")):
+							accNode.setParam("B",params_da.doubleValue("B"))
 					else:
 						accNode = MarkerLinacNode(node_da.stringValue("name"))
 					accNode.setParam("pos",node_pos)
@@ -387,4 +402,168 @@ class SNS_LinacLatticeFactory():
 		linacAccLattice.initialize()
 		return linacAccLattice
 
+	def makeDataAdaptorforLinacLattice(self,linacAccLattice):
+		"""
+		This method generates and returns the accelerator data adaptor 
+		for the accelerator lattice.
+		"""		
+		acc_da = XmlDataAdaptor(linacAccLattice.getName())
+		accSeqs = linacAccLattice.getSequences()
+		for accSeq in accSeqs:
+			self.makeDAforAccSeq(acc_da,accSeq)
+		return acc_da
+
+	def makeDAforAccSeq(self,acc_da,accSeq):
+		"""
+		This method adds the accelerator sequence data to accelerator data adaptor.
+		"""
+		seq_da =  acc_da.createChild(accSeq.getName())
+		seq_da.setValue("length",accSeq.getLength())
+		if(accSeq.hasParam("bpmFrequency")):
+			seq_da.setValue("bpmFrequency",accSeq.getParam("bpmFrequency"))
+		#----------------------------------
+		nodes = accSeq.getNodes()
+		for node in nodes:
+			if(isinstance(node,Quad)):
+				self.makeDA_quad(seq_da,node)
+				continue
+			if(isinstance(node,Bend)):
+				self.makeDA_bend(seq_da,node)
+				continue
+			if(isinstance(node,DCorrectorH)):
+				self.makeDA_dcorrH(seq_da,node)
+				continue
+			if(isinstance(node,DCorrectorV)):
+				self.makeDA_dcorrV(seq_da,node)
+				continue
+			if(isinstance(node,BaseRF_Gap)):
+				self.makeDA_rf_gap(seq_da,node)
+				continue
+			if(isinstance(node,MarkerLinacNode)):
+				self.makeDA_marker(seq_da,node)
+				continue
+		#----------------------------------
+		rf_cavs = accSeq.getRF_Cavities()
+		cavs_da = seq_da.createChild("Cavities")
+		for cav in rf_cavs:
+			cav_da = cavs_da.createChild("Cavity")
+			cav_da.setValue("ampl",cav.getAmp())
+			cav_da.setValue("frequency",cav.getFrequency())
+			cav_da.setValue("name",cav.getName())
+			cav_da.setValue("pos",cav.getPosition())
+			
+	def makeDA_quad(self,seq_da,quad):
+		"""
+		This method will fill out the DataAdaptor for a quad linac accelerator node.
+		"""
+		quad_da =  seq_da.createChild("accElement")
+		params_da = quad_da.createChild("parameters")
+		quad_da.setValue("length",quad.getLength())
+		quad_da.setValue("name",quad.getName())
+		quad_da.setValue("pos",("%9.6f"%quad.getPosition()).strip())
+		quad_da.setValue("type","QUAD")
+		params_da.setValue("field",quad.getParam("dB/dr"))
+		if(quad.hasParam("poles") and len(quad.getParam("poles")) > 0):
+			params_da.setValue("poles",quad.getParam("poles"))
+			params_da.setValue("kls",quad.getParam("kls"))
+			params_da.setValue("skews",quad.getParam("skews"))
+		if(quad.hasParam("aprt_type")):
+			params_da.setValue("aprt_type",quad.getParam("aprt_type"))
+			params_da.setValue("aperture",quad.getParam("aperture"))
+			
+	def makeDA_bend(self,seq_da,bend):
+		"""
+		This method will fill out the DataAdaptor for a bend linac accelerator node.
+		"""
+		bend_da =  seq_da.createChild("accElement")
+		params_da = bend_da.createChild("parameters")
+		bend_da.setValue("type","BEND")
+		bend_da.setValue("name",bend.getName())
+		bend_da.setValue("pos",("%9.6f"%bend.getPosition()).strip())
+		bend_da.setValue("length",bend.getLength())
+		params_da.setValue("theta",bend.getParam("theta"))
+		if(bend.hasParam("ea1")):
+			params_da.setValue("ea1",bend.getParam("ea1"))
+		if(bend.hasParam("ea2")):
+			params_da.setValue("ea2",bend.getParam("ea2"))
+		if(bend.hasParam("poles") and len(bend.getParam("poles")) > 0):
+			params_da.setValue("poles",bend.getParam("poles"))
+			params_da.setValue("kls",bend.getParam("kls"))
+			params_da.setValue("skews",bend.getParam("skews"))	
+		if(bend.hasParam("aprt_type")):
+			params_da.setValue("aprt_type",bend.getParam("aprt_type"))
+			params_da.setValue("aperture_x",bend.getParam("aperture_x"))			
+			params_da.setValue("aperture_y",bend.getParam("aperture_y"))			
+		
+	def makeDA_dcorrH(self,seq_da,dcorr):
+		"""
+		This method will fill out the DataAdaptor for a DCorrectorH linac accelerator node.
+		"""
+		dcorr_da =  seq_da.createChild("accElement")
+		params_da = dcorr_da.createChild("parameters")		
+		dcorr_da.setValue("length",0.)
+		dcorr_da.setValue("name",dcorr.getName())
+		dcorr_da.setValue("pos",("%9.6f"%dcorr.getPosition()).strip())
+		dcorr_da.setValue("type","DCH")
+		params_da.setValue("B",dcorr.getParam("B"))
+		params_da.setValue("effLength",dcorr.getParam("effLength"))
+		
+	def makeDA_dcorrV(self,seq_da,dcorr):
+		"""
+		This method will fill out the DataAdaptor for a DCorrectorV linac accelerator node.
+		"""
+		dcorr_da =  seq_da.createChild("accElement")
+		params_da = dcorr_da.createChild("parameters")		
+		dcorr_da.setValue("length",0.)
+		dcorr_da.setValue("name",dcorr.getName())
+		dcorr_da.setValue("pos",("%9.6f"%dcorr.getPosition()).strip())
+		dcorr_da.setValue("type","DCV")
+		params_da.setValue("B",dcorr.getParam("B"))
+		params_da.setValue("effLength",dcorr.getParam("effLength"))		
+		
+	def makeDA_marker(self,seq_da,marker):
+		marker_da =  seq_da.createChild("accElement")
+		params_da = marker_da.createChild("parameters")
+		marker_da.setValue("length",0.)
+		marker_da.setValue("name",marker.getName())
+		marker_da.setValue("pos",("%9.6f"%marker.getPosition()).strip())
+		marker_da.setValue("type","MARKER")		
+   
+	def makeDA_rf_gap(self,seq_da,rf_gap):
+		"""
+		This method will fill out the DataAdaptor for a RF Gap linac accelerator node.
+		"""
+		rf_gap_da =  seq_da.createChild("accElement")
+		rf_gap_da.setValue("length",0.)
+		rf_gap_da.setValue("name",rf_gap.getName())
+		rf_gap_da.setValue("pos",("%9.6f"%rf_gap.getPosition()).strip())
+		rf_gap_da.setValue("type","RFGAP")
+		params_da = rf_gap_da.createChild("parameters")
+		params_da.setValue("E0L",rf_gap.getParam("E0L"))
+		params_da.setValue("E0TL",rf_gap.getParam("E0TL"))
+		params_da.setValue("EzFile",rf_gap.getParam("EzFile"))
+		params_da.setValue("cavity",rf_gap.getRF_Cavity().getName())
+		params_da.setValue("mode",int(rf_gap.getParam("mode")))
+		params_da.setValue("phase","%7.3f"%(rf_gap.getParam("gap_phase")*180.0/math.pi))
+		if(rf_gap.hasParam("aprt_type")):
+			params_da.setValue("aprt_type",quad.getParam("aprt_type"))
+			params_da.setValue("aperture",quad.getParam("aperture"))		
+		rf_gap_ttfs_da = rf_gap_da.createChild("TTFs")
+		rf_gap_ttfs_da.setValue("beta_max",rf_gap.getParam("beta_max"))
+		rf_gap_ttfs_da.setValue("beta_min",rf_gap.getParam("beta_min"))
+		#---------------------------------------------
+		def make_poly_da(node_name,ttfs_da,poly):
+			poly_da = ttfs_da.createChild(node_name)
+			poly_da.setValue("order",poly.order())
+			coefs = []
+			for ind in range(poly.order()+1):
+				coefs.append(poly.coefficient(ind))
+			poly_da.setValue("pcoefs",coefs)
+		#---------------------------------------------
+		(polyT,polyS,polyTp,polySp) = rf_gap.getTTF_Polynimials()
+		make_poly_da("polyT",rf_gap_ttfs_da,polyT)
+		make_poly_da("polyS",rf_gap_ttfs_da,polyS)
+		make_poly_da("polyTP",rf_gap_ttfs_da,polyTp)
+		make_poly_da("polySP",rf_gap_ttfs_da,polySp)	
+		
 

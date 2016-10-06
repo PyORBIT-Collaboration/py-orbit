@@ -30,6 +30,7 @@ class BaseLinacNode(AccNodeBunchTracker):
 		"""
 		AccNodeBunchTracker.__init__(self,name)
 		self.setType("baseLinacNode")
+		self.setParam("pos",0.)
 		self.__linacSeqence = None
 		
 	def isRFGap(self):
@@ -43,6 +44,22 @@ class BaseLinacNode(AccNodeBunchTracker):
 		Sets the seqence.
 		"""
 		self.__linacSeqence = seq
+		
+	def setPosition(self,pos):
+		"""
+		Sets the position of the node inside the sequence. 
+		If the node has non-zero length, the position is usually 
+		at the center.
+		"""
+		self.setParam("pos",pos)
+		
+	def getPosition(self):
+		"""
+		Returns the position of the node inside the sequence. 
+		If the node has non-zero length, the position is usually 
+		at the center.
+		"""		
+		return self.getParam("pos")
 		
 	def getSequence(self):
 		"""

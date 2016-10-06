@@ -233,7 +233,7 @@ class BaseRF_Gap(AbstractRF_Gap):
 			first_gap_arr_time = rfCavity.getDesignArrivalTime()
 			#print "debug name=",self.getName()," delta_phase=",frequency*(arrival_time - first_gap_arr_time)*360.0," phase=",phase*180/math.pi
 			phase = math.fmod(frequency*(arrival_time - first_gap_arr_time)*2.0*math.pi+phase,2.0*math.pi)		
-		#print "debug name=",self.getName()," arr_time=",arrival_time," phase=",phase*180./math.pi," E0TL=",E0TL*1.0e+3," freq=",frequency
+		#print "debug design name=",self.getName()," arr_time=",arrival_time," phase=",phase*180./math.pi," E0TL=",E0TL*1.0e+3," freq=",frequency
 		#---- rf gap input phase -----	
 		self.setGapPhase(phase)		
 		#call rf gap model to track the bunch

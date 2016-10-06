@@ -30,9 +30,9 @@ class LinacApertureNode(BaseLinacNode):
 		self.b = b
 		self.c = c
 		self.d = d
-		self.pos = pos
-		self.aperture = Aperture(self.shape, self.a, self.b, self.c, self.d, self.pos)
-	
+		self.aperture = Aperture(self.shape, self.a, self.b, self.c, self.d, pos)	
+		self.setPosition(pos)
+
 	def track(self, paramsDict):
 		bunch = paramsDict["bunch"]
 		if(paramsDict.has_key("lostbunch")):
@@ -48,11 +48,8 @@ class LinacApertureNode(BaseLinacNode):
 		pass
 
 	def setPosition(self, pos):
-		self.pos = pos
-		self.Aperture.setPosition(self.pos)
-
-	def getPosition(self):
-		return self.pos
+		BaseLinacNode.setPosition(self,pos)
+		self.aperture.setPosition(self.getPosition())
 
 class CircleLinacApertureNode(LinacApertureNode):
 	"""

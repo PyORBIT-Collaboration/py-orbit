@@ -96,7 +96,6 @@ class LinacAccLattice(AccLattice):
 		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
 		if(paramsDict == None): paramsDict = {}			
 		paramsDict["bunch"] = bunch
-		bunch.getSyncParticle().time(0.)
 		
 		def track(paramsDict):
 			node = paramsDict["node"]

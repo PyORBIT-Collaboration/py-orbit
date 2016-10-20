@@ -183,10 +183,10 @@ class SNS_LinacLatticeFactory():
 						accNode.setParam("skews",params_da.intArrayValue("skews"))
 					if(0.5*accNode.getLength() > self.maxDriftLength):
 						accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
-					accNode.setParam("pos",node_pos)
 					if(params_da.hasAttribute("aperture") and params_da.hasAttribute("aprt_type")):
 						accNode.setParam("aprt_type",params_da.intValue("aprt_type"))
 						accNode.setParam("aperture",params_da.doubleValue("aperture"))
+					accNode.setParam("pos",node_pos)
 					accSeq.addNode(accNode)
 				#------------BEND-----------------
 				elif(node_type == "BEND"):
@@ -208,8 +208,8 @@ class SNS_LinacLatticeFactory():
 						accNode.setParam("aperture_x",params_da.doubleValue("aperture_x"))
 						accNode.setParam("aperture_y",params_da.doubleValue("aperture_y"))
 					accNode.setLength(node_length)
-					if(0.5*accNode.getLength() > self.maxDriftLength):
-						accNode.setnParts(2*int(0.5*accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
+					if(accNode.getLength() > self.maxDriftLength):
+						accNode.setnParts(2*int(accNode.getLength()/self.maxDriftLength  + 1.5 - 1.0e-12))
 					accNode.setParam("pos",node_pos)
 					accSeq.addNode(accNode)
 				#------------RF_Gap-----------------	
@@ -251,6 +251,9 @@ class SNS_LinacLatticeFactory():
 					coef_arr = polySp_da.doubleArrayValue("pcoefs")
 					for coef_ind in range(len(coef_arr)):
 						polySp.coefficient(coef_ind,coef_arr[coef_ind])
+					if(params_da.hasAttribute("aperture") and params_da.hasAttribute("aprt_type")):
+						accNode.setParam("aprt_type",params_da.intValue("aprt_type"))
+						accNode.setParam("aperture",params_da.doubleValue("aperture"))						
 					accNode.setParam("pos",node_pos)
 					accSeq.addNode(accNode)
 				else:
@@ -546,8 +549,8 @@ class SNS_LinacLatticeFactory():
 		params_da.setValue("mode",int(rf_gap.getParam("mode")))
 		params_da.setValue("phase","%7.3f"%(rf_gap.getParam("gap_phase")*180.0/math.pi))
 		if(rf_gap.hasParam("aprt_type")):
-			params_da.setValue("aprt_type",quad.getParam("aprt_type"))
-			params_da.setValue("aperture",quad.getParam("aperture"))		
+			params_da.setValue("aprt_type",rf_gap.getParam("aprt_type"))
+			params_da.setValue("aperture",rf_gap.getParam("aperture"))		
 		rf_gap_ttfs_da = rf_gap_da.createChild("TTFs")
 		rf_gap_ttfs_da.setValue("beta_max",rf_gap.getParam("beta_max"))
 		rf_gap_ttfs_da.setValue("beta_min",rf_gap.getParam("beta_min"))

@@ -10,15 +10,14 @@ import sys
 import os
 
 from orbit.py_linac.lattice import LinacApertureNode
-from orbit.py_linac.lattice import Quad
+from orbit.py_linac.lattice import Quad, AbstractRF_Gap
 from orbit.py_linac.overlapping_fields import OverlappingQuadsNode
 
-def Add_quad_apertures_to_lattice(accLattice):
+def Add_quad_apertures_to_lattice(accLattice,aprtNodes=[]):
 	"""
 	Function will add Aperture nodes at the entrance and exit of quads.
 	It returns the list of Aperture nodes.
 	"""
-	aprtNodes = []
 	node_pos_dict = accLattice.getNodePositionsDict()
 	quads = accLattice.getNodesOfClasses([Quad,OverlappingQuadsNode])
 	for node in quads:
@@ -73,6 +72,33 @@ def Add_quad_apertures_to_lattice(accLattice):
 						aprtNodes.append(apertureNodeAfter)
 	return aprtNodes
 	
+
+def Add_rfgap_apertures_to_lattice(accLattice,aprtNodes=[]):
+	"""
+	Function will add Aperture nodes at the entrance and exit of RF gap.
+	It returns the list of Aperture nodes.
+	"""
+	node_pos_dict = accLattice.getNodePositionsDict()
+	rfgaps = accLattice.getNodesOfClasses([AbstractRF_Gap,])
+	for node in rfgaps:
+		if(node.hasParam("aperture") and node.hasParam("aprt_type")):
+			shape = node.getParam("aprt_type")
+			a = node.getParam("aperture")
+			node_name = node.getName()
+			(posBefore, posAfter) = node_pos_dict[node]
+			apertureNodeBefore = LinacApertureNode(shape,a/2.0,a/2.0,posBefore)
+			apertureNodeAfter = LinacApertureNode(shape,a/2.0,a/2.0,posAfter)
+			apertureNodeBefore.setName(node_name+":AprtIn")
+			apertureNodeAfter.setName(node_name+":AprtOut")
+			apertureNodeBefore.setSequence(node.getSequence())
+			apertureNodeAfter.setSequence(node.getSequence())
+			node.addChildNode(apertureNodeBefore,node.ENTRANCE)
+			node.addChildNode(apertureNodeAfter,node.EXIT)
+			aprtNodes.append(apertureNodeBefore)
+			aprtNodes.append(apertureNodeAfter)
+	return aprtNodes
+
+
 def GetLostDistributionArr(aprtNodes,bunch_lost):
 	"""
 	Function returns the array with [aptrNode,sum_of_losses]
@@ -122,7 +148,7 @@ def GetLostDistributionArr(aprtNodes,bunch_lost):
 	return lossDist_arr
 			
 
-def AddScrapersAperturesToLattice(accLattice,node_name,x_size,y_size,aprtNodes):
+def AddScrapersAperturesToLattice(accLattice,node_name,x_size,y_size,aprtNodes=[]):
 	"""
 	Function will add the rectangular Aperture node (shape=3) at the node with a particular name.
 	Parameters x_size and y_size are full horizontal and vertical sizes of the aperture.

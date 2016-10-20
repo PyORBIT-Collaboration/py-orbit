@@ -3,12 +3,14 @@
 ##
 
 from apertures_additions_lib import Add_quad_apertures_to_lattice
+from apertures_additions_lib import Add_rfgap_apertures_to_lattice
 from apertures_additions_lib import GetLostDistributionArr
 from apertures_additions_lib import AddScrapersAperturesToLattice
 from sns_aperture_additions import AddMEBTChopperPlatesAperturesToSNS_Lattice
 
 __all__ = []
 __all__.append("Add_quad_apertures_to_lattice")
+__all__.append("Add_rfgap_apertures_to_lattice")
 __all__.append("GetLostDistributionArr")
 __all__.append("AddScrapersAperturesToLattice")
 __all__.append("AddMEBTChopperPlatesAperturesToSNS_Lattice")

@@ -370,7 +370,7 @@ double BunchTwissAnalysis::getEmittance(int ic)
 	double xp_dE_avg = this->getCorrelation(2*ic+1,5);	
 	double dE2_avg = fabs(this->getCorrelation(5,5));	
 	double emitt_rms;
-	if(ic==2){
+	if(ic==2 or dE2_avg==0){
 		emitt_rms = sqrt(fabs(x2_avg*xp2_avg - x_xp_avg*x_xp_avg));
 	} else {
 		emitt_rms = sqrt(fabs( (x2_avg - x_dE_avg*x_dE_avg/dE2_avg) * (xp2_avg - xp_dE_avg*xp_dE_avg/dE2_avg) 

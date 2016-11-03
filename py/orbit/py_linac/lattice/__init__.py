@@ -10,7 +10,7 @@ from LinacAccLatticeLib import LinacAccLattice, RF_Cavity, Sequence
 from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode
 from LinacAccNodes import MarkerLinacNode, Drift, Quad, AbstractRF_Gap, Bend
 from LinacAccNodes import DCorrectorH, DCorrectorV
-from LinacRfGapNodes import BaseRF_Gap
+from LinacRfGapNodes import BaseRF_Gap, AxisFieldRF_Gap
 from LinacApertureNodes import LinacApertureNode
 from LinacApertureNodes import CircleLinacApertureNode
 from LinacApertureNodes import EllipseLinacApertureNode
@@ -42,5 +42,7 @@ __all__.append("Sequence")
 __all__.append("LinacStructureTree")
 __all__.append("LinacStructureSeq")
 __all__.append("LinacStuctureNode")
+
 __all__.append("BaseRF_Gap")
+__all__.append("AxisFieldRF_Gap")
 

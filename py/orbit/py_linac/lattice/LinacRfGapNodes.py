@@ -5,19 +5,35 @@ The RF Cavities and gaps in them are different from the ring RF.
 
 import os
 import math
+import sys
 
-# import from orbit utilities
+#---- MPI module function and classes
+import orbit_mpi
+from orbit_mpi import mpi_comm
+from orbit_mpi import mpi_datatype
+from orbit_mpi import mpi_op
+
+# import from orbit Python utilities
 from orbit.utils import orbitFinalize
+from orbit.utils import phaseNearTargetPhase, phaseNearTargetPhaseDeg
+from orbit.utils import speed_of_light
+
+# import from orbit c++ utilities
 from orbit_utils import Polynomial
+from orbit_utils import Function
 
 # from LinacAccLattice import Sequence
 from LinacAccLatticeLib import Sequence
+from LinacAccNodes import Drift, BaseLinacNode
 
 # from linac import the RF gap classes
-from linac import BaseRfGap, MatrixRfGap, RfGapTTF
+from linac import BaseRfGap, MatrixRfGap, RfGapTTF, RfGapThreePointTTF
 
 # The abstract RF gap import
 from LinacAccNodes import AbstractRF_Gap
+
+from bunch import Bunch
+
 
 class BaseRF_Gap(AbstractRF_Gap):
 	"""
@@ -38,7 +54,7 @@ class BaseRF_Gap(AbstractRF_Gap):
 		Constructor for the simplest RF gap. 
 		E0L and E0TL parameters are in GeV. Phases are in radians.
 		"""
-		AbstractRF_Gap.__init__(self,name)
+		AbstractRF_Gap.__init__(self,name)		
 		self.addParam("E0TL",0.)
 		self.addParam("mode",0.)		
 		self.addParam("gap_phase",0.)
@@ -60,15 +76,19 @@ class BaseRF_Gap(AbstractRF_Gap):
 		self.addParam("EzFile","no_file")
 		self.setType("baserfgap")	
 		self.__isFirstGap = False
-		self.cppGapModel = MatrixRfGap()
-		self.cppGapModel = BaseRfGap()
+		#---- by default we use the TTF model 
+		#---- which is a Transit-Time-Factor model from Parmila
+		#self.cppGapModel = MatrixRfGap()
+		#self.cppGapModel = BaseRfGap()
 		self.cppGapModel = RfGapTTF()
 
 	def setnParts(self, n = 1):
 		"""
-		Method. Sets the number of body parts of the node. For the RF gap it will be only 1.
+		Method. Sets the number of body parts of the node. 
+		For the RF gap with zero length it will be only 1.
 		"""
 		BaseLinacNode.setnParts(self,1)
+
 
 	def setCppGapModel(self, cppGapModel = MatrixRfGap()):
 		"""
@@ -79,12 +99,12 @@ class BaseRF_Gap(AbstractRF_Gap):
 	
 	def initialize(self):
 		"""
-		The Ring RF TEAPOT class implementation
+		The BaseRF_Gap  class implementation
 		of the AccNode class initialize() method.
 		"""
 		nParts = self.getnParts()
 		if(nParts != 1):
-			msg = "The simple Rf gap should have 1 parts!"
+			msg = "The BaseRF_Gap RF gap should have 1 parts!"
 			msg = msg + os.linesep
 			msg = msg + "Method initialize():"
 			msg = msg + os.linesep
@@ -97,12 +117,6 @@ class BaseRF_Gap(AbstractRF_Gap):
 			msg = msg + "lenght =" + str(self.getLength())
 			orbitFinalize(msg)
 		self.setLength(0.,0)
-
-	def isRFGap(self):
-		"""
-		Returns True.
-		"""
-		return True
 
 	def isFirstRFGap(self):
 		"""
@@ -247,7 +261,9 @@ class BaseRF_Gap(AbstractRF_Gap):
 
 	def ttf_track_bunch__(self,bunch,frequency,E0L,phase):
 		"""
-		Tracks the bunch through the TTF thin gap model. 
+		Tracks the bunch through the TTF thin gap model. This private method was 
+		introduced to to check the beta TTF limits in the polynomial representation
+		of T,T',S,and S' functions of the relativistic beta. 
 		"""
 		beta = bunch.getSyncParticle().beta()
 		beta_min = self.getParam("beta_min")	
@@ -278,4 +294,521 @@ class BaseRF_Gap(AbstractRF_Gap):
 			msg = msg + os.linesep				
 			orbitFinalize(msg)				
 		self.cppGapModel.trackBunch(bunch,frequency,E0L,phase,self.polyT,self.polyS,self.polyTp,self.polySp)
+
+#-----------------------------------------------------------------------
+#
+# This part of the package is for classes related to the axis RF fields
+#
+#------------------------------------------------------------------------
+
+class RF_AxisFieldsStore:
+	
+	"""
+	The dictionary with the axis field Functions 
+	with the input file names as keys.
+	This is a collection of the static methods.
+	"""
+	
+	#---- static_axis_field_dict[file_name] = Function
+	static_axis_field_dict = {}
+	
+	def __init__(self):
+		pass
+	
+	@classmethod
+	def addAxisFieldsForAccSeq(cls,accLattice,accSeqNamesList,dir_location = ""):
+		"""
+		This method add to the store the axis RF fields of all RF gap nodes 
+		(BaseRF_Gap class instance with "EzFile" parameter) from the set of accSeqences.
+		The dir_location string variable will be added to the rf_gap.getParam("EzFile") to get
+		the file names.
+		"""		
+		for accNamesSeq in accSeqList:
+			accSeq = accLattice.getSequence(accNamesSeq)
+			cavs = accSeq.getRF_Cavities()
+			for cav in cavs:
+				rf_gaps = cav.getRF_GapNodes()
+				for rf_gap in rf_gaps:
+					cls.addAxisField(rf_gap.getParam("EzFile"),dir_location)
+	
+	@classmethod
+	def addAxisField(cls,fl_name,dir_location = ""):
+		"""
+		This method add to the store the axis RF field for the RF gap node. 
+		The dir_location string variable will be added to the fl_name to get
+		the file name.
+		Returns the axis RF field function.
+		"""
+		if(cls.static_axis_field_dict.has_key(fl_name)): 
+			return cls.static_axis_field_dict[fl_name]
+		comm = orbit_mpi.mpi_comm.MPI_COMM_WORLD
+		data_type = mpi_datatype.MPI_DOUBLE
+		rank = orbit_mpi.MPI_Comm_rank(comm)
+		main_rank = 0
+		x_arr = []
+		y_arr = []
+		if(rank == 0):
+			fl_in = open(dir_location + fl_name,"r")
+			lns = fl_in.readlines()
+			fl_in.close()
+			for ln in lns:
+				res_arr = ln.split()
+				if(len(res_arr) == 2):
+					x = float(res_arr[0])
+					y = float(res_arr[1])
+					x_arr.append(x)		
+					y_arr.append(y)	
+		x_arr = orbit_mpi.MPI_Bcast(x_arr,data_type,main_rank,comm)
+		y_arr = orbit_mpi.MPI_Bcast(y_arr,data_type,main_rank,comm)
+		function = Function()
+		for ind in range(len(x_arr)):
+			function.add(x_arr[ind],y_arr[ind])
+		cls.static_axis_field_dict[fl_name] = function
+		return function
+		
+	@classmethod
+	def getAxisFieldFunction(cls,fl_name):
+		"""
+		This method returns the Function with the RF axis field for a particular
+		name of the file. If store does not have this function it will return
+		the None object.
+		"""
+		if(cls.static_axis_field_dict.has_key(fl_name)):
+			return cls.static_axis_field_dict[fl_name]
+		else:
+			return None
+
+	@classmethod
+	def getSize(cls):
+		"""
+		This method returns the number of Functions with the RF axis fields in this
+		store.
+		"""
+		return len(cls.static_axis_field_dict.keys())
+		
+		
+class AxisFieldRF_Gap(AbstractRF_Gap):
+	"""
+	The RF gap representation that uses the RF axis field. User have to provide the 
+	input file with this field. This function should be normalized to the integral of 1.
+	The absolute value of the field will be calculated as cavAmp*E0L*Field(z).
+	The three point tracker RfGapThreePointTTF will be used to track the Bunch instance.
+	The  longitudinal step during the tracking z_step should be defined externally. The 
+	default value is 1 cm. The minimal and maximal longitudinal coordinates z_min
+	and z_max could be used directly from the axis field file or can be corrected 
+	externally to avoid overlapping of electric fields from neighboring gaps.
+	The instance of this class has the reference to the BaseRF_Gap instance and uses 
+	it as a source of information.
+	"""
+	
+	#---- static test bunch for the design phase calculation 
+	static_test_bunch = Bunch()
+	
+	#---- static drift to handle the bunch advance
+	static_drift = Drift()
+	
+	def __init__(self, baserf_gap):
+		"""
+		Constructor for the axis field RF gap. 
+		E0L parameter is in GeV. Phases are in radians.
+		"""
+		AbstractRF_Gap.__init__(self,baserf_gap.getName())
+		self.setAsFirstRFGap(baserf_gap.isFirstRFGap())
+		self.baserf_gap = baserf_gap
+		self.setType("axis_field_rfgap")			
+		self.addParam("E0TL",self.baserf_gap.getParam("E0TL"))
+		self.addParam("mode",self.baserf_gap.getParam("mode"))
+		self.addParam("gap_phase",self.baserf_gap.getParam("gap_phase"))
+		self.addParam("rfCavity",self.baserf_gap.getParam("rfCavity"))
+		self.addParam("E0L",self.baserf_gap.getParam("E0L"))
+		self.addParam("EzFile",self.baserf_gap.getParam("EzFile"))
+		self.axis_field_func = None
+		self.z_step = 0.01
+		self.z_min = 0.
+		self.z_max = 0.
+		self.z_tolerance = 0.000001    # in meters
+		self.phase_tolerance = 0.001   # in degrees
+		#---- gap_phase_vs_z_arr keeps [pos,phase] pairs after the tracking
+		self.gap_phase_vs_z_arr = []
+		#---- The position of the particle during the run. 
+		#---- It is used for the path length accounting.
+		self.part_pos = 0.
+		#---- The RF gap model - three points model
+		self.cppGapModel = RfGapThreePointTTF()
+
+	def readAxisFieldFile(self,dir_location = "", file_name = "", z_step = 0.01):
+		"""
+		Method. Reads the axis field from the file. User have to call this method.
+		There is no other source of information about the axis field.
+		"""
+		if(file_name == ""):
+			self.axis_field_func = RF_AxisFieldsStore.addAxisField(self.baserf_gap.getParam("EzFile"),dir_location)
+		else:
+			self.axis_field_func = RF_AxisFieldsStore.addAxisField(file_name,dir_location)
+		z_min = self.axis_field_func.getMinX()
+		z_max = self.axis_field_func.getMaxX()
+		self.z_step = z_step
+		self.setZ_Min_Max(z_min,z_max)
+		
+	def getZ_Step(self):
+		"""
+		Returns the longitudinal step during the tracking.
+		"""
+		return self.z_step
+		
+	def setZ_Step(self,z_step):
+		if(self.axis_field_func == None):
+			msg = "Class AxisFieldRF_Gap: You have to get thew axis field from file first!"
+			msg = msg + os.linesep
+			msg = "Call readAxisFieldFile(dir_location,file_name) method first!"
+			orbitFinalize(msg)				
+		length = self.getLength()
+		nParts = int(length*1.0000001/z_step)
+		if(nParts < 1): nParts = 1
+		self.z_step = length/nParts
+		#---- this will set the even distribution of the lengths between parts
+		self.setnParts(nParts)
+
+	def getZ_Min_Max(self):
+		"""
+		Returns the tuple (z_min,z_max) with the limits of the axis field.
+		These parameters define the length of the node. The center of the node
+		is at 0.
+		"""
+		return (self.z_min,self.z_max)
+
+	def setZ_Min_Max(self,z_min,z_max):
+		"""
+		Sets the actual longitudinal sizes of the node. It is used for small correction
+		of the length to avoid fields overlapping from neighbouring gaps.
+		"""
+		self.z_min = z_min
+		self.z_max = z_max
+		length = self.z_max - self.z_min
+		self.setLength(length)
+		self.setZ_Step(self.z_step)
+
+	def initialize(self):
+		"""
+		The AxisFieldRF_Gap class implementation
+		of the AccNode class initialize() method.
+		"""
+		n_children = self.getNumberOfChildren()
+		if(n_children > 0):
+			msg = "The AxisFieldRF_Gap cannot have child nodes at the initialization moment!"
+			msg = msg + os.linesep
+			msg = msg + "Method AxisFieldRF_Gap initialize():"
+			msg = msg + os.linesep
+			msg = msg + "Name of element=" + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element=" + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "nParts =" + str(nParts)
+			msg = msg + os.linesep
+			msg = msg + "lenght =" + str(self.getLength())
+			orbitFinalize(msg)	
+
+	def getRF_Cavity(self):
+		"""
+		Returns the parent RF Cavity.
+		"""
+		return self.getParam("rfCavity")
+	
+	def setGapPhase(self, gap_phase):
+		"""
+		Sets the rf gap phase.
+		"""
+		self.setParam("gap_phase",gap_phase)
+
+	def getGapPhase(self):
+		"""
+		Returns the rf gap phase.
+		"""
+		return self.getParam("gap_phase")
+				
+	def track(self, paramsDict):
+		"""
+		The AxisFieldRF_Gap class implementation of
+		the AccNode class track(probe) method.
+		User have to track the design bunch first to setup all gaps arrival time. 
+		"""
+		rfCavity = self.getRF_Cavity()
+		if(not rfCavity.isDesignSetUp()):
+			sequence = self.getSequence()
+			accLattice = sequence.getLinacAccLattice()
+			msg  = "The AxisFieldRF_Gap class. "
+			msg += "You have to run trackDesign on the LinacAccLattice"
+			msg += "first to initialize all RF Cavities' phases!"
+			msg += os.linesep
+			if(accLattice != None):				
+				msg = msg + "Lattice =" + accLattice.getName()				
+				msg = msg + os.linesep
+			if(sequence != None):				
+				msg = msg + "Sequence =" + sequence.getName()				
+				msg = msg + os.linesep
+			msg = msg + "RF Cavity =" + rfCavity.getName()				
+			msg = msg + os.linesep
+			msg = msg + "Name of element=" + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element=" + self.getType()
+			msg = msg + os.linesep
+			orbitFinalize(msg)
+		#-----------------------------------------
+		nParts = self.getnParts()
+		index = self.getActivePartIndex()
+		part_length = self.getLength(index)		
+		bunch = paramsDict["bunch"]		
+		syncPart = bunch.getSyncParticle()	
+		eKin_in = syncPart.kinEnergy()
+		E0L = 1.0e+9*self.getParam("E0L")
+		modePhase = self.getParam("mode")*math.pi
+		frequency = rfCavity.getFrequency()	
+		rf_ampl = rfCavity.getAmp()
+		arrival_time = syncPart.time()
+		designArrivalTime = rfCavity.getDesignArrivalTime()
+		phase_shift = rfCavity.getPhase() - rfCavity.getDesignPhase()
+		phase = rfCavity.getFirstGapEtnrancePhase() + phase_shift
+		#----------------------------------------
+		phase = math.fmod(frequency*(arrival_time - designArrivalTime)*2.0*math.pi + phase,2.0*math.pi)		
+		if(index == 0):
+			self.part_pos = self.z_min 
+			self.gap_phase_vs_z_arr = [[self.part_pos,phase],]
+		zm = self.part_pos
+		z0 = zm + part_length/2
+		zp = z0 + part_length/2
+		Em = E0L*rf_ampl*self.axis_field_func.getY(zm)
+		E0 = E0L*rf_ampl*self.axis_field_func.getY(z0)
+		Ep = E0L*rf_ampl*self.axis_field_func.getY(zp)			
+		#---- advance the particle position
+		AxisFieldRF_Gap.static_drift.setLength(part_length/2)
+		AxisFieldRF_Gap.static_drift.trackBunch(bunch)		
+		self.part_pos += part_length/2	
+		#call rf gap model to track the bunch
+		time_middle_gap = syncPart.time() - arrival_time
+		delta_phase = math.fmod(2*math.pi*time_middle_gap*frequency,2.0*math.pi)
+		self.gap_phase_vs_z_arr.append([self.part_pos,phase+delta_phase])
+		#---- this part is the debugging ---START---
+		#eKin_out = syncPart.kinEnergy()
+		#s  = "debug pos[mm]= %7.2f "%(self.part_pos*1000.)
+		#s += " ekin= %9.6f"%(syncPart.kinEnergy()*1000.)
+		#s += " phase = %9.2f "%(phaseNearTargetPhaseDeg((phase+delta_phase)*180./math.pi,0.))
+		#s += " dE= %9.6f "%((eKin_out-eKin_in)*1000.)		
+		#print s
+		#---- this part is the debugging ---STOP---
+		self.cppGapModel.trackBunch(bunch,part_length/2,Em,E0,Ep,frequency,phase+delta_phase+modePhase)
+		AxisFieldRF_Gap.static_drift.trackBunch(bunch)
+		#---- advance the particle position
+		self.part_pos += part_length/2
+		time_middle_gap = syncPart.time() - arrival_time
+		delta_phase = math.fmod(2*math.pi*time_middle_gap*frequency,2.0*math.pi)
+		self.gap_phase_vs_z_arr.append([self.part_pos,phase+delta_phase])
+		#---- this part is the debugging ---START---
+		#eKin_out = syncPart.kinEnergy()
+		#s  = "debug pos[mm]= %7.2f "%(self.part_pos*1000.)
+		#s += " ekin= %9.6f"%(syncPart.kinEnergy()*1000.)
+		#s += " phase = %9.2f "%(phaseNearTargetPhaseDeg((phase+delta_phase)*180./math.pi,0.))
+		#s += " dE= %9.6f "%((eKin_out-eKin_in)*1000.)
+		#print s
+		#---- this part is the debugging ---STOP---
+		#---- Calculate the phase at the center
+		if(index == (nParts - 1)):
+			pos_old = self.gap_phase_vs_z_arr[0][0]			
+			phase_gap = self.gap_phase_vs_z_arr[0][1]
+			ind_min = -1
+			for ind in range(1,len(self.gap_phase_vs_z_arr)):
+				[pos,phase_gap] = self.gap_phase_vs_z_arr[ind]
+				if(math.fabs(pos) >= math.fabs(pos_old)):
+					ind_min = ind -1
+					phase_gap = self.gap_phase_vs_z_arr[ind_min][1]
+					phase_gap = phaseNearTargetPhase(phase_gap,0.)
+					self.gap_phase_vs_z_arr[ind_min][1] = phase_gap
+					break
+				pos_old = pos
+			self.setGapPhase(phase_gap)
+			#---- wrap all gap part's phases around the central one
+			if(ind_min > 0):
+				for ind in range(ind_min-1,-1,-1):
+					[pos,phase_gap] = self.gap_phase_vs_z_arr[ind]
+					[pos,phase_gap1] = self.gap_phase_vs_z_arr[ind+1]
+					self.gap_phase_vs_z_arr[ind][1] = phaseNearTargetPhase(phase_gap,phase_gap1)
+				for ind in range(ind_min+1,len(self.gap_phase_vs_z_arr)):
+					[pos,phase_gap] = self.gap_phase_vs_z_arr[ind]
+					[pos,phase_gap1] = self.gap_phase_vs_z_arr[ind-1]				
+					self.gap_phase_vs_z_arr[ind][1] = phaseNearTargetPhase(phase_gap,phase_gap1)
+
+	def trackDesign(self, paramsDict):
+		"""
+		The method is tracking the design synchronous particle through the RF Gap.
+		If the gap is a first gap in the cavity we put the arrival time as 
+		a cavity parameter. The pair of the cavity design phase and this arrival time 
+		at the first gap are used during the real bunch tracking.
+		"""
+		nParts = self.getnParts()
+		index = self.getActivePartIndex()
+		part_length = self.getLength(index)
+		bunch = paramsDict["bunch"]
+		syncPart = bunch.getSyncParticle()
+		eKin_in = syncPart.kinEnergy()
+		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
+		E0L = 1.0e+9*self.getParam("E0L")
+		modePhase = self.getParam("mode")*math.pi
+		rfCavity = self.getRF_Cavity()
+		rf_ampl = rfCavity.getDesignAmp()
+		arrival_time = syncPart.time()
+		frequency = rfCavity.getFrequency()
+		phase = rfCavity.getFirstGapEtnrancePhase()
+		#---- calculate the entance phase
+		if(self.isFirstRFGap() and index == 0):
+			rfCavity.setDesignArrivalTime(arrival_time)
+			phase = self.__calculate_first_part_phase(bunch)
+			rfCavity.setFirstGapEtnrancePhase(phase)
+			rfCavity.setFirstGapEtnranceDesignPhase(phase)
+			rfCavity.setDesignSetUp(True)		
+			rfCavity._setDesignPhase(rfCavity.getPhase())
+			rfCavity._setDesignAmp(rfCavity.getAmp())
+			#print "debug firs gap first part phase=",phase*180./math.pi," arr time=",arrival_time
+		else:
+			first_gap_arr_time = rfCavity.getDesignArrivalTime()
+			#print "debug name=",self.getName()," delta_phase=",frequency*(arrival_time - first_gap_arr_time)*360.0," phase=",phase*180/math.pi
+			phase = math.fmod(frequency*(arrival_time - first_gap_arr_time)*2.0*math.pi+phase,2.0*math.pi)		
+		#print "debug design name=",self.getName()," arr_time=",arrival_time," phase=",phase*180./math.pi," E0TL=",E0TL*1.0e+3," freq=",frequency
+		if(index == 0):
+			self.part_pos = self.z_min 
+			self.gap_phase_vs_z_arr = [[self.part_pos,phase],]
+		zm = self.part_pos
+		z0 = zm + part_length/2
+		zp = z0 + part_length/2
+		Em = E0L*rf_ampl*self.axis_field_func.getY(zm)
+		E0 = E0L*rf_ampl*self.axis_field_func.getY(z0)
+		Ep = E0L*rf_ampl*self.axis_field_func.getY(zp)			
+		#---- advance the particle position
+		AxisFieldRF_Gap.static_drift.setLength(part_length/2)
+		AxisFieldRF_Gap.static_drift.trackBunch(bunch)		
+		self.part_pos += part_length/2	
+		#call rf gap model to track the bunch
+		time_middle_gap = syncPart.time() - arrival_time
+		delta_phase = math.fmod(2*math.pi*time_middle_gap*frequency,2.0*math.pi)
+		self.gap_phase_vs_z_arr.append([self.part_pos,phase+delta_phase])
+		#---- this part is the debugging ---START---
+		#eKin_out = syncPart.kinEnergy()
+		#s  = "debug pos[mm]= %7.2f "%(self.part_pos*1000.)
+		#s += " ekin= %9.6f"%(syncPart.kinEnergy()*1000.)
+		#s += " phase = %9.2f "%(phaseNearTargetPhaseDeg((phase+delta_phase)*180./math.pi,0.))
+		#s += " dE= %9.6f "%((eKin_out-eKin_in)*1000.)		
+		#print s
+		#---- this part is the debugging ---STOP---
+		self.cppGapModel.trackBunch(bunch,part_length/2,Em,E0,Ep,frequency,phase+delta_phase+modePhase)
+		AxisFieldRF_Gap.static_drift.trackBunch(bunch)
+		#---- advance the particle position
+		self.part_pos += part_length/2
+		time_middle_gap = syncPart.time() - arrival_time
+		delta_phase = math.fmod(2*math.pi*time_middle_gap*frequency,2.0*math.pi)
+		self.gap_phase_vs_z_arr.append([self.part_pos,phase+delta_phase])
+		#---- this part is the debugging ---START---
+		#eKin_out = syncPart.kinEnergy()
+		#s  = "debug pos[mm]= %7.2f "%(self.part_pos*1000.)
+		#s += " ekin= %9.6f"%(syncPart.kinEnergy()*1000.)
+		#s += " phase = %9.2f "%(phaseNearTargetPhaseDeg((phase+delta_phase)*180./math.pi,0.))
+		#s += " dE= %9.6f "%((eKin_out-eKin_in)*1000.)
+		#print s
+		#---- this part is the debugging ---STOP---
+		#---- Calculate the phase at the center
+		if(index == (nParts - 1)):
+			pos_old = self.gap_phase_vs_z_arr[0][0]			
+			phase_gap = self.gap_phase_vs_z_arr[0][1]
+			ind_min = -1
+			for ind in range(1,len(self.gap_phase_vs_z_arr)):
+				[pos,phase_gap] = self.gap_phase_vs_z_arr[ind]
+				if(math.fabs(pos) >= math.fabs(pos_old)):
+					ind_min = ind -1
+					phase_gap = self.gap_phase_vs_z_arr[ind_min][1]
+					phase_gap = phaseNearTargetPhase(phase_gap,0.)
+					self.gap_phase_vs_z_arr[ind_min][1] = phase_gap
+					break
+				pos_old = pos
+			self.setGapPhase(phase_gap)
+			#---- wrap all gap part's phases around the central one
+			if(ind_min > 0):
+				for ind in range(ind_min-1,-1,-1):
+					[pos,phase_gap] = self.gap_phase_vs_z_arr[ind]
+					[pos,phase_gap1] = self.gap_phase_vs_z_arr[ind+1]
+					self.gap_phase_vs_z_arr[ind][1] = phaseNearTargetPhase(phase_gap,phase_gap1)
+				for ind in range(ind_min+1,len(self.gap_phase_vs_z_arr)):
+					[pos,phase_gap] = self.gap_phase_vs_z_arr[ind]
+					[pos,phase_gap1] = self.gap_phase_vs_z_arr[ind-1]				
+					self.gap_phase_vs_z_arr[ind][1] = phaseNearTargetPhase(phase_gap,phase_gap1)
+
+	def __calculate_first_part_phase(self,bunch_in):
+		rfCavity = self.getRF_Cavity()
+		#---- the design phase at the center of the RF gap 
+		#---- (this is from a thin gap approach)
+		frequency = rfCavity.getFrequency()
+		modePhase = self.getParam("mode")*math.pi
+		phase_cavity = rfCavity.getPhase()
+		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
+		E0L_local = 1.0e+9*rfCavity.getAmp()*self.getParam("E0L")		
+		cav_ampl = rfCavity.getAmp()
+		#---- we have to find the phase_start 
+		#---- which is the phase at the distance z_min before the gap center
+		#---- z_min by defenition is negative
+		bunch = AxisFieldRF_Gap.static_test_bunch
+		bunch_in.copyEmptyBunchTo(bunch)
+		syncPart = bunch.getSyncParticle()
+		syncPart.time(0.)
+		eKin_init = syncPart.kinEnergy()		
+		#print "debug eKin[MeV]= %9.5f"%(syncPart.kinEnergy()*1000.)
+		beta = syncPart.beta()
+		phase_adv = 2.0*math.pi*frequency*math.fabs(self.z_min)/(beta*speed_of_light)
+		#print "debug phase diff at start=",phase_adv*180./math.pi
+		phase_start = phaseNearTargetPhase(phase_cavity - phase_adv,0.) + modePhase
+		phase_cavity_new = phase_cavity + 10*self.phase_tolerance
+		while(math.fabs(phase_cavity_new-phase_cavity) > self.phase_tolerance*math.pi/180.):
+			bunch_in.copyEmptyBunchTo(bunch)
+			syncPart.time(0.)
+			syncPart.kinEnergy(eKin_init)
+			z_old = self.z_min
+			z = self.z_min + self.z_step
+			while(z < 0.):
+				if((z+ self.z_step) > 0.): 
+					z = 0.
+					if(math.fabs(z - z_old) < self.z_tolerance):
+						break
+				half_step = (z - z_old)/2
+				zm = z_old
+				z0 = zm + half_step
+				zp = z0 + half_step
+				AxisFieldRF_Gap.static_drift.setLength(half_step)
+				AxisFieldRF_Gap.static_drift.trackBunch(bunch)
+				time_gap = syncPart.time()
+				delta_phase = 2*math.pi*time_gap*frequency 
+				Em = E0L_local*self.axis_field_func.getY(zm)
+				E0 = E0L_local*self.axis_field_func.getY(z0)
+				Ep = E0L_local*self.axis_field_func.getY(zp)
+				#s  = "debug z[mm]= %7.2f "%(z0*1000.)
+				#s += " ekin= %9.5f"%(syncPart.kinEnergy()*1000.)
+				#s += " phase = %9.2f "%(phaseNearTargetPhaseDeg((phase_start+delta_phase)*180./math.pi,0.))
+				#print s				
+				self.cppGapModel.trackBunch(bunch,half_step,Em,E0,Ep,frequency,phase_start+delta_phase+modePhase)
+				AxisFieldRF_Gap.static_drift.trackBunch(bunch)
+				#time_gap = syncPart.time()
+				#delta_phase = 2*math.pi*time_gap*frequency 				
+				#s  = "debug z[mm]= %7.2f "%(zp*1000.)
+				#s += " ekin= %9.5f"%(syncPart.kinEnergy()*1000.)
+				#s += " phase = %9.2f "%(phaseNearTargetPhaseDeg((phase_start+delta_phase)*180./math.pi,0.))
+				#print s				
+				z_old = z
+				z =  z_old + self.z_step
+			time_gap = syncPart.time()
+			delta_phase =2*math.pi*time_gap*frequency 
+			phase_cavity_new = phaseNearTargetPhase(phase_start+delta_phase,0.)
+			#s  = " phase_cavity = %8.4f "%(phase_cavity*180./math.pi)
+			#s += " new = %8.4f "%(phase_cavity_new *180./math.pi)
+			#s += " phase_start = %8.4f "%(phase_start*180./math.pi)
+			#s += " eKin[MeV]= %9.5f "%(syncPart.kinEnergy()*1000.)
+			#s += " dE[MeV]= %9.6f "%(syncPart.kinEnergy()*1000. - 2.5)
+			#print "debug "+s
+			phase_start -= 0.8*(phase_cavity_new - phase_cavity)
+		#---- undo the last change in the while loop
+		phase_start += 0.8*(phase_cavity_new - phase_cavity)
+		return phase_start
 

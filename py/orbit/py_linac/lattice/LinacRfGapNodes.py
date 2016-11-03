@@ -422,6 +422,11 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		self.addParam("rfCavity",self.baserf_gap.getParam("rfCavity"))
 		self.addParam("E0L",self.baserf_gap.getParam("E0L"))
 		self.addParam("EzFile",self.baserf_gap.getParam("EzFile"))
+		#---- aperture parameters
+		if(baserf_gap.hasParam("aperture") and baserf_gap.hasParam("aprt_type")):
+			self.addParam("aperture",baserf_gap.getParam("aperture"))
+			self.addParam("aprt_type",baserf_gap.getParam("aprt_type"))
+		#---- axis field related parameters
 		self.axis_field_func = None
 		self.z_step = 0.01
 		self.z_min = 0.
@@ -458,7 +463,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		
 	def setZ_Step(self,z_step):
 		if(self.axis_field_func == None):
-			msg = "Class AxisFieldRF_Gap: You have to get thew axis field from file first!"
+			msg = "Class AxisFieldRF_Gap: You have to get the axis field from a file first!"
 			msg = msg + os.linesep
 			msg = "Call readAxisFieldFile(dir_location,file_name) method first!"
 			orbitFinalize(msg)				
@@ -513,18 +518,6 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		Returns the parent RF Cavity.
 		"""
 		return self.getParam("rfCavity")
-	
-	def setGapPhase(self, gap_phase):
-		"""
-		Sets the rf gap phase.
-		"""
-		self.setParam("gap_phase",gap_phase)
-
-	def getGapPhase(self):
-		"""
-		Returns the rf gap phase.
-		"""
-		return self.getParam("gap_phase")
 				
 	def track(self, paramsDict):
 		"""

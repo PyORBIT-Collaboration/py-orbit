@@ -231,6 +231,10 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 		NamedObject.__init__(self, name)
 		ParamsDictObject.__init__(self)
 		self.__rfGaps = []
+		#---- firstGapEntrancePhase is used by gaps instead of phase in the case
+		#---- of non-zero length gaps
+		self.__firstGapEntrancePhase = 0.
+		self.__firstGapEntranceDesignPhase = 0.
 		self.addParam("frequency",0.)
 		self.addParam("phase",0.)
 		self.addParam("amp",1.)		
@@ -279,6 +283,22 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 	def getPhase(self):
 		""" Returns the phase for the first RF gap. """
 		return self.getParam("phase")
+
+	def setFirstGapEtnrancePhase(self,phase):
+		""" Sets the phase at the first gap entrance if Length_of_gap > 0. """
+		self.__firstGapEntrancePhase = phase
+		
+	def getFirstGapEtnrancePhase(self):
+		""" Returns the phase at the first gap entrance if Length_of_gap > 0. """
+		return self.__firstGapEntrancePhase
+
+	def setFirstGapEtnranceDesignPhase(self,phase):
+		""" Sets the design phase at the first gap entrance if Length_of_gap > 0. """
+		self.__firstGapEntranceDesignPhase = phase
+		
+	def getFirstGapEtnranceDesignPhase(self):
+		""" Returns the design phase at the first gap entrance if Length_of_gap > 0. """
+		return self.__firstGapEntranceDesignPhase
 
 	def setAmp(self,Amp):
 		""" Sets the Amp for RF cavity. """
@@ -331,6 +351,10 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 	def getAvgGapPhaseDeg(self):
 		""" Returns average phase in degrees for all RF gaps in the cavity """
 		return self.getAvgGapPhase()*180./math.pi	
+		
+	def removeAllGapNodes(self):
+		""" Remove all rf gaps from this cavity. """
+		self.__rfGaps = []
 		
 	def getRF_GapNodes(self):
 		""" Returns the array with rf gaps. """

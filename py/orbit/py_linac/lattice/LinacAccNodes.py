@@ -73,7 +73,22 @@ class BaseLinacNode(AccNodeBunchTracker):
 		of the bunch through this node
 		"""
 		self.track(paramsDict)
-
+		
+	def trackDesignBunch(self, bunch, paramsDict = {}, actionContainer = None):
+		"""
+		It tracks the bunch through the AccNodeBunchTracker instance.
+		"""
+		if(actionContainer == None): actionContainer = AccActionsContainer("Design Bunch Tracking")
+		paramsDict["bunch"] = bunch
+		
+		def trackDesign(paramsDict):
+			node = paramsDict["node"]
+			node.trackDesign(paramsDict)
+			
+		actionContainer.addAction(trackDesign, AccActionsContainer.BODY)
+		self.trackActions(actionContainer,paramsDict)
+		actionContainer.removeAction(trackDesign, AccActionsContainer.BODY)				
+		
 
 class MarkerLinacNode(BaseLinacNode):
 	"""

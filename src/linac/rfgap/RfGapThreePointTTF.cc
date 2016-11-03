@@ -75,9 +75,9 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
   double ttf_tp = Tpttf(dz,a_param,b_param,kappa_gap);
   double ttf_sp = Spttf(dz,a_param,b_param,kappa_gap);		
 	//the TTF RF gap has the phase correction to simplectic tracking. The delta time in seconds
-	double delta_phase = charge*E0L*kappa_gap*(ttf_t*sin(phase) + ttf_s*cos(phase))
+	double delta_phase = charge*E0L*kappa_gap*(ttf_tp*sin(phase) + ttf_sp*cos(phase))
 	                     /(mass*beta_gap*beta_gap*gamma_gap*gamma_gap*gamma_gap);
-	double delta_time = delta_phase/(2.0*OrbitConst::PI*rf_frequency);	
+	double delta_time = delta_phase/(2.0*OrbitConst::PI*rf_frequency);
 	syncPart->setTime(syncPart->getTime() + delta_time);
 	//now move to the end of the gap
 	double eKin_out = eKin_in + delta_eKin;

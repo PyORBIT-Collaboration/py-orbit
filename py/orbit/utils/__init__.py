@@ -17,6 +17,7 @@ from orbit.utils.TypedObject      import TypedObject
 from orbit.utils.ParamsDictObject import ParamsDictObject
 
 from orbit.utils.phaseOperations  import phaseNearTargetPhase, phaseNearTargetPhaseDeg
+from orbit.utils.consts import speed_of_light
 
 __all__ = []
 __all__.append("multiDimDoubleArray")
@@ -27,4 +28,5 @@ __all__.append("TypedObject")
 __all__.append("ParamsDictObject")
 __all__.append("phaseNearTargetPhase")
 __all__.append("phaseNearTargetPhaseDeg")
+__all__.append("speed_of_light")
 

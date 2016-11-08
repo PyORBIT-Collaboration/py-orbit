@@ -89,6 +89,25 @@ class LinacAccLattice(AccLattice):
 		orbitFinalize(msg)			
 		return self._getSubLattice(LinacAccLattice(),index_start,index_stop)
 
+	def trackActions(self, actionsContainer, paramsDict = {}, index_start = -1, index_stop = -1):
+		"""
+		Method. Tracks the actions through all nodes in the lattice. The indexes are inclusive.
+		The method from the parent class was overloaded to provide the ability to stop tracking
+		if necessary. In the linac, the synchronous particle could start to move backwards in the lattice
+		because of the RF parameters are far away from the design values (acceptance scans).
+		"""
+		paramsDict["lattice"] = self
+		paramsDict["actions"] = actionsContainer
+		paramsDict["stop tracking"] = False
+		if(not paramsDict.has_key("path_length")): paramsDict["path_length"] = 0.
+		if(index_start < 0): index_start = 0
+		if(index_stop < 0): index_stop = len(self.__children) - 1 		
+		for node in self.__children[index_start:index_stop+1]:
+			if(paramsDict["stop tracking"]): break
+			paramsDict["node"] = node
+			paramsDict["parentNode"] = self
+			node.trackActions(actionsContainer, paramsDict)
+
 	def trackBunch(self, bunch, paramsDict = None, actionContainer = None, index_start = -1, index_stop = -1):
 		"""
 		It tracks the bunch through the lattice.

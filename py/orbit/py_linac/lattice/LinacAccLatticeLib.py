@@ -101,8 +101,8 @@ class LinacAccLattice(AccLattice):
 		paramsDict["stop tracking"] = False
 		if(not paramsDict.has_key("path_length")): paramsDict["path_length"] = 0.
 		if(index_start < 0): index_start = 0
-		if(index_stop < 0): index_stop = len(self.__children) - 1 		
-		for node in self.__children[index_start:index_stop+1]:
+		if(index_stop < 0): index_stop = len(self.getNodes()) - 1 		
+		for node in self.getNodes()[index_start:index_stop+1]:
 			if(paramsDict["stop tracking"]): break
 			paramsDict["node"] = node
 			paramsDict["parentNode"] = self

@@ -377,7 +377,7 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 		
 	def getRF_GapNodes(self):
 		""" Returns the array with rf gaps. """
-		return self.__rfGaps[:]
+		return self.__rfGaps
 
 	
 class Sequence(NamedObject,ParamsDictObject):
@@ -410,6 +410,10 @@ class Sequence(NamedObject,ParamsDictObject):
 	def getNodes(self):
 		""" Returns the array with Linac Nodes. """
 		return self.__linacNodes
+		
+	def removeAllNodes(self):
+		""" Removes all nodes from the sequence. """
+		self.__linacNodes = []
 		
 	def setNodes(self, linacNodes):
 		""" Set a new set of Linac Nodes. """

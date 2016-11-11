@@ -422,6 +422,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		self.addParam("rfCavity",self.baserf_gap.getParam("rfCavity"))
 		self.addParam("E0L",self.baserf_gap.getParam("E0L"))
 		self.addParam("EzFile",self.baserf_gap.getParam("EzFile"))
+		self.setPosition(self.baserf_gap.getPosition())
 		#---- aperture parameters
 		if(baserf_gap.hasParam("aperture") and baserf_gap.hasParam("aprt_type")):
 			self.addParam("aperture",baserf_gap.getParam("aperture"))
@@ -492,26 +493,6 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		length = self.z_max - self.z_min
 		self.setLength(length)
 		self.setZ_Step(self.z_step)
-
-	def initialize(self):
-		"""
-		The AxisFieldRF_Gap class implementation
-		of the AccNode class initialize() method.
-		"""
-		n_children = self.getNumberOfChildren()
-		if(n_children > 0):
-			msg = "The AxisFieldRF_Gap cannot have child nodes at the initialization moment!"
-			msg = msg + os.linesep
-			msg = msg + "Method AxisFieldRF_Gap initialize():"
-			msg = msg + os.linesep
-			msg = msg + "Name of element=" + self.getName()
-			msg = msg + os.linesep
-			msg = msg + "Type of element=" + self.getType()
-			msg = msg + os.linesep
-			msg = msg + "nParts =" + str(nParts)
-			msg = msg + os.linesep
-			msg = msg + "lenght =" + str(self.getLength())
-			orbitFinalize(msg)	
 
 	def getRF_Cavity(self):
 		"""

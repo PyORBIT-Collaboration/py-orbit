@@ -83,7 +83,7 @@ int ORBIT_MPI_Get_processor_name(char *name, int* len){
 #else
   res = 1;
   *len = 0;
-  name = "no mpi";
+  name = ( char *) "no mpi";
 #endif
 
   return res;
@@ -224,7 +224,7 @@ int ORBIT_MPI_Comm_get_name(MPI_Comm comm, char *namep, int *reslen){
   res = MPI_Comm_get_name(comm, namep, reslen);
 #else
   res  = 1;
-	namep = "no mpi";
+	namep = ( char *) "no mpi";
 	*reslen = 6;
 #endif		
 	return res;	
@@ -520,6 +520,7 @@ int ORBIT_MPI_Allreduce(void* ar1, void* ar2, int n, MPI_Datatype data, MPI_Op o
 #if USE_MPI > 0
   res = MPI_Allreduce(ar1, ar2, n, data, op, comm);
 #else
+	memcpy(ar2, ar1, n*sizeof(ar1));
   res  = 1;
 #endif
   return res;

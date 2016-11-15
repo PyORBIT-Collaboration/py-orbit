@@ -11,7 +11,7 @@ int ORBIT_MPI_Init(int *len, char ***ch){
 #if USE_MPI > 0
   res = MPI_Init(len,ch);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;
 }
@@ -22,6 +22,7 @@ int ORBIT_MPI_Initialized(int *init){
 #if USE_MPI > 0
   res = MPI_Initialized(init);
 #else
+  res  = MPI_SUCCESS;
   *init = 0;
 #endif
   return res;
@@ -44,7 +45,7 @@ int ORBIT_MPI_Finalize(const char* message){
     res = MPI_Finalize();
   }
 #else
-  if(message != NULL){res  = 1;}
+  if(message != NULL){res  = MPI_SUCCESS;}
 #endif
   if(rank == 0){
     if(Py_IsInitialized()){
@@ -81,7 +82,7 @@ int ORBIT_MPI_Get_processor_name(char *name, int* len){
 #if USE_MPI > 0
   res = MPI_Get_processor_name(name,len);
 #else
-  res = 1;
+  res = MPI_SUCCESS;
   *len = 0;
   name = ( char *) "no mpi";
 #endif
@@ -121,7 +122,7 @@ int ORBIT_MPI_Comm_create(MPI_Comm comm, MPI_Group group, MPI_Comm *comm_out){
 #if USE_MPI > 0
   res = MPI_Comm_create(comm, group, comm_out);
 #else
-  res = 1;
+  res = MPI_SUCCESS;
 #endif
 
   return res;	
@@ -133,7 +134,7 @@ int ORBIT_MPI_Comm_group(MPI_Comm comm, MPI_Group *group ){
 #if USE_MPI > 0
   res = MPI_Comm_group(comm, group);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -144,7 +145,7 @@ int ORBIT_MPI_Comm_dup(MPI_Comm comm, MPI_Comm *comm_out){
 #if USE_MPI > 0
   res = MPI_Comm_dup(comm, comm_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -155,7 +156,7 @@ int ORBIT_MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *comm_out){
 #if USE_MPI > 0
   res = MPI_Comm_split(comm, color, key, comm_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -166,7 +167,7 @@ int ORBIT_MPI_Comm_remote_size(MPI_Comm comm, int *size){
 #if USE_MPI > 0
   res = MPI_Comm_remote_size(comm, size);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*size = 0;
 #endif		
 	return res;	
@@ -178,7 +179,7 @@ int ORBIT_MPI_Comm_remote_group(MPI_Comm comm, MPI_Group *group){
 #if USE_MPI > 0
   res = MPI_Comm_remote_group(comm, group);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;
 }
@@ -189,7 +190,7 @@ int ORBIT_MPI_Comm_test_inter(MPI_Comm comm, int *flag){
 #if USE_MPI > 0
   res = MPI_Comm_test_inter(comm, flag);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*flag = 0;
 #endif		
 	return res;
@@ -201,7 +202,7 @@ int ORBIT_MPI_Comm_compare(MPI_Comm  comm1, MPI_Comm  comm2, int *result){
 #if USE_MPI > 0
   res = MPI_Comm_compare(comm1, comm2, result);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -212,7 +213,7 @@ int ORBIT_MPI_Comm_set_name(MPI_Comm com, char *name){
 #if USE_MPI > 0
   res = MPI_Comm_set_name(com, name);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -223,7 +224,7 @@ int ORBIT_MPI_Comm_get_name(MPI_Comm comm, char *namep, int *reslen){
 #if USE_MPI > 0
   res = MPI_Comm_get_name(comm, namep, reslen);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	namep = ( char *) "no mpi";
 	*reslen = 6;
 #endif		
@@ -237,7 +238,7 @@ int ORBIT_MPI_Comm_size(MPI_Comm comm, int * size){
 #if USE_MPI > 0
   res = MPI_Comm_size(comm,size);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
   *size = 1;
 #endif
 
@@ -250,7 +251,7 @@ int ORBIT_MPI_Comm_rank(MPI_Comm comm, int * rank){
 #if USE_MPI > 0
   res = MPI_Comm_rank(comm,rank);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
   *rank = 0;
 #endif
 
@@ -263,7 +264,7 @@ int ORBIT_MPI_Comm_free(MPI_Comm* comm){
 #if USE_MPI > 0
   res = MPI_Comm_free(comm);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -278,7 +279,7 @@ int ORBIT_MPI_Group_incl(MPI_Group group, int n, int *ranks, MPI_Group *group_ou
 #if USE_MPI > 0
   res = MPI_Group_incl(group, n, ranks, group_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;		
 }
@@ -289,7 +290,7 @@ int ORBIT_MPI_Group_excl(MPI_Group group, int n, int *ranks, MPI_Group *newgroup
 #if USE_MPI > 0
   res = MPI_Group_excl(group, n, ranks, newgroup);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;		
 }
@@ -300,7 +301,7 @@ int ORBIT_MPI_Group_union(MPI_Group group1, MPI_Group group2, MPI_Group *group_o
 #if USE_MPI > 0
   res = MPI_Group_union(group1, group2, group_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -311,7 +312,7 @@ int ORBIT_MPI_Group_difference(MPI_Group group1, MPI_Group group2, MPI_Group *gr
 #if USE_MPI > 0
   res = MPI_Group_difference(group1, group2, group_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*group_out = MPI_GROUP_EMPTY;
 #endif		
 	return res;
@@ -323,7 +324,7 @@ int ORBIT_MPI_Group_intersection(MPI_Group group1, MPI_Group group2, MPI_Group *
 #if USE_MPI > 0
   res = MPI_Group_intersection(group1, group2, group_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*group_out = MPI_GROUP_EMPTY;
 #endif		
 	return res;
@@ -335,7 +336,7 @@ int ORBIT_MPI_Group_compare(MPI_Group group1, MPI_Group group2, int *result){
 #if USE_MPI > 0
   res = MPI_Group_compare(group1, group2, result);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*result = MPI_IDENT;
 #endif		
 	return res;		
@@ -347,7 +348,7 @@ int ORBIT_MPI_Group_translate_ranks(MPI_Group group_a, int n, int *ranks_a, MPI_
 #if USE_MPI > 0
   res = MPI_Group_translate_ranks(group_a, n, ranks_a, group_b, ranks_b);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;
 }
@@ -358,7 +359,7 @@ int ORBIT_MPI_Group_size(MPI_Group group, int *size){
 #if USE_MPI > 0
   res = MPI_Group_size(group, size);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*size = 1; 
 #endif		
 	return res;		
@@ -370,7 +371,7 @@ int ORBIT_MPI_Group_rank(MPI_Group group, int *rank){
 #if USE_MPI > 0
   res = MPI_Group_rank(group,rank);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*rank = 0; 
 #endif		
 	return res;		
@@ -382,7 +383,7 @@ int ORBIT_MPI_Group_free(MPI_Group* group){
 #if USE_MPI > 0
   res = MPI_Group_free(group);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -398,7 +399,7 @@ int ORBIT_MPI_Intercomm_create(MPI_Comm local_comm, int local_leader, MPI_Comm p
 #if USE_MPI > 0
   res = MPI_Intercomm_create(local_comm, local_leader, peer_comm, remote_leader, tag, comm_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -409,7 +410,7 @@ int ORBIT_MPI_Intercomm_merge(MPI_Comm comm, int high, MPI_Comm *comm_out){
 #if USE_MPI > 0
   res = MPI_Intercomm_merge(comm, high, comm_out);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif		
 	return res;	
 }
@@ -436,7 +437,7 @@ int ORBIT_MPI_Graphdims_get(MPI_Comm comm, int *nnodes, int *nedges){
 #if USE_MPI > 0
   res = MPI_Graphdims_get(comm, nnodes, nedges);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	*nnodes = 1;
 	*nedges = 1;
 #endif
@@ -449,7 +450,7 @@ int ORBIT_MPI_Graph_get(MPI_Comm comm, int maxindex, int maxedges, int *index, i
 #if USE_MPI > 0
   res = ORBIT_MPI_Graph_get(comm, maxindex, maxedges, index, edges);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;	
 }
@@ -460,7 +461,7 @@ int ORBIT_MPI_Graph_map(MPI_Comm comm_old, int nnodes, int *index, int *edges, i
 #if USE_MPI > 0
   res = MPI_Graph_map(comm_old, nnodes, index, edges, newrank);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;	
 }
@@ -471,7 +472,7 @@ int ORBIT_MPI_Graph_neighbors_count(MPI_Comm comm, int rank, int *nneighbors){
 #if USE_MPI > 0
   res = MPI_Graph_neighbors_count(comm, rank, nneighbors);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;		
 }
@@ -482,7 +483,7 @@ int ORBIT_MPI_Graph_neighbors(MPI_Comm comm, int rank, int maxneighbors, int *ne
 #if USE_MPI > 0
   res = MPI_Graph_neighbors(comm, rank, maxneighbors, neighbors);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;	
 }
@@ -497,7 +498,7 @@ int ORBIT_MPI_Barrier(MPI_Comm comm){
 #if USE_MPI > 0
   res = MPI_Barrier(comm);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;
 }
@@ -509,7 +510,7 @@ int ORBIT_MPI_Wait(MPI_Request  *request, MPI_Status *status){
 #if USE_MPI > 0
   res = MPI_Wait(request, status);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;
 }
@@ -521,7 +522,7 @@ int ORBIT_MPI_Allreduce(void* ar1, void* ar2, int n, MPI_Datatype data, MPI_Op o
   res = MPI_Allreduce(ar1, ar2, n, data, op, comm);
 #else
 	memcpy(ar2, ar1, n*sizeof(ar1));
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;
 }
@@ -532,7 +533,7 @@ int ORBIT_MPI_Bcast(void* ar, int n1, MPI_Datatype data, int n2, MPI_Comm comm )
 #if USE_MPI > 0
   res = MPI_Bcast(ar, n1, data, n2, comm ) ;
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;
 }
@@ -543,7 +544,7 @@ int ORBIT_MPI_Send(void* ar, int n1, MPI_Datatype data, int n2, int n3, MPI_Comm
 #if USE_MPI > 0
   res = MPI_Send(ar, n1, data, n2, n3, comm);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;
 }
@@ -554,7 +555,7 @@ int ORBIT_MPI_Recv(void* ar, int n1, MPI_Datatype data, int n2, int n3, MPI_Comm
 #if USE_MPI > 0
   res = MPI_Recv(ar, n1, data, n2, n3, comm, stat);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 #endif
   return res;
 }
@@ -565,7 +566,7 @@ int ORBIT_MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status){
 #if USE_MPI > 0
   res = MPI_Probe(source, tag, comm, status);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	status->count = 0;
 	status->MPI_SOURCE = source;
 	status->MPI_TAG = tag;
@@ -579,7 +580,7 @@ int ORBIT_MPI_Get_count(MPI_Status *status, MPI_Datatype datatype, int *count){
 #if USE_MPI > 0
   res = MPI_Get_count(status, datatype, count);
 #else
-  res  = 1;
+  res  = MPI_SUCCESS;
 	status->count = 0;
 #endif
   return res;		

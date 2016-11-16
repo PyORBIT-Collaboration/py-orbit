@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 #--------------------------------------------------------
-# This is a collection of classes for describing overlapping fields
-# At this moment we have only the model for overlapping quadrupole 
+# This is a collection of classes for describing quad 
+# overlapping fields.
+# Here we have only the model for overlapping quadrupole 
 # magnetic fields.
 #--------------------------------------------------------
 # The classes for the quads with the overlapping fields uses
@@ -463,7 +464,7 @@ class OverlappingQuadsController:
 		"""
 		return self.overlapping_quads
 		
-def getGlobalField(accLattice,z):
+def getGlobalQuadGradient(accLattice,z):
 	"""
 	The service function for the overlapping fields package.
 	Returns the quad field for certain position in the lattice that
@@ -478,7 +479,7 @@ def getGlobalField(accLattice,z):
 			if(isinstance(node,Quad)):
 				return node.getParam("dB/dr")
 			if(isinstance(node,OverlappingQuadsNode)):
-				G = node.getTotalField(z - posBefore)
+				G = node.getTotalField(z - posBefore)			
 				return G
 	return G
 

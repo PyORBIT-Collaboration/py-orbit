@@ -12,9 +12,9 @@ import sys
 import os
 
 
-from overlapping_fields_lib import EngeFunction
-from overlapping_fields_lib import OverlappingQuadsNode
-from overlapping_fields_lib import OverlappingQuadsController
+from overlapping_quad_fields_lib import EngeFunction
+from overlapping_quad_fields_lib import OverlappingQuadsNode
+from overlapping_quad_fields_lib import OverlappingQuadsController
 
 def SNS_MEBT_OverlappingQuadsSubst(accLattice):
 	quads = accLattice.getQuads()

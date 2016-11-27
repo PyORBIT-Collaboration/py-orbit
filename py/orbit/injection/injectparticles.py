@@ -93,15 +93,14 @@ class InjectParts:
 				else:
 					self.lostbunch.addParticle(x,px,y,py,z,dE)
 					#self.bunch.compress()
-
-		if(mpi_init):
-			ninjected = orbit_mpi.MPI_Bcast(ninjectedlocal, mpi_datatype.MPI_INT, 0, comm)
-			x_local = orbit_mpi.MPI_Bcast(x_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
-			xp_local = orbit_mpi.MPI_Bcast(xp_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
-			y_local = orbit_mpi.MPI_Bcast(y_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
-			yp_local = orbit_mpi.MPI_Bcast(yp_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
-			z_local = orbit_mpi.MPI_Bcast(z_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
-			dE_local = orbit_mpi.MPI_Bcast(dE_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
+		
+		ninjected = orbit_mpi.MPI_Bcast(ninjectedlocal, mpi_datatype.MPI_INT, 0, comm)
+		x_local = orbit_mpi.MPI_Bcast(x_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
+		xp_local = orbit_mpi.MPI_Bcast(xp_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
+		y_local = orbit_mpi.MPI_Bcast(y_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
+		yp_local = orbit_mpi.MPI_Bcast(yp_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
+		z_local = orbit_mpi.MPI_Bcast(z_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
+		dE_local = orbit_mpi.MPI_Bcast(dE_rank0, mpi_datatype.MPI_DOUBLE, 0, comm)
 
 		n_remainder = ninjected % numprocs;
 		n_inj_local = ninjected/numprocs;

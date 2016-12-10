@@ -1,7 +1,5 @@
-# pyORBIT-SNS-local 
-This repository contains a subset of [pyORBIT](https://sourceforge.net/projects/py-orbit/) to be used for linac simulations. 
+# Py-ORBIT  Installation
 
-# Installation
 Installation procedure requires building from source.
 All installation steps happen in command line (terminal).
 
@@ -25,7 +23,6 @@ sudo yum install python-devel mpich mpich-devel zlib-devel fftw-devel
 There are different package managers available.
 
 [MacPorts](https://www.macports.org)  requires rsync access which is most likely blocked by your firewall, which means `sudo port -v selfupdate` won't work. 
-You can setup a proxy as explained [here](https://ornl.service-now.com/its/kb_view_customer.do?sysparm_article=KB0100132).
 
 After syncing MacPorts run:
 ```shell
@@ -43,14 +40,14 @@ If you don't want to use standard librarues supplied by your distribution, you c
 
 ## 2. Clone the source code
 ```shell
-git clone  https://code-int.ornl.gov/pyORBIT/pyORBIT-SNS-local.git
+git clone https://github.com/PyORBIT-Collaboration/py-orbit.git
 ```
-Your source is now in the *pyORBIT-SNS-local* directory.
+Your source is now in the *py-orbit* directory.
 ## 3. Setup environment variables
 *setupEnevironment.sh* will try to figure out all paths.
 This should be sufficient for common Linux distributions. If you built the environment form source, use *customEnvironment.sh* instead.
 ```shell
-cd pyORBIT-SNS-local
+cd py-orbit
 source setupEnvironment.sh
 ```
 
@@ -88,8 +85,6 @@ This will launch *lattice_test* example on two MPI nodes.
 		  code should be placed into **./lib**.
 
 **./lib**  	- .so shared libraries to be used under pyORBIT interpreter.
-
-**./examples**	- samples of pyORBIT scripts.
 
 **./doc**		- pyORBIT documentation.
 

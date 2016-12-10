@@ -87,7 +87,8 @@ This will launch *lattice_test* example on two MPI nodes.
 **./lib**  	- .so shared libraries to be used under pyORBIT interpreter.
 
 **./doc**		- pyORBIT documentation.
+**./examples**		- pyORBIT examples.
 
 **./conf**		- configuration information.
 
-**./bin**		- a directory containing the pyORBIT executable.
+**./bin**		-  pyORBIT executables.

@@ -22,9 +22,12 @@ sudo yum install python-devel mpich mpich-devel zlib-devel fftw-devel
 ### Mac 
 There are different package managers available.
 
-[MacPorts](https://www.macports.org)  requires rsync access which is most likely blocked by your firewall, which means `sudo port -v selfupdate` won't work. 
+[MacPorts](https://www.macports.org)  
+Sync with package repository
 
-After syncing MacPorts run:
+`sudo port -v selfupdate`
+
+After syncing run:
 ```shell
 sudo port install fftw mpich
 ```
@@ -36,7 +39,7 @@ brew install fftw mpich
 ```
 
 ### Building the whole environment from source
-If you don't want to use standard librarues supplied by your distribution, you can build the whole environment from scratch. It is also possible to do this without having a root account. The process is described in detail [here](BuildFromSource.md).
+If you don't want to use standard libraries supplied by your distribution, you can build the whole environment from scratch. It is also possible to do this without having a root account. The process is described in detail [here](BuildFromSource.md).
 
 ## 2. Clone the source code
 ```shell

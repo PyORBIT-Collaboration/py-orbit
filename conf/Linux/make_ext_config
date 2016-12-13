@@ -1,7 +1,7 @@
 ######################################################################
-# Linux g++ for creation of ORBIT interpreter executable
+# Linux g++ for creation of shared libraries
 ######################################################################
 
 CXX             =  ${MPI_CPP}
-CXXFLAGS       += -g -O3 -DUSE_MPI=1
-LINKFLAGS      +=
+CXXFLAGS       += -g -fPIC -DUSE_MPI=1
+LINKFLAGS      += -fPIC -shared -Wl,--export-dynamic

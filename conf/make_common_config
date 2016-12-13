@@ -6,17 +6,19 @@
 
 LIBS += $(PYTHON_ROOT_LIB)
 #LIBS += -ldl -lreadline -ltermcap -lpthread -lutil -lm -Xlinker -export-dynamic
-LIBS += -ldl -lpthread -lutil -lm -Xlinker -export-dynamic
+LIBS += -ldl -lpthread -lutil -lm -Xlinker
 
 #FFTW library
-LIBS +=  -L${FFTW3_ROOT}/lib -lfftw3
+#LIBS +=  -L${FFTW3_ROOT}/lib -lfftw3 -lz
+LIBS += $(EXTRA_LIB) -lfftw3 -lz
+
 
 #-------------------------------------------------------------------------------
 # include file locations
 #-------------------------------------------------------------------------------
 
 #Headers for FFTW library
-INCLUDES += -I${FFTW3_ROOT}/include
+# INCLUDES += -I${FFTW3_ROOT}/include
 
 #-------------------------------------------------------------------------------
 # PYTHON_ROOT_INC - specify the location of the python header files.
@@ -24,4 +26,4 @@ INCLUDES += -I${FFTW3_ROOT}/include
 #   /usr/include/python$(PYTHON_VERSION)
 #-------------------------------------------------------------------------------
 
-INCLUDES += -I$(PYTHON_ROOT_INC)
+INCLUDES += -I$(PYTHON_ROOT_INC) $(EXTRA_INCLUDE)

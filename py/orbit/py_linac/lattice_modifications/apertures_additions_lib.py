@@ -10,8 +10,9 @@ import sys
 import os
 
 from orbit.py_linac.lattice import LinacApertureNode
-from orbit.py_linac.lattice import Quad, Drift, Bend, BaseRF_Gap
+from orbit.py_linac.lattice import Quad, Drift, Bend, BaseRF_Gap, AxisFieldRF_Gap
 from orbit.py_linac.overlapping_fields import OverlappingQuadsNode
+from orbit.py_linac.overlapping_fields import AxisField_and_Quad_RF_Gap
 
 def Add_quad_apertures_to_lattice(accLattice, aprtNodes=[]):
 	"""
@@ -42,12 +43,15 @@ def Add_quad_apertures_to_lattice(accLattice, aprtNodes=[]):
 			nParts = node.getnParts()
 			simple_quads = node.getQuads()
 			quad_centers = node.getCentersOfField()
-			node_start_pos = node_pos_dict[node][0]
+			(node_start_pos,node_end_pos) = node_pos_dict[node]
+			#print "debug ============= quad ovrlp node=",node.getName()," (node_start_pos,node_end_pos)=",(node_start_pos,node_end_pos)
 			pos_part_arr = []
 			s = 0.
 			for part_ind in range(nParts):
 				pos_part_arr.append(s)
 				s += node.getLength(part_ind)
+			#print "debug          len(pos_part_arr)=",len(pos_part_arr)," min=",pos_part_arr[0]," max=",pos_part_arr[len(pos_part_arr)-1]
+			#print "debug          quad_centers=",quad_centers
 			for quad_ind in range(len(simple_quads)):
 				quad = simple_quads[quad_ind]
 				shape = quad.getParam("aprt_type")
@@ -59,12 +63,14 @@ def Add_quad_apertures_to_lattice(accLattice, aprtNodes=[]):
 				posAfter = pos_z + length/2.
 				for part_ind in range(nParts-1):
 					if(posBefore >= pos_part_arr[part_ind] and posBefore < pos_part_arr[part_ind+1]):
+						#print "debug      before simple quad=",quad.getName()," (posBefore,posAfter)=",(posBefore,posAfter),"  part_ind=",part_ind
 						apertureNodeBefore = LinacApertureNode(shape,a/2.0,a/2.0,posBefore + node_start_pos)
 						apertureNodeBefore.setName(quad_name+":AprtIn")
 						apertureNodeBefore.setSequence(node.getSequence())
 						node.addChildNode(apertureNodeBefore,node.BODY,part_ind,node.BEFORE)
 						aprtNodes.append(apertureNodeBefore)
 					if(posAfter > pos_part_arr[part_ind] and posAfter <= pos_part_arr[part_ind+1]):
+						#print "debug      after  simple quad=",quad.getName()," (posBefore,posAfter)=",(posBefore,posAfter),"  part_ind=",part_ind
 						apertureNodeAfter = LinacApertureNode(shape,a/2.0,a/2.0,posAfter + node_start_pos)
 						apertureNodeAfter.setName(quad_name+":AprtOut")
 						apertureNodeAfter.setSequence(node.getSequence())
@@ -119,7 +125,7 @@ def Add_rfgap_apertures_to_lattice(accLattice, aprtNodes=[]):
 	It returns the list of Aperture nodes.
 	"""
 	node_pos_dict = accLattice.getNodePositionsDict()
-	rfgaps = accLattice.getNodesOfClasses([BaseRF_Gap,])
+	rfgaps = accLattice.getNodesOfClasses([BaseRF_Gap,AxisFieldRF_Gap,AxisField_and_Quad_RF_Gap])
 	for node in rfgaps:
 		if(node.hasParam("aperture") and node.hasParam("aprt_type")):
 			shape = node.getParam("aprt_type")

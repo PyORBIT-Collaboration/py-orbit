@@ -16,6 +16,11 @@
 import math
 import sys
 import os
+import time
+
+#---- MPI environment
+import orbit_mpi
+from orbit_mpi import mpi_comm
 
 # import from orbit Python utilities
 from orbit.utils import orbitFinalize
@@ -24,13 +29,18 @@ from orbit.py_linac.lattice import LinacApertureNode
 from orbit.py_linac.lattice import Quad, Drift
 from orbit.py_linac.lattice import BaseRF_Gap, AxisFieldRF_Gap
 
-def Replace_BaseRF_Gap_to_AxisField_Nodes(accLattice,dir_location="",accSeq_Names = [],cavs_Names = []):
+from orbit_utils import Function
+from orbit_utils import SplineCH
+from orbit_utils import GaussLegendreIntegrator
+
+
+def Replace_BaseRF_Gap_to_AxisField_Nodes(accLattice,z_step,dir_location="",accSeq_Names = [],cavs_Names = []):
 	"""
 	Function will replace  BaseRF_Gap nodes by AxisFieldRF_Gap.
 	It is assumed that AxisFieldRF_Gap nodes do not overlap any
 	others nodes (except Drifts).
 	The replacement will be performed only for specified sequences.
-	If the Base RF Gaps list is empty, all of them will be replaced!
+	If the cavities list is empty, all of them will be replaced!
 	If you want to replace the nodes in a particular cavity please specify it!
 	The dir_location is the location of the directory with the axis field
 	files.
@@ -88,7 +98,9 @@ def Replace_BaseRF_Gap_to_AxisField_Nodes(accLattice,dir_location="",accSeq_Name
 					orbitFinalize(msg)
 		#---- af_rf_gap_dict[rf_gap] = AxisFieldRF_Gap(rf_gap)
 		#---- rf_gap_ind_up_down_arr[[rf_gap,gap_ind,drift_down_ind,drift_up_ind],...]
-		(af_rf_gap_dict,rf_gap_ind_up_down_arr)	 = Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs)
+		(af_rf_gap_dict,rf_gap_ind_up_down_arr)	 = Make_AxisFieldRF_Gaps_and_Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs)
+		for rf_gap in af_rf_gap_dict.keys():
+			af_rf_gap_dict[rf_gap].setZ_Step(z_step)
 		#---- check that all elements covered by the axis rf fields are drifts
 		for [rf_gap,gap_ind,drift_down_ind,drift_up_ind] in rf_gap_ind_up_down_arr:
 			#print "debug rf_gap=",rf_gap.getName()," gap_ind=",gap_ind," drift_down_ind=",drift_down_ind," drift_up_ind=",drift_up_ind
@@ -143,6 +155,7 @@ def Replace_BaseRF_Gap_to_AxisField_Nodes(accLattice,dir_location="",accSeq_Name
 				delta = drift_pos_end - (gap_pos_start + z_min)
 				length = drift.getLength()
 				drift.setLength(length - delta)
+				drift.setPosition(drift.getPosition() - delta/2)
 			#------------------------------
 			drift = nodes[drift_up_ind]
 			"""
@@ -154,6 +167,7 @@ def Replace_BaseRF_Gap_to_AxisField_Nodes(accLattice,dir_location="",accSeq_Name
 				delta = (gap_pos_end + z_max) - drift_pos_start
 				length = drift.getLength()
 				drift.setLength(length - delta)	
+				drift.setPosition(drift.getPosition() + delta/2)
 		#------------------------------------------
 		"""
 		print "debug n_drifts =",len(dbg_chng_length_drift_arr)
@@ -219,9 +233,7 @@ def Replace_BaseRF_Gap_to_AxisField_Nodes(accLattice,dir_location="",accSeq_Name
 	"""
 	#-----------------------------------------------------------
 		
-					
-
-def Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
+def Make_AxisFieldRF_Gaps_and_Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
 	"""
 	It returns (af_rf_gap_dict,rf_gap_ind_up_down_arr).
 	This function analyzes the nodes in the accSeq and creates a dictionary and 
@@ -233,7 +245,9 @@ def Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
 	drift_up_ind are the indexes covering the edges of the axis filed of the
 	particular AxisFieldRF_Gap.
 	"""
+	rank = orbit_mpi.MPI_Comm_rank(orbit_mpi.mpi_comm.MPI_COMM_WORLD)
 	nodes = accSeq.getNodes()
+	node_pos_dict = accLattice.getNodePositionsDict()
 	#--------------------------------------------------
 	#---- let's create the new AxisFieldRF_Gap instances
 	af_rf_gap_dict = {}
@@ -244,8 +258,6 @@ def Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
 			af_rf_gap.readAxisFieldFile(dir_location)
 			af_rf_gap_dict[rf_gap] = af_rf_gap
 	#--------------------------------------------------
-	#---- let's check that axis fields do not cover any node different from Drift
-	node_pos_dict = accLattice.getNodePositionsDict()
 	#---- Let's fix the length of the axis fields to avoid the fields overlaping
 	for cav in cavs:
 		rf_gaps = cav.getRF_GapNodes()
@@ -292,11 +304,19 @@ def Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
 	#---- Here we will go through all rf gaps and find indexes of the drifts before (down) 
 	#---- and after (up). These drifts should be replaced with the shorter drifts.
 	#---- The drifts that covered by the RF gap field completely should be removed.
+	#---------------------------------------------------------------------------------------
+	#---- to speed up indexing let's build rf gaps vs. index dictionary
+	rf_gap_ind_dict = {}
+	for node_ind in range(len(nodes)):
+		node = nodes[node_ind]
+		if(isinstance(node,BaseRF_Gap)):
+			rf_gap_ind_dict[node] = node_ind
+	#-------------------------------------
 	rf_gap_ind_up_down_arr = []
 	for cav in cavs:
 		rf_gaps = cav.getRF_GapNodes()
 		for rf_gap in rf_gaps:
-			gap_ind = nodes.index(rf_gap)
+			gap_ind = rf_gap_ind_dict[rf_gap]
 			(gap_pos_start,gap_pos_end) = node_pos_dict[rf_gap]
 			drift_down_ind = gap_ind
 			drift_up_ind = gap_ind
@@ -311,27 +331,40 @@ def Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
 				if(drift_down_ind < 0):
 					if(gap_pos_start + z_min < node_pos_start):
 						node = nodes[drift_down_ind+1]
-						msg  = "The Replace_BaseRF_Gap_to_AxisField_Nodes Python function. "
+						#---- by default gap_pos_start=gap_pos_end for rf gap with length=0
+						(gap_pos_start,gap_pos_end) = node_pos_dict[rf_gap]
+						(z_min,z_max) = af_rf_gap_dict[rf_gap].getZ_Min_Max()
+						(gap_pos_start,gap_pos_end) = (gap_pos_start+z_min,gap_pos_end+z_max) 
+						(pos_start,pos_end) = node_pos_dict[node]
+						func = af_rf_gap_dict[rf_gap].getAxisFieldFunction()
+						delta_cut = pos_start - gap_pos_start
+						func_new = RenormalizeFunction(func,z_min+delta_cut,z_max)
+						af_rf_gap_dict[rf_gap].setAxisFieldFunction(func_new)
+						(z_min_new,z_max_new) = (func_new.getMinX(),func_new.getMaxX())
+						af_rf_gap_dict[rf_gap].setZ_Min_Max(z_min_new,z_max_new)
+						msg  = "debug =============== WARNING  START ================ RF Gap="+rf_gap.getName()	
+						msg += os.linesep
+						msg += "Inside the Replace_BaseRF_Gap_to_AxisField_Nodes Python function. "
 						msg += os.linesep
 						msg += "The RF gap field overlaps the first element in AccSequence."
 						msg += os.linesep
 						msg += "It means that the field goes outside the AccSequence."
 						msg += os.linesep
-						msg += "That is wrong! Stop! Please check the lattice!"
-						msg += os.linesep
-						msg += "RF gap  = " + rf_gap0.getName()				
+						msg += "That is wrong! The field will be cut shorter and re-normalized!"
 						msg += os.linesep
 						msg += "node    = " + node.getName()			
 						msg += os.linesep
-						(gap_pos_start,gap_pos_end) = node_pos_dict[rf_gap]
-						(z_min,z_max) = af_rf_gap_dict[rf_gap].getZ_Min_Max()
-						(gap_pos_start,gap_pos_end) = (gap_pos_end+z_min,gap_pos_end+z_max) 
-						(pos_start,pos_end) = node_pos_dict[node]
 						msg += "node (pos_start,pos_end)   = " + 	str((pos_start,pos_end))
 						msg += os.linesep
 						msg += "rf_gap (pos_start,pos_end)   = " + 	str((gap_pos_start,gap_pos_end))
 						msg += os.linesep
-						orbitFinalize(msg)
+						msg += "old rf gap (z_min,z_max) = " + str((z_min,z_max))
+						msg += os.linesep
+						msg += "new rf gap (z_min,z_max) = " + str((z_min_new,z_max_new))
+						msg += os.linesep
+						msg += "debug =============== WARNING  END ================"
+						if(rank == 0): print msg
+						break
 					else:
 						break
 				#---------------------------------------------------------------------
@@ -356,7 +389,7 @@ def Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
 						msg += os.linesep
 						msg += "That is wrong! Stop! Please check the lattice!"
 						msg += os.linesep
-						msg += "RF gap  = " + rf_gap0.getName()				
+						msg += "RF gap  = " + rf_gap.getName()				
 						msg += os.linesep
 						msg += "node    = " + node.getName()			
 						msg += os.linesep
@@ -393,3 +426,24 @@ def Find_Neihbor_Nodes(rf_length_tolerance,accLattice,accSeq,dir_location,cavs):
 	"""
 	#----------------------------------------------------------------------
 	return (af_rf_gap_dict,rf_gap_ind_up_down_arr)
+	
+def RenormalizeFunction(func,z_min,z_max):
+	"""
+	It re-normalizes the Function in the new limits (z_min,z_max).
+	We assume that region of the function definition will be cut not extended.
+	"""
+	spline = SplineCH()					
+	spline.compile(func)	
+	integrator = GaussLegendreIntegrator(500)
+	integrator.setLimits(z_min,z_max)
+	integral = integrator.integral(spline)
+	n_points = func.getSize()
+	step = (z_max - z_min)/(n_points-1)
+	new_func = Function()
+	for i in range(n_points):
+		x = z_min + step*i
+		y = spline.getY(x)/integral
+		new_func.add(x,y)
+	new_func.setConstStep(1)
+	return new_func
+	

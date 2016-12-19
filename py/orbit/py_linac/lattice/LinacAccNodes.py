@@ -380,6 +380,17 @@ class Quad(LinacMagnetNode):
 			#print "debug after xp",	bunch.xp(0)
 		return		
 
+	def getTotalField(self,z):
+		"""
+		Returns the field of the quad.
+		This function was added to make a uniform 
+		interface with OverlappingQuadsNode.
+		"""
+		G = 0.
+		if(abs(z) < self.getLength()/2.):
+			G = quad.getParam("dB/dr")
+		return G
+
 
 class Bend(LinacMagnetNode):
 	"""

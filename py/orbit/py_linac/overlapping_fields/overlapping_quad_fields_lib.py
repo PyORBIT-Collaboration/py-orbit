@@ -19,13 +19,60 @@ import sys
 import os
 
 from orbit.py_linac.lattice import BaseLinacNode, Drift, Quad
+from orbit.py_linac.lattice import AxisFieldRF_Gap
+from overlapping_rf_and_quad_fields_lib import AxisField_and_Quad_RF_Gap
 
 # import teapot base functions from wrapper around C++ functions
 from orbit.teapot_base import TPB
 
 from orbit_utils import Function
 
-class EngeFunction:
+
+class AbstractQuadFieldSourceFunction:
+	"""
+	It is an abstract class describing the quadrupole magnetic 
+	field as a function of the longitudinal coordinate.
+	"""
+	def __init__(self):
+		pass
+	
+	def getLimitsZ(self):
+		pass
+	
+	def getFuncValue(self,z):
+		""" 
+		Returns the quad's normalized field distribution 
+		at the distance z from the center.
+		the distribution should be normalized to 1 over the
+		integration along the longitudinal coordinate.
+		"""
+		pass
+	
+class SimpleQuadFieldFunc(AbstractQuadFieldSourceFunction):
+	"""
+	It is an implementation of the QuadFieldSourceFunction class for
+	a simple quad with constant field between (-L/2;+L/2).
+	"""
+	def __init__(self,quad):
+		self.quad = quad
+		
+	def getLimitsZ(self):
+		"""
+		Returns (+L/2,-L/2) as longitudinal limits of the quad field.
+		"""
+		L = self.quad.getLength()
+		return (-L/2,L/2)
+		
+	def getFuncValue(self,z):
+		""" 
+		Returns the quad's normalized field distribution at the distance z from the center 
+		"""
+		L = self.quad.getLength()
+		if(abs(z) <= L/2):
+			return 1./L
+		return 0.
+		
+class EngeFunction(AbstractQuadFieldSourceFunction):
 	""" 
 	The Enge function with parameters from Berz's paper 
 	M.Berz, B. Erdelyn, K.Makino
@@ -111,7 +158,7 @@ class EngeFunction:
 
 	def _findCutOff(self,step, cutoff_level):
 		""" Finds the distance from the center where the field is less than cutoff level """
-		self.normalization= 1.0
+		self.normalization = 1.0
 		init_val = self._getTrueEngeFunc(0.)
 		z = step
 		val = self._getTrueEngeFunc(z)/init_val
@@ -162,13 +209,7 @@ class EngeFunction:
 		""" Returns the tuple with min and max Z value for this field """
 		z_max = self.func.getMaxX()
 		return (-z_max,z_max)
-	
-	def isInside(self,z_center,z):
-		""" Returns True if the position Z is inside the function definition region """
-		if(abs(z-z_center) <= self.func.getMaxX()): return True
-		return False
 		
-
 class OverlappingQuadsNode(BaseLinacNode):
 	"""
 	The set of quads with the overlapping fields.
@@ -178,7 +219,7 @@ class OverlappingQuadsNode(BaseLinacNode):
 		Constructor. Creates the OverlappingQuadsNode instance.
 		"""
 		BaseLinacNode.__init__(self,name)
-		self.setType("OverlappingQuads")
+		self.setType("OVRLPQ")
 		self.setnParts(1)
 		#----quads_fields_arr is an array of [quad, fieldFunc, z_center_of_field]
 		self.quads_fields_arr = []
@@ -207,6 +248,15 @@ class OverlappingQuadsNode(BaseLinacNode):
 		Returns the longitudinal step for the tracking along the node.
 		"""		
 		return self.z_step
+		
+	def getZ_Min_Max(self):
+		"""
+		Returns the tuple (z_min,z_max) with the limits of z coordinate from the center.
+		These parameters define the length of the node. The center of the node
+		is at 0.
+		"""
+		L2 = self.getLength()/2
+		return (-L2,L2)	
 		
 	def getQuads(self):
 		"""
@@ -243,7 +293,7 @@ class OverlappingQuadsNode(BaseLinacNode):
 		"""
 		index = self.getActivePartIndex()	
 		length = self.getLength(index)
-		if(index == 0): self.z_value = 0.
+		if(index == 0): self.z_value = - self.getLength()/2
 		bunch = paramsDict["bunch"]
 		momentum = bunch.getSyncParticle().momentum()		
 		n_steps = int(length/self.z_step)+1
@@ -263,11 +313,21 @@ class OverlappingQuadsNode(BaseLinacNode):
 			TPB.quad1(bunch,z_step/4.0, kq)
 		self.z_value += length
 		
-	def getTotalField(self,z):
+	def getTotalField(self,z_from_center):
+		"""
+		Returns the combined field of all overlapping quads.
+		z_from_center - is a distance from the center of the node.
+		z - is a distance from the beginning of the node.
+		"""
+		z = z_from_center + self.getLength()/2
 		G = 0.
+		if(z < 0. or z > self.getLength()): return G
 		for [quad, fieldFunc, z_center_of_field] in self.quads_fields_arr:
-			gl = quad.getParam("dB/dr")*quad.getLength()
-			G += gl*fieldFunc.getFuncValue(z - z_center_of_field)
+			if(fieldFunc != None):
+				gl = quad.getParam("dB/dr")*quad.getLength()
+				G += gl*fieldFunc.getFuncValue(z - z_center_of_field)
+			else:
+				G += quad.getTotalField(z - z_center_of_field)
 		return G
 	
 class OverlappingQuadsController:
@@ -290,7 +350,7 @@ class OverlappingQuadsController:
 		self.length = 0.
 		#--- The longitudinal step over the magnetic field during the tracking
 		self.z_step = 0.005
-		#--- The maximal distnce between parts of the node
+		#--- The maximal distance between parts of the node
 		self.z_max_dst = 0.01
 
 	def getName(self):
@@ -464,31 +524,90 @@ class OverlappingQuadsController:
 		"""
 		return self.overlapping_quads
 		
-def getGlobalQuadGradient(accLattice,z):
+def GetGlobalQuadGradient(accLattice,z):
 	"""
 	The service function for the overlapping fields package.
 	Returns the quad field for certain position in the lattice that
 	has usual and overlapping quads.
 	"""
 	node_pos_dict = accLattice.getNodePositionsDict()
-	nodes =accLattice.getNodes()
+	nodes = accLattice.getNodes()
 	G = 0.
-	for node in nodes:
-		(posBefore, posAfter) = node_pos_dict[node]
-		if(z >= posBefore and z <= posAfter):
-			if(isinstance(node,Quad)):
-				return node.getParam("dB/dr")
-			if(isinstance(node,OverlappingQuadsNode)):
-				G = node.getTotalField(z - posBefore)			
-				return G
+	(node,posBefore,posAfter) = GetNodeForPosition(accLattice,z)
+	if(isinstance(node,Quad)):
+		return node.getParam("dB/dr")
+	if(isinstance(node,OverlappingQuadsNode)):
+		G = node.getTotalField(z - (posBefore+posAfter)/2)			
+		return G
+	if(isinstance(node,AxisField_and_Quad_RF_Gap)):
+		(z_min,z_max) = node.getZ_Min_Max()
+		G = node.getTotalField((z - posBefore)+z_min)			
+		return G		
 	return G
+
+def GetGlobalRF_AxisField(accLattice,z):
+	"""
+	The service function for the overlapping RF fields package.
+	Returns the RF field on the axis of the RF cavities 
+	for certain position in the lattice. If we have 
+	the BaseRF_Gap instance we will get 0, because it is 
+	an element with zero length.
+	"""	
+	node_pos_dict = accLattice.getNodePositionsDict()
+	nodes =accLattice.getNodes()
+	Ez = 0.
+	(node,posBefore,posAfter) = GetNodeForPosition(accLattice,z)
+	if(isinstance(node,AxisField_and_Quad_RF_Gap) or isinstance(node,AxisFieldRF_Gap)):
+		(z_min,z_max) = node.getZ_Min_Max()
+		Ez = node.getEzFiled(z - posBefore + z_min)
+	return Ez
+
+def GetNodeForPosition(accLattice,z):
+	"""
+	It is a local convinience function. It returns the node which
+	coordsinates cover the z-position.
+	"""
+	node_pos_dict = accLattice.getNodePositionsDict()
+	nodes = accLattice.getNodes()	
+	index0 = 0
+	index1 = len(nodes) - 1
+	(posBefore0, posAfter0) = node_pos_dict[nodes[index0]]
+	(posBefore1, posAfter1) = node_pos_dict[nodes[index1]]
+	index = 0
+	while(index0 != index1):			
+		index = (index0 + index1)/2
+		#print "debug z=",z," index0=",index0," index1=",index1," index=",index," (posBefore0, posAfter0)=",(posBefore0, posAfter0)," (posBefore1, posAfter1)=",(posBefore1, posAfter1)
+		(posBefore, posAfter) = node_pos_dict[nodes[index]]
+		if(z < posBefore):
+			index1 = index
+			(posBefore1, posAfter1) = node_pos_dict[nodes[index1]]
+		elif(z > posAfter):
+			index0 = index
+			(posBefore0, posAfter0) = node_pos_dict[nodes[index0]]
+		elif(z >= posBefore and z <= posAfter):
+			break
+		if(z >= posBefore0 and z <= posAfter0):
+			index =index0 
+			break
+		if(z >= posBefore1 and z <= posAfter1):
+			index =index1
+			break		
+	#-------------------------------------------
+	node = nodes[index]
+	(posBefore, posAfter) = node_pos_dict[node]
+	return (node,posBefore,posAfter)
 
 #-----------------------------------------------------------------------		
 #-----Test of the Enge Function ----------------	
 #-----------------------------------------------------------------------
 if __name__ == "__main__":	
+	#---- MEBT quads ----
 	length_param = 0.066
 	acceptance_diameter_param = 0.0363
+	#---- DTL Permanent Quad
+	length_param = 0.035
+	acceptance_diameter_param = 0.025
+	#--------------------
 	cutoff_level = 0.01	
 	func = EngeFunction(length_param,acceptance_diameter_param,cutoff_level)
 	z_max = func.getCuttOffZ()
@@ -498,7 +617,7 @@ if __name__ == "__main__":
 	for ind in range(2*np-1):
 		z = ind*step-z_max
 		val = func.getFuncValue(z)
-		print " %12.5e  %12.5e "%(z,val)
+		print " %12.5e  %12.5e "%(z*1000.,val)
 	print "z limits=",func.getLimitsZ()
 	func.setCutOffZ(0.5*func.getLimitsZ()[1])
 	print "new z limits=",func.getLimitsZ()

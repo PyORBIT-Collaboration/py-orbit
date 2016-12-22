@@ -51,26 +51,27 @@ def Add_quad_apertures_to_lattice(accLattice, aprtNodes=[]):
 				s += node.getLength(part_ind)
 			for quad_ind in range(len(simple_quads)):
 				quad = simple_quads[quad_ind]
-				shape = quad.getParam("aprt_type")
-				a = quad.getParam("aperture")
-				quad_name = quad.getName()				
-				length = quad.getLength()
-				pos_z = quad_centers[quad_ind]
-				posBefore = pos_z - length/2.
-				posAfter = pos_z + length/2.
-				for part_ind in range(nParts-1):
-					if(posBefore >= pos_part_arr[part_ind] and posBefore < pos_part_arr[part_ind+1]):
-						apertureNodeBefore = LinacApertureNode(shape,a/2.0,a/2.0,posBefore + node_start_pos)
-						apertureNodeBefore.setName(quad_name+":AprtIn")
-						apertureNodeBefore.setSequence(node.getSequence())
-						node.addChildNode(apertureNodeBefore,node.BODY,part_ind,node.BEFORE)
-						aprtNodes.append(apertureNodeBefore)
-					if(posAfter > pos_part_arr[part_ind] and posAfter <= pos_part_arr[part_ind+1]):
-						apertureNodeAfter = LinacApertureNode(shape,a/2.0,a/2.0,posAfter + node_start_pos)
-						apertureNodeAfter.setName(quad_name+":AprtOut")
-						apertureNodeAfter.setSequence(node.getSequence())
-						node.addChildNode(apertureNodeAfter,node.BODY,part_ind,node.AFTER)
-						aprtNodes.append(apertureNodeAfter)
+				if(quad.hasParam("aperture") and quad.hasParam("aprt_type")):
+					shape = quad.getParam("aprt_type")
+					a = quad.getParam("aperture")
+					quad_name = quad.getName()				
+					length = quad.getLength()
+					pos_z = quad_centers[quad_ind]
+					posBefore = pos_z - length/2.
+					posAfter = pos_z + length/2.
+					for part_ind in range(nParts-1):
+						if(posBefore >= pos_part_arr[part_ind] and posBefore < pos_part_arr[part_ind+1]):
+							apertureNodeBefore = LinacApertureNode(shape,a/2.0,a/2.0,posBefore + node_start_pos)
+							apertureNodeBefore.setName(quad_name+":AprtIn")
+							apertureNodeBefore.setSequence(node.getSequence())
+							node.addChildNode(apertureNodeBefore,node.BODY,part_ind,node.BEFORE)
+							aprtNodes.append(apertureNodeBefore)
+						if(posAfter > pos_part_arr[part_ind] and posAfter <= pos_part_arr[part_ind+1]):
+							apertureNodeAfter = LinacApertureNode(shape,a/2.0,a/2.0,posAfter + node_start_pos)
+							apertureNodeAfter.setName(quad_name+":AprtOut")
+							apertureNodeAfter.setSequence(node.getSequence())
+							node.addChildNode(apertureNodeAfter,node.BODY,part_ind,node.AFTER)
+							aprtNodes.append(apertureNodeAfter)
 	return aprtNodes
 	
 

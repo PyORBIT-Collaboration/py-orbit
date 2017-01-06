@@ -11,8 +11,8 @@ import os
 
 from orbit.py_linac.lattice import LinacApertureNode
 from orbit.py_linac.lattice import Quad, Drift, Bend, BaseRF_Gap, AxisFieldRF_Gap
-from orbit.py_linac.overlapping_fields import OverlappingQuadsNode
-from orbit.py_linac.overlapping_fields import AxisField_and_Quad_RF_Gap
+from orbit.py_linac.lattice import OverlappingQuadsNode
+from orbit.py_linac.lattice import AxisField_and_Quad_RF_Gap
 
 def Add_quad_apertures_to_lattice(accLattice, aprtNodes=[]):
 	"""
@@ -203,7 +203,7 @@ def AddScrapersAperturesToLattice(accLattice, node_name, x_size, y_size, aprtNod
 def GetLostDistributionArr(aprtNodes, bunch_lost):
 	"""
 	Function returns the array with [aptrNode,sum_of_losses]
-	The sum_of_losses is a number of particles or the sum of macrosizes if the 
+	The sum_of_losses is a number of particles or the sum of macro sizes if the 
 	particle attribute "macrosize" is defined.
 	"""
 	lossDist_arr = []

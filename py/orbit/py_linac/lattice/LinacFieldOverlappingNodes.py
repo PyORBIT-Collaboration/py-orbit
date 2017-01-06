@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 #--------------------------------------------------------
-# This is a collection of classes for describing RF gap 
-# nodes that have the overlapping quadrupole fields in 
-# addition to the axis electric field of the gap.
+# This is a collection of classes for describing the nodes
+# with the overlapping quad or rf+quad fields.
 #--------------------------------------------------------
 
 import math
@@ -12,8 +11,9 @@ import os
 
 from orbit.utils import phaseNearTargetPhase, phaseNearTargetPhaseDeg
 
-from orbit.py_linac.lattice import BaseLinacNode, Drift, Quad
-from orbit.py_linac.lattice import AbstractRF_Gap
+#---- base linac nodes
+from LinacAccNodes import AbstractRF_Gap
+from LinacAccNodes import BaseLinacNode, Drift, Quad
 
 # import teapot base functions from wrapper around C++ functions
 from orbit.teapot_base import TPB
@@ -408,5 +408,125 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 					[pos,phase_gap] = self.gap_phase_vs_z_arr[ind]
 					[pos,phase_gap1] = self.gap_phase_vs_z_arr[ind-1]				
 					self.gap_phase_vs_z_arr[ind][1] = phaseNearTargetPhase(phase_gap,phase_gap1)
-					
-					
+		
+
+class OverlappingQuadsNode(BaseLinacNode):
+	"""
+	The class represent the set of quads with the overlapping fields.
+	"""
+	def __init__(self, name = "OverlappingQuads"):
+		"""
+		Constructor. Creates the OverlappingQuadsNode instance.
+		"""
+		BaseLinacNode.__init__(self,name)
+		self.setType("OVRLPQ")
+		self.setnParts(1)
+		#----quads_fields_arr is an array of [quad, fieldFunc, z_center_of_field]
+		self.quads_fields_arr = []
+		#---- current z position
+		self.z_value = 0.
+		#---- z-step - the step in longitudinal direction during the tracking in [m]
+		self.z_step = 0.01 
+		#---- the initial length is 0.
+		self.setLength(0.)
+		
+	def addQuad(self, quad, fieldFunc, z_center_of_field):
+		"""
+		Adds the quad with the field function and the position.
+		The position of the quad is relative to the beginning of this OverlappingQuadsNode.
+		"""
+		self.quads_fields_arr.append((quad, fieldFunc, z_center_of_field))
+				
+	def setZ_Step(self,z_step):
+		"""
+		Sets the longitudinal step for the tracking along the node.
+		"""
+		self.z_step = z_step
+		
+	def getZ_Step(self):
+		"""
+		Returns the longitudinal step for the tracking along the node.
+		"""		
+		return self.z_step
+		
+	def getZ_Min_Max(self):
+		"""
+		Returns the tuple (z_min,z_max) with the limits of z coordinate from the center.
+		These parameters define the length of the node. The center of the node
+		is at 0.
+		"""
+		L2 = self.getLength()/2
+		return (-L2,L2)	
+		
+	def getQuads(self):
+		"""
+		Returns the list of quads in this node.
+		"""
+		quads = []
+		for [quad, fieldFunc, z_center_of_field] in self.quads_fields_arr:
+			quads.append(quad)
+		return quads
+	
+	def getCentersOfField(self):
+		"""
+		Returns the array of centers of the quads in this node.
+		"""
+		centers_arr = []
+		for [quad, fieldFunc, z_center_of_field] in self.quads_fields_arr:
+			centers_arr.append(z_center_of_field)
+		return centers_arr
+
+	def initialize(self):
+		"""
+		The OverlappingQuadsNode class implementation
+		of the AccNode class initialize() method.
+		"""
+		nParts = self.getnParts()
+		length = self.getLength()
+		lengthStep = length/nParts
+		for i in xrange(nParts):
+			self.setLength(lengthStep,i)
+
+	def track(self, paramsDict):
+		"""
+		The  OverlappingQuadsNode class implementation of the AccNode class track(paramDict) method.
+		"""
+		index = self.getActivePartIndex()	
+		length = self.getLength(index)
+		if(index == 0): self.z_value = - self.getLength()/2
+		bunch = paramsDict["bunch"]
+		momentum = bunch.getSyncParticle().momentum()		
+		n_steps = int(length/self.z_step)+1
+		z_step = length/n_steps
+		for z_ind in range(n_steps):
+			z = self.z_value + z_step*(z_ind+0.5)
+			G = self.getTotalField(z)
+			kq = G/(3.335640952*momentum)
+			if(abs(kq) == 0.):
+				TPB.drift(bunch,z_step)
+				continue
+			#------- track through a combined quad
+			TPB.quad1(bunch,z_step/4.0, kq)
+			TPB.quad2(bunch,z_step/2.0)
+			TPB.quad1(bunch,z_step/2.0, kq)
+			TPB.quad2(bunch,z_step/2.0)
+			TPB.quad1(bunch,z_step/4.0, kq)
+		self.z_value += length
+		
+	def getTotalField(self,z_from_center):
+		"""
+		Returns the combined field of all overlapping quads.
+		z_from_center - is a distance from the center of the node.
+		z - is a distance from the beginning of the node.
+		"""
+		z = z_from_center + self.getLength()/2
+		G = 0.
+		if(z < 0. or z > self.getLength()): return G
+		for [quad, fieldFunc, z_center_of_field] in self.quads_fields_arr:
+			if(fieldFunc != None):
+				gl = quad.getParam("dB/dr")*quad.getLength()
+				G += gl*fieldFunc.getFuncValue(z - z_center_of_field)
+			else:
+				G += quad.getTotalField(z - z_center_of_field)
+		return G
+

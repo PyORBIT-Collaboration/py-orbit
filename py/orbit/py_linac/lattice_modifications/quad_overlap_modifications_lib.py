@@ -3,7 +3,7 @@
 #--------------------------------------------------------------
 # The functions for the lattice modifications to replace simple 
 # quads (class Quad) with objects that describe the fields of 
-# several quads with overlapping fileds (class OverlappingQuadsNode). 
+# several quads with overlapping fields (class OverlappingQuadsNode). 
 # quadrupoles. 
 # These combine fields can be chopped into parts to include the 
 # elements with zero length. All others non-zero length elements
@@ -20,7 +20,7 @@ from orbit.utils import orbitFinalize
 
 from orbit.py_linac.lattice import Quad, Drift
 
-from orbit.py_linac.overlapping_fields import OverlappingQuadsNode
+from orbit.py_linac.lattice import OverlappingQuadsNode
 
 from rf_quad_overlap_modifications_lib import GetEngeFunction
 
@@ -76,8 +76,7 @@ def Replace_Quads_to_OverlappingQuads_Nodes(\
 					quads_tmp.append(quad)
 			quads = quads_tmp
 		#---- create Enge Functions' dictionary by using the usual quad nodes as keys
-		enge_func_quad_dict = {}		
-		quads = accLattice.getQuads(accSeq)
+		enge_func_quad_dict = {}	
 		for quad in quads:
 			enge_func_quad_dict[quad] = EngeFunctionFactory(quad)
 		#--------------------------------------------
@@ -282,9 +281,11 @@ def Find_Groups_of_Quads(accLattice,accSeq,quads,enge_func_quad_dict,node_to_ind
 				
 def GetNodeInAccSeqForPosition(accLattice,nodes,z):
 	"""
-	It is a local convinience function. It returns the node in the AccSeq 
-	which coordsinates cover the z-position. The position z is a position
+	It is a local convenience function. It returns the node in the AccSeq 
+	which coordinates cover the z-position. The position z is a position
 	in the lattice.
+	This function is different from the AccLattice method getNodeForPosition(z),
+	because it limits the nodes' array to speed up the finding process.
 	"""
 	node_pos_dict = accLattice.getNodePositionsDict()
 	index0 = 0

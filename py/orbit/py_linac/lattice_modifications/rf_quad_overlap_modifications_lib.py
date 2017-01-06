@@ -27,20 +27,22 @@ from orbit.utils import orbitFinalize
 from orbit.py_linac.lattice import LinacApertureNode
 from orbit.py_linac.lattice import Quad, Drift
 from orbit.py_linac.lattice import BaseRF_Gap, AxisFieldRF_Gap
+from orbit.py_linac.lattice import OverlappingQuadsNode
+from orbit.py_linac.lattice import AxisField_and_Quad_RF_Gap
 
-from orbit.py_linac.overlapping_fields import OverlappingQuadsNode
-from orbit.py_linac.overlapping_fields import AxisField_and_Quad_RF_Gap
 from orbit.py_linac.overlapping_fields import EngeFunction
 
 from orbit_utils import Function
 
 from rf_models_modifications_lib import Make_AxisFieldRF_Gaps_and_Find_Neihbor_Nodes
 
-
 def GetEngeFunction(quad):
 	"""
+	This is an example of a EngeFunctionFactory function.
 	It returns the EngeFunction function for the instance of Quad node.
 	The quad should have the aperture parameter.
+	It is used in the quad+rf lattice transformation by default.
+	User can prepare his/her own EngeFunctionFactory function.
 	"""
 	length_param = quad.getLength()
 	if(quad.hasParam("aperture")):

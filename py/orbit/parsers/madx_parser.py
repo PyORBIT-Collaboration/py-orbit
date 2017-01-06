@@ -294,7 +294,7 @@ class MADX_Parser:
 					aper = match_aper.group()[:-len(match_multi.group()) - len(apertype) - 2]
 				else:
 					aper = match_aper.group()[: - len(apertype) - 1]
-					
+		line_init = ''.join(line_init.split())  # remove all whitespaces character
 		tokens = line_init.split(",")
 		nvalues = len(tokens)
 		if nvalues >= 1:

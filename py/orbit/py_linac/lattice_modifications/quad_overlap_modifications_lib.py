@@ -59,8 +59,9 @@ def Replace_Quads_to_OverlappingQuads_Nodes(\
 			orbitFinalize(msg)
 		#--------------------------------------------------------------
 		nodes = accSeq.getNodes()
-		#---- the start position of the accSeq in the lattice
+		#---- the start and end positions of the accSeq in the lattice
 		accSeq_z_start = node_pos_dict[nodes[0]][0]
+		accSeq_z_end = node_pos_dict[nodes[len(nodes)-1]][1]
 		#---- just for case: if the nodes are not in the right order
 		nodes = sorted(nodes, key = lambda x: x.getPosition(), reverse = False)
 		#---- the node to index in the AccSeq dictionary
@@ -86,9 +87,31 @@ def Replace_Quads_to_OverlappingQuads_Nodes(\
 		#--------------------------------------------	
 		if(len(quad_groups_and_ind_arr) == 0): return
 		#---- let's check that the ends of fields of groups of quads cover the drifts
-		for [quads_arr,pos_start,pos_end,ind_start,ind_end] in quad_groups_and_ind_arr:
+		for group_ind in range(len(quad_groups_and_ind_arr)):
+			[quads_arr,pos_start,pos_end,ind_start,ind_end] = quad_groups_and_ind_arr[group_ind]
 			for node_ind in range(ind_start,ind_end+1):
 				node = nodes[node_ind]
+				if((group_ind == 0 or group_ind == (len(quad_groups_and_ind_arr)-1)) and node in quads_arr):
+					(z0_min,z0_max) = enge_func_quad_dict[node].getLimitsZ()
+					quad_pos = (node_pos_dict[node][0] + node_pos_dict[node][1])/2
+					delta_pos_quad_start = quad_pos + z0_min - accSeq_z_start
+					delta_pos_quad_end = quad_pos + z0_max - accSeq_z_end
+					res = delta_pos_quad_start < (- drift_length_tolerance)
+					res = res or (delta_pos_quad_end > drift_length_tolerance)
+					if(res):
+						msg  = "The  Replace_Quads_to_OverlappingQuads_Nodes function. STOP. "
+						msg += os.linesep
+						msg += "We have quad at the beginning or the end of the sequence! quad = "+node.getName()
+						msg += os.linesep				
+						msg += "quad field positions[m] [from,to] ="+str((delta_pos_quad_start,delta_pos_quad_end))
+						msg += os.linesep						
+						msg += "The quad's distributed field will be outside the sequence!"
+						msg += os.linesep
+						msg += "The code cannot handle this situation at this moment."
+						msg += os.linesep						
+						msg += "You have to change the EngeFunctionFactory to describe the right field function."
+						msg += os.linesep	
+						orbitFinalize(msg)
 				if(node in quads_arr): continue
 				if(node.getLength() != 0 and (not isinstance(node,Drift))):
 					msg  = "The  Replace_Quads_to_OverlappingQuads_Nodes function. STOP. "
@@ -132,8 +155,8 @@ def Replace_Quads_to_OverlappingQuads_Nodes(\
 			if(isinstance(node,Drift)):
 				(node_pos_start,node_pos_end) = node_pos_dict[node]
 				delta = node_pos_end - pos_start
-				if(abs(delta) > drift_length_tolerance): 
-					new_length = node.getLength() - delta
+				new_length = abs(node.getLength() - delta)
+				if(new_length > drift_length_tolerance):
 					node.setLength(new_length)
 					node.setPosition(node.getPosition() - delta/2)
 					new_nodes.append(node)
@@ -141,8 +164,8 @@ def Replace_Quads_to_OverlappingQuads_Nodes(\
 			if(isinstance(node,Drift)):
 				(node_pos_start,node_pos_end) = node_pos_dict[node]
 				delta = pos_end - node_pos_start 
-				if(abs(delta) > drift_length_tolerance): 
-					new_length = node.getLength() - delta
+				new_length = abs(node.getLength() - delta)
+				if(new_length > drift_length_tolerance):
 					node.setLength(new_length)
 					node.setPosition(node.getPosition() + delta/2)	
 					new_nodes.append(node)

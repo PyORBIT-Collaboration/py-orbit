@@ -44,6 +44,10 @@ def SNS_EngeFunctionFactory(quad):
 		if(name == "DTL_Mag:PMQH100"):
 			func = SimpleQuadFieldFunc(quad)
 			return func
+		#---- for the DTL_Mag:PMQV300 we have to cut the field because it leaks to the DTL2 section
+		if(name == "DTL_Mag:PMQV300"):
+			func = SimpleQuadFieldFunc(quad)
+			return func			
 		#---- for the DTL_Mag:PMQH500 we have to cut the field because it leaks to the DTL4 section
 		if(name == "DTL_Mag:PMQH500"):
 			func = SimpleQuadFieldFunc(quad)
@@ -54,6 +58,11 @@ def SNS_EngeFunctionFactory(quad):
 		cutoff_level = 0.001	
 		func = EngeFunction(length_param,acceptance_diameter_param,cutoff_level)
 		return func
+	if(name.find("CCL") >= 0):
+		#---- for the CCL_Mag:QH00 we have to cut the field because it leaks to the DTL6 section
+		if(name == "CCL_Mag:QH00"):
+			func = SimpleQuadFieldFunc(quad)
+			return func
 	#----- general Enge's Function
 	length_param = quad.getLength()
 	if(quad.hasParam("aperture")):

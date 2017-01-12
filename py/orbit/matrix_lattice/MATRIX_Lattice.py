@@ -224,15 +224,11 @@ class MATRIX_Lattice(AccLattice):
 		#phase advance 
 		mu_arr = []
 		#count = 0
+		pos_arr.append(position)
+		mu_arr.append(phi)
+		alpha_arr.append(track_v.get(0))
+		beta_arr.append(track_v.get(1))
 		for matrixNode in self.getNodes():
-			if(isinstance(matrixNode,BaseMATRIX) == True):
-				beta = track_v.get(1)
-				# only the main nodes are used, the or-cases deal with markers with zero length 
-				if matrixNode.getLength() > 0 and matrixNode.getParam("matrix_parent_node_active_index")==0 or matrixNode.getParam("matrix_parent_node_type")=="node teapot":
-					pos_arr.append(position)
-					alpha_arr.append(track_v.get(0))
-					beta_arr.append(track_v.get(1))
-					mu_arr.append(phi/(2*math.pi))
 				mt = matrixNode.getMatrix()
 				ind0 = 0+dir_ind
 				ind1 = 1+dir_ind
@@ -249,7 +245,15 @@ class MATRIX_Lattice(AccLattice):
 				beta_0 = track_v.get(1)
 				delta_phi = math.atan(mt.get(ind0,ind1)/(beta_0*mt.get(ind0,ind0) - alpha_0*mt.get(ind0,ind1)))
 				phi = phi + delta_phi
-				track_v = track_m.mult(track_v)	
+				track_v = track_m.mult(track_v)
+				position = position + matrixNode.getLength()
+				if(isinstance(matrixNode,BaseMATRIX) == True):
+					#only the main nodes are used, the or-cases deal with markers with zero length
+					if matrixNode.getLength() > 0 and matrixNode.getParam("matrix_parent_node_active_index")==0 or matrixNode.getParam("matrix_parent_node_type")=="node teapot":
+						pos_arr.append(position)
+						alpha_arr.append(track_v.get(0))
+						beta_arr.append(track_v.get(1))
+						mu_arr.append(phi/(2*math.pi))
 				#count = count + 1
 		#pack the resulting tuple
 		tune = phi/(2*math.pi)	
@@ -314,21 +318,12 @@ class MATRIX_Lattice(AccLattice):
 		disp_arr = []
 		disp_p_arr = []
 		#put in array the initial dispersions
+		#count = 0
 		pos_arr.append(position)
 		disp_arr.append(track_v.get(0))
 		disp_p_arr.append(track_v.get(1))
-		position_old = position
-		disp_old = disp
-		#count = 0
 		for matrixNode in self.getNodes():
 			if(isinstance(matrixNode,BaseMATRIX) == True):
-				disp = track_v.get(0)				
-				if(abs(position_old-position) > eps_length or abs(disp_old - disp) > eps_length):
-					pos_arr.append(position)
-					disp_arr.append(track_v.get(0))
-					disp_p_arr.append(track_v.get(1))
-				disp_old = disp
-				position_old = position
 				mt = matrixNode.getMatrix()
 				ind0 = 0+dir_ind
 				ind1 = 1+dir_ind
@@ -340,9 +335,11 @@ class MATRIX_Lattice(AccLattice):
 				track_m.set(1,2,mt.get(ind1,5)*m_coeff)
 				track_v = track_m.mult(track_v)	
 				position = position + matrixNode.getLength()
-		pos_arr.append(position)
-		disp_arr.append(track_v.get(0))
-		disp_p_arr.append(track_v.get(1))
+				#only the main nodes are used, the or-cases deal with markers with zero length
+				if matrixNode.getLength() > 0 and matrixNode.getParam("matrix_parent_node_active_index")==0 or matrixNode.getParam("matrix_parent_node_type")=="node teapot":
+					pos_arr.append(position)
+					disp_arr.append(track_v.get(0))
+					disp_p_arr.append(track_v.get(1))
 		#pack the resulting tuple
 		graph_disp_arr = []
 		graph_disp_p_arr = []

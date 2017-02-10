@@ -2,10 +2,14 @@
 
 #include "wrap_linacmodule.hh"
 #include "wrap_BaseRfGap.hh"
+#include "wrap_BaseRfGap_slow.hh"
 #include "wrap_MatrixRfGap.hh"
 #include "wrap_RfGapTTF.hh"
+#include "wrap_RfGapTTF_slow.hh"
 #include "wrap_SuperFishFieldSource.hh"
 #include "wrap_RfGapThreePointTTF.hh"
+#include "wrap_RfGapThreePointTTF_slow.hh"
+#include "wrap_linac_tracking.hh"
 
 static PyMethodDef linacmoduleMethods[] = { {NULL,NULL} };
 
@@ -18,10 +22,15 @@ extern "C" {
 		 PyObject* module = Py_InitModule("linac",linacmoduleMethods);
 		 //add the other classes init
 		 wrap_linac::initBaseRfGap(module);
+		 wrap_linac::initBaseRfGap_slow(module);
 		 wrap_linac::initMatrixRfGap(module);
 		 wrap_linac::initRfGapTTF(module);	
+		 wrap_linac::initRfGapTTF_slow(module);
 		 wrap_linac::initSuperFishFieldSource(module);
 		 wrap_linac::initRfGapThreePointTTF(module);
+		 wrap_linac::initRfGapThreePointTTF_slow(module);
+		 //initialization of the linac tracking module
+		 wrap_linac_tracking::initlinactracking();
 	 }
 	 
 	 PyObject* getLinacType(char* name){

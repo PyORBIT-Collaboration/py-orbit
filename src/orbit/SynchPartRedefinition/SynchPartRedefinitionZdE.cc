@@ -110,19 +110,15 @@ void SynchPartRedefinitionZdE::transformBunch(Bunch* bunch){
 	syncPart->setMomentum(momentum1);
 	double beta1 = syncPart->getBeta();
 	
-	// the definition of xp = momentumX/momentum_total 
+	// the definition of xp = momentumX/momentum_synch_part
 	// the z = c*beta*time (time is the same)
 	double x_y_p_coeff = momentum0/momentum1;
-	double z_coeff = beta1/beta0;
 	
 	for(int ip = 0; ip < nParts; ip++){
 		bunch->xp(ip) = x_y_p_coeff*bunch->xp(ip);
 		bunch->yp(ip) = x_y_p_coeff*bunch->yp(ip);
 		bunch->dE(ip) = bunch->dE(ip) - delta_dE;
-		bunch->z(ip) = z_coeff*bunch->z(ip);
 	}
-	
-	z_dE_avg_arr[0] = z_coeff*z_dE_avg_arr[0];
 }
 
 /** Returns the average z postion */

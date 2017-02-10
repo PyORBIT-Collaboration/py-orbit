@@ -93,7 +93,12 @@ void BaseRfGap::trackBunch(Bunch* bunch, double frequency, double E0TL, double p
     //the linear part - implemented in MatrixRFGap
     //bunch->dE(i) = bunch->dE(i) - chargeE0TLsin * d_phi;
     //transverse focusing
-    d_rp = kappa *sin(phase + d_phi) * 2.0 * I1 / (kr * r);
+		if(r == 0.){
+			d_rp = 0.;
+		}
+		else{    
+			d_rp = kappa *sin(phase + d_phi) * 2.0 * I1 / (kr * r);
+		}
 		//the transverse non-linear part is removed
 		//d_rp = kappa *sin(phase + d_phi);
     bunch->xp(i) = bunch->xp(i) * prime_coeff + d_rp * x;

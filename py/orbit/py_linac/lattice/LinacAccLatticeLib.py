@@ -191,39 +191,53 @@ class LinacAccLattice(AccLattice):
 						quads.append(node)
 		return quads
 		
-	def getNodesOfClass(self, Class, seq = None):
+	def getNodesOfClass(self, Class, seq_names = []):
 		""" 
 		Returns the list of all nodes which are instances of Class
 		or these nodes which are also belong to a particular sequence. 
 		""" 
+		nSeqs = len(seq_names)
 		nodes = []
-		for node in self.getNodes():
-			if(isinstance(node,Class)):
-				if(seq == None):
+		if(nSeqs == 0):
+			for node in self.getNodes():
+				if(isinstance(node,Class)):
 					nodes.append(node)
-				else:
-					if(node.getSequence() == seq):
+		else:
+			for seq_name in seq_names:
+				accSeq = self.getSequence(seq_name)
+				seq_nodes = accSeq.getNodes()
+				for node in seq_nodes:
+					if(isinstance(node,Class)):
 						nodes.append(node)
 		return nodes
 		
-	def getNodesOfClasses(self, Classes, seq = None):
+	def getNodesOfClasses(self, Classes, seq_names = []):
 		""" 
 		Returns the list of all nodes which are instances of any Class in Classes array
 		or these nodes which are also belong to a particular sequence. 
-		""" 
+		"""
+		nSeqs = len(seq_names)
 		nodes = []
-		for node in self.getNodes():
-			info = False
-			for Class in Classes:
-				if(isinstance(node,Class)):
-					info = True
-			if(info):
-				if(seq == None):
+		if(nSeqs == 0):
+			for node in self.getNodes():
+				info = False
+				for Class in Classes:
+					if(isinstance(node,Class)):
+						info = True	
+				if(info):
 					nodes.append(node)
-				else:
-					if(node.getSequence() == seq):
+		else:
+			for seq_name in seq_names:
+				accSeq = self.getSequence(seq_name)
+				seq_nodes = accSeq.getNodes()
+				for node in seq_nodes:
+					info = False
+					for Class in Classes:
+						if(isinstance(node,Class)):
+							info = True	
+					if(info):
 						nodes.append(node)
-		return nodes	
+		return nodes		
 
 	def getRF_Gaps(self, rf_cav = None):
 		""" Returns the list of all RF gaps or just gaps belong to a particular RF cavity. """

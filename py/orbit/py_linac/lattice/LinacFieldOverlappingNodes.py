@@ -20,6 +20,7 @@ from orbit.teapot_base import TPB
 
 # from linac import the RF gap classes
 from linac import RfGapThreePointTTF
+from linac import RfGapThreePointTTF_slow
 
 class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 	"""
@@ -69,8 +70,19 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		self.cppGapModel = RfGapThreePointTTF()
 		#---- quadrupole field sources
 		#----quads_fields_arr is an array of [quad, fieldFunc, z_center_of_field]
-		self.quads_fields_arr = []		
+		self.quads_fields_arr = []
 		
+	def setLinacTracker(self, switch = True):
+		"""
+		This method will switch RF gap model to slower one where transformations 
+		coefficients are calculated for each particle in the bunch.
+		"""
+		AbstractRF_Gap.setLinacTracker(self,switch)
+		if(switch):
+			self.cppGapModel = RfGapThreePointTTF_slow()			
+		else:
+			self.cppGapModel = RfGapThreePointTTF()
+
 	def getAxisFieldRF_Gap(self):
 		"""
 		It returns the  AxisFieldRF_Gap instance for this gap.
@@ -236,13 +248,13 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			kq = G/(3.335640952*momentum)
 			#------- track through a quad
 			step = part_length/2
-			TPB.quad1(bunch,step/4.0, kq)
-			TPB.quad2(bunch,step/2.0)
-			TPB.quad1(bunch,step/2.0, kq)
-			TPB.quad2(bunch,step/2.0)
-			TPB.quad1(bunch,step/4.0, kq)
+			self.tracking_module.quad1(bunch,step/4.0, kq)
+			self.tracking_module.quad2(bunch,step/2.0)
+			self.tracking_module.quad1(bunch,step/2.0, kq)
+			self.tracking_module.quad2(bunch,step/2.0)
+			self.tracking_module.quad1(bunch,step/4.0, kq)
 		else:
-			TPB.drift(bunch,part_length/2)
+			self.tracking_module.drift(bunch,part_length/2)
 		self.part_pos += part_length/2	
 		#call rf gap model to track the bunch
 		time_middle_gap = syncPart.time() - arrival_time
@@ -262,13 +274,13 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		if(abs(G) != 0.):
 			kq = G/(3.335640952*momentum)
 			step = part_length/2
-			TPB.quad1(bunch,step/4.0, kq)
-			TPB.quad2(bunch,step/2.0)
-			TPB.quad1(bunch,step/2.0, kq)
-			TPB.quad2(bunch,step/2.0)
-			TPB.quad1(bunch,step/4.0, kq)
+			self.tracking_module.quad1(bunch,step/4.0, kq)
+			self.tracking_module.quad2(bunch,step/2.0)
+			self.tracking_module.quad1(bunch,step/2.0, kq)
+			self.tracking_module.quad2(bunch,step/2.0)
+			self.tracking_module.quad1(bunch,step/4.0, kq)
 		else:
-			TPB.drift(bunch,part_length/2)
+			self.tracking_module.drift(bunch,part_length/2)
 		#---- advance the particle position
 		self.part_pos += part_length/2
 		time_middle_gap = syncPart.time() - arrival_time
@@ -354,7 +366,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		E0 = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(z0)
 		Ep = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(zp)			
 		#---- advance the particle position
-		TPB.drift(bunch,part_length/2)
+		self.tracking_module.drift(bunch,part_length/2)
 		self.part_pos += part_length/2	
 		#call rf gap model to track the bunch
 		time_middle_gap = syncPart.time() - arrival_time
@@ -369,7 +381,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		#print s
 		#---- this part is the debugging ---STOP---
 		self.cppGapModel.trackBunch(bunch,part_length/2,Em,E0,Ep,frequency,phase+delta_phase+modePhase)
-		TPB.drift(bunch,part_length/2)
+		self.tracking_module.drift(bunch,part_length/2)
 		#---- advance the particle position
 		self.part_pos += part_length/2
 		time_middle_gap = syncPart.time() - arrival_time
@@ -503,14 +515,14 @@ class OverlappingQuadsNode(BaseLinacNode):
 			G = self.getTotalField(z)
 			kq = G/(3.335640952*momentum)
 			if(abs(kq) == 0.):
-				TPB.drift(bunch,z_step)
+				self.tracking_module.drift(bunch,z_step)
 				continue
 			#------- track through a combined quad
-			TPB.quad1(bunch,z_step/4.0, kq)
-			TPB.quad2(bunch,z_step/2.0)
-			TPB.quad1(bunch,z_step/2.0, kq)
-			TPB.quad2(bunch,z_step/2.0)
-			TPB.quad1(bunch,z_step/4.0, kq)
+			self.tracking_module.quad1(bunch,z_step/4.0, kq)
+			self.tracking_module.quad2(bunch,z_step/2.0)
+			self.tracking_module.quad1(bunch,z_step/2.0, kq)
+			self.tracking_module.quad2(bunch,z_step/2.0)
+			self.tracking_module.quad1(bunch,z_step/4.0, kq)
 		self.z_value += length
 		
 	def getTotalField(self,z_from_center):

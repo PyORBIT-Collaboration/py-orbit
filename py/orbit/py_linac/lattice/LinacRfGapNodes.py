@@ -28,12 +28,20 @@ from LinacAccNodes import Drift, BaseLinacNode
 
 # from linac import the RF gap classes
 from linac import BaseRfGap, MatrixRfGap, RfGapTTF, RfGapThreePointTTF
+from linac import BaseRfGap_slow, RfGapTTF_slow, RfGapThreePointTTF_slow
 
 # The abstract RF gap import
 from LinacAccNodes import AbstractRF_Gap
 
 # import teapot base functions from wrapper around C++ functions
 from orbit.teapot_base import TPB
+
+# Import the linac specific tracking from linac_tracking. This module has
+# the following functions duplicated the original TEAPOT functions
+# drift - linac drift tracking
+# quad1 - linac quad linear part of tracking
+# quad2 - linac quad non-linear part of tracking
+import linac_tracking
 
 from bunch import Bunch
 
@@ -84,6 +92,23 @@ class BaseRF_Gap(AbstractRF_Gap):
 		#self.cppGapModel = MatrixRfGap()
 		#self.cppGapModel = BaseRfGap()
 		self.cppGapModel = RfGapTTF()
+
+	def setLinacTracker(self, switch = True):
+		"""
+		This method will switch RF gap model to slower one where transformations 
+		coefficients are calculated for each particle in the bunch.
+		"""
+		AbstractRF_Gap.setLinacTracker(self,switch)
+		if(switch):
+			if(isinstance(self.cppGapModel,BaseRfGap)):
+				self.cppGapModel = BaseRfGap_slow()
+			if(isinstance(self.cppGapModel,RfGapTTF)):
+				self.cppGapModel = RfGapTTF_slow()				
+		else:
+			if(isinstance(self.cppGapModel,BaseRfGap)):
+				self.cppGapModel = BaseRfGap()
+			if(isinstance(self.cppGapModel,RfGapTTF)):
+				self.cppGapModel = RfGapTTF()				
 
 	def setnParts(self, n = 1):
 		"""
@@ -445,6 +470,17 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		#---- The RF gap model - three points model
 		self.cppGapModel = RfGapThreePointTTF()
 
+	def setLinacTracker(self, switch = True):
+		"""
+		This method will switch RF gap model to slower one where transformations 
+		coefficients are calculated for each particle in the bunch.
+		"""
+		AbstractRF_Gap.setLinacTracker(self,switch)
+		if(switch):
+			self.cppGapModel = RfGapThreePointTTF_slow()			
+		else:
+			self.cppGapModel = RfGapThreePointTTF()
+
 	def readAxisFieldFile(self,dir_location = "", file_name = "", z_step = 0.01):
 		"""
 		Method. Reads the axis field from the file. User have to call this method.
@@ -579,7 +615,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		E0 = E0L*rf_ampl*self.axis_field_func.getY(z0)
 		Ep = E0L*rf_ampl*self.axis_field_func.getY(zp)			
 		#---- advance the particle position
-		TPB.drift(bunch,part_length/2)
+		self.tracking_module.drift(bunch,part_length/2)
 		self.part_pos += part_length/2	
 		#call rf gap model to track the bunch
 		time_middle_gap = syncPart.time() - arrival_time
@@ -594,7 +630,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		#print s
 		#---- this part is the debugging ---STOP---
 		self.cppGapModel.trackBunch(bunch,part_length/2,Em,E0,Ep,frequency,phase+delta_phase+modePhase)
-		TPB.drift(bunch,part_length/2)
+		self.tracking_module.drift(bunch,part_length/2)
 		#---- advance the particle position
 		self.part_pos += part_length/2
 		time_middle_gap = syncPart.time() - arrival_time
@@ -680,7 +716,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		E0 = E0L*rf_ampl*self.axis_field_func.getY(z0)
 		Ep = E0L*rf_ampl*self.axis_field_func.getY(zp)
 		#---- advance the particle position
-		TPB.drift(bunch,part_length/2)
+		self.tracking_module.drift(bunch,part_length/2)
 		self.part_pos += part_length/2	
 		#call rf gap model to track the bunch
 		time_middle_gap = syncPart.time() - arrival_time
@@ -695,7 +731,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		#print s
 		#---- this part is the debugging ---STOP---
 		self.cppGapModel.trackBunch(bunch,part_length/2,Em,E0,Ep,frequency,phase+delta_phase+modePhase)
-		TPB.drift(bunch,part_length/2)
+		self.tracking_module.drift(bunch,part_length/2)
 		#---- advance the particle position
 		self.part_pos += part_length/2
 		time_middle_gap = syncPart.time() - arrival_time
@@ -782,7 +818,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 				zm = z_old
 				z0 = zm + half_step
 				zp = z0 + half_step
-				TPB.drift(bunch,half_step)
+				self.tracking_module.drift(bunch,half_step)
 				time_gap = syncPart.time()
 				delta_phase = 2*math.pi*time_gap*frequency 
 				Em = E0L_local*self.axis_field_func.getY(zm)
@@ -793,7 +829,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 				#s += " phase = %9.2f "%(phaseNearTargetPhaseDeg((phase_start+delta_phase+modePhase)*180./math.pi,0.))
 				#print s	
 				self.cppGapModel.trackBunch(bunch,half_step,Em,E0,Ep,frequency,phase_start+delta_phase+modePhase)
-				TPB.drift(bunch,half_step)
+				self.tracking_module.drift(bunch,half_step)
 				#time_gap = syncPart.time()
 				#delta_phase = 2*math.pi*time_gap*frequency 				
 				#s  = "debug z[mm]= %7.2f "%(zp*1000.)

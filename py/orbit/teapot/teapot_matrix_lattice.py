@@ -189,6 +189,46 @@ class TEAPOT_MATRIX_Lattice(MATRIX_Lattice):
 		momentum = res_dict["momentum [GeV/c]"]
 		mass = res_dict["mass [GeV]"]		
 		return self.trackDispersionData(momentum, mass, disp, disp_p,"y")
+		
+	def getTransferTwissDataX(self,alpha_x,beta_x):
+		"""
+		Returns the tuple (tuneX, [(position, alphaX),...],[(position,betaX),...] ). 
+		It overloads the getRingTwissDataX(p,m) method from the parent MATRIX_Lattice 
+		class.
+		"""
+		res_dict = self.getRingParametersDict()
+		return self.trackTwissData(alpha_x,beta_x,"x")
+	
+	def getTransferTwissDataY(self,alpha_y,beta_y):
+		"""
+		Returns the tuple (tuneY, [(position, alphaY),...],[(position,betaY),...] ).
+		It overloads the getRingTwissDataY(p,m) method from the parent MATRIX_Lattice 
+		class.
+		"""
+		res_dict = self.getRingParametersDict()
+		return self.trackTwissData(alpha_y,beta_y,"y")
+		
+	def getTransferDispersionDataX(self,disp,disp_p):
+		"""
+		Returns the tuple  ([(position, dispX),...],[(position,disp_pX),...] ). 
+		It overloads the getRingDispersionDataX(p,m) method from the parent MATRIX_Lattice 
+		class.
+		"""
+		res_dict = self.getRingParametersDict()
+		momentum = res_dict["momentum [GeV/c]"]
+		mass = res_dict["mass [GeV]"]			
+		return self.trackDispersionData(momentum, mass, disp, disp_p,"x")
+
+	def getTransferDispersionDataY(self,disp,disp_p):
+		"""
+		Returns the tuple  ([(position, dispY),...],[(position,disp_pY),...] ). 
+		It overloads the getRingDispersionDataY(p,m) method from the parent MATRIX_Lattice 
+		class.
+		"""
+		res_dict = self.getRingParametersDict()
+		momentum = res_dict["momentum [GeV/c]"]
+		mass = res_dict["mass [GeV]"]		
+		return self.trackDispersionData(momentum, mass, disp, disp_p,"y")
 
 	def getChromaticitiesXY(self):
 		"""

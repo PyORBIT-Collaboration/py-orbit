@@ -764,7 +764,7 @@ class MultipoleTEAPOT(NodeTEAPOT):
 			skewArr = node.getParam("skews")
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]
@@ -783,7 +783,7 @@ class MultipoleTEAPOT(NodeTEAPOT):
 			skewArr = node.getParam("skews")
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]
@@ -882,7 +882,7 @@ class QuadTEAPOT(NodeTEAPOT):
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]					
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 			TPB.quadfringeIN(bunch,kq,useCharge)
 			if(length == 0.):
 				return
@@ -903,7 +903,7 @@ class QuadTEAPOT(NodeTEAPOT):
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 			TPB.quadfringeOUT(bunch,kq,useCharge)
 			if(length == 0.):
 				return
@@ -920,7 +920,7 @@ class QuadTEAPOT(NodeTEAPOT):
 		self.getNodeFringeFieldIN().setType("quad fringe in")
 		self.getNodeFringeFieldOUT().setType("quad fringe out")
 
-		self.setType("quad teapot with aperture")
+		self.setType("quad teapot")
 
 	def initialize(self):
 		"""
@@ -961,7 +961,7 @@ class QuadTEAPOT(NodeTEAPOT):
 		skewArr = self.getParam("skews")
 		bunch = paramsDict["bunch"] 
 		useCharge = 1
-		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 		if(index == 0):
 			TPB.quad1(bunch,length,kq,useCharge)
 			return
@@ -1016,7 +1016,7 @@ class BendTEAPOT(NodeTEAPOT):
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 			nParts = paramsDict["parentNode"].getnParts()
 			if(e != 0.):
 				inout = 0
@@ -1054,7 +1054,7 @@ class BendTEAPOT(NodeTEAPOT):
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]				
+			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 			nParts = paramsDict["parentNode"].getnParts()
 			if(e != 0.):
 				inout = 1
@@ -1127,7 +1127,7 @@ class BendTEAPOT(NodeTEAPOT):
 		skewArr = self.getParam("skews")
 		bunch = paramsDict["bunch"]
 		useCharge = 1
-		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
+		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
 		theta = self.getParam("theta")/(nParts - 1)
 		if(index == 0):
 			TPB.bend1(bunch, length, theta/2.0)

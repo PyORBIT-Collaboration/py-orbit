@@ -118,16 +118,18 @@ void BunchTwissAnalysis::analyzeBunch(Bunch* bunch){
 	ORBIT_MPI_Allreduce(avg_arr,avg_arr_MPI,6,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
 	ORBIT_MPI_Allreduce(corr_arr,corr_arr_MPI,36,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
 	
-	for(int i = 0; i < 6; i++){
-		avg_arr[i] = avg_arr_MPI[i]/total_macrosize;
-	}
-	
-	for(int i = 0; i < 6; i++){
-		for(int j = 0; j < i+1; j++){
-			corr_arr[i+6*j] = corr_arr_MPI[i+6*j]/total_macrosize;
-			corr_arr[j+6*i] = corr_arr_MPI[i+6*j]/total_macrosize;
+	if(fabs(total_macrosize) > 0.){
+		for(int i = 0; i < 6; i++){
+			avg_arr[i] = avg_arr_MPI[i]/total_macrosize;
+		}
+		
+		for(int i = 0; i < 6; i++){
+			for(int j = 0; j < i+1; j++){
+				corr_arr[i+6*j] = corr_arr_MPI[i+6*j]/total_macrosize;
+				corr_arr[j+6*i] = corr_arr_MPI[i+6*j]/total_macrosize;
+			}	
 		}	
-	}	
+	}
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
 	
@@ -192,7 +194,9 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 	
 		double xAvg_MPI = 0;
 		ORBIT_MPI_Allreduce(&xAvg,&xAvg_MPI,1,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
-		xAvg = xAvg_MPI/total_macrosize;
+		if(fabs(total_macrosize) > 0.){
+			xAvg = xAvg_MPI/total_macrosize;
+		}
 	}
 	else{
 		xAvg = getAverage(0);
@@ -312,12 +316,15 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 			count++;
 		}
 	}
+	
 	free(buff_0);
 	free(buff_1);
 		
-	for(i=0; i< _order+1; i++)
-        for(j=0; j< _order+1-i ; j++)
-			momentXY[i][j] /= total_macrosize;
+	if(fabs(total_macrosize) > 0.){
+		for(i=0; i< _order+1; i++)
+					for(j=0; j< _order+1-i ; j++)
+				momentXY[i][j] /= total_macrosize;
+	}
 	
 	momentXY[0][0] = 1.;  // 0th moment
 	momentXY[1][0] = xAvg;

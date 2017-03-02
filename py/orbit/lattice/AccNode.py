@@ -178,6 +178,19 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 			nodes = self.__childNodesArr[place][part_index][place_in_part]
 		return nodes
 
+	def getBodyChildren(self):
+		"""
+		Returns the array of direct childrens of this
+		accelerator node that are inside the element,
+		not before or after.
+		"""
+		nodes = []
+		for i in range(len(self.__childNodesArr[1])):
+			arr = self.__childNodesArr[1][i]
+			nodes += arr[0]
+			nodes += arr[1]
+		return nodes
+
 	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""
 		Method. Tracks the actions through the accelerator node.

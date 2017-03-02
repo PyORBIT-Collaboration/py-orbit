@@ -12,7 +12,6 @@ import os
 
 from orbit.py_linac.lattice import LinacApertureNode
 from orbit.py_linac.lattice import Quad
-from orbit.py_linac.overlapping_fields import OverlappingQuadsNode
 
 def AddMEBTChopperPlatesAperturesToSNS_Lattice(accLattice,aprtNodes):
 	"""

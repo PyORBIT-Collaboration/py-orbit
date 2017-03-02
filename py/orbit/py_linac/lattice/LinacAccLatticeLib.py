@@ -16,7 +16,7 @@ from orbit.utils import orbitFinalize, NamedObject, ParamsDictObject, phaseNearT
 # import general accelerator elements and lattice
 from orbit.lattice import AccLattice, AccNode, AccActionsContainer
 
-# import Sequence and RF_Cavity
+# import acc. nodes
 from LinacAccNodes import Quad, AbstractRF_Gap, MarkerLinacNode
 
 # import orbit Bunch
@@ -191,39 +191,53 @@ class LinacAccLattice(AccLattice):
 						quads.append(node)
 		return quads
 		
-	def getNodesOfClass(self, Class, seq = None):
+	def getNodesOfClass(self, Class, seq_names = []):
 		""" 
 		Returns the list of all nodes which are instances of Class
 		or these nodes which are also belong to a particular sequence. 
 		""" 
+		nSeqs = len(seq_names)
 		nodes = []
-		for node in self.getNodes():
-			if(isinstance(node,Class)):
-				if(seq == None):
+		if(nSeqs == 0):
+			for node in self.getNodes():
+				if(isinstance(node,Class)):
 					nodes.append(node)
-				else:
-					if(node.getSequence() == seq):
+		else:
+			for seq_name in seq_names:
+				accSeq = self.getSequence(seq_name)
+				seq_nodes = accSeq.getNodes()
+				for node in seq_nodes:
+					if(isinstance(node,Class)):
 						nodes.append(node)
 		return nodes
 		
-	def getNodesOfClasses(self, Classes, seq = None):
+	def getNodesOfClasses(self, Classes, seq_names = []):
 		""" 
 		Returns the list of all nodes which are instances of any Class in Classes array
 		or these nodes which are also belong to a particular sequence. 
-		""" 
+		"""
+		nSeqs = len(seq_names)
 		nodes = []
-		for node in self.getNodes():
-			info = False
-			for Class in Classes:
-				if(isinstance(node,Class)):
-					info = True
-			if(info):
-				if(seq == None):
+		if(nSeqs == 0):
+			for node in self.getNodes():
+				info = False
+				for Class in Classes:
+					if(isinstance(node,Class)):
+						info = True	
+				if(info):
 					nodes.append(node)
-				else:
-					if(node.getSequence() == seq):
+		else:
+			for seq_name in seq_names:
+				accSeq = self.getSequence(seq_name)
+				seq_nodes = accSeq.getNodes()
+				for node in seq_nodes:
+					info = False
+					for Class in Classes:
+						if(isinstance(node,Class)):
+							info = True	
+					if(info):
 						nodes.append(node)
-		return nodes	
+		return nodes		
 
 	def getRF_Gaps(self, rf_cav = None):
 		""" Returns the list of all RF gaps or just gaps belong to a particular RF cavity. """
@@ -236,6 +250,42 @@ class LinacAccLattice(AccLattice):
 					if(node.getRF_Cavity() == rf_cav):
 						gaps.append(node)
 		return gaps
+		
+	def getNodeForPosition(self,z):
+		"""
+		It is a convenience method. It returns the node which
+		coordinates cover the z-position.
+		"""
+		node_pos_dict = self.getNodePositionsDict()
+		nodes = self.getNodes()	
+		index0 = 0
+		index1 = len(nodes) - 1
+		(posBefore0, posAfter0) = node_pos_dict[nodes[index0]]
+		(posBefore1, posAfter1) = node_pos_dict[nodes[index1]]
+		if(z <= posBefore0): return (nodes[index0],index0,posBefore0,posAfter0)
+		if(z >= posAfter1): return (nodes[index1],index1,posBefore1,posAfter1)
+		index = 0
+		while(index0 != index1):			
+			index = (index0 + index1)/2
+			(posBefore, posAfter) = node_pos_dict[nodes[index]]
+			if(z < posBefore):
+				index1 = index
+				(posBefore1, posAfter1) = node_pos_dict[nodes[index1]]
+			elif(z > posAfter):
+				index0 = index
+				(posBefore0, posAfter0) = node_pos_dict[nodes[index0]]
+			elif(z >= posBefore and z <= posAfter):
+				break
+			if(z >= posBefore0 and z <= posAfter0):
+				index =index0 
+				break
+			if(z >= posBefore1 and z <= posAfter1):
+				index =index1
+				break		
+		#-------------------------------------------
+		node = nodes[index]
+		(posBefore, posAfter) = node_pos_dict[node]
+		return (node,index,posBefore,posAfter)	
 	
 #----------------------------------------------------------------
 # Classes that are specific for the linac model

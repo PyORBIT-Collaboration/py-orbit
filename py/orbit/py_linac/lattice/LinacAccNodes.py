@@ -18,6 +18,13 @@ from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
 # import teapot base functions from wrapper around C++ functions
 from orbit.teapot_base import TPB
 
+# Import the linac specific tracking from linac_tracking. This module has
+# the following functions duplicated the original TEAPOT functions
+# drift - linac drift tracking
+# quad1 - linac quad linear part of tracking
+# quad2 - linac quad non-linear part of tracking
+import linac_tracking
+
 class BaseLinacNode(AccNodeBunchTracker):
 	""" 
 	The base abstract class of the linac accelerator elements hierarchy. 
@@ -32,6 +39,17 @@ class BaseLinacNode(AccNodeBunchTracker):
 		self.setType("baseLinacNode")
 		self.setParam("pos",0.)
 		self.__linacSeqence = None
+		# by default we use the TEAPOT tracker module
+		self.tracking_module = TPB
+		
+	def setLinacTracker(self, switch = True):
+		"""
+		This method will switch tracker module to the linac specific traker by default
+		"""
+		if(switch):
+			self.tracking_module = linac_tracking
+		else:
+			self.tracking_module = TPB		
 		
 	def isRFGap(self):
 		"""
@@ -245,7 +263,7 @@ class Drift(BaseLinacNode):
 		"""
 		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
-		TPB.drift(bunch, length)
+		self.tracking_module.drift(bunch, length)
 		
 class Quad(LinacMagnetNode):
 	"""
@@ -262,9 +280,9 @@ class Quad(LinacMagnetNode):
 		self.addParam("skews",[])
 		self.setnParts(2)
 		self.setType("linacQuad")
-		
-		# B*rho = 3.335640952*momentum [T*m] if momentum in GeV/c
+
 		def fringeIN(node,paramsDict):
+			# B*rho = 3.335640952*momentum [T*m] if momentum in GeV/c
 			usageIN = node.getUsage()	
 			if(not usageIN):
 				return
@@ -355,30 +373,41 @@ class Quad(LinacMagnetNode):
 		skewArr = self.getParam("skews")
 		#print "debug name =",self.getName()," kq=",kq,"  L=",self.getLength()		
 		if(index == 0):
-			TPB.quad1(bunch, length, kq)
+			self.tracking_module.quad1(bunch, length, kq)
 			return
 		if(index > 0 and index < (nParts-1)):
-			TPB.quad2(bunch, length/2.0)
+			self.tracking_module.quad2(bunch, length/2.0)
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]/(nParts - 1)
 				skew = skewArr[i]
 				TPB.multp(bunch,pole,kl,skew)
-			TPB.quad2(bunch, length/2.0)
-			TPB.quad1(bunch, length, kq)
+			self.tracking_module.quad2(bunch, length/2.0)
+			self.tracking_module.quad1(bunch, length, kq)
 			return
 		if(index == (nParts-1)):
 			#print "debug before xp",	bunch.xp(0)
-			TPB.quad2(bunch, length)
+			self.tracking_module.quad2(bunch, length)
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
 				kl = klArr[i]*kq*length/(nParts - 1)
 				skew = skewArr[i]
 				TPB.multp(bunch,pole,kl,skew)
-			TPB.quad2(bunch, length)
-			TPB.quad1(bunch, length, kq)
+			self.tracking_module.quad2(bunch, length)
+			self.tracking_module.quad1(bunch, length, kq)
 			#print "debug after xp",	bunch.xp(0)
 		return		
+
+	def getTotalField(self,z):
+		"""
+		Returns the field of the quad.
+		This function was added to make a uniform 
+		interface with OverlappingQuadsNode.
+		"""
+		G = 0.
+		if(abs(z) < self.getLength()/2.):
+			G = quad.getParam("dB/dr")
+		return G
 
 
 class Bend(LinacMagnetNode):

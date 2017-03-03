@@ -74,8 +74,7 @@ source setupEnvironment.sh
 cd examples/AccLattice_Tests
 ./START.sh lattice_test.py 2
 ```
-
-This will launch *lattice_test* example on two MPI nodes.
+This will launch *lattice_test* example on two MPI nodes. Other examples are availabale in [Examples](../../../examples) repository.
 
 # Structure
 **./src**		- source code for the core ORBIT C++ classes, including

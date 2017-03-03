@@ -87,9 +87,7 @@ void Function::resize()
 
 void Function::finalize(const char* message)
 {
-  if(iMPIini > 0){
     ORBIT_MPI_Finalize(message);
-  }
 }
 
 void Function::add(double x, double y, double err)
@@ -269,6 +267,10 @@ double Function::getY(double x)
   if(inf_const_step > 0){
     ind = (int)((x-xMin)/x_step);
     if(ind < 0 || ind > (size-2)){
+    	if(ind == (size-1)){
+    		yy = y_arr[ind];
+    		return yy;
+    	}
       finalize("ORBIT Utils Function class: The Function method  getY(double x)  ind < 0 or ind >= (size-2)");
     }
     yy = y_arr[ind] + (y_arr[ind+1] - y_arr[ind])*((x - x_arr[ind])/x_step);

@@ -29,6 +29,7 @@ from aperture import Aperture
 class TeapotApertureNode(DriftTEAPOT):
 	def __init__(self, shape, a, b, pos = 0, c = 0, d = 0, name = "aperture"):
 		DriftTEAPOT.__init__(self,name)
+		self.setType("aperture")
 		self.shape = shape
 		self.a = a
 		self.b = b
@@ -50,6 +51,7 @@ class TeapotApertureNode(DriftTEAPOT):
 class CircleApertureNode(DriftTEAPOT):
 	def __init__(self, a, pos = 0, c = 0, d = 0, name = "aperture"):
 		DriftTEAPOT.__init__(self,name)
+		self.setType("aperture")
 		self.shape = 1
 		self.a = a
 		self.b = 1
@@ -73,6 +75,7 @@ class CircleApertureNode(DriftTEAPOT):
 class EllipseApertureNode(DriftTEAPOT):
 	def __init__(self, a, b, pos = 0, c = 0, d = 0,  name = "aperture"):
 		DriftTEAPOT.__init__(self,name)
+		self.setType("aperture")
 		self.shape = 2
 		self.a = a
 		self.b = b
@@ -94,6 +97,7 @@ class EllipseApertureNode(DriftTEAPOT):
 class RectangleApertureNode(DriftTEAPOT):
 	def __init__(self, a, b, pos = 0, c = 0, d = 0, name = "aperture"):
 		DriftTEAPOT.__init__(self,name)
+		self.setType("aperture")
 		self.shape = 3
 		self.a = a
 		self.b = b

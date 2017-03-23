@@ -167,6 +167,10 @@ class SNS_LinacLatticeFactory():
 					if(params_da.hasAttribute("aperture") and params_da.hasAttribute("aprt_type")):
 						accNode.setParam("aprt_type",params_da.intValue("aprt_type"))
 						accNode.setParam("aperture",params_da.doubleValue("aperture"))
+					#---- possible parameters for PMQ description of the in Trace3D style
+					if(params_da.hasAttribute("radIn") and params_da.hasAttribute("radOut")):
+						accNode.setParam("radIn",params_da.doubleValue("radIn"))
+						accNode.setParam("radOut",params_da.doubleValue("radOut"))
 					accNode.setParam("pos",node_pos)
 					accSeq.addNode(accNode)
 				#------------BEND-----------------

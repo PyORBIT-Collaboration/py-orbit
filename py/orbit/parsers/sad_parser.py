@@ -471,7 +471,8 @@ class StringFunctions:
 class SAD_Parser:
 	""" SAD parser """
 	_typeChecker = _possibleElementType()
-
+	SADFilePath = ""
+	
 	def __init__(self):
 		""" Create instance of the SAD_Parser class """
 		self.__SAD_Strings =  []
@@ -479,7 +480,6 @@ class SAD_Parser:
 		self.__accElements = []
 		self.__accLines = []
 		self.__unknownLines = []
-		self.__SADFilePath = ""
 		#old style lattice elements and lines
 		self.__lattElems = []
 		self.__lattLines = []
@@ -489,7 +489,7 @@ class SAD_Parser:
 
 	def parse(self,SADfileName):
 		#1-st stage read SAD file into the lines array
-		self.__SADFilePath = os.path.dirname(SADfileName)
+		self.SADFilePath = os.path.dirname(SADfileName)
 		fileName = os.path.basename(SADfileName)
 		#the initilize can be recursive if there are nested SAD files
 		self.__init__()
@@ -650,7 +650,7 @@ class SAD_Parser:
 
 	def initialize(self,SAD_file_name):
 		""" This method will do the preliminary editing the input file."""
-		fl = open(os.path.join(self.__SADFilePath, SAD_file_name))
+		fl = open(os.path.join(self.SADFilePath,SAD_file_name),"r")
 		sad_strings = []
 		str_local = ""
 		for str_in in fl.readlines():

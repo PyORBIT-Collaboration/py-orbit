@@ -10,7 +10,17 @@
 //    09/01/2015
 //
 // DESCRIPTION
-//    A set of functions for bunches with the ParticleIdNumber attribute
+//    A set of functions for bunches with the ParticleIdNumber attribute.
+//    At this moment there are two main functions:
+//    1. transport_mtrx(bunch_in, bunch_out, Matrix* A_mtr)
+//    2. transport_mtrx(bunch_in, bunch_out, Matrix* A_mtr, int appl_twiss_x, int appl_twiss_y, int appl_twiss_z)
+//    These functions will fill out the A_mtr that will be a transport matrix between
+//    bunches in and out. The correspondence between macro-particles in two bunches
+//    is defined by the Id of the macro-particles.
+//    Before using these functions it is recommended to remove particles far away from the center
+//    of the phase space by using functions from TwissFilteringFunctions.cc
+//    Function 1 assumes the equal weights for all macro-partiles, and 2nd uses weights according
+//    wx = exp(-(x^2+(alphax*x+betax*x')^2)/(2*(betax*emittancex)) etc.
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -328,7 +338,7 @@ namespace OrbitUtils{
 	
 	/** A function analyzes two bunches assuming that they are already
 	    sorted and synchronized according to the macro-particles Id. 
-	    Coordinates of macro-particles in "in" and "out" bunches will be 
+	    Macrosize of macro-particles in "in" and "out" bunches will be 
 	    multiplied by the same numbers wx*wy*wz where
 	    wx = exp(-(x^2+(alphax*x+betax*x')^2)/(2*(betax*emittancex))
 	    etc.

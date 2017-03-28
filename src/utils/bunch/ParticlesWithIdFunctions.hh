@@ -49,14 +49,14 @@ namespace OrbitUtils{
 	
 	/** A function analyzes two bunches assuming that they are already
 	    sorted and synchronized according to the macro-particles Id. 
-	    Coordinates of macro-particles in "in" and "out" bunches will be 
+	    Macrosizes of macro-particles in "in" and "out" bunches will be 
 	    multiplied by the same numbers wx*wy*wz where
 	    wx = exp(-(x^2+(alphax*x+betax*x')^2)/(2*(betax*emittancex))
 	    etc.
 	    Alpha, beta, emittance are the Twiss parameters for the corresponding 
 	    plane.
 	*/
-	void apply_twiss_weghts(Bunch* bunch_in, Bunch* bunch_out,int appl_x,int appl_y,int appl_z);	
+	void apply_twiss_weights(Bunch* bunch_in, Bunch* bunch_out,int appl_x,int appl_y,int appl_z);	
 	
 };
 ///////////////////////////////////////////////////////////////////////////

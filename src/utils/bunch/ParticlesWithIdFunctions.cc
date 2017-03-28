@@ -175,7 +175,7 @@ namespace OrbitUtils{
 		double total_macrosize = 1.0*n_parts;
 		
 		//apply Twiss Gaussian weights to microsize. It will add macrosize Attr. if it does not exist
-		apply_twiss_weghts(b_in_tmp, b_out_tmp,appl_twiss_x,appl_twiss_y,appl_twiss_z);
+		apply_twiss_weights(b_in_tmp, b_out_tmp,appl_twiss_x,appl_twiss_y,appl_twiss_z);
 		
 		partMacroSizeAttr_in_tmp = NULL;
 		if(b_in_tmp->hasParticleAttributes("macrosize") != 0){
@@ -345,7 +345,7 @@ namespace OrbitUtils{
 	    Alpha, beta, emittance are the Twiss parameters for the corresponding 
 	    plane.
 	*/
-	void apply_twiss_weghts(Bunch* bunch_in, Bunch* bunch_out,int appl_x,int appl_y,int appl_z){	
+	void apply_twiss_weights(Bunch* bunch_in, Bunch* bunch_out,int appl_x,int appl_y,int appl_z){	
 		if(appl_x == 0 && appl_y == 0 && appl_z == 0) return;
 		
 		int n_parts =  bunch_in->getSize();

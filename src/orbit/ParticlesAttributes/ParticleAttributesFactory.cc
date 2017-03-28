@@ -26,6 +26,7 @@
 #include "LostParticleAttributes.hh"
 #include "ParticlePhaseAttributes.hh"
 #include "ParticleIdNumber.hh"
+#include "ParticleInitialCoordinates.hh"
 
 ParticleAttributesFactory::ParticleAttributesFactory()
 {
@@ -174,8 +175,11 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 			}
 		}
 	}
-  	
-  
+
+	if(name == "ParticleInitialCoordinates"){
+		part_atrs = new ParticleInitialCoordinates(bunch);
+	}	
+	
 	if(part_atrs == NULL) {
 		if(rank_MPI == 0){
 			std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(const string name, Bunch* bunch)"<< std::endl;

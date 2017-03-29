@@ -160,8 +160,8 @@ extern "C" {
 		Aperture_new, /* tp_new */
 	};	
 	
-	
-	
+  static PyMethodDef ApertureModuleMethods[] = { {NULL,NULL} };	
+  
 	//--------------------------------------------------
 	//Initialization Aperture of the pyBunchAperture class
 	//--------------------------------------------------
@@ -171,7 +171,7 @@ extern "C" {
 		if (PyType_Ready(&pyORBIT_Aperture_Type) < 0) return;
 		Py_INCREF(&pyORBIT_Aperture_Type);
 		//create new module
-		PyObject* module = Py_InitModule("aperture",ApertureClassMethods);
+		PyObject* module = Py_InitModule("aperture",ApertureModuleMethods);
 		PyModule_AddObject(module, "Aperture", (PyObject *)&pyORBIT_Aperture_Type);			
 	}
 

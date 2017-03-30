@@ -18,6 +18,8 @@ from LinacApertureNodes import LinacApertureNode
 from LinacApertureNodes import CircleLinacApertureNode
 from LinacApertureNodes import EllipseLinacApertureNode
 from LinacApertureNodes import RectangleLinacApertureNode
+from LinacApertureNodes import LinacPhaseApertureNode
+from LinacApertureNodes import LinacEnergyApertureNode
 
 from LinacFieldOverlappingNodes import AxisField_and_Quad_RF_Gap
 from LinacFieldOverlappingNodes import OverlappingQuadsNode
@@ -44,6 +46,8 @@ __all__.append("LinacApertureNode")
 __all__.append("CircleLinacApertureNode")
 __all__.append("EllipseLinacApertureNode")
 __all__.append("RectangleLinacApertureNode")
+__all__.append("LinacPhaseApertureNode")
+__all__.append("LinacEnergyApertureNode")
 
 __all__.append("RF_Cavity")
 __all__.append("Sequence")

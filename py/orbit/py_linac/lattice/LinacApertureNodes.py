@@ -83,7 +83,7 @@ class LinacPhaseApertureNode(BaseLinacNode):
 	The phase aperture classes removes particles from bunch and places them in the lostbunch
 	if their phases are not inside the min-max phases.
 	"""
-	def __init__(self, frequency = 402.5e+6, name = "aperture"):
+	def __init__(self, frequency = 402.5e+6, name = "phase_aperture"):
 		BaseLinacNode.__init__(self,name)
 		self.aperture = PhaseAperture(frequency)	
 
@@ -122,7 +122,7 @@ class LinacEnergyApertureNode(BaseLinacNode):
 	The phase aperture classes removes particles from bunch and places them in the lostbunch
 	if their phases are not inside the min-max energy.
 	"""
-	def __init__(self, name = "aperture"):
+	def __init__(self, name = "energy_aperture"):
 		BaseLinacNode.__init__(self,name)
 		self.aperture = EnergyAperture()	
 

@@ -10,8 +10,11 @@ import os
 
 from orbit.py_linac.lattice import BaseLinacNode, Quad
 
-# import injection C++ class
+# import aperture C++ classes
 from aperture import Aperture
+from aperture import PhaseAperture
+from aperture import EnergyAperture
+
 
 class LinacApertureNode(BaseLinacNode):
 	"""
@@ -75,6 +78,75 @@ class RectangleLinacApertureNode(LinacApertureNode):
 		LinacApertureNode.__init__(self,3,a,b,pos,c,d,name)
 
 
+class LinacPhaseApertureNode(BaseLinacNode):
+	"""
+	The phase aperture classes removes particles from bunch and places them in the lostbunch
+	if their phases are not inside the min-max phases.
+	"""
+	def __init__(self, frequency = 402.5e+6, name = "phase_aperture"):
+		BaseLinacNode.__init__(self,name)
+		self.aperture = PhaseAperture(frequency)	
 
+	def setMinMaxPhase(self,minPhase,maxPhase):
+		self.aperture.setMinMaxPhase(minPhase,maxPhase)
+		
+	def getMinMaxPhase(self):
+		return self.aperture.getMinMaxPhase()
 
+	def setRfFrequency(self,frequency):
+		self.aperture.setRfFrequency(frequency)
+		
+	def getRfFrequency(self):
+		return self.aperture.getRfFrequency()
+
+	def setPosition(self, pos):
+		BaseLinacNode.setPosition(self,pos)
+		self.aperture.setPosition(self.getPosition())
+
+	def track(self, paramsDict):
+		bunch = paramsDict["bunch"]
+		if(paramsDict.has_key("lostbunch")):
+			lostbunch = paramsDict["lostbunch"]
+			self.aperture.checkBunch(bunch, lostbunch)
+		else:
+			self.aperture.checkBunch(bunch)
+
+	def trackDesign(self, paramsDict):
+		"""
+		This method does nothing for the aperture case.
+		"""
+		pass
+
+class LinacEnergyApertureNode(BaseLinacNode):
+	"""
+	The phase aperture classes removes particles from bunch and places them in the lostbunch
+	if their phases are not inside the min-max energy.
+	"""
+	def __init__(self, name = "energy_aperture"):
+		BaseLinacNode.__init__(self,name)
+		self.aperture = EnergyAperture()	
+
+	def setMinMaxEnergy(self,minEnergy,maxEnergy):
+		self.aperture.setMinMaxEnergy(minEnergy,maxEnergy)
+		
+	def getMinMaxEnergy(self):
+		return self.aperture.getMinMaxEnergy()
+
+	def setPosition(self, pos):
+		BaseLinacNode.setPosition(self,pos)
+		self.aperture.setPosition(self.getPosition())
+
+	def track(self, paramsDict):
+		bunch = paramsDict["bunch"]
+		if(paramsDict.has_key("lostbunch")):
+			lostbunch = paramsDict["lostbunch"]
+			self.aperture.checkBunch(bunch, lostbunch)
+		else:
+			self.aperture.checkBunch(bunch)
+
+	def trackDesign(self, paramsDict):
+		"""
+		This method does nothing for the aperture case.
+		"""
+		pass
 

@@ -79,27 +79,8 @@ class SNS_LinacLatticeFactory():
 			orbitFinalize(msg)
 		#----- let's parse the XML DataAdaptor
 		accSeq_da_arr = acc_da.childAdaptors()
-		#let's check that the names in good order  ==start==
-		seqencesLocal = accSeq_da_arr
-		seqencesLocalNames = []
-		for seq_da in seqencesLocal:
-			seqencesLocalNames.append(seq_da.getName())
-		ind_old = -1
-		count = 0
-		for name in names:
-			ind = seqencesLocalNames.index(name)
-			if(ind < 0 or (count > 0 and ind != (ind_old + 1))):
-				msg = "The LinacLatticeFactory method getLinacAccLattice(names): sequence names array is wrong!"
-				msg = msg + os.linesep
-				msg = msg + "existing names=" + str(seqencesLocalNames)
-				msg = msg + os.linesep
-				msg = msg + "sequence names="+str(names)
-				orbitFinalize(msg)
-			ind_old = ind
-			count += 1
-		#	let's check that the names in good order  ==stop==			
-		ind_start = seqencesLocalNames.index(names[0])
-		accSeq_da_arr = accSeq_da_arr[ind_start:ind_start+len(names)]
+		#-----let's filter and check that the names in good order 
+		accSeq_da_arr = self.filterSequences_and_OptionalCheck(accSeq_da_arr,names)
 		#----make linac lattice
 		linacAccLattice = LinacAccLattice(acc_da.getName())
 		#There are the folowing possible types of elements in the linac tree:
@@ -186,6 +167,10 @@ class SNS_LinacLatticeFactory():
 					if(params_da.hasAttribute("aperture") and params_da.hasAttribute("aprt_type")):
 						accNode.setParam("aprt_type",params_da.intValue("aprt_type"))
 						accNode.setParam("aperture",params_da.doubleValue("aperture"))
+					#---- possible parameters for PMQ description of the in Trace3D style
+					if(params_da.hasAttribute("radIn") and params_da.hasAttribute("radOut")):
+						accNode.setParam("radIn",params_da.doubleValue("radIn"))
+						accNode.setParam("radOut",params_da.doubleValue("radOut"))
 					accNode.setParam("pos",node_pos)
 					accSeq.addNode(accNode)
 				#------------BEND-----------------
@@ -404,6 +389,35 @@ class SNS_LinacLatticeFactory():
 		#------- finalize the lattice construction
 		linacAccLattice.initialize()
 		return linacAccLattice
+
+	def filterSequences_and_OptionalCheck(self,accSeq_da_arr,names):
+		"""
+		This method will filter the sequences according to names list
+		and check the order of sequences in names. 
+		All sequences should be in the right order. For SNS linac is 
+		just a linac. It returns the filtered array with data adapters
+		with the names in the names array.
+		"""
+		seqencesLocal = accSeq_da_arr
+		seqencesLocalNames = []
+		for seq_da in seqencesLocal:
+			seqencesLocalNames.append(seq_da.getName())
+		ind_old = -1
+		count = 0
+		for name in names:
+			ind = seqencesLocalNames.index(name)
+			if(ind < 0 or (count > 0 and ind != (ind_old + 1))):
+				msg = "The LinacLatticeFactory method getLinacAccLattice(names): sequence names array is wrong!"
+				msg = msg + os.linesep
+				msg = msg + "existing names=" + str(seqencesLocalNames)
+				msg = msg + os.linesep
+				msg = msg + "sequence names="+str(names)
+				orbitFinalize(msg)
+			ind_old = ind
+			count += 1		
+		ind_start = seqencesLocalNames.index(names[0])
+		accSeq_da_arr = accSeq_da_arr[ind_start:ind_start+len(names)]
+		return accSeq_da_arr
 
 	def makeDataAdaptorforLinacLattice(self,linacAccLattice):
 		"""

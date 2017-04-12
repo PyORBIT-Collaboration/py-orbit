@@ -206,7 +206,91 @@ class EngeFunction(AbstractQuadFieldSourceFunction):
 		""" Returns the tuple with min and max Z value for this field """
 		z_max = self.func.getMaxX()
 		return (-z_max,z_max)
+				 
+class PMQ_Trace3D_Function(AbstractQuadFieldSourceFunction):
+	""" 
+	The PMQ Function is a represenatation of the field of permanent quad
+	from Trace3D documantation (p 77): 
+	http://laacg.lanl.gov/laacg/services/traceman.pdf
+	"""
+	def __init__(self, length_param, rad_in, rad_out, cutoff_level = 0.01):
+		self.length = length_param
+		self.rad_in = rad_in
+		self.rad_out = rad_out
+		self.cutoff_level = cutoff_level
+		self.normalization = 1.0
+		self.n_func_points = 500
+		z_step = length_param/self.n_func_points
+		z_cutoff = self._findCutOff(z_step,cutoff_level)
+		self.z_min = - z_cutoff
+		self.z_max = + z_cutoff
+		self._normalize()
+		
+	def _findCutOff(self,step, cutoff_level):
+		""" Finds the distance from the center where the field is less than cutoff level """
+		init_val = self.getFuncValue(0.)
+		z = step
+		val = self.getFuncValue(z)/init_val
+		if(val <= cutoff_level):
+			return z
+		while(val > cutoff_level):
+			z += step
+			val = self.getFuncValue(z)/init_val
+		z0 = z - step
+		z1 = z
+		n_inner_points = 100
+		step_z = step/n_inner_points
+		val0 =  self.getFuncValue(z0)/init_val
+		val1 =  self.getFuncValue(z1)/init_val		
+		while(abs(z0-z1) > step_z):
+			z_new = (z0+z1)/2.0
+			val_new = self.getFuncValue(z_new)/init_val
+			if(val_new <= cutoff_level):
+				z1 = z_new
+				val1 = val_new
+			else:
+				z0 = z_new
+				val0 = val_new			
+		cutoff_z = (z0+z1)/2.0
+		return cutoff_z
 				
+	def _normalize(self):
+		""" Normalizes the quad field function to the integral of 1 """
+		self.normalization = 1.0
+		step = self.z_max/(self.n_func_points - 1)
+		sum_int = 0.
+		for ind in range(self.n_func_points):
+			z = step*ind
+			val = self.getFuncValue(z)
+			sum_int += val
+		sum_int -= (self.getFuncValue(0.) + self.getFuncValue(step*(self.n_func_points - 1)))/2.0
+		sum_int *= 2.0*step
+		self.normalization = 1.0/sum_int
+				
+	def getLimitsZ(self):
+		"""
+		Returns (z_min,z_max) tuple as longitudinal limits of the quad field.
+		"""		
+		return (self.z_min,self.z_max)
+		
+	def pmq_func(self,z):
+		"""
+		This is PMQ function defined at p. 77 of the Trace3D manual.
+		"""
+		r1 = self.rad_in
+		r2 = self.rad_out
+		v1 = 1.0/math.sqrt(1.0+(z/r1)**2)
+		v2 = 1.0/math.sqrt(1.0+(z/r2)**2)
+		f = 0.5*(1-0.125*z*(1.0/r1+1.0/r2)*v1**2*v2**2*(v1**2+v1*v2+v1**2+4+8/v1/v2)/(v1+v2))	
+		return f
+		
+	def getFuncValue(self,z):
+		""" 
+		Returns the quad's normalized field distribution at the distance z from the center 
+		"""		
+		f = self.pmq_func(z - self.length/2) - self.pmq_func(z + self.length/2)
+		return self.normalization*f
+			
 #-----------------------------------------------------------------------		
 #-----Test of the Enge Function ----------------	
 #-----------------------------------------------------------------------

@@ -370,8 +370,6 @@ class MATRIX_Lattice(AccLattice):
 		orbitYP_arr = []
 		
 		position = 0.
-		pos_arr.append(position)
-		
 		
 		track_o = Matrix(6,6)
 		
@@ -383,17 +381,12 @@ class MATRIX_Lattice(AccLattice):
 		track_ov.set(4,z0[4])
 		track_ov.set(5,z0[5])
 		
-		orbitX_arr.append(track_ov.get(0))
-		orbitY_arr.append(track_ov.get(2))
-		orbitXP_arr.append(track_ov.get(1))
-		orbitYP_arr.append(track_ov.get(3))
 
-		position_old = position
 
 		
 		for matrixNode in self.getNodes():
 			if(isinstance(matrixNode,BaseMATRIX) == True):
-				if(abs(position_old-position) > eps_length):
+				if matrixNode.getLength() > 0 and matrixNode.getParam("matrix_parent_node_active_index")==0 or matrixNode.getParam("matrix_parent_node_type")=="node teapot":
 					pos_arr.append(position)
 					orbitX_arr.append(track_ov.get(0))
 					orbitY_arr.append(track_ov.get(2))

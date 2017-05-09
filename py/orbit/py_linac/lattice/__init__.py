@@ -27,6 +27,9 @@ from LinacFieldOverlappingNodes import OverlappingQuadsNode
 from LinacAccLatticeFunc import GetGlobalQuadGradient
 from LinacAccLatticeFunc import GetGlobalRF_AxisField
 
+from LinacTransportMatrixGenNodes import LinacTrMatrixGenNode
+from LinacTransportMatrixGenNodes import LinacTrMatricesContrioller
+
 __all__ = []
 __all__.append("LinacAccLattice")
 
@@ -65,4 +68,7 @@ __all__.append("OverlappingQuadsNode")
 
 __all__.append("GetGlobalQuadGradient")
 __all__.append("GetGlobalRF_AxisField")
+
+__all__.append("LinacTrMatrixGenNode")
+__all__.append("LinacTrMatricesContrioller")
 

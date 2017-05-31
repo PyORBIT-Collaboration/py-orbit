@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
   namespace wrap_aperture{
-    void initAperture(PyObject* module);
+    void initTAperture(PyObject* module);
   }
 
 #ifdef __cplusplus

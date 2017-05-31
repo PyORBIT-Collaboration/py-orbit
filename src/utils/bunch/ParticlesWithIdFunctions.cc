@@ -10,7 +10,17 @@
 //    09/01/2015
 //
 // DESCRIPTION
-//    A set of functions for bunches with the ParticleIdNumber attribute
+//    A set of functions for bunches with the ParticleIdNumber attribute.
+//    At this moment there are two main functions:
+//    1. transport_mtrx(bunch_in, bunch_out, Matrix* A_mtr)
+//    2. transport_mtrx(bunch_in, bunch_out, Matrix* A_mtr, int appl_twiss_x, int appl_twiss_y, int appl_twiss_z)
+//    These functions will fill out the A_mtr that will be a transport matrix between
+//    bunches in and out. The correspondence between macro-particles in two bunches
+//    is defined by the Id of the macro-particles.
+//    Before using these functions it is recommended to remove particles far away from the center
+//    of the phase space by using functions from TwissFilteringFunctions.cc
+//    Function 1 assumes the equal weights for all macro-partiles, and 2nd uses weights according
+//    wx = exp(-(x^2+(alphax*x+betax*x')^2)/(2*(betax*emittancex)) etc.
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -165,7 +175,7 @@ namespace OrbitUtils{
 		double total_macrosize = 1.0*n_parts;
 		
 		//apply Twiss Gaussian weights to microsize. It will add macrosize Attr. if it does not exist
-		apply_twiss_weghts(b_in_tmp, b_out_tmp,appl_twiss_x,appl_twiss_y,appl_twiss_z);
+		apply_twiss_weights(b_in_tmp, b_out_tmp,appl_twiss_x,appl_twiss_y,appl_twiss_z);
 		
 		partMacroSizeAttr_in_tmp = NULL;
 		if(b_in_tmp->hasParticleAttributes("macrosize") != 0){
@@ -328,14 +338,14 @@ namespace OrbitUtils{
 	
 	/** A function analyzes two bunches assuming that they are already
 	    sorted and synchronized according to the macro-particles Id. 
-	    Coordinates of macro-particles in "in" and "out" bunches will be 
+	    Macrosize of macro-particles in "in" and "out" bunches will be 
 	    multiplied by the same numbers wx*wy*wz where
 	    wx = exp(-(x^2+(alphax*x+betax*x')^2)/(2*(betax*emittancex))
 	    etc.
 	    Alpha, beta, emittance are the Twiss parameters for the corresponding 
 	    plane.
 	*/
-	void apply_twiss_weghts(Bunch* bunch_in, Bunch* bunch_out,int appl_x,int appl_y,int appl_z){	
+	void apply_twiss_weights(Bunch* bunch_in, Bunch* bunch_out,int appl_x,int appl_y,int appl_z){	
 		if(appl_x == 0 && appl_y == 0 && appl_z == 0) return;
 		
 		int n_parts =  bunch_in->getSize();

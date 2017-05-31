@@ -156,19 +156,51 @@ def Replace_Quads_to_OverlappingQuads_Nodes(\
 				(node_pos_start,node_pos_end) = node_pos_dict[node]
 				delta = node_pos_end - pos_start
 				new_length = abs(node.getLength() - delta)
+				#print "debug start group node = ",node.getName()," node.getLength() - delta =",node.getLength() - delta
 				if(new_length > drift_length_tolerance):
-					node.setLength(new_length)
-					node.setPosition(node.getPosition() - delta/2)
-					new_nodes.append(node)
+					if(quad_group_ind > 0):
+						#---- we have to check that this node is not the end node of the previous quad group
+						#---- if it is true we have to skip it because we already accounted for this node
+						#---- earlier when we considered node at the end of the previous group
+						[quads_arr0,pos_start0,pos_end0,ind_start0,ind_end0] = quad_groups_and_ind_arr[quad_group_ind-1]
+						if(ind_start != ind_end0):
+							node_new = Drift(node.getName())
+							node_new .setLength(new_length)
+							node_new .setPosition(node.getPosition() - delta/2)
+							new_nodes.append(node_new)
+					else:
+						node_new = Drift(node.getName())
+						node_new .setLength(new_length)
+						node_new .setPosition(node.getPosition() - delta/2)
+						new_nodes.append(node_new)
 			node = nodes[ind_end]
 			if(isinstance(node,Drift)):
 				(node_pos_start,node_pos_end) = node_pos_dict[node]
 				delta = pos_end - node_pos_start 
 				new_length = abs(node.getLength() - delta)
+				#print "debug end   group node = ",node.getName()," node.getLength() - delta =",node.getLength() - delta
 				if(new_length > drift_length_tolerance):
-					node.setLength(new_length)
-					node.setPosition(node.getPosition() + delta/2)	
-					new_nodes.append(node)
+					if(quad_group_ind < n_groups - 1):
+						#---- we have to check that this node is not the start node of the next quad group
+						#---- if it is true we have to account for the cat in the length from this group also
+						[quads_arr1,pos_start1,pos_end1,ind_start1,ind_end1] = quad_groups_and_ind_arr[quad_group_ind+1]
+						if(ind_end == ind_start1):
+							delta1 = node_pos_end - pos_start1
+							new_length = abs(new_length - delta1)
+							node_new = Drift(node.getName())
+							node_new.setLength(new_length)
+							node_new.setPosition(node.getPosition() + delta/2 - delta1/2 )	
+							new_nodes.append(node_new)								
+						else:
+							node_new = Drift(node.getName())
+							node_new.setLength(new_length)
+							node_new.setPosition(node.getPosition() + delta/2)	
+							new_nodes.append(node_new)							
+					else:
+						node_new = Drift(node.getName())
+						node_new.setLength(new_length)
+						node_new.setPosition(node.getPosition() + delta/2)	
+						new_nodes.append(node_new)
 		#---- 2st STEP - nodes from the beginning to the first group of quads
 		[quads_arr,pos_start,pos_end,ind_start,ind_end] = quad_groups_and_ind_arr[0]
 		for node_ind in range(0,ind_start):

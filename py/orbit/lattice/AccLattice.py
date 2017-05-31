@@ -148,6 +148,16 @@ class AccLattice(NamedObject, TypedObject):
 				nodes.append(node)
 		return nodes
 		
+	def getNodesOfClass(self,class_of_node):
+		"""
+		Method. Returns nodes off a certain class.
+		"""
+		nodes = []
+		for node in self.__children:
+			if(isinstance(node,class_of_node)):
+				nodes.append(node)
+		return nodes		
+		
 	def getNodesForSubstring(self,sub, no_sub = None):
 		"""
 		Method. Returns nodes with names each of them has the certain substring. 

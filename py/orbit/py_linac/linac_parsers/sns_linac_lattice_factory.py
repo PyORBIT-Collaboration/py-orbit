@@ -317,7 +317,7 @@ class SNS_LinacLatticeFactory():
 					nDrifts = int(driftLength/self.maxDriftLength) + 1
 					driftLength = driftLength/nDrifts
 					for idrift in range(nDrifts):
-						drift = Drift(accSeq.getName()+":"+firstNode.getName()+":"+str(idrift+1)+":drift")
+						drift = Drift(accSeq.getName()+":START:"+str(idrift+1)+":drift")
 						drift.setLength(driftLength)
 						drift.setParam("pos",0.+drift.getLength()*(idrift+0.5))
 						driftNodes.append(drift)

@@ -158,7 +158,7 @@ extern "C" {
 	//Initialization Aperture class
 	//--------------------------------------------------
 
-	void initAperture(PyObject* module){
+	void initTAperture(PyObject* module){
 		//check that the Aperture wrapper is ready
 		if (PyType_Ready(&pyORBIT_Aperture_Type) < 0) return;
 		Py_INCREF(&pyORBIT_Aperture_Type);

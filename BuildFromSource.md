@@ -9,10 +9,10 @@ Everything will be contained in the pyORBIT directory.
 
 ## Download all required sources and extract them.
 ```shell
-wget -O- http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz | tar xvz
-wget -O- https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz | tar xvz
-wget -O- http://zlib.net/zlib-1.2.8.tar.gz | tar xvz
-wget -O- http://www.fftw.org/fftw-3.3.5.tar.gz | tar xvz
+curl http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz | tar xvz
+curl https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tgz | tar xvz
+curl http://zlib.net/fossils/zlib-1.2.11.tar.gz | tar xvz
+curl http://www.fftw.org/fftw-3.3.5.tar.gz | tar xvz
 ```
 
 ## Build all libraries
@@ -29,7 +29,7 @@ cd ..
 
 2. Build ZLIB
 ```shell
-cd zlib-1.2.8
+cd zlib-1.2.11
 ./configure -prefix=`pwd`/..
 make
 make install

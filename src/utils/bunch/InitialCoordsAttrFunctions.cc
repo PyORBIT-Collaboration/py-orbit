@@ -281,6 +281,7 @@ namespace OrbitUtils{
 			MatrixOperations::invert(Amtrx);
 			
 			Amtrx->mult(XTYmtrx);
+			Amtrx->transpose();
 			for (int i = 0; i < 6; i++){
 				A_mtr->getArray()[i][6] = 0.;
 				for (int j = 0; j < 6; j++){

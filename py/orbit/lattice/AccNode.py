@@ -81,6 +81,7 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		Method. Sets the physical length of a node or a
 		part if index > 0.
 		"""
+		L = float(L)
 		if(math.fabs(L) < 1.0e-36): L = 0.
 		if(index >= 0):
 			self.__lengthArr[index] = L

@@ -17,7 +17,7 @@ class ParticleIdNumber:
 	"""
 	
 	@staticmethod
-	def addParticleIdNumbers(b, fixedidnumber = -1):
+	def addParticleIdNumbers(b, fixedidnumber = -1, part_ind = 0):
 
 		rank = 0
 		numprocs = 1
@@ -43,7 +43,7 @@ class ParticleIdNumber:
 			b.addPartAttr("ParticleIdNumber")
 
 		if(fixedidnumber >= 0):
-			for i in range(b.getSize()):
+			for i in range(part_ind, b.getSize()):
 				b.partAttrValue("ParticleIdNumber", i, 0, fixedidnumber)
 				
 		else:

@@ -254,6 +254,15 @@ extern "C" {
     return Py_None;	
   }	
 	
+  //  det() - returns determinant of the matrix
+  static PyObject* Matrix_det(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyMatrix = (pyORBIT_Object*) self;
+		Matrix* cpp_Matrix = (Matrix*) pyMatrix->cpp_obj;
+		double det;
+		MatrixOperations::det(cpp_Matrix,det);
+		return Py_BuildValue("d",det);
+  } 
+  
 	//  track() - trackiplies a number,matrix or vector to the this matrix. Returns a new matrix. 
   static PyObject* Matrix_track(PyObject *self, PyObject *args){
     pyORBIT_Object* pyMatrix = (pyORBIT_Object*) self;
@@ -286,6 +295,7 @@ extern "C" {
 		{ "unit",       Matrix_unit      ,METH_VARARGS,"Sets the matrix to a unit matrix"},
 		{ "add",        Matrix_add       ,METH_VARARGS,"Adds a matrix or number to the matrix"},
 		{ "mult",       Matrix_mult      ,METH_VARARGS,"Multiples a matrix by number, vector or matrix. Returns a new matrix"},
+		{ "det",        Matrix_det       ,METH_VARARGS,"Returns determinant of the square matrix"},
 		{ "track",      Matrix_track     ,METH_VARARGS,"Tracks Bunch through the matrix"},
     {NULL}
   };

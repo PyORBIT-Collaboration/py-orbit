@@ -26,6 +26,9 @@ namespace OrbitUtils{
 		/** Multiplies a vector with the matrix. */
 		static int mult(Matrix* mtrx, PhaseVector* v, PhaseVector* v_res);
 		
+		/** Calculates determinant of the matrix. */
+		static int det(Matrix* mtrx_in, double& det);
+		
 		/** 
 		  Tracks the bunch through the transport matrix. 
 			The matrix should be 6x6 or 7x7.

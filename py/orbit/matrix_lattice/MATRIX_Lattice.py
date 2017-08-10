@@ -249,11 +249,15 @@ class MATRIX_Lattice(AccLattice):
 				position = position + matrixNode.getLength()
 				if(isinstance(matrixNode,BaseMATRIX) == True):
 					#only the main nodes are used, the or-cases deal with markers with zero length
-					if matrixNode.getLength() > 0 and matrixNode.getParam("matrix_parent_node_active_index")==0 or matrixNode.getParam("matrix_parent_node_type")=="node teapot":
-						pos_arr.append(position)
-						alpha_arr.append(track_v.get(0))
-						beta_arr.append(track_v.get(1))
-						mu_arr.append(phi/(2*math.pi))
+					#print position, matrixNode.getParam("matrix_parent_node_active_index") == 1
+					#print position, matrixNode.getName(), track_v.get(1)
+					
+					if matrixNode.getLength() > 0:
+							#print position, matrixNode.getName(), track_v.get(1)
+							pos_arr.append(position)
+							alpha_arr.append(track_v.get(0))
+							beta_arr.append(track_v.get(1))
+							mu_arr.append(phi/(2*math.pi))
 				#count = count + 1
 		#pack the resulting tuple
 		tune = phi/(2*math.pi)	
@@ -336,7 +340,7 @@ class MATRIX_Lattice(AccLattice):
 				track_v = track_m.mult(track_v)	
 				position = position + matrixNode.getLength()
 				#only the main nodes are used, the or-cases deal with markers with zero length
-				if matrixNode.getLength() > 0 and matrixNode.getParam("matrix_parent_node_active_index")==0 or matrixNode.getParam("matrix_parent_node_type")=="node teapot":
+				if(isinstance(matrixNode,BaseMATRIX) == True):
 					pos_arr.append(position)
 					disp_arr.append(track_v.get(0))
 					disp_p_arr.append(track_v.get(1))
@@ -370,6 +374,8 @@ class MATRIX_Lattice(AccLattice):
 		orbitYP_arr = []
 		
 		position = 0.
+		pos_arr.append(position)
+		
 		
 		track_o = Matrix(6,6)
 		
@@ -381,12 +387,17 @@ class MATRIX_Lattice(AccLattice):
 		track_ov.set(4,z0[4])
 		track_ov.set(5,z0[5])
 		
+		orbitX_arr.append(track_ov.get(0))
+		orbitY_arr.append(track_ov.get(2))
+		orbitXP_arr.append(track_ov.get(1))
+		orbitYP_arr.append(track_ov.get(3))
 
+		position_old = position
 
 		
 		for matrixNode in self.getNodes():
 			if(isinstance(matrixNode,BaseMATRIX) == True):
-				if matrixNode.getLength() > 0 and matrixNode.getParam("matrix_parent_node_active_index")==0 or matrixNode.getParam("matrix_parent_node_type")=="node teapot":
+				if(abs(position_old-position) > eps_length):
 					pos_arr.append(position)
 					orbitX_arr.append(track_ov.get(0))
 					orbitY_arr.append(track_ov.get(2))

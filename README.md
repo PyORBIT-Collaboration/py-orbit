@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/azukov/py-orbit.svg?branch=ci-test)](https://travis-ci.org/azukov/py-orbit)
+
 # Py-ORBIT  Installation
 
 Installation procedure requires building from source.

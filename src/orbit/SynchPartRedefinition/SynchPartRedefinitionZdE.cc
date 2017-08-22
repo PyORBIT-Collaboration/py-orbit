@@ -9,6 +9,8 @@
 #include "ParticleMacroSize.hh"
 #include "SyncPart.hh"
 
+#include "OrbitConst.hh"
+
 /** Constructor */
 SynchPartRedefinitionZdE::SynchPartRedefinitionZdE(): CppPyWrapper(NULL)
 {
@@ -85,17 +87,21 @@ void SynchPartRedefinitionZdE::analyzeBunch(Bunch* bunch){
 }
 
 
-/** Transforms the synch particle parameters and the coordinates of the particles */
-void SynchPartRedefinitionZdE::transformBunch(Bunch* bunch){
+/** Move the synch particle energy to the average energy */
+void SynchPartRedefinitionZdE::centerE(Bunch* bunch){
+	bunch->compress();
+	int nParts = bunch->getSize();
+	analyzeBunch(bunch);
+	double delta_dE = getAvg_dE();
+	shiftE(bunch,delta_dE);
+}
 
+/** Shift the synch particle energy */
+void SynchPartRedefinitionZdE::shiftE(Bunch* bunch,double delta_dE){
+	
 	bunch->compress();
 	
 	int nParts = bunch->getSize();
-
-	analyzeBunch(bunch);
-	
-	double delta_z = z_dE_avg_arr[0];
-	double delta_dE = z_dE_avg_arr[1];
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
 		
@@ -111,13 +117,42 @@ void SynchPartRedefinitionZdE::transformBunch(Bunch* bunch){
 	double beta1 = syncPart->getBeta();
 	
 	// the definition of xp = momentumX/momentum_synch_part
-	// the z = c*beta*time (time is the same)
 	double x_y_p_coeff = momentum0/momentum1;
 	
 	for(int ip = 0; ip < nParts; ip++){
 		bunch->xp(ip) = x_y_p_coeff*bunch->xp(ip);
 		bunch->yp(ip) = x_y_p_coeff*bunch->yp(ip);
 		bunch->dE(ip) = bunch->dE(ip) - delta_dE;
+	}
+}
+
+/** Move the synch particle's z position to the center of the bunch */
+void SynchPartRedefinitionZdE::centerZ(Bunch* bunch){
+	bunch->compress();
+	int nParts = bunch->getSize();
+	analyzeBunch(bunch);
+	double delta_z = getAvg_Z();
+	shiftZ(bunch,delta_z);
+}
+
+/** Shift the synch particle's z position */
+void SynchPartRedefinitionZdE::shiftZ(Bunch* bunch,double delta_z){
+
+	bunch->compress();
+	
+	int nParts = bunch->getSize();
+	
+	SyncPart* syncPart = bunch->getSyncPart();	
+		
+	double beta = syncPart->getBeta();
+
+	// the z = c*beta*time (time is the same)
+	double delta_time = delta_z/(OrbitConst::c*beta);
+	
+	syncPart->setTime(syncPart->getTime() - delta_time);
+	
+	for(int ip = 0; ip < nParts; ip++){
+		bunch->z(ip) = bunch->z(ip) - delta_z;
 	}
 }
 

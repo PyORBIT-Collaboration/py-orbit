@@ -245,7 +245,7 @@ class BaseRF_Gap(AbstractRF_Gap):
 		#---- rf gap input phase -----
 		self.setGapPhase(phase)
 		#call rf gap model to track the bunch	
-		if(isinstance(self.cppGapModel,MatrixRfGap) or isinstance(self.cppGapModel,BaseRfGap)):
+		if(isinstance(self.cppGapModel,MatrixRfGap) or isinstance(self.cppGapModel,BaseRfGap) or isinstance(self.cppGapModel,BaseRfGap_slow)):
 			self.cppGapModel.trackBunch(bunch,frequency,E0TL*rf_ampl,phase)
 		else:
 			self.ttf_track_bunch__(bunch,frequency,E0L*rf_ampl,phase)
@@ -280,7 +280,7 @@ class BaseRF_Gap(AbstractRF_Gap):
 		self.setGapPhase(phase)		
 		#call rf gap model to track the bunch
 		rf_ampl = rfCavity.getDesignAmp()	
-		if(isinstance(self.cppGapModel,MatrixRfGap) or isinstance(self.cppGapModel,BaseRfGap)):
+		if(isinstance(self.cppGapModel,MatrixRfGap) or isinstance(self.cppGapModel,BaseRfGap) or isinstance(self.cppGapModel,BaseRfGap_slow)):
 			self.cppGapModel.trackBunch(bunch,frequency,E0TL*rf_ampl,phase)
 		else:
 			self.ttf_track_bunch__(bunch,frequency,E0L*rf_ampl,phase)

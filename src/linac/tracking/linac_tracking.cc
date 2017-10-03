@@ -61,7 +61,10 @@ namespace linac_tracking
 		double beta1_s = 1.0/beta_s;
 		if(length < 0.) return;
 		
-		syncPart->setTime(syncPart->getTime() + length / v_s);
+		double delta_t = length / v_s;
+		double delta_tc = delta_t*OrbitConst::c;
+		
+		syncPart->setTime(syncPart->getTime() + delta_t);
 		
 		double mass = syncPart->getMass();
 		double Ekin_s = syncPart->getEnergy();
@@ -73,8 +76,11 @@ namespace linac_tracking
 		double yp = 0.;
 		double coeff = 0.;
 		double Ekin = 0.;
-		//double p_z2 = 0.;
-		//double beta_z = 0.;
+		double Etotal = 0.;
+		double p_z2 = 0.;
+		double beta_z = 0.;
+		double beta_x = 0.;
+		double beta_y = 0.;
 		
 		//coordinate array [part. index][x,xp,y,yp,z,dE]
 		double** arr = bunch->coordArr();
@@ -84,13 +90,15 @@ namespace linac_tracking
 			xp = arr[i][1];
 			yp = arr[i][3];
 			Ekin = Ekin_s+dE;
-			p2 = Ekin*(Ekin+2.0*mass);
-			//p_z2 = p2 - (xp*xp + yp*yp)*p2_s;
-			//beta_z = sqrt(p_z2)/(Ekin+mass);
-			coeff = 1.0/sqrt(p2/p2_s - xp*xp - yp*yp);
-			arr[i][0] += length * xp * coeff;
-			arr[i][2] += length * yp * coeff;
-			arr[i][4] += length * beta_s * (beta1_s - (beta1_s + dE/p_s)*coeff);
+			Etotal = Ekin + mass;
+			p2 = Ekin*(Etotal + mass);
+			beta_x = (xp*p_s)/Etotal;
+			beta_y = (yp*p_s)/Etotal;
+			p_z2 = p2 - (xp*xp + yp*yp)*p2_s;
+			beta_z = sqrt(p_z2)/Etotal;
+			arr[i][0] += beta_x * delta_tc;
+			arr[i][2] += beta_y * delta_tc;
+			arr[i][4] += (beta_z - beta_s) * delta_tc;
 		}
 	}
 	
@@ -132,11 +140,14 @@ namespace linac_tracking
     SyncPart* syncPart = bunch->getSyncPart();
     double beta_s = syncPart->getBeta();
 		double beta1_s = 1.0/beta_s;    
-		double v_s = OrbitConst::c * beta_s;    
-    
+		double v_s = OrbitConst::c * beta_s; 
+		
+ 		double delta_t = length / v_s;
+		double delta_tc = delta_t*OrbitConst::c;   
+		
     if(length > 0.)
     {
-    	syncPart->setTime(syncPart->getTime() + length / v_s);
+    	syncPart->setTime(syncPart->getTime() + delta_t);
     }
     
  		// ==== B*rho = 3.335640952*momentum [T*m] if momentum in GeV/c ===
@@ -149,8 +160,14 @@ namespace linac_tracking
 		double p2 = 0.;
 		double dE = 0.;
 		double p = 0.;
-		double Ekin = 0.;    
+		double Ekin = 0.;  
+		double Etotal = 0.;
 		double coeff = 0.; 
+		
+		double p_z2 = 0.;
+		double beta_z = 0.;
+		double beta_x = 0.;
+		double beta_y = 0.;
    
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
@@ -161,6 +178,7 @@ namespace linac_tracking
     	
  			dE = arr[i][5];
 			Ekin = Ekin_s+dE;
+			Etotal = Ekin + mass;
 			p2 = Ekin*(Ekin+2.0*mass); 
 			p = sqrt(p2);
     	kqc = dB_dr/(3.335640952*p);
@@ -209,7 +227,12 @@ namespace linac_tracking
     	arr[i][1]  = (x_init * m21 + xp_init * m22)/coeff;
     	arr[i][2]  = y_init * m33 + yp_init * m34;
     	arr[i][3]  = (y_init * m43 + yp_init * m44)/coeff;
- 			arr[i][4] += length * beta_s * (beta1_s - (beta1_s + dE/p_s)*coeff);
+    	
+ 			beta_x = (xp_init*p_s)/Etotal;
+			beta_y = (yp_init*p_s)/Etotal; 
+			p_z2 = p2 - (xp_init*xp_init + yp_init*yp_init)*p2_s;
+			beta_z = sqrt(p_z2)/Etotal;
+    	arr[i][4] += (beta_z - beta_s) * delta_tc;
     }
   }
   

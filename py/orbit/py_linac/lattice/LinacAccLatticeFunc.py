@@ -8,8 +8,11 @@ import os
 import math
 import sys
 
+# import general accelerator elements and lattice
+from orbit.lattice import AccLattice, AccNode, AccActionsContainer
 
 from orbit.py_linac.lattice import BaseLinacNode, Drift, Quad
+from orbit.py_linac.lattice import LinacMagnetNode
 from orbit.py_linac.lattice import AxisFieldRF_Gap
 from orbit.py_linac.lattice import AxisField_and_Quad_RF_Gap
 
@@ -59,3 +62,97 @@ def GetGlobalRF_AxisField(accLattice,z):
 		modePhase = node.getParam("mode")*math.pi
 		Ez = Ez*math.cos(modePhase)
 	return Ez
+	
+def getNodeForNameFromWholeLattice(accLattice,name):
+	"""
+	Returns the accelerator node or an array of nodes with the same name.
+	This function could be replaced later by the method in the AccLattice class.
+	"""
+	
+	paramsDict = {}
+	actions = AccActionsContainer()
+	nodes = []
+
+	def accNodeExitAction(paramsDict):
+		"""
+		Non-bound function. Finds the node in the lattice
+		with the specified name.
+		positions. This is a closure (well, maybe not
+		exactly). It uses external objects.
+		"""
+		node = paramsDict["node"]
+		if(node.getName() == name):
+			nodes.append(node)
+		
+	actions.addAction(accNodeExitAction, AccNode.EXIT)
+	accLattice.trackActions(actions, paramsDict)
+	if(len(nodes) == 1):
+		return nodes[0]
+	elif(len(nodes) == 0):
+		return None
+	else:
+		return nodes
+		
+def getNodePosDictForWholeLattice(accLattice):
+	"""
+	Returns the dict[node] = (posStart,posEnd) for all nodes (not only for the firts level).
+	This function could be replaced later by the method in the AccLattice class.
+	"""
+	paramsDict = {}
+	actions = AccActionsContainer()
+	posStartDict = {}
+	posStopDict = {}
+
+	def accNodeEntranceAction(paramsDict):
+		"""
+		Non-bound function. Sets node's end positions. 
+		This is a closure (well, maybe not exactly). .
+		"""
+		node = paramsDict["node"]
+		pos = paramsDict["path_length"]
+		posStartDict[node] = pos
+
+	def accNodeExitAction(paramsDict):
+		"""
+		Non-bound function. Sets node's end positions. 
+		This is a closure (well, maybe not exactly). .
+		"""
+		node = paramsDict["node"]
+		pos = paramsDict["path_length"]
+		posStopDict[node] = pos
+
+	actions.addAction(accNodeEntranceAction, AccNode.ENTRANCE)	
+	actions.addAction(accNodeExitAction, AccNode.EXIT)
+	accLattice.trackActions(actions,paramsDict)
+	
+	posStartStopDict = {}
+	for key in posStartDict:
+		pos_start = posStartDict[key]
+		pos_end = posStopDict[key]
+		posStartStopDict[key] = (pos_start,pos_end)
+
+	return posStartStopDict
+
+def getAllMagnetsInLattice(accLattice):
+	"""
+	Returns the array with all magnets including magnets on all levels (e.g correctors)
+	"""
+	
+	magnets = []
+	paramsDict = {}
+	actions = AccActionsContainer()
+
+	def accNodeExitAction(paramsDict):
+		"""
+		Non-bound function. Finds the node in the lattice
+		with the specified name.
+		positions. This is a closure (well, maybe not
+		exactly). It uses external objects.
+		"""
+		node = paramsDict["node"]
+		if(isinstance(node,LinacMagnetNode)):
+			magnets.append(node)
+		
+	actions.addAction(accNodeExitAction, AccNode.EXIT)
+	accLattice.trackActions(actions, paramsDict)
+	return 	magnets

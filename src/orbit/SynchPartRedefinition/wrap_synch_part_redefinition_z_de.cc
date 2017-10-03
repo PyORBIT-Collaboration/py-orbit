@@ -147,9 +147,9 @@ extern "C" {
   static PyMethodDef SynchPartRedefinitionZdEClassMethods[] = {
 		{ "analyzeBunch",	SynchPartRedefinitionZdE_analyzeBunch,	METH_VARARGS,"Calculates of the z and dE averages of the bunch."},
 		{ "center_dE",    SynchPartRedefinitionZdE_center_dE,	    METH_VARARGS,"Transforms the synch part. energy to the average over the bunch."},
-		{ "centerZ",      SynchPartRedefinitionZdE_centerZ,	      METH_VARARGS,"Transforms the synch part. z-coord. to the average over the bunch."},
+		{ "center_Z",      SynchPartRedefinitionZdE_centerZ,	      METH_VARARGS,"Transforms the synch part. z-coord. to the average over the bunch."},
 		{ "shift_dE",     SynchPartRedefinitionZdE_shift_dE,	    METH_VARARGS,"Shift enegry of the synch part."},
-		{ "shiftZ",       SynchPartRedefinitionZdE_shiftZ,	      METH_VARARGS,"Shift z-coord. the synch part."},
+		{ "shift_Z",       SynchPartRedefinitionZdE_shiftZ,	      METH_VARARGS,"Shift z-coord. the synch part."},
  		{ "getAvg_Z",			SynchPartRedefinitionZdE_getAvg_Z,    	METH_VARARGS,"Returns the average z postion."},
  		{ "getAvg_dE",		SynchPartRedefinitionZdE_getAvg_dE,    	METH_VARARGS,"Returns the average dE value."},			
 		{NULL}

@@ -99,7 +99,7 @@ void RfGapTTF::trackBunch(Bunch* bunch, double frequency, double E0L, double pha
 		sin_phRf = sin(phase_rf);
 		cos_phRf = cos(phase_rf);
 		//longitudinal-energy part
-		bunch->dE(i) =bunch->dE(i)  + charge*E0L*I0*(ttf_t*cos_phRf - ttf_s*sin_phRf) - delta_eKin;	
+		bunch->dE(i) = bunch->dE(i)  + charge*E0L*I0*(ttf_t*cos_phRf - ttf_s*sin_phRf) - delta_eKin;	
 		phase_out = phase_in + phase_coeff*(I0*(ttf_tp*sin_phRf + ttf_sp*cos_phRf) +
 			                     r*kappa_Kr*I1*(ttf_t*sin_phRf + ttf_s*cos_phRf));
 		bunch->z(i) = phase_out/kappa_out;

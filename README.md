@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/azukov/py-orbit.svg?branch=ci-test)](https://travis-ci.org/azukov/py-orbit)
+[![Build Status](https://travis-ci.org/PyORBIT-Collaboration/py-orbit.svg?branch=master)](https://travis-ci.org/PyORBIT-Collaboration/py-orbit)
 
 # Py-ORBIT  Installation
 

@@ -93,6 +93,6 @@ while(count <100000):
 
 print "====STOP==="
 
-sys.exit(1)
+sys.exit(0)
 
 

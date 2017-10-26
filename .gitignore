@@ -4,4 +4,4 @@ bin/pyORBIT
 *.pyc
 *~
 *.o
-
+*.so

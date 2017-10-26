@@ -174,6 +174,20 @@ class LinacMagnetNode(LinacNode):
 		self.getChildNodes(AccNode.EXIT).insert(0,self.__fringeFieldOUT)
 		self.setType("linacMagnet")		
 		
+	def getField(self):
+		"""
+		Returns the field value for the magnet.
+		Abstract method. It should be implemented in the subclass.
+		"""
+		return None
+		
+	def setField(self,field):
+		"""
+		Sets the field value for the magnet.
+		Abstract method. It should be implemented in the subclass.
+		"""
+		pass
+		
 	def getNodeFringeFieldIN(self):
 		"""
 		Returns the FringeField instance before this node
@@ -330,7 +344,18 @@ class Quad(LinacMagnetNode):
 		self.getNodeFringeFieldIN().setType("quad fringe in")
 		self.getNodeFringeFieldOUT().setType("quad fringe out")
 		
-
+	def getField(self):
+		"""
+		Returns the field value for the magnet..
+		"""
+		return self.getParam("dB/dr")
+		
+	def setField(self,field):
+		"""
+		Sets the field value for the magnet.
+		"""
+		self.setParam("dB/dr",field)	
+		
 	def initialize(self):
 		"""
 		The  Quad Combined Function class implementation
@@ -595,6 +620,18 @@ class DCorrectorH(LinacMagnetNode):
 		self.setType("dch")	
 		self.setnParts(1)
 
+	def getField(self):
+		"""
+		Returns the field value for the magnet..
+		"""
+		return self.getParam("B")
+		
+	def setField(self,field):
+		"""
+		Sets the field value for the magnet.
+		"""
+		self.setParam("B",field)
+
 	def track(self, paramsDict):
 		"""
 		The Horizontal Dipole Corrector class implementation of
@@ -625,6 +662,18 @@ class DCorrectorV(LinacMagnetNode):
 		self.addParam("effLength",0.)
 		self.setType("dcv")	
 		self.setnParts(1)
+
+	def getField(self):
+		"""
+		Returns the field value for the magnet..
+		"""
+		return self.getParam("B")
+		
+	def setField(self,field):
+		"""
+		Sets the field value for the magnet.
+		"""
+		self.setParam("B",field)
 
 	def track(self, paramsDict):
 		"""

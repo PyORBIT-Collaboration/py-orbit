@@ -35,14 +35,17 @@ class LinacApertureNode(BaseLinacNode):
 		self.d = d
 		self.aperture = Aperture(self.shape, self.a, self.b, self.c, self.d, pos)	
 		self.setPosition(pos)
+		self.lost_particles_n = 0		
 
 	def track(self, paramsDict):
 		bunch = paramsDict["bunch"]
+		n_parts = bunch.getSize()
 		if(paramsDict.has_key("lostbunch")):
 			lostbunch = paramsDict["lostbunch"]
 			self.aperture.checkBunch(bunch, lostbunch)
 		else:
 			self.aperture.checkBunch(bunch)
+		self.lost_particles_n = n_parts - bunch.getSize()
 
 	def trackDesign(self, paramsDict):
 		"""
@@ -53,13 +56,16 @@ class LinacApertureNode(BaseLinacNode):
 	def setPosition(self, pos):
 		BaseLinacNode.setPosition(self,pos)
 		self.aperture.setPosition(self.getPosition())
+		
+	def getNumberOfLostParticles(self):
+		return self.lost_particles_n
 
 class CircleLinacApertureNode(LinacApertureNode):
 	"""
 	The curcular aperture shape = 1
 	"""
-	def __init__(self, a, pos = 0., c = 0., d = 0., name = "aperture"):
-		LinacApertureNode.__init__(self,1,a,a,pos,c,d,name)
+	def __init__(self, radius, pos = 0., c = 0., d = 0., name = "aperture"):
+		LinacApertureNode.__init__(self,1,radius,radius,pos,c,d,name)
 
 
 class EllipseLinacApertureNode(LinacApertureNode):
@@ -85,7 +91,8 @@ class LinacPhaseApertureNode(BaseLinacNode):
 	"""
 	def __init__(self, frequency = 402.5e+6, name = "phase_aperture"):
 		BaseLinacNode.__init__(self,name)
-		self.aperture = PhaseAperture(frequency)	
+		self.aperture = PhaseAperture(frequency)
+		self.lost_particles_n = 0
 
 	def setMinMaxPhase(self,minPhase,maxPhase):
 		self.aperture.setMinMaxPhase(minPhase,maxPhase)
@@ -105,18 +112,23 @@ class LinacPhaseApertureNode(BaseLinacNode):
 
 	def track(self, paramsDict):
 		bunch = paramsDict["bunch"]
+		n_parts = bunch.getSize()
 		if(paramsDict.has_key("lostbunch")):
 			lostbunch = paramsDict["lostbunch"]
 			self.aperture.checkBunch(bunch, lostbunch)
 		else:
 			self.aperture.checkBunch(bunch)
-
+		self.lost_particles_n = n_parts - bunch.getSize()
+		
 	def trackDesign(self, paramsDict):
 		"""
 		This method does nothing for the aperture case.
 		"""
 		pass
-
+		
+	def getNumberOfLostParticles(self):
+		return self.lost_particles_n
+		
 class LinacEnergyApertureNode(BaseLinacNode):
 	"""
 	The phase aperture classes removes particles from bunch and places them in the lostbunch
@@ -124,7 +136,9 @@ class LinacEnergyApertureNode(BaseLinacNode):
 	"""
 	def __init__(self, name = "energy_aperture"):
 		BaseLinacNode.__init__(self,name)
-		self.aperture = EnergyAperture()	
+		self.aperture = EnergyAperture()
+		self.lost_particles_n = 0
+		self.eKin_design = 0.
 
 	def setMinMaxEnergy(self,minEnergy,maxEnergy):
 		self.aperture.setMinMaxEnergy(minEnergy,maxEnergy)
@@ -138,15 +152,23 @@ class LinacEnergyApertureNode(BaseLinacNode):
 
 	def track(self, paramsDict):
 		bunch = paramsDict["bunch"]
+		n_parts = bunch.getSize()
 		if(paramsDict.has_key("lostbunch")):
 			lostbunch = paramsDict["lostbunch"]
 			self.aperture.checkBunch(bunch, lostbunch)
 		else:
 			self.aperture.checkBunch(bunch)
-
+		self.lost_particles_n = n_parts - bunch.getSize()
+		
 	def trackDesign(self, paramsDict):
 		"""
-		This method does nothing for the aperture case.
+		This method memorizes the kinetic energy of the synchronous particle.
 		"""
-		pass
+		bunch = paramsDict["bunch"]
+		self.eKin_design = bunch.getSyncParticle().kinEnergy()
 
+	def getNumberOfLostParticles(self):
+		return self.lost_particles_n
+		
+	def getDesignKinEnergy(self):
+		return self.eKin_design

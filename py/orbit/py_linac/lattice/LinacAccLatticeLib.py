@@ -70,6 +70,14 @@ class LinacAccLattice(AccLattice):
 				if(not rf_cavity in self.__rfCavities):
 					self.__rfCavities.append(rf_cavity)
 					
+	def setLinacTracker(self, switch = True):
+		"""
+		This method will switch tracker module to the linac specific traker 
+		for each node on the first level.
+		"""
+		for node in self.getNodes():
+			node.setLinacTracker(switch)
+					
 	def getSubLattice(self, index_start = -1, index_stop = -1):
 		"""
 		It returns the new LinacAccLattice with children with indexes 

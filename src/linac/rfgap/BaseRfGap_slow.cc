@@ -104,7 +104,7 @@ void BaseRfGap_slow::trackBunch(Bunch* bunch, double frequency, double E0TL, dou
     I1 = bessi1(kr * r);
     //longitudinal-energy part
     d_phi = - bunch->z(i)*k/beta_z;
-    bunch->z(i) = bunch->z(i)*beta_out/beta_z;
+    //std::cout<<"debug part i="<<i<<" phase="<<phase*180./3.1415926<<" d_phi="<<d_phi*180./3.1415926<<" (phase + d_phi)="<<(phase + d_phi)*180./3.1415926<<std::endl;
     bunch->dE(i) = bunch->dE(i) + charge * E0TL * cos(phase + d_phi) * I0 - delta_eKin;
     //the linear part - implemented in MatrixRFGap
     //bunch->dE(i) = bunch->dE(i) - chargeE0TLsin * d_phi;
@@ -115,6 +115,8 @@ void BaseRfGap_slow::trackBunch(Bunch* bunch, double frequency, double E0TL, dou
 		beta_z_out = sqrt(p_z2)/(Ekin+mass);
 		gamma_z_out = 1.0/sqrt(1.0-beta_z_out*beta_z_out);
 		kappa = -charge * E0TL * k /(2.0 * mass * beta_z * beta_z * beta_z_out * gamma_z * gamma_z * gamma_z_out);
+		
+		bunch->z(i) = bunch->z(i)*beta_z_out/beta_z;
     //transverse focusing
 		if(r == 0.){
 			d_rp = 0.;
@@ -122,6 +124,7 @@ void BaseRfGap_slow::trackBunch(Bunch* bunch, double frequency, double E0TL, dou
 		else{    
 			d_rp = kappa *sin(phase + d_phi) * 2.0 * I1 / (kr * r);
 		}
+		
 		//the transverse non-linear part is removed
 		//d_rp = kappa *sin(phase + d_phi);
     bunch->xp(i) = xp * prime_coeff + d_rp * x;

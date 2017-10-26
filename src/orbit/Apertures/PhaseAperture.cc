@@ -113,6 +113,9 @@ void PhaseAperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	ParticleAttributes* partMacroAttr = NULL;
 	ParticleAttributes* partMacroInitAttr = NULL;	
 	
+	ParticleAttributes* partInitCoordsAttr = NULL;
+	ParticleAttributes* partInitCoordsInitAttr = NULL;		
+	
 	if(lostbunch != NULL) {
 		if(lostbunch->hasParticleAttributes("LostParticleAttributes") <= 0){
 			std::map<std::string,double> params_dict;
@@ -139,6 +142,15 @@ void PhaseAperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 			}	
 		}	
 		
+		if(bunch->hasParticleAttributes("ParticleInitialCoordinates") > 0){
+			partInitCoordsInitAttr = bunch->getParticleAttributes("ParticleInitialCoordinates");
+			if(lostbunch->hasParticleAttributes("ParticleInitialCoordinates") <= 0){
+				std::map<std::string,double> params_dict;
+				lostbunch->addParticleAttributes("ParticleInitialCoordinates",params_dict);
+				partInitCoordsAttr = lostbunch->getParticleAttributes("ParticleInitialCoordinates");
+			}	
+		}			
+		
 		lostbunch->setMacroSize(bunch->getMacroSize());
 	}
 
@@ -161,6 +173,11 @@ void PhaseAperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 				}
 				if(partMacroAttr != NULL){
 					partMacroAttr->attValue(lostbunch->getSize() - 1, 0) = partMacroInitAttr->attValue(count,0);
+				}
+				if(partInitCoordsInitAttr != NULL){
+					for(int init_ind = 0; init_ind < 6; init_ind++){
+					  partInitCoordsAttr->attValue(lostbunch->getSize() - 1,init_ind) = partInitCoordsInitAttr->attValue(count,init_ind);
+					}
 				}
 			}
 			bunch->deleteParticleFast(count);

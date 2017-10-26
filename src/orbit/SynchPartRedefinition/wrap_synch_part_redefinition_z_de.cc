@@ -39,7 +39,7 @@ extern "C" {
 	  SynchPartRedefinitionZdE* cpp_SynchPartRedefinitionZdE = (SynchPartRedefinitionZdE*)((pyORBIT_Object*) self)->cpp_obj;
 		PyObject* pyBunch;
 		if(!PyArg_ParseTuple(args,"O:analyzeBunch",&pyBunch)){
-			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - analyzeBunch(Bunch* bunch) - parameter are needed.");
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - analyzeBunch(Bunch* bunch) - parameter is needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
@@ -51,22 +51,75 @@ extern "C" {
 		return Py_None;
   }
 	
-  /** Transforms the synch particle parameters and the coordinates of the particles */
-  static PyObject* SynchPartRedefinitionZdE_transformBunch(PyObject *self, PyObject *args){
+  /** Move the synch particle energy to the average energy. */
+  static PyObject* SynchPartRedefinitionZdE_center_dE(PyObject *self, PyObject *args){
 	  SynchPartRedefinitionZdE* cpp_SynchPartRedefinitionZdE = (SynchPartRedefinitionZdE*)((pyORBIT_Object*) self)->cpp_obj;
 		PyObject* pyBunch;
-		if(!PyArg_ParseTuple(args,"O:transformBunch",&pyBunch)){
-			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - transformBunch(Bunch* bunch) - parameter are needed.");
+		if(!PyArg_ParseTuple(args,"O:center_dE",&pyBunch)){
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - center_dE(Bunch* bunch) - parameter is needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - transformBunch(Bunch* bunch) - method needs a Bunch.");
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - center_dE(Bunch* bunch) - method needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_SynchPartRedefinitionZdE->transformBunch(cpp_bunch);
+		cpp_SynchPartRedefinitionZdE->centerE(cpp_bunch);
 		Py_INCREF(Py_None);
 		return Py_None;
   } 
+  
+   /** Move the synch particle's z position to the center of the bunch */
+  static PyObject* SynchPartRedefinitionZdE_centerZ(PyObject *self, PyObject *args){
+	  SynchPartRedefinitionZdE* cpp_SynchPartRedefinitionZdE = (SynchPartRedefinitionZdE*)((pyORBIT_Object*) self)->cpp_obj;
+		PyObject* pyBunch;
+		if(!PyArg_ParseTuple(args,"O:centerZ",&pyBunch)){
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - centerZ(Bunch* bunch) - parameter is needed.");
+		}
+		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - centerZ(Bunch* bunch) - method needs a Bunch.");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+		cpp_SynchPartRedefinitionZdE->centerZ(cpp_bunch);
+		Py_INCREF(Py_None);
+		return Py_None;
+  }  
+  
+  /** Shift the synch particle energy. */
+  static PyObject* SynchPartRedefinitionZdE_shift_dE(PyObject *self, PyObject *args){
+	  SynchPartRedefinitionZdE* cpp_SynchPartRedefinitionZdE = (SynchPartRedefinitionZdE*)((pyORBIT_Object*) self)->cpp_obj;
+		PyObject* pyBunch;
+		double delta_E = 0.;
+		if(!PyArg_ParseTuple(args,"Od:shift_dE",&pyBunch,&delta_E)){
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - shift_dE(Bunch* bunch,delta_E) - parameters are needed.");
+		}
+		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - shift_dE(Bunch* bunch,delta_E) - method needs a Bunch.");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+		cpp_SynchPartRedefinitionZdE->shiftE(cpp_bunch,delta_E);
+		Py_INCREF(Py_None);
+		return Py_None;
+  } 
+  
+   /** Shift the synch particle's z position */
+  static PyObject* SynchPartRedefinitionZdE_shiftZ(PyObject *self, PyObject *args){
+	  SynchPartRedefinitionZdE* cpp_SynchPartRedefinitionZdE = (SynchPartRedefinitionZdE*)((pyORBIT_Object*) self)->cpp_obj;
+		PyObject* pyBunch;
+		double delta_z = 0.;
+		if(!PyArg_ParseTuple(args,"Od:shiftZ",&pyBunch,&delta_z)){
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - shiftZ(Bunch* bunch, delta_z) - parameters are needed.");
+		}
+		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+			ORBIT_MPI_Finalize("SynchPartRedefinitionZdE - shiftZ(Bunch* bunch, delta_z) - method needs a Bunch.");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
+		cpp_SynchPartRedefinitionZdE->shiftZ(cpp_bunch,delta_z);
+		Py_INCREF(Py_None);
+		return Py_None;
+  }  
   
 	/** Returns the average z postion */
 	static PyObject* SynchPartRedefinitionZdE_getAvg_Z(PyObject *self, PyObject *args){
@@ -92,10 +145,13 @@ extern "C" {
 	// defenition of the methods of the python SynchPartRedefinitionZdE wrapper class
 	// they will be vailable from python level
   static PyMethodDef SynchPartRedefinitionZdEClassMethods[] = {
-		{ "analyzeBunch",	SynchPartRedefinitionZdE_analyzeBunch,		METH_VARARGS,"Calculates of the z and dE averages of the bunch."},
-		{ "transformBunch",SynchPartRedefinitionZdE_transformBunch,	METH_VARARGS,"Transforms the synch part. params and particles' coordinates."},
- 		{ "getAvg_Z",			SynchPartRedefinitionZdE_getAvg_Z,    		METH_VARARGS,"Returns the average z postion."},
- 		{ "getAvg_dE",		SynchPartRedefinitionZdE_getAvg_dE,    		METH_VARARGS,"Returns the average dE value."},			
+		{ "analyzeBunch",	SynchPartRedefinitionZdE_analyzeBunch,	METH_VARARGS,"Calculates of the z and dE averages of the bunch."},
+		{ "center_dE",    SynchPartRedefinitionZdE_center_dE,	    METH_VARARGS,"Transforms the synch part. energy to the average over the bunch."},
+		{ "center_Z",      SynchPartRedefinitionZdE_centerZ,	      METH_VARARGS,"Transforms the synch part. z-coord. to the average over the bunch."},
+		{ "shift_dE",     SynchPartRedefinitionZdE_shift_dE,	    METH_VARARGS,"Shift enegry of the synch part."},
+		{ "shift_Z",       SynchPartRedefinitionZdE_shiftZ,	      METH_VARARGS,"Shift z-coord. the synch part."},
+ 		{ "getAvg_Z",			SynchPartRedefinitionZdE_getAvg_Z,    	METH_VARARGS,"Returns the average z postion."},
+ 		{ "getAvg_dE",		SynchPartRedefinitionZdE_getAvg_dE,    	METH_VARARGS,"Returns the average dE value."},			
 		{NULL}
   };
 	

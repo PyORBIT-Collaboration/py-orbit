@@ -26,10 +26,19 @@ class SynchPartRedefinitionZdE: public OrbitUtils::CppPyWrapper
 		
 		/** Performs the calculation of the z and dE averages of the bunch */
 		void analyzeBunch(Bunch* bunch);
+				
+    /** Move the synch particle energy to the average energy */
+    void centerE(Bunch* bunch);	
+
+    /** Shift the synch particle energy */
+    void shiftE(Bunch* bunch,double delta_dE);		
 		
-		/** Transforms the synch particle parameters and the coordinates of the particles */
-		void transformBunch(Bunch* bunch);
-		
+    /** Move the synch particle's z position to the center of the bunch */
+    void centerZ(Bunch* bunch);  
+
+    /** Shift the synch particle's z position */
+    void shiftZ(Bunch* bunch,double delta_z);  
+    
 		/**Returns the average z postion */
 		double getAvg_Z();
 		

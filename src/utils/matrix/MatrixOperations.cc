@@ -11,7 +11,7 @@ int MatrixOperations::invert(double **a, int n){
 	
 	//   Taken from Nrecipes and slightly modified.
 	//   Get matrix A(nxn) and transform it into A^(-1).
-	//   Returns -1 if A^(-1) doesn't exist.
+	//   Returns 0 if A^(-1) doesn't exist. Normally returns 1. 
 	
 	int i,icol,irow,j,k,l,ll;
 	double big,dum,pivinv,temp;
@@ -131,6 +131,118 @@ int MatrixOperations::mult(Matrix* mtrx, PhaseVector* v, PhaseVector* v_res){
 		}
 	}
 	return 1;
+}
+
+int MatrixOperations::det(Matrix* mtrx_in, double& det){
+	// Calculates the determinant of the matrix
+	int n = mtrx_in->rows();
+	int m = mtrx_in->columns();
+	if(n != m){
+		ORBIT_MPI_Finalize("MatrixOperations:det(...) You try to get determinant of a non-square matrix.");
+		return 0;
+	}
+	double** arr_in = mtrx_in->getArray();
+	
+	//this matrix will be destroyed
+	int buff_index0 = -1;
+	double* arr = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,n*n);	
+	
+	//this array is auxiliary
+	int buff_index1 = -1;
+	double* vv = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,n);	
+	
+	for(int i = 0; i < n; i++){
+		for(int j = 0; j < n; j++){
+			arr[j+n*i] = arr_in[i][j];
+		}
+	}
+	
+	int d_perm_count = +1;
+	double big = 0.;
+	double temp = 0.;
+	double sum = 0.;
+	
+	int i_max = -1;
+	
+	for(int i = 0; i < n; i++){
+		big = 0.;
+		for(int j = 0; j < n; j++){
+			if((temp=fabs(arr[j+n*i])) > big) big=temp;
+		}
+		if(big == 0.){
+			BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+			BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);
+			det = 0.;
+			return 1;
+		}
+		vv[i]=1.0/big;			
+	}
+	
+	for(int j = 0; j < n; j++){
+		for(int i = 0; i < j; i++){
+			sum = arr[j+n*i];
+			for(int k = 0; k < i; k++){
+				sum -= arr[k+n*i]*arr[j+n*k];
+			}
+			arr[j+n*i] = sum;
+		}
+		big = 0.;
+		for(int i = j; i < n; i++){
+			sum = arr[j+n*i];
+			for(int k = 0; k < j; k++){
+				sum -= arr[k+n*i]*arr[j+n*k];
+			}
+			arr[j+n*i] = sum;
+			temp = vv[i]*fabs(sum);
+			if(temp >= big){
+				big = temp;
+				i_max = i;
+			}
+		}
+		
+		if(j != i_max){
+			for(int k = 0; k < n; k++){
+				temp = arr[k+n*i_max];
+				arr[k+n*i_max] = arr[k+n*j];
+				arr[k+n*j] = temp;
+			}
+			d_perm_count = - d_perm_count;
+			vv[i_max]=vv[j];
+		}
+		
+		if(arr[j+n*j] == 0.){
+			BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+			BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);
+			det = 0.;
+			return 1;			
+		}
+		if(j != (n-1)){
+			temp = 1.0/arr[j+n*j];
+			for(int i = j + 1; i < n; i++){
+				arr[j+n*i] *= temp;
+			}
+		}
+	}
+	
+	//now calculate det value
+	det = 0.;
+	for(int j = 0; j < n; j++){
+		temp = arr[j+n*j];
+		if(temp < 0.) d_perm_count = - d_perm_count;
+		det += log(fabs(temp));
+	}
+	
+	if(fabs(det) > 100.0){
+		det = 300.0*det/fabs(det);
+	}
+	det = exp(det);
+	det *= d_perm_count;
+
+	// free the unused arrays
+	BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+	BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);
+	return 1;
+
 }
 
 void MatrixOperations::track(Bunch* bunch,Matrix* mtrx){

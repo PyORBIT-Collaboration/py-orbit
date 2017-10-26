@@ -149,10 +149,8 @@ void SynchPartRedefinitionZdE::shiftZ(Bunch* bunch,double delta_z){
 	// the z = c*beta*time (time is the same)
 	double delta_time = delta_z/(OrbitConst::c*beta);
 	
-	syncPart->setTime(syncPart->getTime() - delta_time);
-	
 	for(int ip = 0; ip < nParts; ip++){
-		bunch->z(ip) = bunch->z(ip) - delta_z;
+		bunch->z(ip) = bunch->z(ip) + delta_z;
 	}
 }
 

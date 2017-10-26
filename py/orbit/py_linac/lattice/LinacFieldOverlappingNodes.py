@@ -77,6 +77,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		This method will switch RF gap model to slower one where transformations 
 		coefficients are calculated for each particle in the bunch.
 		"""
+		BaseLinacNode.setLinacTracker(self,switch)
 		AbstractRF_Gap.setLinacTracker(self,switch)
 		if(switch):
 			self.cppGapModel = RfGapThreePointTTF_slow()			

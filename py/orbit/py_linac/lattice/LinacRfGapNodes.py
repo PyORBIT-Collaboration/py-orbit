@@ -100,14 +100,14 @@ class BaseRF_Gap(AbstractRF_Gap):
 		"""
 		AbstractRF_Gap.setLinacTracker(self,switch)
 		if(switch):
-			if(isinstance(self.cppGapModel,BaseRfGap)):
+			if(isinstance(self.cppGapModel,BaseRfGap) or isinstance(self.cppGapModel,BaseRfGap_slow)):
 				self.cppGapModel = BaseRfGap_slow()
-			if(isinstance(self.cppGapModel,RfGapTTF)):
+			if(isinstance(self.cppGapModel,RfGapTTF) or isinstance(self.cppGapModel,RfGapTTF_slow)):
 				self.cppGapModel = RfGapTTF_slow()				
 		else:
-			if(isinstance(self.cppGapModel,BaseRfGap)):
+			if(isinstance(self.cppGapModel,BaseRfGap) or isinstance(self.cppGapModel,BaseRfGap_slow)):
 				self.cppGapModel = BaseRfGap()
-			if(isinstance(self.cppGapModel,RfGapTTF)):
+			if(isinstance(self.cppGapModel,RfGapTTF) or isinstance(self.cppGapModel,RfGapTTF_slow)):
 				self.cppGapModel = RfGapTTF()				
 
 	def setnParts(self, n = 1):
@@ -787,7 +787,6 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		phase_cavity = rfCavity.getPhase()
 		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
 		E0L_local = 1.0e+9*rfCavity.getAmp()*self.getParam("E0L")		
-		cav_ampl = rfCavity.getAmp()
 		#---- we have to find the phase_start 
 		#---- which is the phase at the distance z_min before the gap center
 		#---- z_min by defenition is negative

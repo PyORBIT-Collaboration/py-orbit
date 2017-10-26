@@ -211,6 +211,7 @@ void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& 
 	names.push_back("Evolution");
 	names.push_back("LostParticleAttributes");
 	names.push_back("ParticlePhaseAttributes");
+	names.push_back("ParticleInitialCoordinates");
 }
 
 

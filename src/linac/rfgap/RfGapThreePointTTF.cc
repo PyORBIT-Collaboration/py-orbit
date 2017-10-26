@@ -80,6 +80,7 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
 	double delta_time = delta_phase/(2.0*OrbitConst::PI*rf_frequency);
 	syncPart->setTime(syncPart->getTime() + delta_time);
 	//now move to the end of the gap
+	delta_eKin = charge*E0L*(ttf_t*cos(phase) - ttf_s*sin(phase));
 	double eKin_out = eKin_in + delta_eKin;
 	syncPart->setMomentum(syncPart->energyToMomentum(eKin_out));	
 	double gamma_out = syncPart->getGamma();
@@ -109,6 +110,7 @@ void RfGapThreePointTTF::trackBunch(Bunch* bunch, double dz, double Em, double E
 		bunch->dE(i) =bunch->dE(i)  + charge*E0L*I0*(ttf_t*cos_phRf - ttf_s*sin_phRf) - delta_eKin;	
 		phase_out = phase_in + phase_coeff*(I0*(ttf_tp*sin_phRf + ttf_sp*cos_phRf) +
 			                     r*kappa_Kr*I1*(ttf_t*sin_phRf + ttf_s*cos_phRf));
+		phase_out -= delta_phase;
 		bunch->z(i) = phase_out/kappa_out;
 		//transverse focusing 
 		if(r == 0.){

@@ -10,10 +10,9 @@
 //    01/31/2013
 //
 // DESCRIPTION
-//    Calculates the polynomial:
 //    order = 0   y = coef[0]
-//    order = 1   y = coef[0] + coef[1]*x^2
-//    etc.
+//    order = 1   y = coef[0] + coef[1]*x
+//    order = 2   y = coef[0] + coef[1]*x + coef[2]*x^2
 //
 ///////////////////////////////////////////////////////////////////////////
 #ifndef ORBIT_UTILS_POLYNOMIAL_H
@@ -51,6 +50,12 @@ namespace OrbitUtils{
 		
 		void copyTo(Polynomial* p);
 		
+		double getMinX();
+		double getMaxX();
+		
+		void setMinX(double x_min);
+		void setMaxX(double x_max);
+		
 	private:
 		//------------------------------------------
 		//the private members of the Polynomial class
@@ -59,6 +64,12 @@ namespace OrbitUtils{
 		int order;
 		
 		double* coef_arr;
+		
+		// minimal and maximal x that give a good accuracy 
+		// for a polynomial representation of external data
+		// By default are just negative and positive infinity.
+		double x_min;
+		double x_max;
 		
 	};
 	

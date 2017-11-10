@@ -299,10 +299,14 @@ namespace OrbitUtils{
 				
 		double energytracker = 0.0;
 		
-		int ilow = 0;
-				
-		for(int i=0; i<56; i++) if(energy[i] <= energyrequest <= energy[i+1]) ilow = i;
-				
+		int ilow = 55;
+		for(int i=0; i<56; i++){
+			if(energyrequest <= energy[i+1]){
+				ilow = i;
+				break;
+			}
+		}
+		
 		double efrac = (energyrequest - energy[ilow]) / (energy[ilow + 1] - energy[ilow]);
 				
 		double cross_section = ic[ilow] + efrac*(ic[ilow + 1] - ic[ilow]);

@@ -192,6 +192,29 @@ class AccLattice(NamedObject, TypedObject):
 		Method. Returns the physical length of the lattice.
 		"""
 		return self.__length
+		
+	def reverseOrder(self):
+		"""
+		This method is used for a lattice reversal and a bunch backtracking.
+		This method will reverse the order of the children nodes. It will 
+		apply the reverse recursively to the all children nodes.
+		"""
+		self.__children.reverse()
+		for node in self.__children:
+			node.reverseOrder()
+		self.initialize()
+
+	def structureToText(self):
+		"""
+		Returns the text with the lattice structure.
+		"""
+		txt = "==== START ==== Lattice =" + self.getName() + "  L=" + str(self.getLength()) 
+		txt += os.linesep
+		for node in self.__children:
+			txt += node.structureToText("")
+		txt += "==== STOP  ==== Lattice =" + self.getName() + "  L=" + str(self.getLength())
+		txt += os.linesep
+		return txt
 
 	def _getSubLattice(self, accLatticeNew, index_start = -1, index_stop = -1):
 		"""

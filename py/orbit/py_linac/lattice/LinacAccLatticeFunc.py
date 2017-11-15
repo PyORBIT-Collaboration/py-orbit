@@ -133,6 +133,29 @@ def getNodePosDictForWholeLattice(accLattice):
 
 	return posStartStopDict
 
+def getAllNodesInLattice(accLattice):
+	"""
+	Returns the array with all nodes on all levels (even sub-child).
+	"""
+	
+	nodes = []
+	paramsDict = {}
+	actions = AccActionsContainer()
+
+	def accNodeEntranceAction(paramsDict):
+		"""
+		Non-bound function. Add the node to the nodes array
+		at the entrance inside the node.
+		This is a closure (well, maybe not
+		exactly). It uses external objects.
+		"""
+		node = paramsDict["node"]
+		nodes.append(node)
+		
+	actions.addAction(accNodeEntranceAction, AccNode.ENTRANCE)
+	accLattice.trackActions(actions, paramsDict)
+	return nodes
+
 def getAllMagnetsInLattice(accLattice):
 	"""
 	Returns the array with all magnets including magnets on all levels (e.g correctors)
@@ -145,8 +168,8 @@ def getAllMagnetsInLattice(accLattice):
 	def accNodeExitAction(paramsDict):
 		"""
 		Non-bound function. Finds the node in the lattice
-		with the specified name.
-		positions. This is a closure (well, maybe not
+		which is a magnet.
+		This is a closure (well, maybe not
 		exactly). It uses external objects.
 		"""
 		node = paramsDict["node"]

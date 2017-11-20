@@ -3,5 +3,5 @@
 ######################################################################
 
 CXX             =  ${MPI_CPP}
-CXXFLAGS       += -g -O3 -DUSE_MPI=1 -I /usr/local/include/
-LINKFLAGS      += -dynamic -L/usr/local/lib
+CXXFLAGS       += -g -O3 -DUSE_MPI=1 -I /usr/local/include/ -I /opt/local/include
+LINKFLAGS      += -dynamic -L/usr/local/lib -L/opt/local/lib

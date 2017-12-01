@@ -31,7 +31,7 @@ Sync with package repository
 
 After syncing run:
 ```shell
-sudo port install fftw mpich
+sudo port install fftw-3 mpich
 ```
 Alternatively you can use [Homebrew](http://brew.sh). 
 This tends to build a lot of packages from sources (especially for the first time), which can take a long time.

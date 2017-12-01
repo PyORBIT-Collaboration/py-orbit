@@ -92,6 +92,7 @@ extern "C" {
   void initNumrecipes(PyObject* module, const char* num_recipes_name){
     //create numrecipes module
     PyObject* module_nr = Py_InitModule(num_recipes_name,NumrecipesModuleMethods);
+		Py_INCREF(module_nr);
 		PyModule_AddObject(module, num_recipes_name, module_nr);
 	}
 

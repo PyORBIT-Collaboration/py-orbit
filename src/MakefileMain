@@ -6,8 +6,8 @@ DIRS = $(filter-out test%,$(patsubst %/, %, $(filter %/,$(shell ls -F))))
 OBJS = $(foreach dir,$(DIRS),$(wildcard $(dir)/obj/*.o))
 
 #FFTW library
-FFTW_LIBS = -L${FFTW3_ROOT}/lib -lfftw3
-LIBS += ${FFTW_LIBS}
+#FFTW_LIBS = -L${FFTW3_ROOT}/lib -lfftw3
+#LIBS += ${FFTW_LIBS}
 
 #========rules=========================
 

@@ -1,5 +1,5 @@
 ######################################################################
-# Linux g++ for creation of ORBIT interpreter executable
+# Darwin g++ for creation of ORBIT interpreter executable
 ######################################################################
 
 CXX             =  ${MPI_CPP}

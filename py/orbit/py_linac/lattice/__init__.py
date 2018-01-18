@@ -34,6 +34,8 @@ from LinacAccLatticeFunc import getAllMagnetsInLattice
 from LinacTransportMatrixGenNodes import LinacTrMatrixGenNode
 from LinacTransportMatrixGenNodes import LinacTrMatricesContrioller
 
+from LinacDiagnosticsNodes import LinacBPM
+
 __all__ = []
 __all__.append("LinacAccLattice")
 
@@ -79,4 +81,6 @@ __all__.append("getAllMagnetsInLattice")
 
 __all__.append("LinacTrMatrixGenNode")
 __all__.append("LinacTrMatricesContrioller")
+
+__all__.append("LinacBPM")
 

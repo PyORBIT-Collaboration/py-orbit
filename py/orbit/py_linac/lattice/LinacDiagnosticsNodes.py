@@ -169,6 +169,7 @@ class LinacBPM(BaseLinacNode):
 		nHistP = len(self.phase_hist_arr)
 		for ind in range(nParts):
 			phase_ind = int((180. + phaseNearTargetPhaseDeg(z_to_phase*bunch.z(ind),0.))/self.phase_step)
+			phase_ind = phase_ind % nHistP
 			if(phase_ind < 0): phase_ind = 0
 			if(phase_ind >= nHistP): phase_ind = nHistP - 1
 			self.phase_hist_arr[phase_ind] += 1.0
@@ -210,7 +211,7 @@ class LinacBPM(BaseLinacNode):
 		cos_sum *= self.phase_step*grad_to_rad_coeff
 		self.fourier_amp = math.sqrt(sin_sum**2 + cos_sum**2)/math.pi
 		self.amp = self.norm_coeff*self.fourier_amp
-		self.fourier_phase = math.atan2(cos_sum,sin_sum)*180./math.pi + 90.
+		self.fourier_phase = - math.atan2(cos_sum,sin_sum)*180./math.pi - 90.
 		self.fourier_phase += synch_phase
 		self.fourier_phase = phaseNearTargetPhaseDeg(self.fourier_phase,0.)
 		

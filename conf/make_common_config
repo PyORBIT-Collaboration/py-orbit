@@ -9,8 +9,8 @@ LIBS += $(PYTHON_ROOT_LIB)
 LIBS += -ldl -lpthread -lutil -lm -Xlinker
 
 #FFTW library
-LIBS +=  -L${FFTW3_ROOT}/lib -lfftw3 -lz
-LIBS += $(EXTRA_LIB)
+#LIBS +=  -L${FFTW3_ROOT}/lib -lfftw3 -lz
+LIBS += $(EXTRA_LIB) -lfftw3 -lz
 
 
 #-------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ LIBS += $(EXTRA_LIB)
 #-------------------------------------------------------------------------------
 
 #Headers for FFTW library
-INCLUDES += -I${FFTW3_ROOT}/include
+# INCLUDES += -I${FFTW3_ROOT}/include
 
 #-------------------------------------------------------------------------------
 # PYTHON_ROOT_INC - specify the location of the python header files.

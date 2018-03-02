@@ -445,7 +445,7 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew, int useCharge)
         std::complex<double> zlm1 = std::complex<double>(1., 0.);
         for (int k = 0; k < lm1; k++)
         {
-            zlm1 *= z;
+            zlm1 = zlm1 * z;
         }
         std::complex<double> zl = zlm1 * z;
 
@@ -555,7 +555,7 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew, int useCharge)
         std::complex<double> zlm1 = std::complex<double>(1., 0.);
         for (int k = 0; k < lm1; k++)
         {
-            zlm1 *= z;
+            zlm1 = zlm1 * z;
         }
         std::complex<double> zl = zlm1 * z;
 
@@ -757,7 +757,7 @@ void quadfringeIN(Bunch* bunch, double kq, int useCharge)
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
     double kqc = kq * charge;
-    double KNL, x_init, xp_init, y_init, yp_init;
+    double KNL, x_init, xp_init, y_init, yp_init, detM;
 
     SyncPart* syncPart = bunch->getSyncPart();
 
@@ -775,6 +775,9 @@ void quadfringeIN(Bunch* bunch, double kq, int useCharge)
         xp_init = arr[i][1];
         y_init  = arr[i][2];
         yp_init = arr[i][3];
+        detM = 1.0 - pow(((kqc * KNL / 4.) *
+                          (x_init * x_init - y_init * y_init)), 2);
+
 
         arr[i][0] += (kqc * KNL / 12.) * x_init *
                      (x_init * x_init + 3. * y_init * y_init);
@@ -782,6 +785,7 @@ void quadfringeIN(Bunch* bunch, double kq, int useCharge)
         arr[i][1] -= (kqc * KNL / 4.) *
                      (xp_init * (x_init * x_init + y_init * y_init) -
                       2. * yp_init * x_init * y_init);
+        arr[i][1] /= detM;
 
         arr[i][2] -= (kqc * KNL / 12.) * y_init *
                      (y_init * y_init + 3. * x_init * x_init);
@@ -789,6 +793,7 @@ void quadfringeIN(Bunch* bunch, double kq, int useCharge)
         arr[i][3] -= (kqc * KNL / 4.) *
                      (-yp_init * (x_init * x_init + y_init * y_init) +
                       2. * xp_init * x_init * y_init);
+        arr[i][3] /= detM;
 
         arr[i][4] += (kqc * KNL * KNL / 12.) *
                      (xp_init * x_init *
@@ -819,7 +824,7 @@ void quadfringeOUT(Bunch* bunch, double kq, int useCharge)
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
     double kqc = kq * charge;
-    double KNL, x_init, xp_init, y_init, yp_init;
+    double KNL, x_init, xp_init, y_init, yp_init, detM;
 
     SyncPart* syncPart = bunch->getSyncPart();
 
@@ -837,6 +842,8 @@ void quadfringeOUT(Bunch* bunch, double kq, int useCharge)
         xp_init = arr[i][1];
         y_init  = arr[i][2];
         yp_init = arr[i][3];
+        detM = 1.0 - pow(((kqc * KNL / 4.) *
+                          (x_init * x_init - y_init * y_init)), 2);
 
         arr[i][0] -= (kqc * KNL / 12.) * x_init *
                      (x_init * x_init + 3. * y_init * y_init);
@@ -844,6 +851,7 @@ void quadfringeOUT(Bunch* bunch, double kq, int useCharge)
         arr[i][1] += (kqc * KNL / 4.) *
                      (xp_init * (x_init * x_init + y_init * y_init) -
                       2. * yp_init * x_init * y_init);
+        arr[i][1] /= detM;
 
         arr[i][2] += (kqc * KNL / 12.) * y_init *
                      (y_init * y_init + 3. * x_init * x_init);
@@ -851,6 +859,7 @@ void quadfringeOUT(Bunch* bunch, double kq, int useCharge)
         arr[i][3] += (kqc * KNL / 4.) *
                      (-yp_init * (x_init * x_init + y_init * y_init) +
                       2. * xp_init * x_init * y_init);
+        arr[i][3] /= detM;
 
         arr[i][4] -= (kqc * KNL * KNL / 12.) *
                      (xp_init * x_init *
@@ -905,14 +914,14 @@ void wedgerotate(Bunch* bunch, double e, int frinout)
             arr[i][1]  =  xp_temp * cs + p0_temp * sn;
             p0         = -xp_temp * sn + p0_temp * cs;
             dp_p       =  p0 - 1.0;
-            arr[i][4]  =  (-arr[i][0] * sn + arr[i][4]) / cs;
+            arr[i][4]  =  (-arr[i][0] * sn + arr[i][4]) * cs;
         }
         else
         {
             dp_p = arr[i][5] * dp_p_coeff;
             p0   = 1.0 + dp_p;
 
-            arr[i][4]  = arr[i][0] * sn + arr[i][4] * cs;
+            arr[i][4]  = arr[i][0] * sn + arr[i][4] / cs;
             arr[i][0] *= cs;
             xp_temp    = arr[i][1] * cs - p0 * sn;
             p0_temp    = arr[i][1] * sn + p0 * cs;

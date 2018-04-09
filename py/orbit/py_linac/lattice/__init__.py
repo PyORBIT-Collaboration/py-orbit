@@ -28,10 +28,13 @@ from LinacAccLatticeFunc import GetGlobalQuadGradient
 from LinacAccLatticeFunc import GetGlobalRF_AxisField
 from LinacAccLatticeFunc import getNodeForNameFromWholeLattice
 from LinacAccLatticeFunc import getNodePosDictForWholeLattice
+from LinacAccLatticeFunc import getAllNodesInLattice
 from LinacAccLatticeFunc import getAllMagnetsInLattice
 
 from LinacTransportMatrixGenNodes import LinacTrMatrixGenNode
 from LinacTransportMatrixGenNodes import LinacTrMatricesContrioller
+
+from LinacDiagnosticsNodes import LinacBPM
 
 __all__ = []
 __all__.append("LinacAccLattice")
@@ -73,8 +76,11 @@ __all__.append("GetGlobalQuadGradient")
 __all__.append("GetGlobalRF_AxisField")
 __all__.append("getNodeForNameFromWholeLattice")
 __all__.append("getNodePosDictForWholeLattice")
+__all__.append("getAllNodesInLattice")
 __all__.append("getAllMagnetsInLattice")
 
 __all__.append("LinacTrMatrixGenNode")
 __all__.append("LinacTrMatricesContrioller")
+
+__all__.append("LinacBPM")
 

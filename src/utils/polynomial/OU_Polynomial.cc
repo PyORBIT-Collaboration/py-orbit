@@ -12,10 +12,13 @@
 // DESCRIPTION
 //    Calculates the polynomial:
 //    order = 0   y = coef[0]
-//    order = 1   y = coef[0] + coef[1]*x^2
+//    order = 1   y = coef[0] + coef[1]*x
+//    order = 2   y = coef[0] + coef[1]*x + coef[2]*x^2
 //    etc.
 //
 ///////////////////////////////////////////////////////////////////////////
+#include <cfloat>
+
 #include "orbit_mpi.hh"
 #include "OU_Polynomial.hh"
 
@@ -31,6 +34,9 @@ Polynomial::Polynomial(int order_in): CppPyWrapper(NULL)
 	for (int i = 0; i < (order+1); i++){
 		coef_arr[i] = 0.;
 	}
+	
+	x_min = -DBL_MAX;
+	x_max = DBL_MAX;
 }
 
 Polynomial::~Polynomial()
@@ -124,4 +130,20 @@ void Polynomial::copyTo(Polynomial* p)
 	}	
 }
 
+double Polynomial::getMinX(){
+	return x_min;
+}
 
+double Polynomial::getMaxX(){
+	return x_max;
+}
+
+
+void Polynomial::setMinX(double x_min_in){
+	x_min = x_min_in;
+}
+
+
+void Polynomial::setMaxX(double x_max_in){
+	x_max = x_max_in;
+}

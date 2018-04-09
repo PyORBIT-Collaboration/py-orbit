@@ -166,8 +166,6 @@ namespace linac_tracking
 		
 		double p_z2 = 0.;
 		double beta_z = 0.;
-		double beta_x = 0.;
-		double beta_y = 0.;
    
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
@@ -182,6 +180,7 @@ namespace linac_tracking
 			p2 = Ekin*(Ekin+2.0*mass); 
 			p = sqrt(p2);
     	kqc = dB_dr/(3.335640952*p);
+			beta_z = p/Etotal;
 			
     	sqrt_kq  = sqrt(fabs(kqc));
     	kqlength = sqrt_kq * length; 
@@ -215,8 +214,8 @@ namespace linac_tracking
      	xp_init = arr[i][1];
     	yp_init = arr[i][3];
      	
-    	// coeff = p_s/p_z
-  		coeff = 1.0/sqrt(p2/p2_s - xp_init*xp_init - yp_init*yp_init);
+    	// coeff = p_s/p
+  		coeff = p_s/p;
   		
     	x_init  = arr[i][0];
     	xp_init = xp_init*coeff;
@@ -227,11 +226,7 @@ namespace linac_tracking
     	arr[i][1]  = (x_init * m21 + xp_init * m22)/coeff;
     	arr[i][2]  = y_init * m33 + yp_init * m34;
     	arr[i][3]  = (y_init * m43 + yp_init * m44)/coeff;
-    	
- 			beta_x = (xp_init*p_s)/Etotal;
-			beta_y = (yp_init*p_s)/Etotal; 
-			p_z2 = p2 - (xp_init*xp_init + yp_init*yp_init)*p2_s;
-			beta_z = sqrt(p_z2)/Etotal;
+
     	arr[i][4] += (beta_z - beta_s) * delta_tc;
     }
   }

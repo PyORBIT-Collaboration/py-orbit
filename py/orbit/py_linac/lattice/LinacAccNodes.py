@@ -360,11 +360,15 @@ class Quad(LinacMagnetNode):
 		"""
 		The  Quad Combined Function class implementation
 		of the AccNode class initialize() method.
+		The parts number should be even to have ability to put correctors
+		at the center of the quad.
 		"""
 		nParts = self.getnParts()
 		if(nParts < 2 and nParts%2 != 0):
 			msg = "The Quad Combined Function class instance should have no less than 2 and even number of parts!"
 			msg = msg + os.linesep
+			msg = "Even number of parts are needed for the correctors at the center of the quad."
+			msg = msg + os.linesep			
 			msg = msg + "Method initialize():"
 			msg = msg + os.linesep
 			msg = msg + "Name of element=" + self.getName()
@@ -373,15 +377,23 @@ class Quad(LinacMagnetNode):
 			msg = msg + os.linesep
 			msg = msg + "nParts =" + str(nParts)
 			orbitFinalize(msg)
+		lengthStep = self.getLength()/nParts
+		for i in range(nParts):
+			self.setLength(lengthStep,i)
+		"""
+		#=============================================
+		# This is an old TEAPOT-like implementation 
+		# of the Quad slicing.
+		#=============================================		
 		lengthIN = (self.getLength()/(nParts - 1))/2.0
 		lengthOUT = (self.getLength()/(nParts - 1))/2.0
 		lengthStep = lengthIN + lengthOUT
 		self.setLength(lengthIN,0)
 		self.setLength(lengthOUT,nParts - 1)
-		for i in xrange(nParts-2):
+		for i in range(nParts-2):
 			self.setLength(lengthStep,i+1)
-
-
+		"""	
+		
 	def track(self, paramsDict):
 		"""
 		The Quad Combined Function TEAPOT  class implementation
@@ -396,7 +408,37 @@ class Quad(LinacMagnetNode):
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
-		#print "debug name =",self.getName()," kq=",kq,"  L=",self.getLength()		
+		#print "debug name =",self.getName()," kq=",kq,"  L=",self.getLength(index)," index=",index
+		#===============================================================
+		# This is a 3-sub-parts implementation TEAPOT algorithm
+		# Now the quad is divided into equally long parts, and
+		# for each part we use the same tracking.
+		# It will allow the backward tracking through the 
+		# quad with Space Charge child nodes.
+		#===============================================================
+		step = length
+		self.tracking_module.quad1(bunch, step/4, kq)
+		self.tracking_module.quad2(bunch, step/4)
+		for i in xrange(len(poleArr)):
+			pole = poleArr[i]
+			kl = klArr[i]/(nParts - 1)
+			skew = skewArr[i]
+			TPB.multp(bunch,pole,kl,skew)
+		self.tracking_module.quad2(bunch, step/4)
+		self.tracking_module.quad1(bunch, step/2, kq)
+		self.tracking_module.quad2(bunch, step/4)
+		for i in xrange(len(poleArr)):
+			pole = poleArr[i]
+			kl = klArr[i]*kq*length/(nParts - 1)
+			skew = skewArr[i]
+			TPB.multp(bunch,pole,kl,skew)
+		self.tracking_module.quad2(bunch, step/4)
+		self.tracking_module.quad1(bunch, step/4, kq)
+		"""
+		#=============================================
+		# This is an old TEAPOT-like implementation 
+		# of the Quad tracking.
+		#=============================================
 		if(index == 0):
 			self.tracking_module.quad1(bunch, length, kq)
 			return
@@ -411,7 +453,6 @@ class Quad(LinacMagnetNode):
 			self.tracking_module.quad1(bunch, length, kq)
 			return
 		if(index == (nParts-1)):
-			#print "debug before xp",	bunch.xp(0)
 			self.tracking_module.quad2(bunch, length)
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
@@ -420,7 +461,7 @@ class Quad(LinacMagnetNode):
 				TPB.multp(bunch,pole,kl,skew)
 			self.tracking_module.quad2(bunch, length)
 			self.tracking_module.quad1(bunch, length, kq)
-			#print "debug after xp",	bunch.xp(0)
+		"""		
 		return		
 
 	def getTotalField(self,z):
@@ -826,7 +867,7 @@ class FringeField(BaseLinacNode):
 		It is tracking the dictionary with parameters through
 		the fringe field node.
 		"""
-		if(self.__trackFunc != None):
+		if(self.__trackFunc != None and self.__usage == True):
 			self.__trackFunc(self,paramsDict)
 
 	def setFringeFieldFunction(self, trackFunction = None):

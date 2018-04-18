@@ -77,7 +77,38 @@ class LinacAccLattice(AccLattice):
 		"""
 		for node in self.getNodes():
 			node.setLinacTracker(switch)
-					
+						
+	def reverseOrder(self):
+		"""
+		This method is used for a lattice reversal and a bunch backtracking.
+		This method will reverse the order of the children nodes. It will 
+		apply the reverse recursively to the all children nodes.
+		"""
+		AccLattice.reverseOrder(self)
+		seqs = self.getSequences()
+		for seq in seqs:
+			seq.getNodes().reverse()
+		self.initialize()
+		#------ the positions of the nodes inside sequences will be defined by their positions 
+		#------ inside their order in the AccLattice. It is necessary for the reverse order
+		#------ operation. 
+		node_pos_dict = self.getNodePositionsDict()
+		for seq in seqs:
+			pos_seq_start = seq.getPosition()
+			nodes = seq.getNodes()
+			for node in nodes:
+				(pos_start,pos_stop) = node_pos_dict[node]
+				node.setPosition((pos_start+pos_stop)/2.0 - pos_seq_start)
+			nodes = sorted(nodes, key = lambda x: x.getPosition(), reverse = False)
+			seq.setNodes(nodes)
+		"""
+		for seq in seqs:
+			for node in nodes: 
+				(pos_start,pos_stop) = node_pos_dict[node]
+				print "debug node=",node.getName()," (pos_start,pos_stop)=",(pos_start,pos_stop)," L=",node.getLength()
+		"""
+		
+
 	def getSubLattice(self, index_start = -1, index_stop = -1):
 		"""
 		It returns the new LinacAccLattice with children with indexes 

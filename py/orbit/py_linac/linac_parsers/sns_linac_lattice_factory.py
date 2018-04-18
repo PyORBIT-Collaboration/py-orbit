@@ -213,8 +213,10 @@ class SNS_LinacLatticeFactory():
 						cav.setPhase(accNode.getParam("gap_phase"))
 					#---- TTFs parameters
 					ttfs_da = node_da.childAdaptors("TTFs")[0]
-					accNode.setParam("beta_min",ttfs_da.doubleValue("beta_min"))
-					accNode.setParam("beta_max",ttfs_da.doubleValue("beta_max"))					
+					beta_min = ttfs_da.doubleValue("beta_min")
+					beta_max = ttfs_da.doubleValue("beta_max")
+					accNode.setParam("beta_min",beta_min)
+					accNode.setParam("beta_max",beta_max)					
 					(polyT,polyS,polyTp,polySp) = accNode.getTTF_Polynimials()
 					polyT_da = ttfs_da.childAdaptors("polyT")[0]
 					polyS_da = ttfs_da.childAdaptors("polyS")[0]
@@ -224,6 +226,16 @@ class SNS_LinacLatticeFactory():
 					polyS.order(polyS_da.intValue("order"))
 					polyTp.order(polyTp_da.intValue("order"))
 					polySp.order(polySp_da.intValue("order"))
+					#---- actually these polynomials are functions of kappa =  2*PI*Freq/(c*beta)
+					#---- but we will use these parameters to keep beta
+					polyT.minX(beta_min)
+					polyT.maxX(beta_max)
+					polyS.minX(beta_min)
+					polyS.maxX(beta_max)
+					polyTp.minX(beta_min)
+					polyTp.maxX(beta_max)
+					polySp.minX(beta_min)
+					polySp.maxX(beta_max)
 					coef_arr = polyT_da.doubleArrayValue("pcoefs")
 					for coef_ind in range(len(coef_arr)):
 						polyT.coefficient(coef_ind,coef_arr[coef_ind])

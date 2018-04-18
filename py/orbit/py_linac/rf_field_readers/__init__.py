@@ -1,4 +1,4 @@
-## \namespace orbit::sns_linac::rf_field_readers
+## \namespace orbit::py_linac::rf_field_readers
 ## \brief The classes to read and analyze the SuperFish output files 
 ##        with the electric and magnetic fields of the RF cavities.
 ##        The field are assumed to have axial symmetry.

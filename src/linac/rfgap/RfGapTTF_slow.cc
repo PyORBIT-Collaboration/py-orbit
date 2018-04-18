@@ -54,7 +54,13 @@ void RfGapTTF_slow::trackBunch(Bunch* bunch, double frequency, double E0L, doubl
 	OrbitUtils::Polynomial* Spttf){
 	// E0L, energy, and mass of particles in GeV
 	// RF frequency is in Hz
-	// RF phase in radians		
+	// RF phase in radians	
+	//-----------------------------------------------------------------------
+	// Actually TTF polynomials are functions of kappa =  2*PI*Freq/(c*beta)
+	// but we get minimal and maximal beta parameters
+	double beta_min = Tttf->getMinX();
+	double beta_max = Tttf->getMaxX();
+	//------------------------------------------------------------------------
 	bunch->compress();
 	SyncPart* syncPart = bunch->getSyncPart();
 	double gamma_in = syncPart->getGamma();
@@ -112,6 +118,22 @@ void RfGapTTF_slow::trackBunch(Bunch* bunch, double frequency, double E0L, doubl
 		beta_z = sqrt(p_z2)/(Ekin+mass);
 		gamma_z = 1.0/sqrt(1.0-beta_z*beta_z);
     kappa = 2.0*OrbitConst::PI*frequency/(OrbitConst::c*beta_z);
+    
+    //check that TTF will be good for this beta
+    if(beta_z < beta_min || beta_z > beta_max){
+    	int rank_MPI = bunch->getMPI_Rank();
+    	if(rank_MPI == 0){
+    		std::cerr << "Method RfGapTTF_slow::trackBunch(...)"<< std::endl;
+    		std::cerr << "The partilce's beta outside the correct limit of the TTF in the RF Gap."<< std::endl;
+    		std::cerr << "Synch. particle's kin. energy[MeV]:"<< eKin_in*1000. << std::endl;
+    		std::cerr << "Particle's kin. energy[MeV]:"<< Ekin*1000. << std::endl;
+    		std::cerr << "beta ="<< beta_z << std::endl;
+    		std::cerr << "beta_min ="<< beta_min << std::endl;
+    		std::cerr << "beta_max ="<< beta_max << std::endl;
+    		std::cerr << "Cannot track this particle! Stop."<< std::endl;
+    	}
+    	ORBIT_MPI_Finalize();
+    }    
 
 		Kr = kappa/gamma_z;	
     kappa_Kr = gamma_z;		

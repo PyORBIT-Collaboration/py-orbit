@@ -22,23 +22,29 @@ sudo yum install python-devel mpich mpich-devel zlib-devel fftw-devel
 ```
 
 ### Mac 
-There are different package managers available.
-
-[MacPorts](https://www.macports.org)  
+We recommend to use [MacPorts](https://www.macports.org).
+  
 Sync with package repository
 
 `sudo port -v selfupdate`
 
 After syncing run:
 ```shell
-sudo port install fftw mpich
+sudo port install fftw-3 mpich
 ```
+Select mpich to enable mpicc
+
+```shell
+sudo port select mpi mpich-mp-fortran
+```
+
 Alternatively you can use [Homebrew](http://brew.sh). 
 This tends to build a lot of packages from sources (especially for the first time), which can take a long time.
 ```shell
 brew update
 brew install fftw mpich
 ```
+You will need to modify *[conf/Darwin/make_root_config](conf/Darwin/make_root_config)* and include Homebrew specific directories in compiler flags.
 
 ### Building the whole environment from source
 If you don't want to use standard libraries supplied by your distribution, you can build the whole environment from scratch. It is also possible to do this without having a root account. The process is described in detail [here](BuildFromSource.md).

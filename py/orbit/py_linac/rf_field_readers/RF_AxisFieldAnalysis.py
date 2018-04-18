@@ -259,6 +259,21 @@ class RF_AxisFieldAnalysis:
 				func_SP.add(cappa,SP)
 		return self.ttp_ssp_gap_arr
 
+	def getTTPandSSP_Values(self,beta, gap_index = 0):
+		"""
+		Returns a tuple (T,T',S,S') for particular beta value for given gap_index.
+		The data for func_T,func_TP,func_S,func_SP should be prepared 
+		before by call makeTransitTimeTables(...).
+		"""
+		c_light = 2.99792458e+8
+		cappa = 2*math.pi*self.rf_freq/(c_light*beta)
+		[func_T,func_TP,func_S,func_SP] = self.ttp_ssp_gap_arr[gap_index]
+		T = func_T.getY(cappa)
+		TP = func_TP.getY(cappa)
+		S = func_S.getY(cappa)
+		SP = func_SP.getY(cappa)
+		return (T,TP,S,SP)
+
 	def makePlynomialFittings(self,n_order):
 		"""
 		The method will prepare the polynomial fitting for the T,Tp,S,Sp 

@@ -118,6 +118,21 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		Method. Sets lengths of all parts evenly.
 		"""
 		self.__nParts = n
+		n_body_children = self.getNumberOfBodyChildren()
+		if(n_body_children != 0):
+			msg = "The Class AccNode: method _setPartsLengthEvenly will remove the exiting child nodes!"
+			msg = msg + os.linesep
+			msg = "You will empty self.__childNodesArr[AccNode.BODY] array which is not empty!"
+			msg = msg + os.linesep			
+			msg = msg + "Name of element=" + self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Type of element=" + self.getType()
+			msg = msg + os.linesep
+			msg = msg + "Requested nParts =" + str(n)
+			msg = msg + os.linesep
+			msg = msg + "N body children=" + n_body_children
+			msg = msg + os.linesep		
+			orbitFinalize(msg)		
 		self.__lengthArr = []
 		self.__childNodesArr[AccNode.BODY] = []
 		for i in range(self.__nParts):
@@ -191,6 +206,73 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 			nodes += arr[0]
 			nodes += arr[1]
 		return nodes
+		
+	def reverseOrder(self):
+		"""
+		This method is used for a lattice reversal and a bunch backtracking.
+		This method will reverse the order of the children nodes and their 
+		positions in the parent node node. It will apply the reverse
+		recursively to the all children nodes. It also will call a node specific 
+		reversal procedure that can be needed internally, like the field 
+		distribution etc. Here this node specific reversal method should
+		be empty.
+		"""
+		self.__lengthArr.reverse()
+		self.__childNodesArr.reverse()
+		self.__childNodesArr[AccNode.ENTRANCE].reverse()
+		self.__childNodesArr[AccNode.EXIT].reverse()
+		for node in self.__childNodesArr[AccNode.ENTRANCE]: node.reverseOrderNodeSpecific()
+		for node in self.__childNodesArr[AccNode.EXIT]: node.reverseOrderNodeSpecific()
+		self.__childNodesArr[AccNode.BODY].reverse()
+		for iPart in range(len(self.__childNodesArr[AccNode.BODY])):
+			self.__childNodesArr[AccNode.BODY][iPart].reverse()
+			self.__childNodesArr[AccNode.BODY][iPart][AccNode.BEFORE].reverse()
+			self.__childNodesArr[AccNode.BODY][iPart][AccNode.AFTER].reverse()
+			for node in self.__childNodesArr[AccNode.BODY][iPart][AccNode.BEFORE]: node.reverseOrderNodeSpecific()
+			for node in self.__childNodesArr[AccNode.BODY][iPart][AccNode.AFTER]: node.reverseOrderNodeSpecific()
+		
+	def reverseOrderNodeSpecific(self):
+		"""
+		This method is used for a lattice reversal and a bunch backtracking
+		This is a node type specific method. Here it is empty. It should be
+		redefined in the subclasses.
+		"""
+		pass
+	
+	def structureToText(self, txt = "", txt_shift = ""):
+		"""
+		This method write the structure of the node to the text variable recursively.
+		"""
+		txt_shift_local = " "
+		txt += txt_shift + "==== START AccNode = " + self.getName() + " L=" + str(self.getLength())
+		txt += os.linesep
+		txt += txt_shift + txt_shift_local + "==== ENTRANCE"
+		txt += os.linesep		
+		for node in self.getChildNodes(AccNode.ENTRANCE):
+			txt = node.structureToText(txt,txt_shift + txt_shift_local*2)
+		txt += txt_shift + txt_shift_local*2 + "==== BODY ENTRANCE n parts =" + str(self.getnParts())
+		txt += os.linesep
+		for ind in range(self.getnParts()):
+			txt += txt_shift + txt_shift_local*3 + "==== BODY Part ind.="+str(ind)+" L=" + str(self.getLength(ind))
+			txt += os.linesep
+			txt += txt_shift + txt_shift_local*4 + "==== BEFORE"+os.linesep
+			nodes = self.getChildNodes(AccNode.BODY,ind,AccNode.BEFORE)
+			for node in nodes:
+				txt = node.structureToText(txt,txt_shift + txt_shift_local*5)
+			txt += txt_shift + txt_shift_local*4 + "==== AFTER "+os.linesep
+			nodes = self.getChildNodes(AccNode.BODY,ind,AccNode.AFTER)
+			for node in nodes:
+				txt = node.structureToText(txt,txt_shift + txt_shift_local*5)
+		txt += txt_shift + txt_shift_local*2 + "==== BODY EXIT     n parts =" + str(self.getnParts())
+		txt += os.linesep
+		txt += txt_shift + txt_shift_local + "==== EXIT"
+		txt += os.linesep
+		for node in self.getChildNodes(AccNode.EXIT):
+			txt = node.structureToText(txt,txt_shift + txt_shift_local*2)		
+		txt += txt_shift + "==== END of AccNode = " + self.getName()	
+		txt += os.linesep
+		return txt	
+	
 
 	def trackActions(self, actionsContainer, paramsDict = {}):
 		"""

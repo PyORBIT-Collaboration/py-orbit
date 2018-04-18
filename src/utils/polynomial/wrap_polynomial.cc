@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <string>
+#include <cfloat>
 
 #include "OU_Polynomial.hh"
 
@@ -142,6 +143,26 @@ extern "C" {
 		return pyP;
   }
 	
+ 	/** It sets/returns the min good value for x for this polynomial reprsentation */
+  static PyObject* Polynomial_minX(PyObject *self, PyObject *args){
+	  Polynomial* cpp_Polynomial = (Polynomial*)((pyORBIT_Object*) self)->cpp_obj;
+		double x_min = -DBL_MAX;
+		if(PyArg_ParseTuple(	args,"d:",&x_min)){
+			cpp_Polynomial->setMinX(x_min);
+		}
+		return Py_BuildValue("d",cpp_Polynomial->getMinX());
+  }  
+
+ 	/** It sets/returns the max good value for x for this polynomial reprsentation */
+  static PyObject* Polynomial_maxX(PyObject *self, PyObject *args){
+	  Polynomial* cpp_Polynomial = (Polynomial*)((pyORBIT_Object*) self)->cpp_obj;
+		double x_max = -DBL_MAX;
+		if(PyArg_ParseTuple(	args,"d:",&x_max)){
+			cpp_Polynomial->setMaxX(x_max);
+		}
+		return Py_BuildValue("d",cpp_Polynomial->getMaxX());
+  }  
+  
   //-----------------------------------------------------
   //destructor for python Polynomial class (__del__ method).
   //-----------------------------------------------------
@@ -154,12 +175,14 @@ extern "C" {
 	// defenition of the methods of the python Polynomial wrapper class
 	// they will be vailable from python level
   static PyMethodDef PolynomialClassMethods[] = {
-		{ "order",				 Polynomial_order,    	  METH_VARARGS,"Sets or returns order of the Polynomial."},
+		{ "order",				 Polynomial_order,    	 METH_VARARGS,"Sets or returns order of the Polynomial."},
 		{ "coefficient",	 Polynomial_coefficient, METH_VARARGS,"Sets or gets the cofficient with index - coefficient(index[,val])"},
 		{ "value",		 	   Polynomial_value,       METH_VARARGS,"Returns the value of the polynomial."},
 		{ "derivative",	   Polynomial_derivative,  METH_VARARGS,"Returns the value of the derivative of the polynomial."},
 		{ "derivativeTo",	 Polynomial_derivativeTo,METH_VARARGS,"derivativeTo(polynomial) - initializes another polynomial as derivative"},
-		{ "copyTo",		 	   Polynomial_copyTo,    	METH_VARARGS,"copyTo(polynomial) - initializes another polynomial as a copy"},
+		{ "copyTo",		 	   Polynomial_copyTo,    	 METH_VARARGS,"copyTo(polynomial) - initializes another polynomial as a copy"},
+		{ "minX",		 	     Polynomial_minX,        METH_VARARGS,"minX(x_min) or minX() sets or returns min good value for x"},
+		{ "maxX",		 	     Polynomial_maxX,        METH_VARARGS,"maxX(x_min) or maxX() sets or returns max good value for x"},
     {NULL}
   };
 	

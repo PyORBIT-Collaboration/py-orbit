@@ -1,7 +1,7 @@
 ######################################################################
-# Linux g++ for creation of ORBIT interpreter executable
+# Darwin g++ for creation of ORBIT interpreter executable
 ######################################################################
 
 CXX             =  ${MPI_CPP}
-CXXFLAGS       += -g -O3 -DUSE_MPI=1 -I /usr/local/include/
-LINKFLAGS      += -dynamic -L/usr/local/lib
+CXXFLAGS       += -g -O3 -DUSE_MPI=1  -I /opt/local/include
+LINKFLAGS      += -dynamic  -L/opt/local/lib

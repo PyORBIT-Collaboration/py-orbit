@@ -37,6 +37,22 @@ using namespace OrbitUtils;
 
 HarmonicData::HarmonicData(int order_in, Function* inFunc): CppPyWrapper(NULL)
 {  
+	this->init(order_in,inFunc);
+}
+
+HarmonicData::HarmonicData(HarmonicData* harmonicData)
+{
+	this->init(harmonicData->getOrder(),harmonicData->getDataFunction());
+}
+
+HarmonicData::~HarmonicData()
+{
+  delete [] param_arr;
+  delete dataFunc;
+}
+
+void HarmonicData::init(int order_in, Function* inFunc)
+{
 	if(order_in < 0){
 		ORBIT_MPI_Finalize("Orbit Utilites HarmonicData::HarmonicData(order) - order should be >= 0. Stop.");
 	}	
@@ -52,19 +68,7 @@ HarmonicData::HarmonicData(int order_in, Function* inFunc): CppPyWrapper(NULL)
 	for(int ind = 0; ind < inFunc->getSize(); ind++){
 		dataFunc->add(inFunc->x(ind),inFunc->y(ind),inFunc->err(ind));
 	}
-
 }
-
-HarmonicData::HarmonicData(HarmonicData* harmonicData): HarmonicData(harmonicData->getOrder(),harmonicData->getDataFunction())
-{
-}
-
-HarmonicData::~HarmonicData()
-{
-  delete [] param_arr;
-  delete dataFunc;
-}
-
 void HarmonicData::setOrder(int order_in)
 {
 	if(order_in < 0){
@@ -96,6 +100,15 @@ int HarmonicData::getOrder()
 	return order;
 }
 
+void HarmonicData::setDataFunction(Function* inFunc)
+{
+	dataFunc->clean();
+	for(int ind = 0; ind < inFunc->getSize(); ind++){
+		dataFunc->add(inFunc->x(ind),inFunc->y(ind),inFunc->err(ind));
+	}	
+}
+
+
 void HarmonicData::setParam(int index, double val)
 {
 	if(index < 0 || index > 2*order){
@@ -120,6 +133,11 @@ int HarmonicData::dataSize()
 double HarmonicData::valueY(int indexX)
 {
 	return dataFunc->y(indexX);
+}
+
+double HarmonicData::valueErr(int indexX)
+{
+	return dataFunc->err(indexX);
 }
 
 double HarmonicData::valueX(int indexX)

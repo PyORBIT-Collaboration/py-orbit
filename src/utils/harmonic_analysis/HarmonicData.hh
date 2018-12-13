@@ -71,6 +71,11 @@ namespace OrbitUtils{
 		int getOrder();
 		
 		/**
+		  Sets the new initial data for fiiting as new Function.
+		*/			
+		void setDataFunction(Function* inFunc);		
+		
+		/**
 		  Sets A or phase parameter in param_arr = [A0,A1,phase1,A2,phase2, ...].
 		*/		
 		void setParam(int index, double val);
@@ -89,6 +94,11 @@ namespace OrbitUtils{
 		  Returns the Y value for data point with the indexX in the input scan data.
 		*/		
 		double valueY(int indexX);
+
+		/**
+		  Returns the error of Y value for data point with the indexX in the input scan data.
+		*/		
+		double valueErr(int indexX);	
 		
 		/**
 		  Returns the X value for data point with the indexX in the input scan data.
@@ -116,6 +126,9 @@ namespace OrbitUtils{
 		Function* getDataFunction();
 
 	private:
+		
+		void init(int order_in, Function* inFunc);
+		
 		//------------------------------------------
 		//the private members of the HarmonicData class
 		//------------------------------------------

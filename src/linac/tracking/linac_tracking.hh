@@ -39,6 +39,11 @@ namespace linac_tracking
 		Quadrupole element two: nonlinear piece for linac
 	*/
 	void linac_quad2(Bunch* bunch, double length);
+	
+	/**
+		Kicker element function: each particle will be kicked with (p_synch/p) coefficient
+	*/	
+	void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge);
 
 }
 

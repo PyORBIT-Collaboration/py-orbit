@@ -11,6 +11,7 @@ from LinacAccLatticeLib import LinacAccLattice, RF_Cavity, Sequence
 from LinacAccNodes import BaseLinacNode, LinacNode, LinacMagnetNode
 from LinacAccNodes import MarkerLinacNode, Drift, Quad, AbstractRF_Gap, Bend
 from LinacAccNodes import DCorrectorH, DCorrectorV
+from LinacAccNodes import ThickKick
 
 from LinacRfGapNodes import BaseRF_Gap, AxisFieldRF_Gap, RF_AxisFieldsStore
 
@@ -49,6 +50,7 @@ __all__.append("Quad")
 __all__.append("AbstractRF_Gap")
 __all__.append("DCorrectorH")
 __all__.append("DCorrectorV")
+__all__.append("ThickKick")
 __all__.append("Bend")
 
 __all__.append("LinacApertureNode")

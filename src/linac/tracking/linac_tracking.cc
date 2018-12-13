@@ -251,4 +251,79 @@ namespace linac_tracking
   {
   	//there are no non-linear components
   }
+  
+  
+///////////////////////////////////////////////////////////////////////////
+// NAME
+//   kick
+//
+// DESCRIPTION
+//   Kicks a particle bunch
+//
+// PARAMETERS
+//   bunch = reference to the macro-particle bunch
+//   kx = strength of the horizontal kick in rad
+//   ky = strength of the vertical kick in rad
+//   kE = strength of the energy kick in GeV
+//
+// RETURNS
+//   Nothing
+//
+///////////////////////////////////////////////////////////////////////////
+
+	void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge)
+	{
+		double charge = +1.0;
+		if(useCharge == 1) charge = bunch->getCharge();
+		
+		double kxc = kx * charge;
+		double kyc = ky * charge;
+		
+		SyncPart* syncPart = bunch->getSyncPart();
+		
+		double mass = syncPart->getMass();
+		double Ekin_s = syncPart->getEnergy();  	
+		double p_s = syncPart->getMomentum();
+		double p2_s = p_s*p_s;
+		double dE = 0.;
+		double p2 = 0.;
+		double p_z = 0.;
+		double Ekin = 0.;    
+		double coeff = 0.;
+		
+		//coordinate array [part. index][x,xp,y,yp,z,dE]
+		double** arr = bunch->coordArr();
+		if(kxc != 0.)
+		{
+			for(int i = 0; i < bunch->getSize(); i++)
+			{
+				dE = arr[i][5];
+				Ekin = Ekin_s+dE;
+				p2 = Ekin*(Ekin+2.0*mass);
+				p_z = sqrt(p2 - (arr[i][1]*arr[i][1] + arr[i][3]*arr[i][3])*p2_s);
+				coeff = p_s/p_z;
+				arr[i][1] += kxc*coeff;
+			}
+		}
+		if(kyc != 0.)
+		{
+			for(int i = 0; i < bunch->getSize(); i++)
+			{
+				dE = arr[i][5];
+				Ekin = Ekin_s+dE;
+				p2 = Ekin*(Ekin+2.0*mass);
+				p_z = sqrt(p2 - (arr[i][1]*arr[i][1] + arr[i][3]*arr[i][3])*p2_s);
+				coeff = p_s/p_z;        	
+				arr[i][3] += kyc*coeff;
+			}
+		}
+		if(kE != 0.)
+		{
+			for(int i = 0; i < bunch->getSize(); i++)
+			{
+				arr[i][5] += kE;
+			}
+		}
+	}
+	
 }  //end of namespace linac_tracking

@@ -495,13 +495,13 @@ class Bend(LinacMagnetNode):
 		self.addParam("theta",1.0e-36)
 		
 		self.setnParts(2)
-                self.setType("bend linac")
-                self.setUsageFringeFieldIN(True)
-                self.setUsageFringeFieldOUT(True)
+		self.setType("bend linac")
+		self.setUsageFringeFieldIN(True)
+		self.setUsageFringeFieldOUT(True)
 		
 		def fringeIN(node,paramsDict):
-                        bunch = paramsDict["bunch"]
-                        length = paramsDict["parentNode"].getLength()
+			bunch = paramsDict["bunch"]
+			length = paramsDict["parentNode"].getLength()
 			usageIN = node.getUsage()
 			e = node.getParam("ea1")
 			rho = node.getParam("rho")
@@ -536,8 +536,8 @@ class Bend(LinacMagnetNode):
 							TPB.multpfringeIN(bunch,pole,kl,skew)
 
 		def fringeOUT(node,paramsDict):
-                        bunch = paramsDict["bunch"]
-                        length = paramsDict["parentNode"].getLength()
+			bunch = paramsDict["bunch"]
+			length = paramsDict["parentNode"].getLength()
 			usageOUT = node.getUsage()
 			e = node.getParam("ea2")
 			rho = node.getParam("rho")
@@ -685,10 +685,10 @@ class DCorrectorH(LinacMagnetNode):
 		bunch = paramsDict["bunch"]
 		syncPart = bunch.getSyncParticle()
 		momentum = syncPart.momentum()
-		q = bunch.charge()
-		# dp/p = Q*c*B*L/p p in GeV/c c = 2.99792*10^8/10^9		
-		kick = q*field*length*0.299792/momentum
-		TPB.kick(bunch,kick,0.,0.)
+		# dp/p = Q*c*B*L/p p in GeV/c c = 2.99792*10^8/10^9
+		# Q is used inside kick-method
+		kick = field*length*0.299792/momentum
+		self.tracking_module.kick(bunch,kick,0.,0.)
 
 class DCorrectorV(LinacMagnetNode):
 	"""
@@ -728,10 +728,78 @@ class DCorrectorV(LinacMagnetNode):
 		bunch = paramsDict["bunch"]
 		syncPart = bunch.getSyncParticle()
 		momentum = syncPart.momentum()
-		q = bunch.charge()
-		# dp/p = Q*c*B*L/p p in GeV/c, c = 2.99792*10^8/10^9		
-		kick = q*field*length*0.299792/momentum
-		TPB.kick(bunch,0,kick,0.)
+		# dp/p = Q*c*B*L/p p in GeV/c, c = 2.99792*10^8/10^9
+		# Q is used inside kick-method
+		kick = field*length*0.299792/momentum
+		self.tracking_module.kick(bunch,0,kick,0.)
+
+class ThickKick(LinacMagnetNode):
+	"""
+	Thick kiker linac node.
+	"""
+	def __init__(self, name = "thick_kick"):
+		"""
+		Constructor. Creates the thick kiker linac node.
+		"""
+		LinacMagnetNode.__init__(self,name)	
+		self.addParam("Bx",0.)
+		self.addParam("By",[])
+		self.setnParts(1)
+		self.setType("thickKick")
+		
+	def getFieldBx(self):
+		"""
+		Returns the field Bx value for the magnet. Vertical kick.
+		"""
+		return self.getParam("Bx")
+		
+	def setFieldBx(self,field):
+		"""
+		Sets the field Bx value for the magnet. Vertical kick.
+		"""
+		self.setParam("Bx",field)	
+		
+	def getFieldBy(self):
+		"""
+		Returns the field By value for the magnet. Horizontal kick.
+		"""
+		return self.getParam("By")
+		
+	def setFieldBy(self,field):
+		"""
+		Sets the field By value for the magnet. Horizontal kick.
+		"""
+		self.setParam("By",field)		
+		
+	def initialize(self):
+		"""
+		The  Thick Kick class implementation of the AccNode class initialize() method.
+		"""
+		nParts = self.getnParts()
+		lengthStep = self.getLength()/nParts
+		for i in range(nParts):
+			self.setLength(lengthStep,i)
+		
+	def track(self, paramsDict):
+		"""
+		The Thick Kick  class implementation of the AccNode class track(probe) method.
+		"""
+		bunch = paramsDict["bunch"]		
+		momentum = bunch.getSyncParticle().momentum()
+		Bx = self.getParam("Bx")
+		By = self.getParam("By")	
+		nParts = self.getnParts()
+		index = self.getActivePartIndex()
+		length = self.getLength(index)
+		#print "debug name =",self.getName()," Bx=",Bx," By=",By,"  L=",self.getLength(index)," index=",index
+		#==========================================
+		# dp/p = Q*c*B*L/p p in GeV/c, c = 2.99792*10^8/10^9
+		# Q is used inside kick-method
+		kickY = Bx*length*0.299792/momentum
+		kickX = By*length*0.299792/momentum
+		self.tracking_module.drift(bunch, length/2.0)
+		self.tracking_module.kick(bunch,kickX,kickY,0.)
+		self.tracking_module.drift(bunch, length/2.0)
 
 class AbstractRF_Gap(BaseLinacNode):
 	"""

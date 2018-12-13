@@ -70,11 +70,29 @@ extern "C"
 		return Py_None;
 	}   
 	
+	//Tracking a bunch through a linac kicker element with different kick for different energies
+	static PyObject* wrap_linac_kick(PyObject *self, PyObject *args)
+	{
+		PyObject* pyBunch;
+		double kx, ky, kE;
+		int useCharge = 1;
+		if(!PyArg_ParseTuple(	args, "Oddd|i:kick",
+			&pyBunch, &kx, &ky, &kE, &useCharge))
+		{
+			error("linac tracking - linac_kick - cannot parse arguments!");
+		}
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+		linac_tracking::kick(cpp_bunch, kx, ky, kE, useCharge);
+		Py_INCREF(Py_None);
+		return Py_None;
+	} 	
+	
 	static PyMethodDef linactrackingMethods[] =
 	{
 		{"drift",            wrap_linac_drift,          METH_VARARGS, "Tracking a bunch through a linac drift "},
 		{"quad1",            wrap_linac_quad1,          METH_VARARGS, "Tracking a bunch through a linear part of a linac quad"},
 		{"quad2",            wrap_linac_quad2,          METH_VARARGS, "Tracking a bunch through a non-linear part of a linac quad"},
+		{"kick",             wrap_linac_kick,           METH_VARARGS, "Tracking a bunch through a kicker"},		
 		{ NULL, NULL }
 	};
 	

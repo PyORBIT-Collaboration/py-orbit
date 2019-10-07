@@ -87,7 +87,7 @@ class LinacNode(BaseLinacNode):
 		"""
 		Sets the tilt angle for the tilt operation.
 		"""
-		self.__params["tilt"] = angle
+		self.setParam("tilt", angle)
 		self.__tiltNodeIN.setTiltAngle(angle)
 		self.__tiltNodeOUT.setTiltAngle( (-1.0) * angle)
 

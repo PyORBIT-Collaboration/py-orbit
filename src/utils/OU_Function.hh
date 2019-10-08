@@ -38,6 +38,9 @@ namespace OrbitUtils{
 		Function();
 		
 		virtual ~Function();
+
+		void setStepEps(double eps);
+		double getStepEps();
 		
 		void add(double x, double y);
 		void add(double x, double y, double err);
@@ -60,10 +63,16 @@ namespace OrbitUtils{
 		/** It will set the number of points to 0 */
 		void clean(); 
 		
-		/** It will free the mmemory and set the number of points to 0 */
+		/** It will free the memory and set the number of points to 0 */
 		void cleanMemory(); 
 		
+		/** Returns interpolated y-value for x-value */
 		double getY(double x);
+		
+		/** Returns interpolated derivative dy/dx for x-value */
+		double getYP(double x);	
+		
+		/** Returns interpolated y_error-value for x-value */
 		double getYErr(double x);
 		
 		//this method should be used only for monotonic function
@@ -85,7 +94,7 @@ namespace OrbitUtils{
 		void print(std::ostream& Out);
 		void print(const char* fileName);
 		
-		//auxiliary method to create normalize cumulative function
+		//auxiliary method to create a normalized cumulative function
 		//for probability distribution with y_min = 0 and y_max = 1.0
 		//It returns 1 if it was a success and 0 otherwise 		
 		int normalize();
@@ -103,10 +112,6 @@ namespace OrbitUtils{
 		//the private members of the Function class
 		//------------------------------------------
 		
-		//-----------------------
-		//info variables
-		//-----------------------
-		
 		//inf_const_step = 1 if the step is const 0 - otherwise
 		int inf_const_step;
 		
@@ -117,6 +122,9 @@ namespace OrbitUtils{
 		
 		int maxSize;
 		int sizeChunk;
+		
+		//constant step size accuracy for x
+		double eps_const_step;
 		
 		//min and max values
 		double xMin, xMax;

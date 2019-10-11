@@ -258,6 +258,41 @@ def Make_AxisFieldRF_Gaps_and_Find_Neihbor_Nodes(rf_length_tolerance,accLattice,
 			af_rf_gap.readAxisFieldFile(dir_location)
 			af_rf_gap_dict[rf_gap] = af_rf_gap
 	#--------------------------------------------------
+	#---- Let's fix the length of the axis field of the first gap if it is goes 
+	#---- beyond of the beginning of the sequence
+	if(len(cavs) > 0):
+		accSeq_pos = accSeq.getPosition()	
+		cav = cavs[0]
+		rf_gap = cav.getRF_GapNodes()[0]
+		(gap_pos_start,gap_pos_end) = node_pos_dict[rf_gap]
+		(z_min,z_max) = af_rf_gap_dict[rf_gap].getZ_Min_Max()
+		field_start = gap_pos_start - accSeq_pos + z_min
+		if(field_start < rf_length_tolerance):
+			z_min_new =  z_min + abs(field_start) + rf_length_tolerance
+			func = af_rf_gap_dict[rf_gap].getAxisFieldFunction()
+			func_new = RenormalizeFunction(func,z_min_new,z_max)
+			af_rf_gap_dict[rf_gap].setAxisFieldFunction(func_new)
+			(z_min_new,z_max_new) = (func_new.getMinX(),func_new.getMaxX())
+			af_rf_gap_dict[rf_gap].setZ_Min_Max(z_min_new,z_max_new)
+			msg  = "debug =============== WARNING  START ================ RF Gap="+rf_gap.getName()	
+			msg += os.linesep
+			msg += "Inside the Replace_BaseRF_Gap_to_AxisField_Nodes Python function. "
+			msg += os.linesep
+			msg += "The RF gap field  goes outside the start of the  AccSequence = " + accSeq.getName()
+			msg += os.linesep
+			msg += "The RF gap = " + rf_gap.getName()
+			msg += os.linesep		
+			msg += "That is wrong! The field will be cut shorter and re-normalized!"
+			msg += os.linesep
+			msg += "rf_gap (pos_start,pos_end)   = " + 	str((gap_pos_start- accSeq_pos,gap_pos_end - accSeq_pos))
+			msg += os.linesep
+			msg += "old rf gap (z_min,z_max) = " + str((z_min,z_max))
+			msg += os.linesep
+			msg += "new rf gap (z_min,z_max) = " + str((z_min_new,z_max_new))
+			msg += os.linesep
+			msg += "debug =============== WARNING  END ================"
+			if(rank == 0): print msg
+	#--------------------------------------------------
 	#---- Let's fix the length of the axis fields to avoid the fields overlaping
 	for cav in cavs:
 		rf_gaps = cav.getRF_GapNodes()
@@ -363,8 +398,7 @@ def Make_AxisFieldRF_Gaps_and_Find_Neihbor_Nodes(rf_length_tolerance,accLattice,
 						msg += "new rf gap (z_min,z_max) = " + str((z_min_new,z_max_new))
 						msg += os.linesep
 						msg += "debug =============== WARNING  END ================"
-						if(rank == 0): print msg
-						break
+						orbitFinalize(msg)
 					else:
 						break
 				#---------------------------------------------------------------------

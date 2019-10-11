@@ -9,7 +9,7 @@ import math
 import sys
 import os
 
-from orbit.utils import phaseNearTargetPhase, phaseNearTargetPhaseDeg
+from orbit.utils import orbitFinalize, phaseNearTargetPhase, phaseNearTargetPhaseDeg
 
 #---- base linac nodes
 from LinacAccNodes import AbstractRF_Gap
@@ -388,7 +388,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			phase = self.axis_field_rf_gap.calculate_first_part_phase(bunch)
 			rfCavity.setFirstGapEtnrancePhase(phase)
 			rfCavity.setFirstGapEtnranceDesignPhase(phase)
-			rfCavity.setDesignSetUp(True)		
+			rfCavity.setDesignSetUp(True)
 			rfCavity._setDesignPhase(rfCavity.getPhase())
 			rfCavity._setDesignAmp(rfCavity.getAmp())
 			#print "debug firs gap first part phase=",phase*180./math.pi," arr time=",arrival_time
@@ -483,7 +483,7 @@ class OverlappingQuadsNode(BaseLinacNode):
 		#---- the initial length is 0.
 		self.setLength(0.)
 		#---- If we going to use the longitudinal magnetic field component of quad
-		self.useLongField = False		
+		self.useLongField = False
 		
 	def setUseLongitudinalFieldOfQuad(self, use):
 		"""
@@ -582,7 +582,7 @@ class OverlappingQuadsNode(BaseLinacNode):
 			self.tracking_module.quad1(bunch,z_step/4.0, kq)
 			if(abs(GP) != 0.):
 				kqP = GP/(3.335640952*momentum)
-				self.tracking_module.quad3(bunch,step, kqP)			
+				self.tracking_module.quad3(bunch,z_step, kqP)			
 		self.z_value += length
 		
 	def getTotalField(self,z_from_center):

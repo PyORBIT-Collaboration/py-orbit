@@ -113,6 +113,8 @@ namespace linac_tracking
 	//   bunch  = reference to the macro-particle bunch
 	//   length = length of transport
 	//   kq = quadrupole field strength [m^(-2)]
+	//   kq = G/(B*rho) B*rho = 3.33564*P0 [T*m] where P0 in GeV/c
+	//   G = dB/dr [T/m] quad gradient
 	//
 	// RETURNS
 	//   Nothing
@@ -252,7 +254,55 @@ namespace linac_tracking
   	//there are no non-linear components
   }
   
-  
+
+	////////////////////////////
+	// NAME
+	//   linac_quad3
+	//
+	// DESCRIPTION
+	//   Quadrupole element 3: longitudinal field component of the quad field
+	//   Bz(z) = x*y*dG(z)/dz
+	//   This function performs the transverse kicks correction, so the length
+	//   is just a parameter.
+	//
+	// PARAMETERS
+	//   bunch  = reference to the macro-particle bunch
+	//   length = length of transport
+	//   kq = quadrupole field strength derivative [m^(-2)]
+	//   kq = (dG/dz)/(B*rho) B*rho = 3.33564*P0 [T*m] where P0 in GeV/c
+	//   G = dB/dr [T/m] quad gradient
+	//
+	// RETURNS
+	//   Nothing
+	//
+	///////////////////////////////////////////////////////////////////////////
+	
+	void linac_quad3(Bunch* bunch, double length, double kq, int useCharge)
+	{
+    double charge = +1.0;
+    if(useCharge == 1) charge = bunch->getCharge();
+    
+    double kqc = kq * charge;
+    if(kqc == 0.)
+    {
+    	return;
+    }
+
+    double kick_coeff = kqc*length;
+     
+    //coordinate array [part. index][x,xp,y,yp,z,dE]
+    double** arr = bunch->coordArr();
+    int nParts = bunch->getSize();
+    
+    double coef_xy = 0.;
+    
+    for(int i = 0; i < nParts; i++){
+    	coef_xy = kick_coeff*arr[i][0]*arr[i][2];
+    	arr[i][1]  +=  arr[i][3]*coef_xy;
+    	arr[i][3]  += -arr[i][1]*coef_xy;
+    }
+  }
+   
 ///////////////////////////////////////////////////////////////////////////
 // NAME
 //   kick

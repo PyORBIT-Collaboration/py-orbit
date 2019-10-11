@@ -26,6 +26,7 @@ from LinacFieldOverlappingNodes import AxisField_and_Quad_RF_Gap
 from LinacFieldOverlappingNodes import OverlappingQuadsNode
 
 from LinacAccLatticeFunc import GetGlobalQuadGradient
+from LinacAccLatticeFunc import GetGlobalQuadGradientDerivative
 from LinacAccLatticeFunc import GetGlobalRF_AxisField
 from LinacAccLatticeFunc import getNodeForNameFromWholeLattice
 from LinacAccLatticeFunc import getNodePosDictForWholeLattice
@@ -75,6 +76,7 @@ __all__.append("AxisField_and_Quad_RF_Gap")
 __all__.append("OverlappingQuadsNode")
 
 __all__.append("GetGlobalQuadGradient")
+__all__.append("GetGlobalQuadGradientDerivative")
 __all__.append("GetGlobalRF_AxisField")
 __all__.append("getNodeForNameFromWholeLattice")
 __all__.append("getNodePosDictForWholeLattice")

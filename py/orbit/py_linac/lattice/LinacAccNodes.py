@@ -472,7 +472,7 @@ class Quad(LinacMagnetNode):
 		"""
 		G = 0.
 		if(abs(z) < self.getLength()/2.):
-			G = quad.getParam("dB/dr")
+			G = self.getParam("dB/dr")
 		return G
 
 

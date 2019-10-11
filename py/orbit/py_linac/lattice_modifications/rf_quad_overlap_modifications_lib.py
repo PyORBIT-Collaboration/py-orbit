@@ -319,6 +319,16 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 				if(ind < len(zero_length_nodes)):
 					new_nodes.append(zero_length_nodes[ind])
 				pos_start = pos_end
+		#------------------------------------------------------------------------------------------------
+		#---- sometimes there will be duplicate nodes: if RF filed covers the beginning or end of accSeq
+		#---- we will remove the duplicate nodes
+		new_nodes_tmp = []
+		new_nodes_dict_tmp = {}
+		for node in new_nodes:
+			if(not new_nodes_dict_tmp.has_key(node)):
+				new_nodes_tmp.append(node)
+				new_nodes_dict_tmp[node] = None
+		new_nodes = new_nodes_tmp
 		#--------------------------------------------------------------------------
 		#---- 4st STEP - nodes between two RF gaps
 		for local_gap_ind in range(n_rf_gaps-1):
@@ -384,7 +394,7 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 	#---- new set of nodes for the lattice
 	new_latt_nodes = []
 	for accSeq in accLattice.getSequences():
-		new_latt_nodes += accSeq.getNodes()
+		new_latt_nodes += accSeq.getNodes()	
 	accLattice.setNodes(new_latt_nodes)
 	accLattice.initialize()
 	#------- debug START printing of new nodes and their positions in the lattice

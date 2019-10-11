@@ -41,6 +41,15 @@ namespace linac_tracking
 	void linac_quad2(Bunch* bunch, double length);
 	
 	/**
+	     Quadrupole element 3: longitudinal field component of the quad field
+	     Bz(z) = x*y*dG(z)/dz
+	     This function performs the transverse kicks correction, so the length
+	     is just a parameter.
+	*/		
+	void linac_quad3(Bunch* bunch, double length, double kq, int useCharge);	
+	
+	
+	/**
 		Kicker element function: each particle will be kicked with (p_synch/p) coefficient
 	*/	
 	void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge);

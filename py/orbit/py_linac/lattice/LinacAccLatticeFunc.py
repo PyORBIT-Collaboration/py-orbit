@@ -44,6 +44,27 @@ def GetGlobalQuadGradient(accLattice,z):
 		return G		
 	return G
 
+def GetGlobalQuadGradientDerivative(accLattice,z):
+	"""
+	The service function for the overlapping fields package.
+	Returns the quad field derivative for certain position in the lattice that
+	has usual and overlapping quads.
+	"""
+	node_pos_dict = accLattice.getNodePositionsDict()
+	nodes = accLattice.getNodes()
+	GP = 0.
+	(node,index,posBefore,posAfter) = accLattice.getNodeForPosition(z)
+	if(isinstance(node,Quad)):
+		return 0.
+	if(isinstance(node,OverlappingQuadsNode)):
+		GP = node.getTotalFieldDerivative(z - (posBefore+posAfter)/2)			
+		return GP
+	if(isinstance(node,AxisField_and_Quad_RF_Gap)):
+		(z_min,z_max) = node.getZ_Min_Max()
+		GP = node.getTotalFieldDerivative((z - posBefore)+z_min)			
+		return GP		
+	return GP
+
 def GetGlobalRF_AxisField(accLattice,z):
 	"""
 	The service function for the overlapping RF fields package.

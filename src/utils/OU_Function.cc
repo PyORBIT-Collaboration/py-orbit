@@ -30,6 +30,9 @@ Function::Function(): CppPyWrapper(NULL)
 	sizeChunk = 10;
   cleanMemory();
 
+  //default value of the constant step size accuracy for x
+  eps_const_step = 1.0e-11;
+  
   //MPI stuffs
   rank_MPI = 0;
   size_MPI = 1;
@@ -88,6 +91,16 @@ void Function::resize()
 void Function::finalize(const char* message)
 {
     ORBIT_MPI_Finalize(message);
+}
+
+void Function::setStepEps(double eps)
+{
+	eps_const_step = eps;
+}
+
+double Function::getStepEps()
+{
+	return eps_const_step;
 }
 
 void Function::add(double x, double y, double err)
@@ -290,13 +303,60 @@ double Function::getY(double x)
 				ind_stop =  ind;
     }
 		if(count > 200){
-			finalize("ORBIT Utils Function class: The Function method  getX(double y) has unlimited loop. Check data.");
+			finalize("ORBIT Utils Function class: The Function method  getY(double y) has unlimited loop. Check data.");
 		}
   }	
 	ind = ind_start;
 
   yy = y_arr[ind] + (y_arr[ind+1] - y_arr[ind])*((x - x_arr[ind])/(x_arr[ind+1] - x_arr[ind]));
   return yy;
+}
+
+double Function::getYP(double x)
+{
+  if(size < 2){
+    finalize("ORBIT Utils Function class: The Function method  getYP(double x)  (size<2)");
+  }	
+	
+  if(x <= xMin) return 0.;
+  if(x >= xMax) return 0.;
+
+  int ind = 0;
+  double yp = 0.;
+
+  if(inf_const_step > 0){
+    ind = (int)((x-xMin)/x_step);
+    if(ind < 0 || ind > (size-2)){
+    	if(ind == (size-1)){
+    		yp = (y_arr[ind] - y_arr[ind-1])/x_step;
+    		return yp;
+    	}
+      finalize("ORBIT Utils Function class: The Function method  getYP(double x)  ind < 0 or ind >= (size-2)");
+    }
+    yp = (y_arr[ind+1] - y_arr[ind])/x_step;
+    return yp;
+  }
+
+  int ind_start = 0;
+  int ind_stop = size-1;
+	int count = 0;
+  while((ind_stop - ind_start) > 1){
+		count++;
+    ind = (ind_stop + ind_start)/2;
+    if(x > x_arr[ind]){
+      ind_start = ind;
+    }
+    else{
+				ind_stop =  ind;
+    }
+		if(count > 200){
+			finalize("ORBIT Utils Function class: The Function method  getYP(double y) has unlimited loop. Check data.");
+		}
+  }	
+	ind = ind_start;
+
+  yp = (y_arr[ind+1] - y_arr[ind])/(x_arr[ind+1] - x_arr[ind]);
+  return yp;
 }
 
 double Function::getYErr(double x)
@@ -406,7 +466,7 @@ int Function::setConstStep(int info)
     //check that step is const
     x_step = x_arr[1] - x_arr[0];
     for(int i = 0; i < (size-1); i++){
-      if(abs((x_step - (x_arr[i+1] - x_arr[i]))/x_step) > 1.0e-11){
+      if(abs((x_step - (x_arr[i+1] - x_arr[i]))/x_step) > eps_const_step){
 				inf_const_step = 0;
 	      return 0;
       }
@@ -552,7 +612,7 @@ void Function::print(const char* fileName)
   return;
 }
 
-//auxiliary method to create normalize cumulative function
+//auxiliary method to create a normalized cumulative function
 //for probability distribution with y_min = 0 and y_max = 1.0
 //It returns 1 if it was a success and 0 otherwise 
 int Function::normalize()

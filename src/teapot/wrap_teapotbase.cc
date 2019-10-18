@@ -174,6 +174,13 @@ extern "C"
         return Py_None;
     }
 
+    //Quadrupole element 3: non-linear transport due to the longitudinal component of the field
+    static PyObject* wrap_quad3(PyObject *self, PyObject *args)
+    {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }   
+    
     //Quadrupole element IN edge
     static PyObject* wrap_quadfringeIN(PyObject *self, PyObject *args)
     {
@@ -471,6 +478,7 @@ extern "C"
 			{"kick",             wrap_kick,           METH_VARARGS, "Kicker element: chnges in x-prime, y-prime and dE"},
 			{"quad1",            wrap_quad1,          METH_VARARGS, "Quadrupole element one: linear transport matrix "},
 			{"quad2",            wrap_quad2,          METH_VARARGS, "Quadrupole element two: drift in quadrupole "},
+			{"quad3",            wrap_quad3,          METH_VARARGS, "Quadrupole element one: mon-linear transport of Bz - empty there "},
 			{"quadfringeIN",     wrap_quadfringeIN,   METH_VARARGS, "Quadrupole element IN edge"},
 			{"quadfringeOUT",    wrap_quadfringeOUT,  METH_VARARGS, "Quadrupole element OUT edge"},
 			{"wedgerotate",      wrap_wedgerotate,    METH_VARARGS, "Rotates coordinates by e for fringe fields at non-SBEND "},

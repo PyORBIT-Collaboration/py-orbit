@@ -736,6 +736,27 @@ void quad2(Bunch* bunch, double length)
     }
 }
 
+////////////////////////////
+// NAME
+//   quad3
+//
+// DESCRIPTION
+//   Quadrupole element 3: non-linear transport 
+//   with the longitudinal field component
+//
+//  It is empty here in the TEAPOT package!
+//
+// RETURNS
+//   Nothing
+//
+///////////////////////////////////////////////////////////////////////////
+
+void quad3(Bunch* bunch, double length, double kq, int useCharge)
+{
+	return;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////
 // NAME
 //   quadfringeIN

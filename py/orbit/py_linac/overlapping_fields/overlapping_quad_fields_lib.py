@@ -45,6 +45,12 @@ class AbstractQuadFieldSourceFunction:
 		"""
 		pass
 	
+	def getFuncDerivative(self,z):
+		"""
+		Returns the derivative of the getFuncValue(z)
+		"""
+		pass
+	
 class SimpleQuadFieldFunc(AbstractQuadFieldSourceFunction):
 	"""
 	It is an implementation of the QuadFieldSourceFunction class for
@@ -68,6 +74,12 @@ class SimpleQuadFieldFunc(AbstractQuadFieldSourceFunction):
 		if(abs(z) <= L/2):
 			return 1./L
 		return 0.
+	
+	def getFuncDerivative(self,z):
+		"""
+		Returns the derivative of the getFuncValue(z)
+		"""
+		return 0.	
 		
 class EngeFunction(AbstractQuadFieldSourceFunction):
 	""" 
@@ -202,6 +214,13 @@ class EngeFunction(AbstractQuadFieldSourceFunction):
 		if(abs(z) >= self.func.getMaxX()): return 0.
 		return self.normalization*self.func.getY(abs(z))
 		
+	def getFuncDerivative(self,z):
+		"""
+		Returns the derivative of the getFuncValue(z)
+		"""
+		if(abs(z) >= self.func.getMaxX()): return 0.
+		return 	math.copysign(self.normalization*self.func.getYP(abs(z)),-z)
+		
 	def getLimitsZ(self):
 		""" Returns the tuple with min and max Z value for this field """
 		z_max = self.func.getMaxX()
@@ -224,27 +243,28 @@ class PMQ_Trace3D_Function(AbstractQuadFieldSourceFunction):
 		z_cutoff = self._findCutOff(z_step,cutoff_level)
 		self.z_min = - z_cutoff
 		self.z_max = + z_cutoff
+		self.func = Function()
 		self._normalize()
 		
 	def _findCutOff(self,step, cutoff_level):
 		""" Finds the distance from the center where the field is less than cutoff level """
-		init_val = self.getFuncValue(0.)
+		init_val = self.getPMQ_FuncValue(0.)
 		z = step
-		val = self.getFuncValue(z)/init_val
+		val = self.getPMQ_FuncValue(z)/init_val
 		if(val <= cutoff_level):
 			return z
 		while(val > cutoff_level):
 			z += step
-			val = self.getFuncValue(z)/init_val
+			val = self.getPMQ_FuncValue(z)/init_val
 		z0 = z - step
 		z1 = z
 		n_inner_points = 100
 		step_z = step/n_inner_points
-		val0 =  self.getFuncValue(z0)/init_val
-		val1 =  self.getFuncValue(z1)/init_val		
+		val0 =  self.getPMQ_FuncValue(z0)/init_val
+		val1 =  self.getPMQ_FuncValue(z1)/init_val		
 		while(abs(z0-z1) > step_z):
 			z_new = (z0+z1)/2.0
-			val_new = self.getFuncValue(z_new)/init_val
+			val_new = self.getPMQ_FuncValue(z_new)/init_val
 			if(val_new <= cutoff_level):
 				z1 = z_new
 				val1 = val_new
@@ -259,11 +279,13 @@ class PMQ_Trace3D_Function(AbstractQuadFieldSourceFunction):
 		self.normalization = 1.0
 		step = self.z_max/(self.n_func_points - 1)
 		sum_int = 0.
+		self.func.clean()
 		for ind in range(self.n_func_points):
 			z = step*ind
-			val = self.getFuncValue(z)
+			val = self.getPMQ_FuncValue(z)
+			self.func.add(z,val)
 			sum_int += val
-		sum_int -= (self.getFuncValue(0.) + self.getFuncValue(step*(self.n_func_points - 1)))/2.0
+		sum_int -= (self.getPMQ_FuncValue(0.) + self.getPMQ_FuncValue(step*(self.n_func_points - 1)))/2.0
 		sum_int *= 2.0*step
 		self.normalization = 1.0/sum_int
 				
@@ -284,13 +306,25 @@ class PMQ_Trace3D_Function(AbstractQuadFieldSourceFunction):
 		f = 0.5*(1-0.125*z*(1.0/r1+1.0/r2)*v1**2*v2**2*(v1**2+v1*v2+v1**2+4+8/v1/v2)/(v1+v2))	
 		return f
 		
-	def getFuncValue(self,z):
+	def getPMQ_FuncValue(self,z):
 		""" 
-		Returns the quad's normalized field distribution at the distance z from the center 
+		Returns the total PMQ quad field distribution 
 		"""		
 		f = self.pmq_func(z - self.length/2) - self.pmq_func(z + self.length/2)
-		return self.normalization*f
-			
+		return f
+
+	def getFuncValue(self,z):
+		""" Returns the quad's field at the distance z from the center """
+		if(abs(z) >= self.func.getMaxX()): return 0.
+		return self.normalization*self.func.getY(abs(z))
+		
+	def getFuncDerivative(self,z):
+		"""
+		Returns the derivative of the getFuncValue(z)
+		"""
+		if(abs(z) >= self.func.getMaxX()): return 0.
+		return 	math.copysign(self.normalization*self.func.getYP(abs(z)),-z)
+
 #-----------------------------------------------------------------------		
 #-----Test of the Enge Function ----------------	
 #-----------------------------------------------------------------------

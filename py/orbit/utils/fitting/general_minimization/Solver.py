@@ -12,7 +12,7 @@ import math
 import sys
 import time
 
-from orbit.utils import NamedObject
+from orbit.utils import NamedObject, ParamsDictObject
 
 # import the finalization function 
 from orbit.utils import orbitFinalize
@@ -679,7 +679,7 @@ class Scoreboard:
 #       class VariableProxy
 #====================================================================
 
-class VariableProxy(NamedObject):
+class VariableProxy(NamedObject,ParamsDictObject):
 	"""
 	This class represents the parameter for the score function in the fitting process. 
 	"""
@@ -690,6 +690,7 @@ class VariableProxy(NamedObject):
 		VariableProxy(name, value, step)
 		VariableProxy(name = ""???"", value = ???, step = ???)
 		"""
+		ParamsDictObject.__init__(self)
 		self.setName("unknown")
 		self.value = 0.
 		self.step = 0.
@@ -711,6 +712,7 @@ class VariableProxy(NamedObject):
 					self.useInSolver = varProxy.getUseInSolver()
 					self.lowerLimit = varProxy.getLowerLimit()
 					self.upperLimit = varProxy.getUpperLimit()
+					self.updateParamsDict(varProxy.getParamsDict())
 				else:
 					msg = "VariableProxy constructor. If there is only one argument it should be only VariableProxy."
 					msg = msg + os.linesep

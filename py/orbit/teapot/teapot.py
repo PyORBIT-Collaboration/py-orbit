@@ -691,6 +691,7 @@ class MonitorTEAPOT(NodeTEAPOT):
 		self.addParam("xpAvg",self.twiss.getAverage(1))
 		self.addParam("yAvg",self.twiss.getAverage(2))
 		self.addParam("ypAvg",self.twiss.getAverage(3))
+		TPB.drift(bunch, length)
 
 class BunchWrapTEAPOT(NodeTEAPOT):
 	"""

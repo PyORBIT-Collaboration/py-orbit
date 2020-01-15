@@ -299,7 +299,7 @@ class TrialPoint:
 		"""
 		st = "======== TrialPoint ==========="
 		st = st + os.linesep
-		st = st + " Name              Value               Step  Use          Limit_Min       Limit_Max  "
+		st = st + " Name                       Value          Step       Use      Limit_Min       Limit_Max  "
 		for variableProxy in self._varProxy_arr:
 			st += os.linesep
 			st += "%10s "%variableProxy.getName()

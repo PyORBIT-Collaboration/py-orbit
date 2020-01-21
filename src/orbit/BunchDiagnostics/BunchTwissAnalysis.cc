@@ -156,7 +156,7 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 	double m_size = 0.;
 	double xAvg = 0.;
 	double yAvg = 0.;
-	double total_macrosize = 0; //Total macrosize (can different than number of macroparticles if m_size is specified)
+	total_macrosize = 0; //Total macrosize (can different than number of macroparticles if m_size is specified)
 	int nParts = bunch->getSize();
 	double total_macrosize_MPI = 0.;
 	double** part_coord_arr = bunch->coordArr();
@@ -293,6 +293,9 @@ void BunchTwissAnalysis::computeBunchMoments(Bunch* bunch, int order, int disper
 		total_macrosize += nParts*m_size;
 		
 	}
+	
+	ORBIT_MPI_Allreduce(&total_macrosize,&total_macrosize_MPI,1,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
+	total_macrosize = total_macrosize_MPI;	
 	
 	//if( nMPIsize_ > 1){
 	double* buff_0 = (double *) malloc (sizeof(double)*(_order+1)*(_order+1));

@@ -684,7 +684,6 @@ class MonitorTEAPOT(NodeTEAPOT):
 		"""
 		The bunchtuneanalysis-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
-		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
 		self.twiss.analyzeBunch(bunch)
 		self.addParam("xAvg",self.twiss.getAverage(0))

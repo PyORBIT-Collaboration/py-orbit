@@ -105,25 +105,30 @@ ShapedBoundary2D::ShapedBoundary2D(int nPoints, int nModes, string shape, double
 	if(shape_type_ == 3){
 		double dx = a_rect_/(nPoints/4);
 		double dy = b_rect_/(nPoints/4);
+		int count = 0;
 		for (int i = 0; i < nPoints/4; i++){
 			double x = (-a_rect_/2.0) + i*dx;
 			double y = b_rect_/2.0;		
-			setBoundaryPoint(i,x,y);	
+			setBoundaryPoint(count,x,y);
+			count += 1; 
 		}
 		for (int i = 0; i < nPoints/4; i++){
 			double x = a_rect_/2.0;
 			double y = b_rect_/2.0 - i*dy;		
-			setBoundaryPoint(i,x,y);	
+			setBoundaryPoint(count,x,y);
+			count += 1;
 		}
 		for (int i = 0; i < nPoints/4; i++){
 			double x = a_rect_/2.0 - i*dx;
 			double y = -b_rect_/2.0;		
-			setBoundaryPoint(i,x,y);	
+			setBoundaryPoint(count,x,y);
+			count += 1;
 		}
 		for (int i = 0; i < nPoints/4; i++){
 			double x = -a_rect_/2.0;
 			double y = (-b_rect_/2.0) + i*dy;		
-			setBoundaryPoint(i,x,y);	
+			setBoundaryPoint(count,x,y);
+			count += 1;
 		}
 	}
 	

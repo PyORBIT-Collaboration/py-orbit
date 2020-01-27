@@ -3,6 +3,8 @@ import sys
 import re
 import math
 
+from orbit.utils   import orbitFinalize
+
 #===============================================================
 
 class _possibleElementType:
@@ -45,11 +47,14 @@ class _possibleElementType:
 			Method. Confirms validity of element type.
 			"""
 		name = name_in.lower()
-		if self.__names_type.count(name) == 0:
-			print "Error creating lattice element:"
-			print "There is no element with type: ", name
-			print "Stop."
-			sys.exit (0)
+		if(self.__names_type.count(name) == 0):
+			msg = "Error creating lattice element:"
+			msg = msg + os.linesep
+			msg = msg + "There is no element with type:" + name
+			msg = msg + os.linesep
+			msg = msg + "Stop."
+			msg = msg + os.linesep
+			orbitFinalize(msg)
 		return name_in
 
 #===============================================================
@@ -148,7 +153,7 @@ class MADX_Parser:
 		self._sequencelength = ""
 		self._sequencelist = []
 		#the lines to ignore will start with these words
-		self.__ingnoreWords = ["title","beam", "none"]
+		self.__ingnoreWords = ["title","beam", "none", "initial"]
 
 	def parse(self,MADXfileName):
 		
@@ -165,7 +170,6 @@ class MADX_Parser:
 			#print str
 			#take off the ";" at end of each line
 			#print str
-			
 			str0 = str
 			if str0.rfind(";") > 0:
 				str_local = ""
@@ -180,6 +184,13 @@ class MADX_Parser:
 			if str == "":
 				str_local = ""
 				continue
+			#check if str starts with the ingnore word
+			ignore_word = -1
+			for word in self.__ingnoreWords:
+				if(str0.lower().find(word) == 0):
+					ignore_word = 1
+					break
+			if(ignore_word > 0): continue
 			#Parse element or sequence definition. 
 			if re.search(r'[\w]* *:.*',str_local):
 				if(str_local.rfind("sequence") >=0):
@@ -258,16 +269,16 @@ class MADX_Parser:
 		driftlength = endpos - startpos
 
 		name = "Drift"# + "_" + str(seqlength)
-		type = "drift"
+		type_local = "drift"
 		length = 0.0
 		strength = 0.0
 		
 		if(driftlength < -1e-10):
 			print "Warning: Drift between, ', upstreamelem.getName(), ' and ', downstreamelem.getName(), ' has negative length."
 			print "Setting length to zero."
-			lattElem = MADX_LattElement(name, type)
+			lattElem = MADX_LattElement(name, type_local)
 		else:
-			lattElem = MADX_LattElement(name, type)
+			lattElem = MADX_LattElement(name, type_local)
 			lattElem.addParameter("l", driftlength)
 
 		return lattElem
@@ -300,8 +311,8 @@ class MADX_Parser:
 		if nvalues >= 1:
 			subtokens = tokens[0].split(":")
 			name = subtokens[0]
-			type = subtokens[1].strip()
-			lattElem = MADX_LattElement(name, type)
+			type_local = subtokens[1].strip()
+			lattElem = MADX_LattElement(name, type_local)
 			for i in range(1, nvalues):
 				subtokens = tokens[i].split(":=")
 				lattElem.addParameter(subtokens[0],float(subtokens[1]))
@@ -359,12 +370,12 @@ class MADX_Parser:
 	def makeAperture(self, downstreamelem):
 	
 		# Now we have to creat a aperture before and after the element with the MADX label aperture
-		type = "apertype"
+		type_local = "apertype"
 		name = "aperture"
 		lattElem = MADX_LattElement("Aperture", name)
 		lattElem.addParameter("l", 0.0)
 		dim = downstreamelem.getParameter(name)
-		shape_type = downstreamelem.getParameter(type)
+		shape_type = downstreamelem.getParameter(type_local)
 		if shape_type == "circle":
 			shape = 1
 		elif shape_type == "ellipse":
@@ -377,7 +388,7 @@ class MADX_Parser:
 			print "Stop."
 			sys.exit(1)
 		lattElem.addParameter(name, dim)
-		lattElem.addParameter(type, shape)
+		lattElem.addParameter(type_local, shape)
 		return lattElem
 			
 	def getSequenceName(self):

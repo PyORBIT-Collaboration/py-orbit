@@ -159,6 +159,16 @@ extern "C" {
 		}	
 		return Py_BuildValue("d",cpp_Function->getY(val));
   }
+  
+ 	/** It will return dy/dx for a specified x value */
+  static PyObject* Function_getYP(PyObject *self, PyObject *args){
+	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
+		double val = 0.;
+		if(!PyArg_ParseTuple(	args,"d:",&val)){
+			error("pyFunction getYP(x) - parameter is needed");
+		}	
+		return Py_BuildValue("d",cpp_Function->getYP(val));
+  }  
 	
  	/** It will return x for a specified y value */
   static PyObject* Function_getX(PyObject *self, PyObject *args){
@@ -196,6 +206,23 @@ extern "C" {
 		return Py_BuildValue("i",cpp_Function->isStepConst());
   }	
 	
+  /** It will return the constant step tolerance for x variable */
+  static PyObject* Function_getStepEps(PyObject *self, PyObject *args){
+	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
+		return Py_BuildValue("d",cpp_Function->getStepEps());
+  }
+  
+  /** It will set the constant step tolerance for x variable */
+  static PyObject* Function_setStepEps(PyObject *self, PyObject *args){
+	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
+	  double eps;
+		if(!PyArg_ParseTuple(	args,"d:",&eps)){
+			error("pyFunction setStepEps(eps) - parameter is needed");
+		}
+		cpp_Function->setStepEps(eps);
+		return Py_BuildValue("d",cpp_Function->getStepEps());
+  } 
+  
  	/** It will build the reverse Function if it is possible and return 1 or 0 */
   static PyObject* Function_setInverse(PyObject *self, PyObject *args){
 	  Function* cpp_Function = (Function*)((pyORBIT_Object*) self)->cpp_obj;
@@ -263,22 +290,25 @@ extern "C" {
 		{ "x",				     Function_x,          	METH_VARARGS,"Returns x value for a point with a particular index"},
  		{ "y",				     Function_y,    	      METH_VARARGS,"Returns y value for a point with a particular index"},
  		{ "err",			     Function_err,    	    METH_VARARGS,"Returns err value for y with a particular index"},
- 		{ "xy",				     Function_xy,    	    METH_VARARGS,"Returns (x,y) value for a point with a particular index"},
+ 		{ "xy",				     Function_xy,    	      METH_VARARGS,"Returns (x,y) value for a point with a particular index"},
  		{ "xyErr",				 Function_xyErr,    	  METH_VARARGS,"Returns (x,y,err) value for a point with a particular index"},
  		{ "getMinX",		 	 Function_getMinX,    	METH_VARARGS,"Returns the minimal x value in the Function"},
  		{ "getMaxX",		 	 Function_getMaxX,    	METH_VARARGS,"Returns the maximal x value in the Function"},
  		{ "getMinY",		 	 Function_getMinY,    	METH_VARARGS,"Returns the minimal y value in the Function"},
  		{ "getMaxY",		 	 Function_getMaxY,    	METH_VARARGS,"Returns the maximal y value in the Function"},
  		{ "clean",			 	 Function_clean,    	  METH_VARARGS,"It will remove all points in the Function"},
- 		{ "cleanMemory",	 Function_cleanMemory, METH_VARARGS,"It will free the memory and remove all points in the Function"},
+ 		{ "cleanMemory",	 Function_cleanMemory,  METH_VARARGS,"It will free the memory and remove all points in the Function"},
  		{ "getY",				 	 Function_getY,    	    METH_VARARGS,"Returns y for a specified x value "},
+ 		{ "getYP",				 Function_getYP,    	  METH_VARARGS,"Returns dy/dx for a specified x value "},
  		{ "getX",				 	 Function_getX,    	    METH_VARARGS,"Returns x for a specified y value "},
  		{ "getYErr",			 Function_getYErr,    	METH_VARARGS,"Returns err for a specified y value "},
- 		{ "setConstStep", Function_setConstStep, METH_VARARGS,"It will set the constant step flag to 1 if it is possible"},
+ 		{ "setConstStep",  Function_setConstStep, METH_VARARGS,"It will set the constant step flag to 1 if it is possible"},
  		{ "isStepConst", 	 Function_isStepConst,  METH_VARARGS,"It will return 1 if the step is const and 0 otherwise"},
+ 		{ "getStepEps", 	 Function_getStepEps,   METH_VARARGS,"It will return the constant step tolerance for x variable"},
+ 		{ "setStepEps", 	 Function_setStepEps,   METH_VARARGS,"It will set the constant step tolerance for x variable"},
  		{ "setInverse",		 Function_setInverse,   METH_VARARGS,"It will build the reverse Function if it is possible and return 1 or 0"},
  		{ "dump",				   Function_dump,    	    METH_VARARGS,"Prints Function into the std::cout stream or file"},
- 		{ "normalize",	   Function_normalize,   METH_VARARGS,"It will return 1 if it is success and 0 otherwise"},
+ 		{ "normalize",	   Function_normalize,    METH_VARARGS,"It will return 1 if it is success and 0 otherwise"},
     {NULL}
   };
 	

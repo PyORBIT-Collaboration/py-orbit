@@ -9,7 +9,7 @@ import math
 import sys
 import os
 
-from orbit.utils import phaseNearTargetPhase, phaseNearTargetPhaseDeg
+from orbit.utils import orbitFinalize, phaseNearTargetPhase, phaseNearTargetPhaseDeg
 
 #---- base linac nodes
 from LinacAccNodes import AbstractRF_Gap
@@ -68,6 +68,8 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		self.part_pos = 0.
 		#---- The RF gap model - three points model
 		self.cppGapModel = RfGapThreePointTTF()
+		#---- If we going to use the longitudinal magnetic field component of quad
+		self.useLongField = False
 		#---- quadrupole field sources
 		#----quads_fields_arr is an array of [quad, fieldFunc, z_center_of_field]
 		self.quads_fields_arr = []
@@ -83,6 +85,18 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			self.cppGapModel = RfGapThreePointTTF_slow()			
 		else:
 			self.cppGapModel = RfGapThreePointTTF()
+
+	def setUseLongitudinalFieldOfQuad(self, use):
+		"""
+		If we going to use the longitudinal magnetic field component of quad
+		"""
+		self.useLongField = use
+		
+	def getUseLongitudinalFieldOfQuad(self):
+		"""
+		If we going to use the longitudinal magnetic field component of quad
+		"""
+		return self.useLongField
 
 	def getAxisFieldRF_Gap(self):
 		"""
@@ -134,6 +148,22 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			else:
 				G += quad.getTotalField(z - z_center_of_field)
 		return G		
+
+	def getTotalFieldDerivative(self,z_from_center):
+		"""
+		Returns the combined derivative of the field of all overlapping quads.
+		z_from_center - is a distance from the center of the parent RF gap node.
+		"""
+		z = z_from_center
+		GP = 0.
+		if(z < self.z_min or z > self.z_max): return GP
+		for [quad, fieldFunc, z_center_of_field] in self.quads_fields_arr:
+			if(fieldFunc != None):
+				gl = quad.getParam("dB/dr")*quad.getLength()
+				GP += gl*fieldFunc.getFuncDerivative(z - z_center_of_field)
+			else:
+				GP += 0.
+		return GP
 
 	def getZ_Step(self):
 		"""
@@ -245,6 +275,8 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		Ep = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(zp)			
 		#------- track through a quad
 		G = self.getTotalField((zm+z0)/2)
+		GP = 0.
+		if(self.useLongField == True): GP = self.getTotalFieldDerivative((zm+z0)/2)
 		if(abs(G) != 0.):
 			kq = G/(3.335640952*momentum)
 			#------- track through a quad
@@ -254,9 +286,12 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			self.tracking_module.quad1(bunch,step/2.0, kq)
 			self.tracking_module.quad2(bunch,step/2.0)
 			self.tracking_module.quad1(bunch,step/4.0, kq)
+			if(abs(GP) != 0.):
+				kqP = GP/(3.335640952*momentum)
+				self.tracking_module.quad3(bunch,step, kqP)
 		else:
 			self.tracking_module.drift(bunch,part_length/2)
-		self.part_pos += part_length/2	
+		self.part_pos += part_length/2
 		#call rf gap model to track the bunch
 		time_middle_gap = syncPart.time() - arrival_time
 		delta_phase = math.fmod(2*math.pi*time_middle_gap*frequency,2.0*math.pi)
@@ -272,6 +307,8 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		self.cppGapModel.trackBunch(bunch,part_length/2,Em,E0,Ep,frequency,phase+delta_phase+modePhase)
 		#------- track through a quad		
 		G = self.getTotalField((z0+zp)/2)
+		GP = 0.
+		if(self.useLongField == True): GP = self.getTotalFieldDerivative((z0+zp)/2)		
 		if(abs(G) != 0.):
 			kq = G/(3.335640952*momentum)
 			step = part_length/2
@@ -280,6 +317,9 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			self.tracking_module.quad1(bunch,step/2.0, kq)
 			self.tracking_module.quad2(bunch,step/2.0)
 			self.tracking_module.quad1(bunch,step/4.0, kq)
+			if(abs(GP) != 0.):
+				kqP = GP/(3.335640952*momentum)
+				self.tracking_module.quad3(bunch,step, kqP)
 		else:
 			self.tracking_module.drift(bunch,part_length/2)
 		#---- advance the particle position
@@ -348,7 +388,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			phase = self.axis_field_rf_gap.calculate_first_part_phase(bunch)
 			rfCavity.setFirstGapEtnrancePhase(phase)
 			rfCavity.setFirstGapEtnranceDesignPhase(phase)
-			rfCavity.setDesignSetUp(True)		
+			rfCavity.setDesignSetUp(True)
 			rfCavity._setDesignPhase(rfCavity.getPhase())
 			rfCavity._setDesignAmp(rfCavity.getAmp())
 			#print "debug firs gap first part phase=",phase*180./math.pi," arr time=",arrival_time
@@ -442,6 +482,20 @@ class OverlappingQuadsNode(BaseLinacNode):
 		self.z_step = 0.01 
 		#---- the initial length is 0.
 		self.setLength(0.)
+		#---- If we going to use the longitudinal magnetic field component of quad
+		self.useLongField = False
+		
+	def setUseLongitudinalFieldOfQuad(self, use):
+		"""
+		If we going to use the longitudinal magnetic field component of quad
+		"""
+		self.useLongField = use
+		
+	def getUseLongitudinalFieldOfQuad(self):
+		"""
+		If we going to use the longitudinal magnetic field component of quad
+		"""
+		return self.useLongField		
 		
 	def addQuad(self, quad, fieldFunc, z_center_of_field):
 		"""
@@ -514,6 +568,8 @@ class OverlappingQuadsNode(BaseLinacNode):
 		for z_ind in range(n_steps):
 			z = self.z_value + z_step*(z_ind+0.5)
 			G = self.getTotalField(z)
+			GP = 0.
+			if(self.useLongField == True): GP = self.getTotalFieldDerivative(z)			
 			kq = G/(3.335640952*momentum)
 			if(abs(kq) == 0.):
 				self.tracking_module.drift(bunch,z_step)
@@ -524,6 +580,9 @@ class OverlappingQuadsNode(BaseLinacNode):
 			self.tracking_module.quad1(bunch,z_step/2.0, kq)
 			self.tracking_module.quad2(bunch,z_step/2.0)
 			self.tracking_module.quad1(bunch,z_step/4.0, kq)
+			if(abs(GP) != 0.):
+				kqP = GP/(3.335640952*momentum)
+				self.tracking_module.quad3(bunch,z_step, kqP)			
 		self.z_value += length
 		
 	def getTotalField(self,z_from_center):
@@ -542,4 +601,21 @@ class OverlappingQuadsNode(BaseLinacNode):
 			else:
 				G += quad.getTotalField(z - z_center_of_field)
 		return G
+		
+	def getTotalFieldDerivative(self,z_from_center):
+		"""
+		Returns the combined derivative of the field of all overlapping quads.
+		z_from_center - is a distance from the center of the node.
+		z - is a distance from the beginning of the node.
+		"""
+		z = z_from_center + self.getLength()/2
+		GP = 0.
+		if(z < 0. or z > self.getLength()): return GP
+		for [quad, fieldFunc, z_center_of_field] in self.quads_fields_arr:
+			if(fieldFunc != None):
+				gl = quad.getParam("dB/dr")*quad.getLength()
+				GP += gl*fieldFunc.getFuncDerivative(z - z_center_of_field)
+			else:
+				GP += 0.
+		return GP	
 

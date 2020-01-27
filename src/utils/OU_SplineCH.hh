@@ -77,7 +77,7 @@ namespace OrbitUtils{
 		double* x_arr;
 		double* y_arr;
 		
-		//ranning derivetive m array
+		//ranning derivative m array
 		double* m_arr;
 		
 		//MPI members

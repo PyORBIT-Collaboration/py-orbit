@@ -18,7 +18,7 @@ from orbit.py_linac.lattice import LinacAccLattice
 from orbit.py_linac.lattice import LinacAccNodes
 
 from orbit.py_linac.lattice import BaseLinacNode, LinacNode, LinacMagnetNode, MarkerLinacNode, Drift, Quad, AbstractRF_Gap, Bend
-from orbit.py_linac.lattice import DCorrectorH, DCorrectorV
+from orbit.py_linac.lattice import DCorrectorH, DCorrectorV, ThickKick
 from orbit.py_linac.lattice import RF_Cavity, Sequence
 from orbit.py_linac.lattice import BaseRF_Gap
 
@@ -253,6 +253,14 @@ class SNS_LinacLatticeFactory():
 						accNode.setParam("aperture",params_da.doubleValue("aperture"))						
 					accNode.setParam("pos",node_pos)
 					accSeq.addNode(accNode)
+				#------------THICK KICK-----------------	
+				elif(node_type == "THICK_KICK"):
+					accNode = ThickKick(node_da.stringValue("name"))
+					accNode.setParam("Bx",params_da.doubleValue("Bx"))
+					accNode.setParam("By",params_da.doubleValue("By"))
+					accNode.setLength(node_length)
+					accNode.setParam("pos",node_pos)
+					accSeq.addNode(accNode)					
 				else:
 					if(node_length != 0.):
 						msg = "The LinacLatticeFactory method getLinacAccLattice(names): there is a strange element!"

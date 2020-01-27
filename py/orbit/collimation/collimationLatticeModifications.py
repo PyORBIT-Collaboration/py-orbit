@@ -13,6 +13,9 @@ from orbit.collimation import TeapotCollimatorNode
 # import teapot drift class
 from orbit.teapot import DriftTEAPOT
 
+# import linac Drift which should be used only in the linac lattices 
+from orbit.py_linac.lattice import Drift as LinacDrift
+
 def addTeapotCollimatorNode(lattice, position, collimator_node):
 	"""
 	It will put one Teapot collimation node in the lattice 
@@ -38,6 +41,10 @@ def addTeapotCollimatorNode(lattice, position, collimator_node):
 	for node in lattice.getNodes()[node_start_ind:node_stop_ind+1]:
 		#print "debug node=",node.getName()," type=",node.getType()," L=",node.getLength()
 		if(not isinstance(node,DriftTEAPOT)):
+			if(isinstance(node,LinacDrift)):
+				print "You are trying to work with linac lattice! This method is working only with TEAPOT lattice!"
+				print "Node=",node.getName()," type=",node.getType()," L=",node.getLength()
+				orbitFinalize("addTeapotCollimatorNode function is used on Linac lattice! Stop!")
 			print "Non-drift node=",node.getName()," type=",node.getType()," L=",node.getLength()
 			orbitFinalize("We have non-drift element at the place of the collimator! Stop!")
 			#if(node.getNumberOfChildren() != 4):

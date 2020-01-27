@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------
-# This is a polynom fitting class. 
+# This is a polynom fitting class. It uses the standart 
+# LSM nmatrix approach. 
 # As input you can use Function or SplineCH instances
 # order of the polynomial a0+...+aN*x^N is N
 #--------------------------------------------------------------------------
@@ -111,7 +112,7 @@ class PolynomialFit:
 					sigma = self.x_y_err_arr[k][2]
 					y = self.x_y_err_arr[k][1]
 					coef_arr[i] += aTCaI.get(i,j)*aMatr.get(k,j)*sigma*y
-		# polinimial coefficients are found
+		# polinimial coefficients have been found
 		self.polynomial.order(self.order)
 		for i in range(len(coef_arr)):
 			self.polynomial.coefficient(i,coef_arr[i])	

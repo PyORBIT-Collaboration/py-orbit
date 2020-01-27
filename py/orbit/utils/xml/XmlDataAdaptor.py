@@ -172,6 +172,15 @@ class XmlDataAdaptor(NamedObject,ParamsDictObject):
 		else:
 			self.data_adaptors.insert(index,adaptor)
 
+	def setAllChildAdaptors(self,data_adaptors = None):
+		""" Replace all adapters from the external list """
+		if(data_adaptors == None):
+			self.data_adaptors = []
+		else:
+			self.data_adaptors = []
+			for chld_da in data_adaptors:
+				self.data_adaptors.append(chld_da)
+
 	def attributes(self):
 		""" return the list of attributes """
 		return self.keys()

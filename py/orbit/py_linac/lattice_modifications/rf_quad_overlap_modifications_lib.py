@@ -104,7 +104,7 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 	node_pos_dict = accLattice.getNodePositionsDict()
 	for accSeq_Name in accSeq_Names:
 		accSeq = accLattice.getSequence(accSeq_Name)
-		#print "debug ================== STAR seq=",accSeq.getName()
+		#print "debug ================== START seq=",accSeq.getName()
 		if(accSeq == None):
 			msg  = "The Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes Python function. "
 			msg += os.linesep
@@ -384,7 +384,7 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 	#---- new set of nodes for the lattice
 	new_latt_nodes = []
 	for accSeq in accLattice.getSequences():
-		new_latt_nodes += accSeq.getNodes()
+		new_latt_nodes += accSeq.getNodes()	
 	accLattice.setNodes(new_latt_nodes)
 	accLattice.initialize()
 	#------- debug START printing of new nodes and their positions in the lattice

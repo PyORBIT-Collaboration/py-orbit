@@ -47,6 +47,7 @@ namespace teapot_base
 
     void quad1(Bunch* bunch, double length, double kq, int useCharge);
     void quad2(Bunch* bunch, double length);
+    void quad3(Bunch* bunch, double length, double kq, int useCharge);
 
     void quadfringeIN(Bunch* bunch, double kq, int useCharge);
     void quadfringeOUT(Bunch* bunch, double kq, int useCharge);

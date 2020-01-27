@@ -20,6 +20,7 @@ sudo yum update
 sudo yum group install "Development Tools"
 sudo yum install python-devel mpich mpich-devel zlib-devel fftw-devel
 ```
+The latest linux distributions are phasing out python 2. Some modifications to package names might be needed. For example: CentOS 8 (RedHat 8) needs you to replace **python-devel** with **python2-devel** and add **python2** to your package list in above *yum* command.
 
 ### Mac 
 We recommend to use [MacPorts](https://www.macports.org).
@@ -38,13 +39,13 @@ Select mpich to enable mpicc
 sudo port select mpi mpich-mp-fortran
 ```
 
-Alternatively you can use [Homebrew](http://brew.sh). 
-This tends to build a lot of packages from sources (especially for the first time), which can take a long time.
+The latest versions of Mac OS (macOS Mojave) don't include python 2 installed by default.
+In this situation install it from MacPorts as well:
+
 ```shell
-brew update
-brew install fftw mpich
+sudo port install python27
+sudo port select --set python python27
 ```
-You will need to modify *[conf/Darwin/make_root_config](conf/Darwin/make_root_config)* and include Homebrew specific directories in compiler flags.
 
 ### Building the whole environment from source
 If you don't want to use standard libraries supplied by your distribution, you can build the whole environment from scratch. It is also possible to do this without having a root account. The process is described in detail [here](BuildFromSource.md).
@@ -56,7 +57,7 @@ git clone https://github.com/PyORBIT-Collaboration/py-orbit.git
 Your source is now in the *py-orbit* directory.
 ## 3. Setup environment variables
 *setupEnevironment.sh* will try to figure out all paths.
-This should be sufficient for common Linux distributions. If you built the environment form source, use *customEnvironment.sh* instead.
+This should be sufficient for common Linux distributions. If you built the environment from source, use *customEnvironment.sh* instead.
 ```shell
 cd py-orbit
 source setupEnvironment.sh
@@ -95,8 +96,6 @@ This will launch *lattice_test* example on two MPI nodes. Other examples are ava
 		  code should be placed into **./lib**.
 
 **./lib**  	- .so shared libraries to be used under pyORBIT interpreter.
-
-**./doc**		- pyORBIT documentation.
 
 **./examples**		- pyORBIT examples.
 

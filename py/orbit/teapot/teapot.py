@@ -524,7 +524,7 @@ class NodeTEAPOT(BaseTEAPOT):
 		"""
 		Sets the tilt angle for the tilt operation.
 		"""
-		self.__params["tilt"] = angle
+		self.setParam("tilt", angle)
 		self.__tiltNodeIN.setTiltAngle(angle)
 		self.__tiltNodeOUT.setTiltAngle( (-1.0) * angle)
 
@@ -684,7 +684,6 @@ class MonitorTEAPOT(NodeTEAPOT):
 		"""
 		The bunchtuneanalysis-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
-		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
 		self.twiss.analyzeBunch(bunch)
 		self.addParam("xAvg",self.twiss.getAverage(0))

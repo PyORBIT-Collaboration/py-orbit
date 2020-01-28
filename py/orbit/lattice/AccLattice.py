@@ -128,13 +128,13 @@ class AccLattice(NamedObject, TypedObject):
 			else:
 				msg = "The AccLattice class. Method getNodeForName found many nodes instead of one!"
 				msg = msg + os.linesep
-				msg = msg + "looking for name=",name
+				msg = msg + "looking for name="+name
 				msg = msg + os.linesep
 				msg = msg + "found nodes:"
 				for node in nodes:
 					msg = msg + " " + node.getName()
 				msg = msg + os.linesep
-				msg = "Please use getNodesForName method instead."
+				msg = msg + "Please use getNodesForName method instead."
 				msg = msg + os.linesep				
 				orbitFinalize(msg)
 				

@@ -80,19 +80,34 @@ public:
 
   /** Bins the Bunch to the grid incorporating macrosize */
   void binBunch(Bunch* bunch);
+  
+  /** Bins the Bunch to the grid along any axis */
+  void binBunch(Bunch* bunch, int axis_ind); 
 
   /** Bins the Bunch to the grid using a smoothing algorithm
       and incorporating macrosize */
   void binBunchSmoothed(Bunch* bunch);
+  
+  /** Bins the Bunch to the grid along any axis using a smoothing algorithm
+      and incorporating macrosize */
+  void binBunchSmoothed(Bunch* bunch, int axis_ind);  
 
   /** Bins the Bunch to the grid giving each macroparticle 
       unit weight */
   void binBunchByParticle(Bunch* bunch);
+  
+  /** Bins the Bunch along the particular coordinate to the grid giving each macro-particle 
+      unit weight */
+  void binBunchByParticle(Bunch* bunch, int axis_ind);  
 
   /** Bins the Bunch to the grid using a smoothing algorithm
       and giving each macroparticle unit weight */
   void binBunchSmoothedByParticle(Bunch* bunch);
 
+   /** Bins the Bunch  along the particular coordinate to the grid using a smoothing algorithm
+      and giving each macroparticle unit weight */
+  void binBunchSmoothedByParticle(Bunch* bunch, int axis_ind); 
+  
   /** Bins moment of the Bunch to the grid giving
       each macroparticle unit weight */
   void binBunchMoment(int propindex, Bunch* bunch, double* Moment);
@@ -169,9 +184,6 @@ protected:
 
   /** grid limits */
   double zMin_, zMax_;
-	
-  /** lattice length */
-  double length_;
 };
 
 

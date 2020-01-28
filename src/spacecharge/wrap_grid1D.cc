@@ -241,23 +241,25 @@ static PyObject* Grid1D_getValueSmoothed(PyObject *self, PyObject *args)
 
 
 // binBunch(Bunch* bunch)
-
 static PyObject* Grid1D_binBunch(PyObject *self, PyObject *args)
 {
   pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
   Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
   PyObject* pyBunch;
-  if(!PyArg_ParseTuple(args, "O:binBunch", &pyBunch))
+  //if args = (pyBunch) use cpp_Grid1D->binBunch(cpp_bunch, ind = 4); - longitudinal coordinate
+  //if args = (pyBunch,axis_ind) use cpp_Grid1D->binBunch(cpp_bunch,ind);
+  int axis_ind = 4;
+  if(!PyArg_ParseTuple(args, "O|i:binBunch", &pyBunch,&axis_ind))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch) - parameters are needed.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch, axis_ind = 4) - parameters are needed.");
   }
   PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
   if(!PyObject_IsInstance(pyBunch, pyORBIT_Bunch_Type))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch) - constructor needs a Bunch.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunch(Bunch* bunch, axis_ind = 4) - constructor needs a Bunch.");
   }
   Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-  cpp_Grid1D->binBunch(cpp_bunch);
+  cpp_Grid1D->binBunch(cpp_bunch,axis_ind);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -270,17 +272,20 @@ static PyObject* Grid1D_binBunchSmoothed(PyObject *self, PyObject *args)
   pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
   Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
   PyObject* pyBunch;
-  if(!PyArg_ParseTuple(args,"O:binBunchSmoothed",&pyBunch))
+  //if args = (pyBunch) use cpp_Grid1D->binBunchSmoothed(cpp_bunch, ind = 4); - longitudinal coordinate
+  //if args = (pyBunch,axis_ind) use cpp_Grid1D->binBunchSmoothed(cpp_bunch,ind);
+  int axis_ind = 4;  
+  if(!PyArg_ParseTuple(args,"O|i:binBunchSmoothed",&pyBunch, &axis_ind))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothed(Bunch* bunch) - parameters are needed.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothed(Bunch* bunch,axis_ind = 4) - parameters are needed.");
   }
   PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
   if(!PyObject_IsInstance(pyBunch, pyORBIT_Bunch_Type))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothed(Bunch* bunch) - constructor needs a Bunch.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothed(Bunch* bunch,axis_ind = 4) - constructor needs a Bunch.");
   }
   Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-  cpp_Grid1D->binBunchSmoothed(cpp_bunch);
+  cpp_Grid1D->binBunchSmoothed(cpp_bunch,axis_ind);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -293,17 +298,20 @@ static PyObject* Grid1D_binBunchByParticle(PyObject *self, PyObject *args)
   pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
   Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
   PyObject* pyBunch;
-  if(!PyArg_ParseTuple(args, "O:binBunchByParticle", &pyBunch))
+  //if args = (pyBunch) use cpp_Grid1D->binBunchByParticle(cpp_bunch, ind = 4); - longitudinal coordinate
+  //if args = (pyBunch,axis_ind) use cpp_Grid1D->binBunchByParticle(cpp_bunch,ind);
+  int axis_ind = 4;  
+  if(!PyArg_ParseTuple(args, "O|i:binBunchByParticle", &pyBunch, &axis_ind))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunchByParticle(Bunch* bunch) - parameters are needed.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunchByParticle(Bunch* bunch,axis_ind = 4) - parameters are needed.");
   }
   PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
   if(!PyObject_IsInstance(pyBunch, pyORBIT_Bunch_Type))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunchByParticle(Bunch* bunch) - constructor needs a Bunch.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunchByParticle(Bunch* bunch,axis_ind = 4) - constructor needs a Bunch.");
   }
   Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-  cpp_Grid1D->binBunchByParticle(cpp_bunch);
+  cpp_Grid1D->binBunchByParticle(cpp_bunch,axis_ind);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -316,17 +324,20 @@ static PyObject* Grid1D_binBunchSmoothedByParticle(PyObject *self, PyObject *arg
   pyORBIT_Object* pyGrid1D = (pyORBIT_Object*) self;
   Grid1D* cpp_Grid1D = (Grid1D*) pyGrid1D->cpp_obj;
   PyObject* pyBunch;
-  if(!PyArg_ParseTuple(args,"O:binBunchSmoothedByParticle",&pyBunch))
+  //if args = (pyBunch) use cpp_Grid1D->(cpp_bunch, ind = 4); - longitudinal coordinate
+  //if args = (pyBunch,axis_ind) use cpp_Grid1D->(cpp_bunch,ind);
+  int axis_ind = 4;  
+  if(!PyArg_ParseTuple(args,"O|i:binBunchSmoothedByParticle",&pyBunch,&axis_ind))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothedByParticle(Bunch* bunch) - parameters are needed.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothedByParticle(Bunch* bunch,axis_ind = 4) - parameters are needed.");
   }
   PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
   if(!PyObject_IsInstance(pyBunch, pyORBIT_Bunch_Type))
   {
-    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothedByParticle(Bunch* bunch) - constructor needs a Bunch.");
+    ORBIT_MPI_Finalize("PyGrid1D - binBunchSmoothedByParticle(Bunch* bunch,axis_ind = 4) - constructor needs a Bunch.");
   }
   Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-  cpp_Grid1D->binBunchSmoothedByParticle(cpp_bunch);
+  cpp_Grid1D->binBunchSmoothedByParticle(cpp_bunch,axis_ind);
   Py_INCREF(Py_None);
   return Py_None;
 }

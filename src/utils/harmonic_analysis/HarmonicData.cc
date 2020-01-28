@@ -32,6 +32,7 @@
 
 #include "orbit_mpi.hh"
 #include "HarmonicData.hh"
+#include "OrbitConst.hh"
 
 using namespace OrbitUtils;
 
@@ -148,7 +149,7 @@ double HarmonicData::valueX(int indexX)
 double HarmonicData::fitValueY(double x)
 {
 	double sum = param_arr[0];
-	double grad_to_rad = PI/180.;
+	double grad_to_rad = OrbitConst::PI/180.;
 	for(int ind = 0; ind < order; ind++){
 		sum += param_arr[2*ind+1]*cos(grad_to_rad*((ind+1)*x +  param_arr[2*ind+2]));
 	}

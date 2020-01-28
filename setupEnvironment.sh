@@ -8,11 +8,18 @@ echo "ORBIT installed in $ORBIT_ROOT"
 
 export ORBIT_ARCH=`uname -s`
 
+# alias python='python2'
 
-export PYTHON_VERSION=`python -c "from distutils import sysconfig; print sysconfig.get_config_var('VERSION');"`
+if command_exists python2; then
+   PYEX=python2
+else
+   PYEX=python
+fi
+
+export PYTHON_VERSION=`$PYEX -c "from distutils import sysconfig; print sysconfig.get_config_var('VERSION');"`
 echo "Python version is $PYTHON_VERSION"
 
-PYTHON_LIB_DIR=`python -c "from distutils import sysconfig; print sysconfig.get_config_var('LIBPL');"`
+PYTHON_LIB_DIR=`$PYEX -c "from distutils import sysconfig; print sysconfig.get_config_var('LIBPL');"`
 if [ -f $PYTHON_LIB_DIR/libpython${PYTHON_VERSION}.a ]
    then
 	export PYTHON_ROOT_LIB=$PYTHON_LIB_DIR/libpython${PYTHON_VERSION}.a
@@ -24,8 +31,7 @@ fi
 
 echo "Found python library: ${PYTHON_LIB_DIR} will use $LIB_TYPE library"
 
-# export PYTHON_ROOT_LIB="$PYTHON_LIB_DIR/libpython${PYTHON_VERSION}.a $PYTHON_LIB_DIR/libpython${PYTHON_VERSION}.a" 
-export PYTHON_ROOT_INC=`python -c "from distutils import sysconfig; print sysconfig.get_config_var('INCLUDEPY');"`
+export PYTHON_ROOT_INC=`$PYEX -c "from distutils import sysconfig; print sysconfig.get_config_var('INCLUDEPY');"`
 echo "Found Python include directory: $PYTHON_ROOT_INC"
 
 export PYTHONPATH=${PYTHONPATH}:${ORBIT_ROOT}/py:${ORBIT_ROOT}/lib

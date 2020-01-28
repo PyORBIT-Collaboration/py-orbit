@@ -24,9 +24,8 @@ using namespace OrbitUtils;
 Grid1D::Grid1D(int zSize):CppPyWrapper(NULL)
 {
   zSize_ = zSize;
-  zMin_  = -1.0;
-  zMax_  = +1.0;
-  length_ = 0.0;
+  zMin_  = -0.5;
+  zMax_  = +0.5;
   init();
   setZero();
 }
@@ -35,9 +34,8 @@ Grid1D::Grid1D(int zSize):CppPyWrapper(NULL)
 Grid1D::Grid1D(int zSize, double length):CppPyWrapper(NULL)
 {
 	zSize_ = zSize;
-	length_ = length;
-	zMin_  = -1.0;
-	zMax_  = +1.0;
+	zMin_  = 0.;
+	zMax_  = length;
 	init();
 	setZero();
 }
@@ -229,9 +227,31 @@ double Grid1D::getValueSmoothed(double z)
 }
 
 
-/** Bins the Bunch to the grid incorporating macrosize */
+/** 
+    Bins the Bunch along the longitudinal coordinate using macro-size 
+    for each particle.
+*/
 void Grid1D::binBunch(Bunch* bunch)
 {
+	binBunch(bunch,4);
+}
+
+
+/** 
+    Bins the Bunch along any coordinate using macro-size 
+    for each particle.
+*/
+void Grid1D::binBunch(Bunch* bunch, int axis_ind)
+{
+	if(axis_ind < 0 || axis_ind > 5)
+	{
+		std::cerr << "Grid1D::Grid1D - binBunch(Bunch* bunch, int axis_ind)" << std::endl
+							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
+							<< std::endl << "number of bins = " << zSize_ << std::endl
+							<< "Stop." << std::endl;
+	}
+	ORBIT_MPI_Finalize();	
+	
   double m_size;
   bunch->compress();
   double** part_coord_arr = bunch->coordArr();
@@ -244,7 +264,7 @@ void Grid1D::binBunch(Bunch* bunch)
     for(int i = 0; i < bunch->getSize(); i++)
     {
       m_size = macroSizeAttr->macrosize(i);
-      binValue(m_size, part_coord_arr[i][4]);
+      binValue(m_size, part_coord_arr[i][axis_ind]);
     }
   }
   else
@@ -252,16 +272,35 @@ void Grid1D::binBunch(Bunch* bunch)
     m_size = bunch->getMacroSize();
     for(int i = 0; i < bunch->getSize(); i++)
     {
-      binValue(m_size, part_coord_arr[i][4]);
+      binValue(m_size, part_coord_arr[i][axis_ind]);
     }
   }
 }
 
-
-/** Bins the Bunch to the grid using a smoothing algorithm
-    and incorporating macrosize */
+/** 
+    Bins the Bunch along the longitudinal coordinate using a smoothing algorithm
+    and macro-size for each particle.
+*/
 void Grid1D::binBunchSmoothed(Bunch* bunch)
 {
+	binBunchSmoothed(bunch,4);
+}
+
+/** 
+    Bins the Bunch along any coordinate using a smoothing algorithm
+    and macro-size for each particle.
+*/
+void Grid1D::binBunchSmoothed(Bunch* bunch, int axis_ind)
+{
+	if(axis_ind < 0 || axis_ind > 5)
+	{
+		std::cerr << "Grid1D::Grid1D - binBunchSmoothed(Bunch* bunch, int axis_ind)" << std::endl
+							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
+							<< std::endl << "number of bins = " << zSize_ << std::endl
+							<< "Stop." << std::endl;
+	}
+	ORBIT_MPI_Finalize();		
+	
   double m_size;
   bunch->compress();
   double** part_coord_arr = bunch->coordArr();
@@ -274,7 +313,7 @@ void Grid1D::binBunchSmoothed(Bunch* bunch)
     for(int i = 0; i < bunch->getSize(); i++)
     {
       m_size = macroSizeAttr->macrosize(i);
-      binValueSmoothed(m_size, part_coord_arr[i][4]);
+      binValueSmoothed(m_size, part_coord_arr[i][axis_ind]);
     }
   }
   else
@@ -282,34 +321,63 @@ void Grid1D::binBunchSmoothed(Bunch* bunch)
     m_size = bunch->getMacroSize();
     for(int i = 0; i < bunch->getSize(); i++)
     {
-      binValueSmoothed(m_size, part_coord_arr[i][4]);
+      binValueSmoothed(m_size, part_coord_arr[i][axis_ind]);
     }
   }
 }
 
-
-/** Bins the Bunch to the grid giving each macroparticle 
-    unit weight */
+/** Bins the Bunch along the longitudinal coordinate giving each macroparticle 
+    an unit weight */
 void Grid1D::binBunchByParticle(Bunch* bunch)
 {
+	binBunchByParticle(bunch,4);
+}
+
+/** Bins the Bunch along the particular coordinate giving each macroparticle 
+    an unit weight */
+void Grid1D::binBunchByParticle(Bunch* bunch, int axis_ind)
+{
+	if(axis_ind < 0 || axis_ind > 5)
+	{
+		std::cerr << "Grid1D::Grid1D - binBunchByParticle(Bunch* bunch, int axis_ind)" << std::endl
+							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
+							<< std::endl << "number of bins = " << zSize_ << std::endl
+							<< "Stop." << std::endl;
+	}
+	
   bunch->compress();
   double** part_coord_arr = bunch->coordArr();
   for(int i = 0; i < bunch->getSize(); i++)
   {
-    binValue(1.0, part_coord_arr[i][4]);
+    binValue(1.0, part_coord_arr[i][axis_ind]);
   }
 }
 
 
-/** Bins the Bunch to the grid using a smoothing algorithm
+/** Bins the Bunch along the longitudinal coordinate using a smoothing algorithm
     and giving each macroparticle unit weight */
 void Grid1D::binBunchSmoothedByParticle(Bunch* bunch)
 {
+	binBunchSmoothedByParticle(bunch,4);
+}
+
+/** Bins the Bunch along the particular coordinate using a smoothing algorithm
+    and giving each macroparticle unit weight */
+void Grid1D::binBunchSmoothedByParticle(Bunch* bunch, int axis_ind)
+{
+	if(axis_ind < 0 || axis_ind > 5)
+	{
+		std::cerr << "Grid1D::Grid1D - binBunchByParticle(Bunch* bunch, int axis_ind)" << std::endl
+							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
+							<< std::endl << "number of bins = " << zSize_ << std::endl
+							<< "Stop." << std::endl;
+	}
+	
   bunch->compress();
   double** part_coord_arr = bunch->coordArr();
   for(int i = 0; i < bunch->getSize(); i++)
   {
-    binValueSmoothed(1.0, part_coord_arr[i][4]);
+    binValueSmoothed(1.0, part_coord_arr[i][axis_ind]);
   }
 }
 
@@ -356,6 +424,7 @@ void Grid1D::binBunchSmoothedMoment(int propindex, Bunch* bunch, double* Moment)
 void Grid1D::binValue(double value, double z)
 {
   if(z < zMin_ || z > zMax_ ) return;
+
   double WZ0, WZp;
   int iZ0, iZp;
   getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
@@ -375,6 +444,7 @@ void Grid1D::binValue(double value, double z)
 void Grid1D::binValueSmoothed(double value, double z)
 {
   if(z < zMin_ || z > zMax_ ) return;
+
   double  WZm,  WZ0,  WZp;
   double dWZm, dWZ0, dWZp;
   int iZm, iZ0, iZp;
@@ -403,6 +473,7 @@ void Grid1D::binValueSmoothed(double value, double z)
 void Grid1D::binMoment(double value, double z, double* Moment)
 {
   if(z < zMin_ || z > zMax_ ) return;
+
   double WZ0, WZp;
   int iZ0, iZp;
   getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
@@ -544,14 +615,15 @@ void Grid1D::getIndAndWZ(double z,
   {
     double zgloc = (z - zMin_) / dz_;
     iZ0 = int(zgloc);
+
+    // Keep indices in bounds
+    if(iZ0 < 0) iZ0 = 0;
+    if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;
+
     WZp = zgloc - double(iZ0);
     WZ0 = 1.0 - WZp;
 
-    // Keep indices in bounds
-    if(iZ0 < 0) iZ0 = zSize_ - 1;
-    if(iZ0 > (zSize_ - 1)) iZ0 =  0;
     iZp = iZ0 + 1;
-    if(iZ0 == (zSize_ - 1)) iZp = 0;
   }
   else
   {
@@ -576,19 +648,14 @@ void Grid1D::getIndAndWZSmoothed(double z,
 {
   if(zSize_ > 2)
   {
-	double zgloc = 0;
-    //double zgloc = (z - zMin_) / dz_;
-	if(length_ == 0)
-    {
-		std::cerr<<"Warning!: Lattice length should not be zero for smoothed binning.\n";
-		zgloc = (z - zMin_) / dz_;
-	}
-	else
-    {
-		zgloc = (z + length_ / 2.0) / dz_;
-	}
-	  
+    double zgloc = 0.;
+    zgloc = (z - zMin_) / dz_;
     iZ0 = int(zgloc + 0.5);
+
+    // Keep indices in bounds
+    if(iZ0 < 1) iZ0 = 1;
+    if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;
+
     double frac = zgloc - double(iZ0);
     WZm  = 0.5 * (0.5 - frac) * (0.5 - frac);
     WZ0  = 0.75 - frac * frac;
@@ -597,13 +664,8 @@ void Grid1D::getIndAndWZSmoothed(double z,
     dWZ0 = -2.0 * frac / dz_;
     dWZp = (frac + 0.5) / dz_;
 
-    // Keep indices in bounds
-    if(iZ0 < 0) iZ0 = zSize_ - 1;
-    if(iZ0 > (zSize_ - 1)) iZ0 =  0;
     iZm = iZ0 - 1;
-    if(iZ0 == 0) iZm = zSize_ - 1;
     iZp = iZ0 + 1;
-    if(iZ0 == (zSize_ - 1)) iZp = 0;
   }
   else if(zSize_ == 2)
   {

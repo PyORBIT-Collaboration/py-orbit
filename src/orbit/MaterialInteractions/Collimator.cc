@@ -354,10 +354,6 @@ int Collimator::driftParticle(int coll_flag, double& zrl, double length, double*
 	while((coll_flag == 0) && (zrl > 0))
 	{
 		
-		//double x = coords[0];
-		//double xp = coords[1];
-		//double y = coords[2];
-		//double yp = coords[3];
 		if(stepsize > length / 10.) stepsize = length / 10.;
 		if(stepsize - zrl > eps) stepsize = zrl + dlength;
 				

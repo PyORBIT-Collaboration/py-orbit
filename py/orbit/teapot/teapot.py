@@ -686,10 +686,12 @@ class MonitorTEAPOT(NodeTEAPOT):
 		"""
 		bunch = paramsDict["bunch"]
 		self.twiss.analyzeBunch(bunch)
+		length = self.getLength(self.getActivePartIndex())
 		self.addParam("xAvg",self.twiss.getAverage(0))
 		self.addParam("xpAvg",self.twiss.getAverage(1))
 		self.addParam("yAvg",self.twiss.getAverage(2))
 		self.addParam("ypAvg",self.twiss.getAverage(3))
+		TPB.drift(bunch, length)
 
 class BunchWrapTEAPOT(NodeTEAPOT):
 	"""

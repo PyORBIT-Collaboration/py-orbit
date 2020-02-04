@@ -442,8 +442,8 @@ class _teapotFactory:
 			elem = NodeTEAPOT(madElem.getName())
 		if(madElem.getType().lower() =="monitor"):
 			elem = 	MonitorTEAPOT(madElem.getName())
-			drft_1 = DriftTEAPOT(madElem.getName()+"_drift")
-			drft_2 = DriftTEAPOT(madElem.getName()+"_drift")
+			drft_1 = DriftTEAPOT(madElem.getName()+"_drift1")
+			drft_2 = DriftTEAPOT(madElem.getName()+"_drift2")
 			drft_1.setLength(length/2.0)
 			drft_2.setLength(length/2.0)
 			xAvg = 0.0

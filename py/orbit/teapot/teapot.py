@@ -418,8 +418,8 @@ class _teapotFactory:
 		# ===========RF Cavity element ======================
 		if(madElem.getType().lower() == "rfcavity"):
 			elem = RingRFTEAPOT(madElem.getName())
-			drft_1 = DriftTEAPOT(madElem.getName()+"_drift")
-			drft_2 = DriftTEAPOT(madElem.getName()+"_drift")
+			drft_1 = DriftTEAPOT(madElem.getName()+"_drift1")
+			drft_2 = DriftTEAPOT(madElem.getName()+"_drift2")
 			drft_1.setLength(length/2.0)
 			drft_2.setLength(length/2.0)
 			volt = 0.

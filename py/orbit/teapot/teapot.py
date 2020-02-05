@@ -418,8 +418,8 @@ class _teapotFactory:
 		# ===========RF Cavity element ======================
 		if(madElem.getType().lower() == "rfcavity"):
 			elem = RingRFTEAPOT(madElem.getName())
-			drft_1 = DriftTEAPOT(madElem.getName()+"_drift")
-			drft_2 = DriftTEAPOT(madElem.getName()+"_drift")
+			drft_1 = DriftTEAPOT(madElem.getName()+"_drift1")
+			drft_2 = DriftTEAPOT(madElem.getName()+"_drift2")
 			drft_1.setLength(length/2.0)
 			drft_2.setLength(length/2.0)
 			volt = 0.
@@ -442,10 +442,16 @@ class _teapotFactory:
 			elem = NodeTEAPOT(madElem.getName())
 		if(madElem.getType().lower() =="monitor"):
 			elem = 	MonitorTEAPOT(madElem.getName())
+			drft_1 = DriftTEAPOT(madElem.getName()+"_drift1")
+			drft_2 = DriftTEAPOT(madElem.getName()+"_drift2")
+			drft_1.setLength(length/2.0)
+			drft_2.setLength(length/2.0)
 			xAvg = 0.0
 			yAvg = 0.0
 			elem.addParam("xAvg",xAvg)
-			elem.addParam("yAvg",yAvg)			
+			elem.addParam("yAvg",yAvg)
+			if length > 0:
+				return [drft_1,elem,drft_2]
 		# ------------------------------------------------
 		# ready to finish
 		# ------------------------------------------------
@@ -691,7 +697,7 @@ class MonitorTEAPOT(NodeTEAPOT):
 		self.addParam("xpAvg",self.twiss.getAverage(1))
 		self.addParam("yAvg",self.twiss.getAverage(2))
 		self.addParam("ypAvg",self.twiss.getAverage(3))
-		TPB.drift(bunch, length)
+		
 
 class BunchWrapTEAPOT(NodeTEAPOT):
 	"""

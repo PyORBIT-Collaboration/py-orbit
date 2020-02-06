@@ -3,6 +3,8 @@ import sys
 import re
 import math
 
+from orbit.utils   import orbitFinalize
+
 #===============================================================
 
 class _possibleElementType:
@@ -51,13 +53,15 @@ class _possibleElementType:
 			Method. Confirms validity of element type.
 			"""
 		name = name_in.lower()
-		if name not in self.__names_type:
-			print "Error creating lattice element:"
-			print "There is no element with type: ", name
-			print "Stop."
-			sys.exit (0)
+		if(self.__names_type.count(name) == 0):
+			msg = "Error creating lattice element:"
+			msg = msg + os.linesep
+			msg = msg + "There is no element with type:" + name
+			msg = msg + os.linesep
+			msg = msg + "Stop."
+			msg = msg + os.linesep
+			orbitFinalize(msg)
 		return name_in
-
 #===============================================================
 
 class MADX_LattElement:
@@ -282,7 +286,7 @@ class StringFunctions:
 #====================================================================
 
 class MADX_Parser:
-	""" MAD parser """
+	""" MADX parser """
 	
 	def __init__(self):
 		""" Create instance of the MAD_Parser class """
@@ -293,7 +297,7 @@ class MADX_Parser:
 		self._sequencelength = ""
 		self._sequencelist = []
 		#the lines to ignore will start with these words
-		self.__ingnoreWords = ["title","beam", "none"]
+		self.__ingnoreWords = ["title","beam", "none", "initial"]
 
 	def collect_madx_lines(self,fileName,madFilePath):
 
@@ -311,13 +315,20 @@ class MADX_Parser:
 				str_local = ""
 				continue
 			#check the empty line
-			if str == "":
+			if not str:
 				str_local = ""
 				continue
 			# remove spaces, capital letters, words,...
 			tmp=str[:].lower().split()
 			str0="".join([x for x in tmp if x not in ["real","const"]]) # removes "const" and "real" from var definitions
 			str0 = "".join(str0.split()) # removes all spaces
+
+			# check if the line with ignore word
+			ignore_word = [word for word in self.__ingnoreWords if word in str0 and str0.lstrip(word)!=str0]
+			if ignore_word:
+				print("The line starting with {} word found. line [{}] is ignored".format(ignore_word,str0))
+				str_local = ""
+				continue
 			#take off the ";" at end of each line
 			if str0.rfind(";") > 0:
 				str_local = ""
@@ -325,7 +336,7 @@ class MADX_Parser:
 					str_local = "".join([str_local,str0[i]])
 				str_local.strip()
 			# deal with multi-line definitions in madx file
-			# is it better to preliminary collect all the lines, joi ands split by ";"?
+			# is it better to preliminary collect all the lines, join and split by ";"?
 			else:
 				pass
 			#check if there is a nested file
@@ -429,6 +440,11 @@ class MADX_Parser:
 				latt_elem = self._accElemDict[elem_name]
 				# he have the element, let's replace variables in parameters by numerical values here
 				latt_elem = self.recalculateParameters(latt_elem,localValDict)
+
+				# all monitors in PyORBIT have zero len by definition				
+				if "monitor" in latt_elem.getType() and latt_elem.getParameter("l"):
+					latt_elem.addParameter("l", 0.0)
+
 				length = latt_elem.getParameter("l")
 
 				if "from" in latt_elem.getParameters().keys():
@@ -569,6 +585,7 @@ class MADX_Parser:
 		# for accelerator elements
 		#--------------------------------------------
 
+#		for name,accElem in self._accElemDict.iteritems():
 		kvs = accElem.getParameters()
 		for key,val in kvs.iteritems():
 			val_out = None
@@ -629,14 +646,14 @@ class MADX_Parser:
 		driftlength = abs(posDown - posUp) - refer[0]*lenUp -refer[1]*lenDown
 
 		name = "Drift{}".format(len(self._sequencelist)//2)
-		type = "drift"
+		type_local = "drift"
 		
 		if driftlength < 0:
 			print "Warning: Drift between {} and {} has negative length, value = {}".format(upstreamelem.getName(), downstreamelem.getName(),driftlength)
 			print "Setting length to zero."
-			lattElem = MADX_LattElement(name, type)
+			lattElem = MADX_LattElement(name, type_local)
 		else:
-			lattElem = MADX_LattElement(name, type)
+			lattElem = MADX_LattElement(name, type_local)
 			lattElem.addParameter("l", driftlength)
 
 		return lattElem
@@ -718,15 +735,15 @@ class MADX_Parser:
 		tokens = line_init.split(",")
 		subtokens = tokens[0].split(":")
 		name = subtokens[0]
-		type = subtokens[1]
+		type_local = subtokens[1]
 
 		# elem can be defined as a child node
 		paramsDict = {}
-		if type not in self._accElemDict.keys():			
-			type_upd = type
+		if type_local not in self._accElemDict.keys():			
+			type_upd = type_local
 		else:	
-			type_upd = self._accElemDict[type].getType()
-			paramsDict = self._accElemDict[type].getParameters()
+			type_upd = self._accElemDict[type_local].getType()
+			paramsDict = self._accElemDict[type_local].getParameters()
 
 		if "marker" in type_upd.lower():
 			type_upd = "marker"
@@ -748,7 +765,7 @@ class MADX_Parser:
 			lattElem.addParameter(key,val)
 				
 		if not name:
-			lattElem = MADX_LattElement(name, type)
+			lattElem = MADX_LattElement(name, type_local)
 			print "Warning: Empty lattice element type."
 
 		lattElem_upd = self.parseParameters(line_init, lattElem)
@@ -777,18 +794,19 @@ class MADX_Parser:
 			    skews = ["1" for x in kls]
 			poles = ["{}".format(i) for i,x in enumerate(kls)]
 
+		#return kls, poles, skews
 		return ",".join(kls), ",".join(poles), ",".join(skews)
 
 
 	def makeAperture(self, downstreamelem):
 	
 		# Now we have to create an aperture before and after the element with the MADX label aperture
-		type = "apertype"
+		type_local = "apertype"
 		name = "aperture"
 		lattElem = MADX_LattElement("Aperture", name)
 		lattElem.addParameter("l", 0.0)
 		dim = downstreamelem.getParameter(name)
-		shape_type = downstreamelem.getParameter(type)
+		shape_type = downstreamelem.getParameter(type_local)
 		if shape_type == "circle":
 			shape = 1
 		elif shape_type == "ellipse":
@@ -801,7 +819,7 @@ class MADX_Parser:
 			print "Stop."
 			sys.exit(1)
 		lattElem.addParameter(name, dim)
-		lattElem.addParameter(type, shape)
+		lattElem.addParameter(type_local, shape)
 		return lattElem
 			
 	def getSequenceName(self):

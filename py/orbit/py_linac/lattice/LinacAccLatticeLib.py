@@ -445,12 +445,10 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 		""" Returns average phase for all RF gaps in the cavity """ 
 		avg_phase = 0.
 		phase = 0.
-		phase_arr = []
 		if(len(self.__rfGaps) > 0): 
 				phase = phaseNearTargetPhase(self.__rfGaps[0].getGapPhase(),0.)				
 		for rfGap in self.__rfGaps:
 			phase_new = phaseNearTargetPhase(rfGap.getGapPhase(),phase)
-			phase_arr.append(phase_new*180./math.pi)
 			avg_phase += phase_new
 			phase = phase_new
 		if(len(self.__rfGaps) > 0): avg_phase /= len(self.__rfGaps)

@@ -20,7 +20,7 @@ extern "C" {
 	//---------------------------------------------------------
 	//Python PoissonSolverFFT3D class definition
 	//---------------------------------------------------------
-
+	
 	//constructor for python class wrapping PoissonSolverFFT3D instance
 	//It never will be called directly
 	static PyObject* PoissonSolverFFT3D_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -31,10 +31,10 @@ extern "C" {
 		//std::cerr<<"The PoissonSolverFFT3D new has been called!"<<std::endl;
 		return (PyObject *) self;
 	}
-
-  //initializator for python  PoissonSolverFFT3D class
-  //this is implementation of the __init__ method
-  static int PoissonSolverFFT3D_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
+	
+	//initializator for python  PoissonSolverFFT3D class
+	//this is implementation of the __init__ method
+	static int PoissonSolverFFT3D_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
 		int xSize, ySize, zSize;
 		double xMin = -1.0, xMax = +1.0;
 		double yMin = -1.0, yMax = +1.0;
@@ -46,7 +46,35 @@ extern "C" {
 		((PoissonSolverFFT3D*) self->cpp_obj)->setPyWrapper((PyObject*) self);
 		//std::cerr<<"The PoissonSolverFFT3D __init__ has been called!"<<std::endl;
 		return 0;
-  }
+	}
+  
+ 	//set or get the number of neighboring bunches to account in the potential 
+	static PyObject* PoissonSolverFFT3D_numExtBunches(PyObject *self, PyObject *args){
+		int nBunches = -1;
+		if(!PyArg_ParseTuple(args,"|i:numExtBunches",&nBunches)){
+			ORBIT_MPI_Finalize("PyPoissonSolverFFT3D - numExtBunches([nBunches]) - set/get the number of neighboring bunches.");
+		}
+		pyORBIT_Object* pyPoissonSolverFFT3D = (pyORBIT_Object*) self;
+		PoissonSolverFFT3D* cpp_PoissonSolverFFT3D = (PoissonSolverFFT3D*) pyPoissonSolverFFT3D->cpp_obj;
+		if(nBunches >= 0){
+			cpp_PoissonSolverFFT3D->setNumberOfExternalBunches(nBunches);
+		}
+		return Py_BuildValue("i",cpp_PoissonSolverFFT3D->getNumberOfExternalBunches());
+	}
+	
+ 	//set or get the distance between neighboring bunches
+	static PyObject* PoissonSolverFFT3D_distBetweenBunches(PyObject *self, PyObject *args){
+		double lambda = -1.0;
+		if(!PyArg_ParseTuple(args,"|d:",&lambda)){
+			ORBIT_MPI_Finalize("PyPoissonSolverFFT3D - distBetweenBunches([lambda]) - set/get distance between bunches.");
+		}
+		pyORBIT_Object* pyPoissonSolverFFT3D = (pyORBIT_Object*) self;
+		PoissonSolverFFT3D* cpp_PoissonSolverFFT3D = (PoissonSolverFFT3D*) pyPoissonSolverFFT3D->cpp_obj;
+		if(lambda > 0.){
+			cpp_PoissonSolverFFT3D->setSpacingOfExternalBunches(lambda);
+		}
+		return Py_BuildValue("d",cpp_PoissonSolverFFT3D->getSpacingOfExternalBunches());
+	}	
 		
 	//get grid size in X 
 	static PyObject* PoissonSolverFFT3D_getSizeX(PyObject *self, PyObject *args){
@@ -168,6 +196,8 @@ extern "C" {
 	// defenition of the methods of the python PoissonSolverFFT3D wrapper class
 	// they will be vailable from python level
   static PyMethodDef PoissonSolverFFT3DClassMethods[] = {
+ 		{ "numExtBunches",       PoissonSolverFFT3D_numExtBunches,       METH_VARARGS,"set/get number of neighboring bunches"},
+ 		{ "distBetweenBunches",  PoissonSolverFFT3D_distBetweenBunches,  METH_VARARGS,"set/get distance between bunches"},
 		{ "getSizeX",            PoissonSolverFFT3D_getSizeX,            METH_VARARGS,"returns the number of grid points in x-direction"},
 		{ "getSizeY",            PoissonSolverFFT3D_getSizeY,            METH_VARARGS,"returns the number of grid points in y-direction"},
 		{ "getSizeZ",            PoissonSolverFFT3D_getSizeZ,            METH_VARARGS,"returns the number of grid points in z-direction"},

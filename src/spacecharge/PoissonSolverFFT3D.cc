@@ -30,6 +30,9 @@ void PoissonSolverFFT3D::init(int xSize, int ySize, int zSize,
   xSize2_ = 2*xSize;
   ySize2_ = 2*ySize;
   zSize2_ = 2*zSize;
+  
+  nBunches_ = 0;
+  lambda_ = DBL_MAX;
 
   if( xSize_ < 3 || ySize_ < 3){
 		int rank = 0;
@@ -95,6 +98,24 @@ PoissonSolverFFT3D::~PoissonSolverFFT3D()
   fftw_destroy_plan(planBackward_);
 }
 
+void PoissonSolverFFT3D::setNumberOfExternalBunches(int nBunches){
+	if(nBunches % 2 != 0){
+		nBunches = nBunches + 1;
+	}
+	nBunches_ = nBunches;
+}	
+
+void PoissonSolverFFT3D::setSpacingOfExternalBunches(double lambda){
+	lambda_ = lambda;
+}	
+
+int PoissonSolverFFT3D::getNumberOfExternalBunches(){
+	return nBunches_;
+}	
+
+double PoissonSolverFFT3D::getSpacingOfExternalBunches(){
+	return lambda_;
+}	
 
 void PoissonSolverFFT3D::setGridX(double xMin, double xMax){
 	xMin_ = xMin;
@@ -130,31 +151,46 @@ void PoissonSolverFFT3D::setGridXYZ(double xMin, double xMax, double yMin, doubl
 	_defineGreenF();
 }
 
-// Defines the FFT of the Green Function: field = lambda/r, potential = - lambda*ln(abs(r))
-// Please, keep in mind that the field of point like string 2*lambda*ln(abs(r)) in CGS
+// Defines the FFT of the Green Function: field = Q/r^2, potential = Q/r
 void PoissonSolverFFT3D::_defineGreenF()
 {
   double rTransY, rTransX, rTransZ, rTot;
+  double externalPhi,rTransZ_tmp;
+  double rTransY2, rTransX2, rTransZ2;
   int i, j, k, iY , iX, iZ;
 	
 	for (iZ = 0; iZ <= zSize2_/2; iZ++)
 	{
-		rTransZ = iZ * dz_;	
+		rTransZ = iZ * dz_;
+		rTransZ2 = rTransZ*rTransZ;
 		
 		for (iY = 0; iY <= ySize2_/2; iY++)
 		{
 			rTransY = iY * dy_;
+			rTransY2 = rTransY*rTransY;
 			
 			for (iX = 0; iX <= xSize2_/2; iX++)
 			{
 				rTransX = iX * dx_;	
-				rTot = sqrt(rTransX*rTransX + rTransY*rTransY + rTransZ*rTransZ);
+				rTransX2 = rTransX*rTransX;
+				rTot = sqrt(rTransX2 + rTransY2 + rTransZ2);
+				
+				externalPhi = 0.;
+				if(nBunches_ != 0){
+					for (int iBunch = -nBunches_/2; iBunch <= nBunches_/2; iBunch++){
+						if(iBunch == 0){
+							continue;
+						}
+						rTransZ_tmp = rTransZ + iBunch*lambda_;
+						externalPhi += 1.0/sqrt(rTransX2 + rTransY2 + rTransZ_tmp*rTransZ_tmp);
+					}
+				}
 				
 				if(iX != 0 || iY != 0 || iZ != 0){
-					greensF_[iX][iY][iZ] = 1./rTot;
+					greensF_[iX][iY][iZ] = 1./rTot + externalPhi;
 				}
 				else{
-					greensF_[iX][iY][iZ] = 0.0;
+					greensF_[iX][iY][iZ] = externalPhi;
 				}
 			}
 			
@@ -252,6 +288,13 @@ void PoissonSolverFFT3D::findPotential(Grid3D* rhoGrid,Grid3D*  phiGrid)
 
 	double*** rhosc = rhoGrid->getArr3D();
 	double*** phisc = phiGrid->getArr3D();
+	
+	//if nBunches_ > 0 the scale_coeff will be always 1.0
+	if(nBunches_ > 0){
+		setGridXYZ(rhoGrid->getMinX(), rhoGrid->getMaxX(),
+			         rhoGrid->getMinY(), rhoGrid->getMaxY(),
+			         rhoGrid->getMinZ(), rhoGrid->getMaxZ());
+	}
 	
 	double scale_coeff = dx_/rhoGrid->getStepX();
 		

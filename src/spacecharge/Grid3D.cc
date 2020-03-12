@@ -243,7 +243,7 @@ double Grid3D::getValueOnGrid(int ix, int iy, int iz){
 	return Arr3D[iz][ix][iy];
 }
 
-/** Bins the Bunch into the 2D grid. If bunch has a macrosize particle attribute it will be used. */	
+/** Bins the Bunch into the 3D grid. If bunch has a macrosize particle attribute it will be used. */	
 void Grid3D::binBunch(Bunch* bunch){
 	bunch->compress();
 	double** part_coord_arr = bunch->coordArr();
@@ -261,6 +261,36 @@ void Grid3D::binBunch(Bunch* bunch){
 	int nParts = bunch->getSize();
 	for(int i = 0; i < nParts; i++){
 		this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],part_coord_arr[i][4]);	
+	}
+}
+
+/** 
+	Bins the Bunch into the 3D grid wrapping the longitudinal coordinates into
+	-Lambda/2 : +Lambda/2 interval. If bunch has a macrosize particle attribute 
+	it will be used. 
+*/	
+void Grid3D::binWrappedBunch(Bunch* bunch, double lambda){
+	bunch->compress();
+	double** part_coord_arr = bunch->coordArr();
+	int has_msize = bunch->hasParticleAttributes("macrosize");
+	double z_ini,z_wrapped;
+	if(has_msize > 0){
+		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
+		double m_size = 0.;
+		for(int i = 0, n = bunch->getSize(); i < n; i++){
+			m_size = macroSizeAttr->macrosize(i);
+			z_ini = part_coord_arr[i][4];
+			z_wrapped = remainder(z_ini,lambda);
+			this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],z_wrapped);
+		}	
+		return;
+	}
+	double m_size = bunch->getMacroSize();
+	int nParts = bunch->getSize();
+	for(int i = 0; i < nParts; i++){
+		z_ini = part_coord_arr[i][4];
+		z_wrapped = remainder(z_ini,lambda);		
+		this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],z_wrapped);	
 	}
 }
 

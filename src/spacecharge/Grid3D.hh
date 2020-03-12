@@ -121,6 +121,13 @@ public:
 	    macrosize particle attribute it will be used. */	
 	void binBunch(Bunch* bunch);
 	
+	/** 
+	Bins the Bunch into the 3D grid wrapping the longitudinal coordinates into
+	-Lambda/2 : +Lambda/2 interval. If bunch has a macrosize particle attribute 
+	it will be used. 
+	*/	
+	void binWrappedBunch(Bunch* bunch, double lambda);
+	
 	/** Bins the value onto grid */
   void binValue(double macroSize, double x, double y, double z);
 	

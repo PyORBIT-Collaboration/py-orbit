@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <string>
+#include <cfloat>
 
 //pyORBIT utils
 #include "CppPyWrapper.hh"
@@ -43,6 +44,18 @@ class PoissonSolverFFT3D: public PoissonSolver3D
 		/** Destructor */
 		virtual ~PoissonSolverFFT3D();
 		
+		/** Set number of bunches from both sides for space charge calculations */
+		void setNumberOfExternalBunches(int nBunches);
+
+		/** Set distance between external bunches - period */
+		void setSpacingOfExternalBunches(double lambda);	
+		
+		/** Get number of bunches from both sides for space charge calculations */
+		int getNumberOfExternalBunches();
+		
+		/** Get distance between bunches */
+		double getSpacingOfExternalBunches();
+
 	  void setGridX(double xMin, double xMax); 	
 	  void setGridY(double yMin, double yMax);
 	  void setGridZ(double zMin, double zMax);
@@ -85,6 +98,14 @@ class PoissonSolverFFT3D: public PoissonSolver3D
 			fftw_plan planForward_greenF_;
 			fftw_plan planForward_;
 			fftw_plan planBackward_;
+			
+			//Number of bunches from both sides that should be taken into account.
+			//It defines the how many components we will add to Green function.
+			//This number will be an even number.
+			int nBunches_;
+			
+			//The distance between centers of the neighboring bunches
+			double lambda_;
 };
 //end of SC_POISSON_SOLVER_FFT_3D_H ifdef
 #endif

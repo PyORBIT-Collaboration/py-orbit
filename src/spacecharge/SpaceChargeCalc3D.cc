@@ -22,6 +22,7 @@
 #include "PoissonSolverFFT3D.hh"
 #include "SpaceChargeCalc3D.hh"
 #include "BufferStore.hh"
+#include "OrbitConst.hh"
 
 #include <iostream>
 #include <cmath>
@@ -48,6 +49,12 @@ SpaceChargeCalc3D::SpaceChargeCalc3D(int xSize, int ySize, int zSize): CppPyWrap
 	//If the shape (x to y and x to z ratios) of 3D region changes more than this
 	//limit then we have to change shape and recalculate Green Functions in the Poisson solver
 	ratio_limit = 1.2;
+	
+	//Number of bunches from both sides that should be taken into account for space charge.
+	nBunches_ = 0;
+	
+	//The frequency of the bunch arrivals in Hz. It defines by the RFQ frequency.
+	frequency_ = 0.;
 }
 
 SpaceChargeCalc3D::~SpaceChargeCalc3D(){
@@ -73,6 +80,22 @@ Grid3D* SpaceChargeCalc3D::getPhiGrid(){
 	return phiGrid;
 }
 
+void SpaceChargeCalc3D::setNumberOfExternalBunches(int nBunches){
+	poissonSolver->setNumberOfExternalBunches(nBunches);
+}	
+
+void SpaceChargeCalc3D::setFrequencyOfBunches(double frequency){
+	frequency_ = frequency;
+}	
+
+int SpaceChargeCalc3D::getNumberOfExternalBunches(){
+	return poissonSolver->getNumberOfExternalBunches();
+}	
+
+double SpaceChargeCalc3D::getFrequencyOfBunches(){
+	return frequency_;
+}	
+
 void SpaceChargeCalc3D::trackBunch(Bunch* bunch, double length){
 
 	int nPartsGlobal = bunch->getSizeGlobal();
@@ -80,14 +103,23 @@ void SpaceChargeCalc3D::trackBunch(Bunch* bunch, double length){
 	
 	//calculate max and min of X,Y,Z, bin paricles and set up limits for rhoGrid, phiGrid
 	//and bin the particles from the bunch into the rhoGrid
-	this->bunchAnalysis(bunch);
+	int nExtBunches = this->getNumberOfExternalBunches();
+	if(nExtBunches > 0){
+		this->wrappedBunchAnalysis(bunch);
+	}
+	else{
+		this->bunchAnalysis(bunch);
+	}
 	
 	//calculate phiGrid with potential. The z-coordinate is in the center of mass coordinate system
 	poissonSolver->findPotential(rhoGrid,phiGrid);
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
 	double gamma = syncPart->getGamma();
-	double beta = syncPart->getBeta();	
+	double beta = syncPart->getBeta();
+	
+	//distance between bunches in the center of mass of the bunch
+	double lambda_cm = OrbitConst::c*beta*gamma/frequency_;
 	
 	double trans_factor =  length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(beta,2)*pow(gamma,2));	
 	double long_factor =  length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)*bunch->getMass();
@@ -101,6 +133,10 @@ void SpaceChargeCalc3D::trackBunch(Bunch* bunch, double length){
 		y = bunch->y(i);
 		z = (bunch->z(i) - z_center)*gamma + z_center;
 		
+		if(nExtBunches > 0){
+			z = remainder(z,lambda_cm);
+		}
+		
 		phiGrid->calcGradient(x,ex,y,ey,z,ez);	
 		//std::cout<<"debug ip="<<i<<" x="<<x<<" y="<<y<<" z="<<z<<" ex="<<ex<<" ey="<<ey<<" ez="<<ez<<" rho_z="<< zGrid->getValue(z) <<std::endl;
 		//calculate momentum kicks
@@ -108,7 +144,6 @@ void SpaceChargeCalc3D::trackBunch(Bunch* bunch, double length){
 		bunch->yp(i) += -ey * trans_factor;
 		bunch->dE(i) += -ez * long_factor;
 	}
-	
 }
 
 void SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
@@ -133,7 +168,7 @@ void SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
 		int rank = 0;
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){
-			std::cerr << "SpaceChargeCalc3D::bunchAnalysis(bunch,...)" << std::endl
+			std::cerr << "SpaceChargeCalc3D::bunchAnalysis(bunch)" << std::endl
          				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
 								<< "x min ="<< xMin <<" max="<< xMax << std::endl
 								<< "y min ="<< yMin <<" max="<< yMax << std::endl
@@ -208,6 +243,88 @@ void SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
 	rhoGrid->setGridZ(zMin,zMax);	
 	phiGrid->setGridZ(zMin,zMax);		
 }
+
+
+
+
+
+
+void SpaceChargeCalc3D::wrappedBunchAnalysis(Bunch* bunch){
+	
+	double width, center;
+	
+	double xMin, xMax, yMin, yMax, zMin, zMax;
+	
+	bunchExtremaCalc->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);
+	
+	//we will work in the center of the mass of the bunch. 
+  //We have to shrink the longitudinal size
+	SyncPart* syncPart = bunch->getSyncPart();	
+	double gamma = syncPart->getGamma();
+	double beta = syncPart->getBeta();
+	center = (zMax + zMin)/2.0;
+	width = (zMax - zMin)/2.0;		
+	zMin = center - width;
+	zMax = center + width;
+	
+	//distance between bunches in the laboratory system
+	double lambda = OrbitConst::c*beta/frequency_;
+	
+	if(fabs(zMax) > lambda/2 || fabs(zMin) > lambda/2){
+		// extension should not change the results at all. It just changes the grid size.
+		double extension_coeff = 1.0001;
+		center = 0.;
+		width = extension_coeff*lambda/2;
+		zMin = center - width;
+		zMax = center + width;		
+	}
+	
+	//check if the beam size is not zero 
+  if( xMin >=  xMax || yMin >=  yMax || zMin >=  zMax){
+		int rank = 0;
+		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		if(rank == 0){
+			std::cerr << "SpaceChargeCalc3D::wrappedBunchAnalysis(bunch)" << std::endl
+         				<< "The bunch min and max sizes are wrong! Cannot calculate space charge!" << std::endl
+								<< "x min ="<< xMin <<" max="<< xMax << std::endl
+								<< "y min ="<< yMin <<" max="<< yMax << std::endl
+								<< "z min ="<< zMin <<" max="<< zMax << std::endl
+								<< "Stop."<< std::endl;
+		}
+		ORBIT_MPI_Finalize();
+  }
+	
+	rhoGrid->setGridX(xMin,xMax);	
+	phiGrid->setGridX(xMin,xMax);	
+
+	rhoGrid->setGridY(yMin,yMax);	
+	phiGrid->setGridY(yMin,yMax);	
+	
+	rhoGrid->setGridZ(zMin,zMax);	
+	phiGrid->setGridZ(zMin,zMax);	
+	
+	//bin rho&z Bunch to the Grid
+	rhoGrid->setZero();
+	rhoGrid->binWrappedBunch(bunch,lambda);
+	rhoGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
+	
+	//after binning we have to rescale the z-coordinate to the center-of-mass system
+	center = (zMax + zMin)/2.0;
+	width = (zMax - zMin)*gamma/2.0;		
+	zMin = center - width;
+	zMax = center + width;		
+	rhoGrid->setGridZ(zMin,zMax);	
+	phiGrid->setGridZ(zMin,zMax);		
+}
+
+
+
+
+
+
+
+
+
 
 /** Sets the ratio limit for the shape change and Green Function recalculations. */
 void SpaceChargeCalc3D::setRatioLimit(double ratio_limit_in)

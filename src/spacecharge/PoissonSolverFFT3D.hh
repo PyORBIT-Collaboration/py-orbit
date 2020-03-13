@@ -61,6 +61,9 @@ class PoissonSolverFFT3D: public PoissonSolver3D
 	  void setGridZ(double zMin, double zMax);
 		void setGridXYZ(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
 		
+		/** Updates the Green function FFT */
+		void updateGreenFunction();
+		
 		/** Solves the Poisson problem for an external charge distribution and
 		puts results into an external potential grid
 		*/
@@ -78,34 +81,34 @@ class PoissonSolverFFT3D: public PoissonSolver3D
 		//define green functions table
 		void _defineGreenF();
 		
-		protected:
-			
-			//Twice extended grid size to use convolution method
-			int xSize2_;
-			int ySize2_; 
-			int zSize2_; 
-			
-			//Green function 
-			double*** greensF_;
-			
-			//FFT arrays
-			double* in_;
-			double* in_res_;
-			fftw_complex* out_green_;
-			fftw_complex* out_;
-			fftw_complex* out_res_;
-			
-			fftw_plan planForward_greenF_;
-			fftw_plan planForward_;
-			fftw_plan planBackward_;
-			
-			//Number of bunches from both sides that should be taken into account.
-			//It defines the how many components we will add to Green function.
-			//This number will be an even number.
-			int nBunches_;
-			
-			//The distance between centers of the neighboring bunches
-			double lambda_;
+	protected:
+		
+		//Twice extended grid size to use convolution method
+		int xSize2_;
+		int ySize2_; 
+		int zSize2_; 
+		
+		//Green function 
+		double*** greensF_;
+		
+		//FFT arrays
+		double* in_;
+		double* in_res_;
+		fftw_complex* out_green_;
+		fftw_complex* out_;
+		fftw_complex* out_res_;
+		
+		fftw_plan planForward_greenF_;
+		fftw_plan planForward_;
+		fftw_plan planBackward_;
+		
+		//Number of bunches from both sides that should be taken into account.
+		//It defines the how many components we will add to Green function.
+		//This number will be an even number.
+		int nBunches_;
+		
+		//The distance between centers of the neighboring bunches
+		double lambda_;
 };
 //end of SC_POISSON_SOLVER_FFT_3D_H ifdef
 #endif

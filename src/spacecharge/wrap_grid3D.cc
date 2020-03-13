@@ -268,11 +268,11 @@ extern "C" {
 		PyObject* pyBunch;
 		double lambda;
 		if(!PyArg_ParseTuple(args,"Od:binWrappedBunch",&pyBunch,&lambda)){
-			ORBIT_MPI_Finalize("PyGrid3D - binWrappedBunch(Bunch* bunch) - parameters are needed.");
+			ORBIT_MPI_Finalize("PyGrid3D - binWrappedBunch(Bunch* bunch, lambda) - parameters are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyGrid3D - binBunch(Bunch* bunch) - method needs a Bunch.");
+			ORBIT_MPI_Finalize("PyGrid3D - binWrappedBunch(Bunch* bunch, lambda) - method needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
 		cpp_Grid3D->binWrappedBunch(cpp_bunch,lambda);

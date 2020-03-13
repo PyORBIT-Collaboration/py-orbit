@@ -151,6 +151,11 @@ void PoissonSolverFFT3D::setGridXYZ(double xMin, double xMax, double yMin, doubl
 	_defineGreenF();
 }
 
+/** Updates the Green function FFT */
+void PoissonSolverFFT3D::updateGreenFunction(){
+	this->_defineGreenF();
+}
+
 // Defines the FFT of the Green Function: field = Q/r^2, potential = Q/r
 void PoissonSolverFFT3D::_defineGreenF()
 {
@@ -255,7 +260,7 @@ void PoissonSolverFFT3D::findPotential(Grid3D* rhoGrid,Grid3D*  phiGrid)
 		int rank = 0;
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){
-			std::cerr << "PoissonSolverFFT3D:" 
+			std::cerr << "PoissonSolverFFT3D:findPotential" 
 			<< "The grid sizes or shape are different "<< std::endl 
 								<< "number x bins ="<< xSize_ << std::endl
 								<< "number y bins ="<< ySize_ << std::endl
@@ -288,14 +293,7 @@ void PoissonSolverFFT3D::findPotential(Grid3D* rhoGrid,Grid3D*  phiGrid)
 
 	double*** rhosc = rhoGrid->getArr3D();
 	double*** phisc = phiGrid->getArr3D();
-	
-	//if nBunches_ > 0 the scale_coeff will be always 1.0
-	if(nBunches_ > 0){
-		setGridXYZ(rhoGrid->getMinX(), rhoGrid->getMaxX(),
-			         rhoGrid->getMinY(), rhoGrid->getMaxY(),
-			         rhoGrid->getMinZ(), rhoGrid->getMaxZ());
-	}
-	
+
 	double scale_coeff = dx_/rhoGrid->getStepX();
 		
   int i, j, k, index;

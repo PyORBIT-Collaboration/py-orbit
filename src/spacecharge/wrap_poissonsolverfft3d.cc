@@ -159,7 +159,16 @@ extern "C" {
 		PoissonSolverFFT3D* cpp_PoissonSolverFFT3D = (PoissonSolverFFT3D*) pyPoissonSolverFFT3D->cpp_obj;
 		return Py_BuildValue("d",cpp_PoissonSolverFFT3D->getStepZ());
 	}			
-		
+
+	// updateGreenFunction()
+	static PyObject* PoissonSolverFFT3D_updateGreenFunction(PyObject *self, PyObject *args){
+		pyORBIT_Object* pyPoissonSolverFFT3D = (pyORBIT_Object*) self;
+		PoissonSolverFFT3D* cpp_PoissonSolverFFT3D = (PoissonSolverFFT3D*) pyPoissonSolverFFT3D->cpp_obj;
+		cpp_PoissonSolverFFT3D->updateGreenFunction();
+		Py_INCREF(Py_None);
+    return Py_None;
+	}			
+
 	//findPotential(Grid3D* rhoGrid3D,Grid3D* phiGrid3D)
   static PyObject* PoissonSolverFFT3D_findPotential(PyObject *self, PyObject *args){
     pyORBIT_Object* pyPoissonSolverFFT3D = (pyORBIT_Object*) self;
@@ -210,6 +219,7 @@ extern "C" {
 		{ "getStepX",            PoissonSolverFFT3D_getStepX,            METH_VARARGS,"returns grid step in x-direction"},
 		{ "getStepY",            PoissonSolverFFT3D_getStepY,            METH_VARARGS,"returns grid step in y-direction"},
 		{ "getStepZ",            PoissonSolverFFT3D_getStepZ,            METH_VARARGS,"returns grid step in z-direction"},
+		{ "updateGeenFunction",  PoissonSolverFFT3D_updateGreenFunction, METH_VARARGS,"updates the Green function FFT"},
 		{ "findPotential",       PoissonSolverFFT3D_findPotential,       METH_VARARGS,"findPotential(Grid3D rhoGrid3D,Grid3D phiGrid3D)"},
     {NULL}
   };

@@ -244,11 +244,6 @@ void SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
 	phiGrid->setGridZ(zMin,zMax);		
 }
 
-
-
-
-
-
 void SpaceChargeCalc3D::wrappedBunchAnalysis(Bunch* bunch){
 	
 	double width, center;
@@ -269,6 +264,9 @@ void SpaceChargeCalc3D::wrappedBunchAnalysis(Bunch* bunch){
 	
 	//distance between bunches in the laboratory system
 	double lambda = OrbitConst::c*beta/frequency_;
+	
+	//distance between bunches in the center of mass of the bunch
+	double lambda_cm = OrbitConst::c*beta*gamma/frequency_;	
 	
 	if(fabs(zMax) > lambda/2 || fabs(zMin) > lambda/2){
 		// extension should not change the results at all. It just changes the grid size.
@@ -314,17 +312,15 @@ void SpaceChargeCalc3D::wrappedBunchAnalysis(Bunch* bunch){
 	zMin = center - width;
 	zMax = center + width;		
 	rhoGrid->setGridZ(zMin,zMax);	
-	phiGrid->setGridZ(zMin,zMax);		
+	phiGrid->setGridZ(zMin,zMax);
+	
+	//now we set the sizes of the Poisson Solver grids and 
+	//calculate Green function FFT inside it
+	poissonSolver->setSpacingOfExternalBunches(lambda_cm);
+	poissonSolver->setGridXYZ(rhoGrid->getMinX(), rhoGrid->getMaxX(),
+			                      rhoGrid->getMinY(), rhoGrid->getMaxY(),
+			                      rhoGrid->getMinZ(), rhoGrid->getMaxZ());
 }
-
-
-
-
-
-
-
-
-
 
 /** Sets the ratio limit for the shape change and Green Function recalculations. */
 void SpaceChargeCalc3D::setRatioLimit(double ratio_limit_in)

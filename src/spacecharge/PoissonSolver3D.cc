@@ -18,7 +18,14 @@ PoissonSolver3D::PoissonSolver3D(int xSize, int ySize, int zSize): CppPyWrapper(
 	zMax_ = +1.0;
 	dx_ = (xMax_ - xMin_)/(xSize_ -1);
 	dy_ = (yMax_ - yMin_)/(ySize_ -1);	
-	dz_ = (zMax_ - zMin_)/(zSize_ -1);	
+	
+	/** 
+		Sets the limits for the z-grid. The z-grid is different
+		from x and y. We redefined it to allow the periodicity
+		along the longitudinal coordinate in the beam.
+	*/	
+	
+	dz_ = (zMax_ - zMin_)/zSize_;	
 }
 
 // Constructor
@@ -38,7 +45,14 @@ PoissonSolver3D::PoissonSolver3D(int xSize, int ySize, int zSize,
 	zMax_ = zMax;	
 	dx_ = (xMax_ - xMin_)/(xSize_ -1);
 	dy_ = (yMax_ - yMin_)/(ySize_ -1);	
-	dz_ = (zMax_ - zMin_)/(zSize_ -1);		
+	
+	/** 
+		Sets the limits for the z-grid. The z-grid is different
+		from x and y. We redefined it to allow the periodicity
+		along the longitudinal coordinate in the beam.
+	*/	
+	
+	dz_ = (zMax_ - zMin_)/zSize_;		
 }
 
 // Destructor

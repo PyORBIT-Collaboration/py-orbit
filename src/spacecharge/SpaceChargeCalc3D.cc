@@ -53,8 +53,9 @@ SpaceChargeCalc3D::SpaceChargeCalc3D(int xSize, int ySize, int zSize): CppPyWrap
 	//Number of bunches from both sides that should be taken into account for space charge.
 	nBunches_ = 0;
 	
-	//The frequency of the bunch arrivals in Hz. It defines by the RFQ frequency.
-	frequency_ = 0.;
+	// The frequency of the bunch arrivals in Hz. It defines by the RFQ frequency.
+	// The non-zero is setup by default to avoid division on zero
+	frequency_ = 402.5e+6;
 }
 
 SpaceChargeCalc3D::~SpaceChargeCalc3D(){
@@ -154,6 +155,10 @@ void SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
 	
 	bunchExtremaCalc->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);
 	
+	//we are not going to account for neighboring bunches here
+	rhoGrid->setLongWrapping(0);
+	phiGrid->setLongWrapping(0);
+	
 	//we will work in the center of the mass of the bunch. 
   //We have to shrink the longitudinal size
 	SyncPart* syncPart = bunch->getSyncPart();	
@@ -207,7 +212,6 @@ void SpaceChargeCalc3D::bunchAnalysis(Bunch* bunch){
 	if(scale_coeff < scale_coeff_y) scale_coeff = scale_coeff_y;
 	if(scale_coeff < scale_coeff_z) scale_coeff = scale_coeff_z;	
 	
-
 	center = (xMax + xMin)/2.0;
 	width = (poissonSolver->getMaxX() - poissonSolver->getMinX())*scale_coeff/2.0;		
 	xMin = center - width;
@@ -251,6 +255,10 @@ void SpaceChargeCalc3D::wrappedBunchAnalysis(Bunch* bunch){
 	double xMin, xMax, yMin, yMax, zMin, zMax;
 	
 	bunchExtremaCalc->getExtremaXYZ(bunch, xMin, xMax, yMin, yMax, zMin, zMax);
+	
+	//we will account for neighboring bunches here
+	rhoGrid->setLongWrapping(1);
+	phiGrid->setLongWrapping(1);
 	
 	//we will work in the center of the mass of the bunch. 
   //We have to shrink the longitudinal size
@@ -303,7 +311,7 @@ void SpaceChargeCalc3D::wrappedBunchAnalysis(Bunch* bunch){
 	
 	//bin rho&z Bunch to the Grid
 	rhoGrid->setZero();
-	rhoGrid->binWrappedBunch(bunch,lambda);
+	rhoGrid->binBunch(bunch,lambda);
 	rhoGrid->synchronizeMPI(bunch->getMPI_Comm_Local());
 	
 	//after binning we have to rescale the z-coordinate to the center-of-mass system

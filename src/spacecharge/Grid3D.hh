@@ -114,21 +114,32 @@ public:
   /** define all elements as 0.0 */
   void setZero();
 
-  //multiply all elements of Grid3D by constant coefficient
+  /** multiply all elements of Grid3D by constant coefficient */
   void multiply(double coeff);
+  
+	/**
+		If it is equal 0 we do not have longitudinal wrapping.
+	*/
+	void setLongWrapping(int isWrapped);
+	
+	/**
+		If it is equal 0 we do not have longitudinal wrapping.
+	*/
+	int getLongWrapping(); 
 	
   /** Bins the Bunch into the 2D grid. If bunch has a 
-	    macrosize particle attribute it will be used. */	
+	    macrosize particle attribute it will be used. 
+	  */	
 	void binBunch(Bunch* bunch);
 	
-	/** 
-	Bins the Bunch into the 3D grid wrapping the longitudinal coordinates into
-	-Lambda/2 : +Lambda/2 interval. If bunch has a macrosize particle attribute 
-	it will be used. 
-	*/	
-	void binWrappedBunch(Bunch* bunch, double lambda);
+  /** Bins the Bunch into the 2D grid. If bunch has a 
+	    macrosize particle attribute it will be used.
+	    The coordinates of the particles will be wrapped 
+	    longitudinally with period of lambda.
+  */	
+	void binBunch(Bunch* bunch, double lambda);	
 	
-	/** Bins the value onto grid */
+  /** Bins the value onto grid */
   void binValue(double macroSize, double x, double y, double z);
 	
   /** Calculates gradient of Arr3D. gradX = gradient_x(Arr3D), and so on */
@@ -194,6 +205,10 @@ protected:
   int nZ_,nX_,nY_;
   double xMin_,xMax_,yMin_,yMax_,zMin_,zMax_;
   double dx_, dy_, dz_;
+  
+  //it is equal 0 we do not have longitudinal wrapping
+  //if it is 1 we have wrapping. By default it is 0. 
+  int longWrapping;
 
 };
 #endif

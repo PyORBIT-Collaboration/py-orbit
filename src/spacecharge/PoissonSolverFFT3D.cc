@@ -134,7 +134,7 @@ void PoissonSolverFFT3D::setGridY(double yMin, double yMax){
 void PoissonSolverFFT3D::setGridZ(double zMin, double zMax){
 	zMin_ = zMin;
 	zMax_ = zMax;
-	dz_ = (zMax_ - zMin_)/(zSize_ -1);
+	dz_ = (zMax_ - zMin_)/zSize_;
 	_defineGreenF();
 }
 
@@ -147,7 +147,7 @@ void PoissonSolverFFT3D::setGridXYZ(double xMin, double xMax, double yMin, doubl
 	dy_ = (yMax_ - yMin_)/(ySize_ -1);
 	zMin_ = zMin;
 	zMax_ = zMax;
-	dz_ = (zMax_ - zMin_)/(zSize_ -1);	
+	dz_ = (zMax_ - zMin_)/zSize_;	
 	_defineGreenF();
 }
 
@@ -159,7 +159,7 @@ void PoissonSolverFFT3D::updateGreenFunction(){
 // Defines the FFT of the Green Function: field = Q/r^2, potential = Q/r
 void PoissonSolverFFT3D::_defineGreenF()
 {
-  double rTransY, rTransX, rTransZ, rTot;
+  double rTransY, rTransX, rTransZ, rTot, rTotExt;
   double externalPhi,rTransZ_tmp;
   double rTransY2, rTransX2, rTransZ2;
   int i, j, k, iY , iX, iZ;
@@ -187,7 +187,10 @@ void PoissonSolverFFT3D::_defineGreenF()
 							continue;
 						}
 						rTransZ_tmp = rTransZ + iBunch*lambda_;
-						externalPhi += 1.0/sqrt(rTransX2 + rTransY2 + rTransZ_tmp*rTransZ_tmp);
+						rTotExt = sqrt(rTransX2 + rTransY2 + rTransZ_tmp*rTransZ_tmp);
+						//this is protection for iX, iY, = 0, iZ = zSize2_/2, and iBunch = -1
+						//Rememeber, here we do not have control over lambda value
+						if(rTotExt > 1.0e-10) externalPhi += 1.0/rTotExt;
 					}
 				}
 				
@@ -260,8 +263,8 @@ void PoissonSolverFFT3D::findPotential(Grid3D* rhoGrid,Grid3D*  phiGrid)
 		int rank = 0;
 		ORBIT_MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		if(rank == 0){
-			std::cerr << "PoissonSolverFFT3D:findPotential" 
-			<< "The grid sizes or shape are different "<< std::endl 
+			std::cerr << "PoissonSolverFFT3D:findPotential" << std::endl 
+			          << "The grid sizes or shape are different "<< std::endl 
 								<< "number x bins ="<< xSize_ << std::endl
 								<< "number y bins ="<< ySize_ << std::endl
 								<< "number z bins ="<< zSize_ << std::endl
@@ -276,8 +279,10 @@ void PoissonSolverFFT3D::findPotential(Grid3D* rhoGrid,Grid3D*  phiGrid)
 								<< "dz_  ="<< dz_ <<std::endl
 								<< "rhoGrid dx ="<< rhoGrid->getStepX() <<std::endl
 								<< "rhoGrid dy ="<< rhoGrid->getStepY() <<std::endl
+								<< "rhoGrid dz ="<< rhoGrid->getStepZ() <<std::endl
 								<< "phiGrid dx ="<< phiGrid->getStepX() <<std::endl
 								<< "phiGrid dy ="<< phiGrid->getStepY() <<std::endl
+								<< "phiGrid dz ="<< phiGrid->getStepZ() <<std::endl
 								<< "xMin ="<< xMin_ <<std::endl
 								<< "yMin  ="<< yMin_ <<std::endl
 								<< "rhoGrid xMin ="<< rhoGrid->getMinX() <<std::endl
@@ -287,6 +292,10 @@ void PoissonSolverFFT3D::findPotential(Grid3D* rhoGrid,Grid3D*  phiGrid)
 								<< "phiGrid yMin ="<< phiGrid->getMinY() <<std::endl
 								<< "phiGrid zMin ="<< phiGrid->getMinZ() <<std::endl
 								<< "Stop. \n";
+								std::cerr << "debug dx_/dy_ =" << dx_/dy_ << " rhoGrid->getStepX()/rhoGrid->getStepY() ="<< rhoGrid->getStepX()/rhoGrid->getStepY() <<std::endl;
+								std::cerr << "debug dz_/dy_ =" << dx_/dy_ << " rhoGrid->getStepZ()/rhoGrid->getStepY() ="<< rhoGrid->getStepZ()/rhoGrid->getStepY() <<std::endl;
+								std::cerr << "debug dx_/dy_ =" << dx_/dy_ << " phiGrid->getStepX()/phiGrid->getStepY() ="<< rhoGrid->getStepX()/rhoGrid->getStepY() <<std::endl;
+								std::cerr << "debug dz_/dy_ =" << dx_/dy_ << " phiGrid->getStepZ()/phiGrid->getStepY() ="<< rhoGrid->getStepZ()/rhoGrid->getStepY() <<std::endl;			
 		}
 		ORBIT_MPI_Finalize();
   }		

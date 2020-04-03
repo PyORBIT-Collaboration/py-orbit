@@ -37,7 +37,10 @@ Grid3D::Grid3D(int nX, int nY, int nZ): CppPyWrapper(NULL)
   yMin_=0.0; yMax_=0.0;
   zMin_=0.0; zMax_=0.0;
 
-
+  // if it is equal 0 we do not have longitudinal wrapping
+  // if it is 1 we have wrapping
+  longWrapping = 0;
+  
   //Allocate memory for the 3D distribution
   grid2dArr = new Grid2D*[nZ_];
   Arr3D = new double**[nZ_];
@@ -90,9 +93,14 @@ double Grid3D::getGridY(int index){
 	return yMin_ + index*dy_;
 }
 
-/** Returns the grid point z-coordinate for this index. */   
+/** 
+	Returns the grid point z-coordinate for this index. 
+	The z-grid is different from x and y. 
+	We redefined it to allow the periodicity
+	along the longitudinal coordinate in the beam.
+*/   
 double Grid3D::getGridZ(int index){
-	return zMin_ + index*dz_;
+	return zMin_ + (index+0.5)*dz_;
 }
 
 /** Returns the grid step along x-axis */
@@ -148,17 +156,16 @@ void Grid3D::setGridY(double yMin, double yMax){
   }
 }
 
-/** Sets the limits for the z-grid */
+/** 
+	Sets the limits for the z-grid. The z-grid is different
+	from x and y. We redefined it to allow the periodicity
+	along the longitudinal coordinate in the beam.
+*/
 void Grid3D::setGridZ(double zMin, double zMax)
 {
   zMin_ = zMin;
   zMax_ = zMax;
-  if( nZ_ > 1){
-   dz_ = (zMax_-zMin_)/( nZ_ -1);
-  }
-  else{
-   dz_ = zMax_-zMin_;
-  }
+  dz_ = (zMax_-zMin_)/nZ_;
 }
 
 /** Set all array values to zero */
@@ -171,6 +178,22 @@ void Grid3D::setZero()
       }
     }
   }
+}
+
+/**
+	If it is equal 0 we do not have longitudinal wrapping.
+*/
+void Grid3D::setLongWrapping(int isWrapped)
+{
+	longWrapping = isWrapped;
+}
+
+/**
+	If it is equal 0 we do not have longitudinal wrapping.
+*/
+int Grid3D::getLongWrapping()
+{
+	return longWrapping;
 }
 
 /** Multiply all elements of Grid3D by constant coefficient */
@@ -208,16 +231,21 @@ void Grid3D::getGridIndAndFrac(double x, int& xInd, double& xFrac,
 	
   //z direction
   if( nZ_ > 1){
-    zInd  = int ( (z - zMin_)/dz_ + 0.5 );
+    zInd  = int((z - zMin_)/dz_);
 		
-    if( nZ_ > 2){
-      //cut off edge for three point interpolation
-      if(zInd <= 0) zInd = 1;
-      if(zInd >=  nZ_ -1) zInd =  nZ_  - 2;
-      zFrac = (z - (zMin_ + zInd * dz_))/dz_;
+    if(nZ_ > 2){
+      if(longWrapping == 0){
+        //cut off edge for three point interpolation
+        if(zInd <= 0) zInd = 1;
+        if(zInd >=  nZ_ -1) zInd =  nZ_  - 2;
+      } else {
+        if(zInd <= 0) zInd = 0;
+        if(zInd >=  nZ_ -1) zInd =  nZ_  - 1;      	
+      }
+      zFrac = (z - this->getGridZ(zInd))/dz_;
     }
-    if( nZ_ == 2){
-      zFrac = (z - zMin_)/dz_;
+    if(nZ_ == 2){
+      zFrac = (z - (zMin_+0.5*dz_))/dz_;
       if(zInd < 0) {
 				zInd = 0;
 				zFrac = 0.0;
@@ -229,7 +257,8 @@ void Grid3D::getGridIndAndFrac(double x, int& xInd, double& xFrac,
     }
   }
   else{
-    dz_=0.0; zInd = 0;zFrac = 0.0;
+    zInd = 0;
+    zFrac = 0.0;
   }
 }
 
@@ -243,59 +272,44 @@ double Grid3D::getValueOnGrid(int ix, int iy, int iz){
 	return Arr3D[iz][ix][iy];
 }
 
+/** 
+	Bins the Bunch into the 3D grid. If bunch has a macrosize particle attribute it will be used.
+	This method will wrap the bunch particles in the longitudonal directions if 
+	longWrapping = 1.
+*/	
+void Grid3D::binBunch(Bunch* bunch,double lambda){
+	double z;
+	bunch->compress();
+	double** part_coord_arr = bunch->coordArr();
+	int has_msize = bunch->hasParticleAttributes("macrosize");
+	if(has_msize > 0){
+		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
+		double m_size = 0.;
+		for(int i = 0, n = bunch->getSize(); i < n; i++){
+			m_size = macroSizeAttr->macrosize(i);
+			z = part_coord_arr[i][4];
+			if(longWrapping != 0) z = remainder(z,lambda);
+			this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],z);
+		}	
+		return;
+	}
+	double m_size = bunch->getMacroSize();
+	int nParts = bunch->getSize();
+	for(int i = 0; i < nParts; i++){
+		z = part_coord_arr[i][4];
+		if(longWrapping != 0) z = remainder(z,lambda);
+		this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],z);	
+	}
+}
+
+
 /** Bins the Bunch into the 3D grid. If bunch has a macrosize particle attribute it will be used. */	
 void Grid3D::binBunch(Bunch* bunch){
-	bunch->compress();
-	double** part_coord_arr = bunch->coordArr();
-	int has_msize = bunch->hasParticleAttributes("macrosize");
-	if(has_msize > 0){
-		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
-		double m_size = 0.;
-		for(int i = 0, n = bunch->getSize(); i < n; i++){
-			m_size = macroSizeAttr->macrosize(i);
-			this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],part_coord_arr[i][4]);
-		}	
-		return;
-	}
-	double m_size = bunch->getMacroSize();
-	int nParts = bunch->getSize();
-	for(int i = 0; i < nParts; i++){
-		this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],part_coord_arr[i][4]);	
-	}
+	longWrapping = 0;
+	this->binBunch(bunch,0.);
 }
 
-/** 
-	Bins the Bunch into the 3D grid wrapping the longitudinal coordinates into
-	-Lambda/2 : +Lambda/2 interval. If bunch has a macrosize particle attribute 
-	it will be used. 
-*/	
-void Grid3D::binWrappedBunch(Bunch* bunch, double lambda){
-	bunch->compress();
-	double** part_coord_arr = bunch->coordArr();
-	int has_msize = bunch->hasParticleAttributes("macrosize");
-	double z_ini,z_wrapped;
-	if(has_msize > 0){
-		ParticleMacroSize* macroSizeAttr = (ParticleMacroSize*) bunch->getParticleAttributes("macrosize");
-		double m_size = 0.;
-		for(int i = 0, n = bunch->getSize(); i < n; i++){
-			m_size = macroSizeAttr->macrosize(i);
-			z_ini = part_coord_arr[i][4];
-			z_wrapped = remainder(z_ini,lambda);
-			this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],z_wrapped);
-		}	
-		return;
-	}
-	double m_size = bunch->getMacroSize();
-	int nParts = bunch->getSize();
-	for(int i = 0; i < nParts; i++){
-		z_ini = part_coord_arr[i][4];
-		z_wrapped = remainder(z_ini,lambda);		
-		this->binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2],z_wrapped);	
-	}
-}
-
-
-/** Bins the value onto grid */
+/** Bins the value into the grid 3D assuming a wrapped longitudinal direction */
 void Grid3D::binValue(double macroSize, double x, double y, double z)
 {
 	if(x < xMin_ || x > xMax_ || y < yMin_ || y > yMax_ || z < zMin_ || z > zMax_) return;	
@@ -303,7 +317,7 @@ void Grid3D::binValue(double macroSize, double x, double y, double z)
   double xFrac, yFrac, zFrac;
   getGridIndAndFrac(x, iX, xFrac, y, iY, yFrac, z, iZ, zFrac);
 
-  //Calculate interpolation weight
+  //Calculate interpolation weight and indexes
   double Wxm,Wx0,Wxp,Wym,Wy0,Wyp;
   double Wzm,Wz0,Wzp;
   Wzm = Wz0 = Wzp = 0.0;
@@ -315,6 +329,12 @@ void Grid3D::binValue(double macroSize, double x, double y, double z)
   Wy0 = 0.75 - yFrac * yFrac;
   Wyp = 0.5 * (0.5 + yFrac) * (0.5 + yFrac);
 
+  int iZ0 = iZ;
+  int iZm = iZ-1;
+  int iZp = iZ+1;
+  if(iZm < 0) iZm = nZ_ - 1;
+  if(iZp >= nZ_) iZp = 0;
+  
   if( nZ_ >= 3){
     Wzm = 0.5 * (0.5 - zFrac) * (0.5 - zFrac);
     Wz0 = 0.75 - zFrac * zFrac;
@@ -332,41 +352,41 @@ void Grid3D::binValue(double macroSize, double x, double y, double z)
 
   if( nZ_ >= 3){
     tmp = Wym * Wzm *macroSize;
-    Arr3D[iZ-1][iX-1][iY-1] += Wxm * tmp;
-    Arr3D[iZ-1][iX  ][iY-1] += Wx0 * tmp;
-    Arr3D[iZ-1][iX+1][iY-1] += Wxp * tmp;
+    Arr3D[iZm][iX-1][iY-1] += Wxm * tmp;
+    Arr3D[iZm][iX  ][iY-1] += Wx0 * tmp;
+    Arr3D[iZm][iX+1][iY-1] += Wxp * tmp;
     tmp = Wy0 * Wzm *macroSize;
-    Arr3D[iZ-1][iX-1][iY  ] += Wxm * tmp;
-    Arr3D[iZ-1][iX  ][iY  ] += Wx0 * tmp;
-    Arr3D[iZ-1][iX+1][iY  ] += Wxp * tmp;
+    Arr3D[iZm][iX-1][iY  ] += Wxm * tmp;
+    Arr3D[iZm][iX  ][iY  ] += Wx0 * tmp;
+    Arr3D[iZm][iX+1][iY  ] += Wxp * tmp;
     tmp = Wyp * Wzm *macroSize;
-    Arr3D[iZ-1][iX-1][iY+1] += Wxm * tmp;
-    Arr3D[iZ-1][iX  ][iY+1] += Wx0 * tmp;
-    Arr3D[iZ-1][iX+1][iY+1] += Wxp * tmp;
+    Arr3D[iZm][iX-1][iY+1] += Wxm * tmp;
+    Arr3D[iZm][iX  ][iY+1] += Wx0 * tmp;
+    Arr3D[iZm][iX+1][iY+1] += Wxp * tmp;
     tmp = Wym * Wz0 *macroSize;
-    Arr3D[iZ  ][iX-1][iY-1] += Wxm * tmp;
-    Arr3D[iZ  ][iX  ][iY-1] += Wx0 * tmp;
-    Arr3D[iZ  ][iX+1][iY-1] += Wxp * tmp;
+    Arr3D[iZ0][iX-1][iY-1] += Wxm * tmp;
+    Arr3D[iZ0][iX  ][iY-1] += Wx0 * tmp;
+    Arr3D[iZ0][iX+1][iY-1] += Wxp * tmp;
     tmp = Wy0 * Wz0 *macroSize;
-    Arr3D[iZ  ][iX-1][iY  ] += Wxm * tmp;
-    Arr3D[iZ  ][iX  ][iY  ] += Wx0 * tmp;
-    Arr3D[iZ  ][iX+1][iY  ] += Wxp * tmp;
+    Arr3D[iZ0][iX-1][iY  ] += Wxm * tmp;
+    Arr3D[iZ0][iX  ][iY  ] += Wx0 * tmp;
+    Arr3D[iZ0][iX+1][iY  ] += Wxp * tmp;
     tmp = Wyp * Wz0 *macroSize;
-    Arr3D[iZ  ][iX-1][iY+1] += Wxm * tmp;
-    Arr3D[iZ  ][iX  ][iY+1] += Wx0 * tmp;
-    Arr3D[iZ  ][iX+1][iY+1] += Wxp * tmp;
+    Arr3D[iZ0][iX-1][iY+1] += Wxm * tmp;
+    Arr3D[iZ0][iX  ][iY+1] += Wx0 * tmp;
+    Arr3D[iZ0][iX+1][iY+1] += Wxp * tmp;
     tmp = Wym * Wzp *macroSize;
-    Arr3D[iZ+1][iX-1][iY-1] += Wxm * tmp;
-    Arr3D[iZ+1][iX  ][iY-1] += Wx0 * tmp;
-    Arr3D[iZ+1][iX+1][iY-1] += Wxp * tmp;
+    Arr3D[iZp][iX-1][iY-1] += Wxm * tmp;
+    Arr3D[iZp][iX  ][iY-1] += Wx0 * tmp;
+    Arr3D[iZp][iX+1][iY-1] += Wxp * tmp;
     tmp = Wy0 * Wzp *macroSize;
-    Arr3D[iZ+1][iX-1][iY  ] += Wxm * tmp;
-    Arr3D[iZ+1][iX  ][iY  ] += Wx0 * tmp;
-    Arr3D[iZ+1][iX+1][iY  ] += Wxp * tmp;
+    Arr3D[iZp][iX-1][iY  ] += Wxm * tmp;
+    Arr3D[iZp][iX  ][iY  ] += Wx0 * tmp;
+    Arr3D[iZp][iX+1][iY  ] += Wxp * tmp;
     tmp = Wyp * Wzp *macroSize;
-    Arr3D[iZ+1][iX-1][iY+1] += Wxm * tmp;
-    Arr3D[iZ+1][iX  ][iY+1] += Wx0 * tmp;
-    Arr3D[iZ+1][iX+1][iY+1] += Wxp * tmp;  
+    Arr3D[iZp][iX-1][iY+1] += Wxm * tmp;
+    Arr3D[iZp][iX  ][iY+1] += Wx0 * tmp;
+    Arr3D[iZp][iX+1][iY+1] += Wxp * tmp;  
   }
   if( nZ_ == 2){
     tmp = Wym * Wzm *macroSize;
@@ -410,7 +430,10 @@ void Grid3D::binValue(double macroSize, double x, double y, double z)
   }
 }
 
-/** Calculates gradient of Arr3D. gradX = gradient_x(Arr3D), and so on */
+/** 
+	Calculates gradient of Arr3D. gradX = gradient_x(Arr3D), 
+  and so on for longitudinally wrapped grid 
+*/
 void Grid3D::calcGradient(double x,double& gradX,
 			  double y,double& gradY,
 			  double z,double& gradZ)
@@ -464,20 +487,27 @@ void Grid3D::calcGradient(double x,double& gradX,
     dWzp = (-1.0)* -1.0/dz_; // for zInd=1   
   }
 
+  
+  int iZ0 = iZ;
+  int iZm = iZ-1;
+  int iZp = iZ+1;
+  if(iZm < 0) iZm = nZ_ - 1;
+  if(iZp >= nZ_) iZp = 0;
+
   //calculate gradient
   if( nZ_ >= 3){
     gradX = 
-      calcSheetGradient(iZ-1,iX,iY,dWxm,dWx0,dWxp,Wym,Wy0,Wyp) *Wzm +
-      calcSheetGradient(iZ  ,iX,iY,dWxm,dWx0,dWxp,Wym,Wy0,Wyp) *Wz0 +
-      calcSheetGradient(iZ+1,iX,iY,dWxm,dWx0,dWxp,Wym,Wy0,Wyp) *Wzp;
+      calcSheetGradient(iZm,iX,iY,dWxm,dWx0,dWxp,Wym,Wy0,Wyp) *Wzm +
+      calcSheetGradient(iZ0,iX,iY,dWxm,dWx0,dWxp,Wym,Wy0,Wyp) *Wz0 +
+      calcSheetGradient(iZp,iX,iY,dWxm,dWx0,dWxp,Wym,Wy0,Wyp) *Wzp;
     gradY = 
-      calcSheetGradient(iZ-1,iX,iY,Wxm,Wx0,Wxp,dWym,dWy0,dWyp) *Wzm +
-      calcSheetGradient(iZ  ,iX,iY,Wxm,Wx0,Wxp,dWym,dWy0,dWyp) *Wz0 +
-      calcSheetGradient(iZ+1,iX,iY,Wxm,Wx0,Wxp,dWym,dWy0,dWyp) *Wzp;
+      calcSheetGradient(iZm,iX,iY,Wxm,Wx0,Wxp,dWym,dWy0,dWyp) *Wzm +
+      calcSheetGradient(iZ0,iX,iY,Wxm,Wx0,Wxp,dWym,dWy0,dWyp) *Wz0 +
+      calcSheetGradient(iZp,iX,iY,Wxm,Wx0,Wxp,dWym,dWy0,dWyp) *Wzp;
     gradZ = 
-      calcSheetGradient(iZ-1,iX,iY,Wxm,Wx0,Wxp,Wym,Wy0,Wyp) *dWzm +
-      calcSheetGradient(iZ  ,iX,iY,Wxm,Wx0,Wxp,Wym,Wy0,Wyp) *dWz0 +
-      calcSheetGradient(iZ+1,iX,iY,Wxm,Wx0,Wxp,Wym,Wy0,Wyp) *dWzp;
+      calcSheetGradient(iZm,iX,iY,Wxm,Wx0,Wxp,Wym,Wy0,Wyp) *dWzm +
+      calcSheetGradient(iZ0,iX,iY,Wxm,Wx0,Wxp,Wym,Wy0,Wyp) *dWz0 +
+      calcSheetGradient(iZp,iX,iY,Wxm,Wx0,Wxp,Wym,Wy0,Wyp) *dWzp;
   } 
   if( nZ_ == 2){
     gradX = 
@@ -499,6 +529,7 @@ void Grid3D::calcGradient(double x,double& gradX,
   }
 
 }
+
 
 /** Calculates value at the point with coordinates x,y,z */
 double Grid3D::getValue(double x,double y,double z)
@@ -542,23 +573,29 @@ double Grid3D::getValue(double x,double y,double z)
     Wzp = 0.0;    
   }
 
+  int iZ0 = iZ;
+  int iZm = iZ-1;
+  int iZp = iZ+1;
+  if(iZm < 0) iZm = nZ_ - 1;
+  if(iZp >= nZ_) iZp = 0;  
+  
   double Vm, V0, Vp;
   double Vzm, Vz0, Vzp;
 
   if( nZ_ > 2 ){
-    Vm = calcValueOnX(iX,iY-1,iZ-1,Wxm,Wx0,Wxp);
-    V0 = calcValueOnX(iX,iY  ,iZ-1,Wxm,Wx0,Wxp);
-    Vp = calcValueOnX(iX,iY+1,iZ-1,Wxm,Wx0,Wxp);
+    Vm = calcValueOnX(iX,iY-1,iZm,Wxm,Wx0,Wxp);
+    V0 = calcValueOnX(iX,iY  ,iZm,Wxm,Wx0,Wxp);
+    Vp = calcValueOnX(iX,iY+1,iZm,Wxm,Wx0,Wxp);
     Vzm = Wym*Vm + Wy0*V0 + Wyp*Vp;
 
-    Vm = calcValueOnX(iX,iY-1,iZ,Wxm,Wx0,Wxp);
-    V0 = calcValueOnX(iX,iY  ,iZ,Wxm,Wx0,Wxp);
-    Vp = calcValueOnX(iX,iY+1,iZ,Wxm,Wx0,Wxp);
+    Vm = calcValueOnX(iX,iY-1,iZ0,Wxm,Wx0,Wxp);
+    V0 = calcValueOnX(iX,iY  ,iZ0,Wxm,Wx0,Wxp);
+    Vp = calcValueOnX(iX,iY+1,iZ0,Wxm,Wx0,Wxp);
     Vz0 = Wym*Vm + Wy0*V0 + Wyp*Vp;
 
-    Vm = calcValueOnX(iX,iY-1,iZ+1,Wxm,Wx0,Wxp);
-    V0 = calcValueOnX(iX,iY  ,iZ+1,Wxm,Wx0,Wxp);
-    Vp = calcValueOnX(iX,iY+1,iZ+1,Wxm,Wx0,Wxp);
+    Vm = calcValueOnX(iX,iY-1,iZp,Wxm,Wx0,Wxp);
+    V0 = calcValueOnX(iX,iY  ,iZp,Wxm,Wx0,Wxp);
+    Vp = calcValueOnX(iX,iY+1,iZp,Wxm,Wx0,Wxp);
     Vzp = Wym*Vm + Wy0*V0 + Wyp*Vp;
 
     value = Wzm*Vzm + Wz0*Vz0 + Wzp*Vzp;   
@@ -625,21 +662,35 @@ double Grid3D::getSliceSum(double z)
   double zFrac = 0.;
   if(nZ_ > 2){
     double sumM,sum0,sumP;
-    zInd  = int ( (z - zMin_)/dz_ + 0.5 );
-    //cut off edge for three point interpolation
-    if(zInd <= 0) zInd = 1;
-    if(zInd >=  nZ_ -1) zInd =  nZ_  - 2;
+    zInd  = int((z - zMin_)/dz_);
+
+		if(longWrapping == 0){
+			//cut off edge for three point interpolation
+			if(zInd <= 0) zInd = 1;
+			if(zInd >=  nZ_ -1) zInd =  nZ_  - 2;
+		} else {
+			if(zInd <= 0) zInd = 0;
+			if(zInd >=  nZ_ -1) zInd =  nZ_  - 1;      	
+		}    
+    
     zFrac = (z - (zMin_ + zInd * dz_))/dz_;
-    sumM = getSliceSum(zInd - 1);
-    sum0 = getSliceSum(zInd);
-    sumP = getSliceSum(zInd + 1);
+    
+		int iZ0 = zInd;
+		int iZm = zInd-1;
+		int iZp = zInd+1;
+		if(iZm < 0) iZm = nZ_ - 1;
+		if(iZp >= nZ_) iZp = 0;    
+    
+    sumM = getSliceSum(iZm);
+    sum0 = getSliceSum(iZ0);
+    sumP = getSliceSum(iZp);
     sum = 0.5*(0.5 - zFrac)*(0.5 - zFrac)*sumM + 
           (0.75 - zFrac*zFrac)*sum0 +
           0.5*(0.5 + zFrac)*(0.5 + zFrac)*sumP;
     return sum;
   }
   if(nZ_ == 2){
-   zFrac = (z - zMin_)/dz_;
+   zFrac = (z - (zMin_+0.5*dz_))/dz_;
    sum = (1.0 - zFrac)*getSliceSum(0) + zFrac*getSliceSum(1);
    return sum;
   }

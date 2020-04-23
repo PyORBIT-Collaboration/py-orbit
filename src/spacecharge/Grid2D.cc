@@ -107,8 +107,17 @@ double Grid2D::getValue(double x, double y){
 	return value;
 }	
 
-/** Bins the Bunch into the 2D grid. If bunch has a macrosize particle attribute it will be used. */	
+/** Bins the Bunch into the 2D grid using X and Y coordinates. 
+    If bunch has a macrosize particle attribute it will be used. 
+  */	
 void Grid2D::binBunch(Bunch* bunch){
+	this->binBunch(bunch,0,2);
+}
+
+/** Bins the Bunch into the 2D grid using coordinate indexes ind0 and ind1. 
+    If bunch has a macrosize particle attribute it will be used. 
+  */	
+void Grid2D::binBunch(Bunch* bunch, int ind0, int ind1){
 	bunch->compress();
 	double** part_coord_arr = bunch->coordArr();
 	int has_msize = bunch->hasParticleAttributes("macrosize");
@@ -117,18 +126,16 @@ void Grid2D::binBunch(Bunch* bunch){
 		double m_size = 0.;
 		for(int i = 0, n = bunch->getSize(); i < n; i++){
 			m_size = macroSizeAttr->macrosize(i);
-			binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);
+			binValue(m_size,part_coord_arr[i][ind0],part_coord_arr[i][ind1]);
 		}	
 		return;
 	}
 	double m_size = bunch->getMacroSize();
 	int nParts = bunch->getSize();
 	for(int i = 0; i < nParts; i++){
-		binValue(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);	
+		binValue(m_size,part_coord_arr[i][ind0],part_coord_arr[i][ind1]);	
 	}
 }
-
-
 
 /** Bins the value into the 2D grid */	
 void Grid2D::binValue(double value, double x, double y){
@@ -158,9 +165,14 @@ void Grid2D::binValue(double value, double x, double y){
   arr_[iX+1][iY+1] += Wxp * Wyp * value;             
 }
 
-/** Does a bilinear binning scheme on the bunch */
+/** Does a bilinear binning scheme on the bunch using X and Y coordinates */
 void Grid2D::binBunchBilinear(Bunch* bunch){
-	
+	this->binBunchBilinear(bunch,0,2);
+}
+
+/** Does a bilinear binning scheme on the bunch using coordinate indexes ind0 and ind1. 
+  */
+void Grid2D::binBunchBilinear(Bunch* bunch, int ind0, int ind1){
 	bunch->compress();
 	double** part_coord_arr = bunch->coordArr();
 	int nParts = bunch->getSize();
@@ -170,15 +182,14 @@ void Grid2D::binBunchBilinear(Bunch* bunch){
 			double m_size = 0.;
 			for(int i = 0, n = bunch->getSize(); i < n; i++){
 				m_size = macroSizeAttr->macrosize(i);
-				binValueBilinear(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);
+				binValueBilinear(m_size,part_coord_arr[i][ind0],part_coord_arr[i][ind1]);
 			}
 			return;
 		}
 		double m_size = bunch->getMacroSize();
 		for(int i = 0; i < nParts; i++){
 			//cerr<<"i = "<<i;
-			binValueBilinear(m_size,part_coord_arr[i][0],part_coord_arr[i][2]);
-			
+			binValueBilinear(m_size,part_coord_arr[i][ind0],part_coord_arr[i][ind1]);
 		}
 }
 

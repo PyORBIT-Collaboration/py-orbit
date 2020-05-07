@@ -596,7 +596,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		syncPart = bunch.getSyncParticle()	
 		eKin_in = syncPart.kinEnergy()
 		E0L = 1.0e+9*self.getParam("E0L")
-		modePhase = self.getParam("mode")*math.pi
+		modePhase = self.baserf_gap.getParam("mode")*math.pi
 		frequency = rfCavity.getFrequency()	
 		rf_ampl = rfCavity.getAmp()
 		arrival_time = syncPart.time()
@@ -685,7 +685,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		eKin_in = syncPart.kinEnergy()
 		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
 		E0L = 1.0e+9*self.getParam("E0L")
-		modePhase = self.getParam("mode")*math.pi
+		modePhase = self.baserf_gap.getParam("mode")*math.pi
 		rfCavity = self.getRF_Cavity()
 		rf_ampl = rfCavity.getDesignAmp()
 		arrival_time = syncPart.time()
@@ -783,7 +783,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		#---- the design phase at the center of the RF gap 
 		#---- (this is from a thin gap approach)
 		frequency = rfCavity.getFrequency()
-		modePhase = self.getParam("mode")*math.pi
+		modePhase = self.baserf_gap.getParam("mode")*math.pi
 		phase_cavity = rfCavity.getPhase()
 		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
 		E0L_local = 1.0e+9*rfCavity.getAmp()*self.getParam("E0L")		

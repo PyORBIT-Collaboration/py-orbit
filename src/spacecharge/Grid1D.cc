@@ -238,8 +238,8 @@ void Grid1D::binBunch(Bunch* bunch, int axis_ind)
 							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
 							<< std::endl << "number of bins = " << zSize_ << std::endl
 							<< "Stop." << std::endl;
+							ORBIT_MPI_Finalize();
 	}
-	ORBIT_MPI_Finalize();	
 	
   double m_size;
   bunch->compress();
@@ -287,8 +287,8 @@ void Grid1D::binBunchSmoothed(Bunch* bunch, int axis_ind)
 							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
 							<< std::endl << "number of bins = " << zSize_ << std::endl
 							<< "Stop." << std::endl;
-	}
-	ORBIT_MPI_Finalize();		
+							ORBIT_MPI_Finalize();	
+	}	
 	
   double m_size;
   bunch->compress();
@@ -332,6 +332,7 @@ void Grid1D::binBunchByParticle(Bunch* bunch, int axis_ind)
 							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
 							<< std::endl << "number of bins = " << zSize_ << std::endl
 							<< "Stop." << std::endl;
+							ORBIT_MPI_Finalize();	
 	}
 	
   bunch->compress();

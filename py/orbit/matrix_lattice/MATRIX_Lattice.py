@@ -123,7 +123,7 @@ class MATRIX_Lattice(AccLattice):
 		res_dict["dispersion prime y"] = None
 		cos_phi_x = (mt.get(0,0)+mt.get(1,1))/2.0
 		cos_phi_y = (mt.get(2,2)+mt.get(3,3))/2.0		
-		if(abs(cos_phi_x) >= 1.0 or abs(cos_phi_x) >= 1.0):
+		if(abs(cos_phi_x) >= 1.0 or abs(cos_phi_y) >= 1.0):
 			return res_dict
 		sign_x = +1.0
 		if(abs(mt.get(0,1)) != 0.): sign_x = mt.get(0,1)/abs(mt.get(0,1))

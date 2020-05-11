@@ -347,24 +347,22 @@ int Collimator::checkCollFlag(double x, double y){
 	
 
 int Collimator::driftParticle(int coll_flag, double& zrl, double length, double* coords, SyncPart* syncpart){
+	double eps = 1.0e-8;
+	double dlength = length * 1.0e-4;
+	double stepsize = 0.001;
+
 	while((coll_flag == 0) && (zrl > 0))
 	{
 		
-		double x = coords[0];
-		double xp = coords[1];
-		double y = coords[2];
-		double yp = coords[3];
-		double dlength = length * 1.0e-4;
-		double stepsize = 0.001;
 		if(stepsize > length / 10.) stepsize = length / 10.;
-		if(stepsize > zrl) stepsize = zrl + dlength;
+		if(stepsize - zrl > eps) stepsize = zrl + dlength;
 				
 		double pfac = Collimator::getPFactor(coords, syncpart);
 	
-		x += stepsize * xp / pfac;
-		y += stepsize * yp / pfac;
+		coords[0] += stepsize * coords[1] / pfac;
+		coords[2] += stepsize * coords[3] / pfac;
 		zrl -= stepsize;
-		coll_flag = Collimator::checkCollFlag(x, y);
+		coll_flag = Collimator::checkCollFlag(coords[0], coords[2]);
 		
 		nHits++;
 		if(coll_flag == 1) return 1;

@@ -44,8 +44,8 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		E0L parameter is in GeV. Phases are in radians.
 		"""
 		AbstractRF_Gap.__init__(self,axis_field_rf_gap.getName())
-		self.axis_field_rf_gap = axis_field_rf_gap
-		self.setType("axis_field_and_quad_rfgap")			
+		self.setType("GAP&Q")
+		self.axis_field_rf_gap = axis_field_rf_gap	
 		self.addParam("E0TL",self.axis_field_rf_gap.getParam("E0TL"))
 		self.addParam("mode",self.axis_field_rf_gap.getParam("mode"))
 		self.addParam("gap_phase",self.axis_field_rf_gap.getParam("gap_phase"))
@@ -73,6 +73,8 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		#---- quadrupole field sources
 		#----quads_fields_arr is an array of [quad, fieldFunc, z_center_of_field]
 		self.quads_fields_arr = []
+		#---- If it is true then the this tracking will be in the reversed lattice
+		self.reversed_lattice = False		
 		
 	def setLinacTracker(self, switch = True):
 		"""
@@ -110,13 +112,32 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		"""		
 		return self.axis_field_rf_gap.baserf_gap
 		
+	def reverseOrderNodeSpecific(self):
+		"""
+		This method is used for a lattice reversal and a bunch backtracking
+		This is a node type specific method. The implementation of the abstract
+		method of AccNode class from the top level lattice package. 
+		"""
+		self.reversed_lattice = not self.reversed_lattice
+		#---- Here the order of quads does not matter
+		for quad_ind in range(len(self.quads_fields_arr)):
+			[quad, fieldFunc, z_center_of_field] = self.quads_fields_arr[quad_ind]
+			self.quads_fields_arr[quad_ind][2] = - z_center_of_field
+		(self.z_min,self.z_max) = (-self.z_max,-self.z_min)  
+			
+	def isNodeInReversedLattice(self):
+		"""
+		Returns True if this node in the reversed lattice or False if it otherwise.
+		"""
+		return self.reversed_lattice		
+		
 	def addQuad(self, quad, fieldFunc, z_center_of_field):
 		"""
 		Adds the quad with the field function and the position.
 		The position of the quad is relative to the center of 
 		the parent rf gap node.
 		"""
-		self.quads_fields_arr.append((quad, fieldFunc, z_center_of_field))		
+		self.quads_fields_arr.append([quad, fieldFunc, z_center_of_field])		
 		
 	def getQuads(self):
 		"""
@@ -130,8 +151,11 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 	def getPosAndQuad_Arr(self):
 		"""
 		Return the array with pairs: the quad and the position of its center.
-		"""		
-		return self.quad_arr
+		"""
+		quad_arr = []
+		for [quad, fieldFunc, z_center_of_field] in self.quads_fields_arr:
+			quad_arr.append([quad,z_center_of_field])
+		return quad_arr
 
 	def getTotalField(self,z_from_center):
 		"""
@@ -210,6 +234,14 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		rfCavity = self.getRF_Cavity()
 		E0L = 1.0e+9*self.getParam("E0L")
 		rf_ampl = rfCavity.getAmp()
+		Ez = self.getEzFiledInternal(z,rfCavity,E0L,rf_ampl)
+		return Ez
+
+	def getEzFiledInternal(self,z,rfCavity,E0L,rf_ampl):
+		"""
+		Returns the Ez field on the axis of the RF gap in V/m. 
+		"""
+		if(self.reversed_lattice): z *= -1
 		Ez = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(z)	
 		return Ez
 
@@ -255,7 +287,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		eKin_in = syncPart.kinEnergy()
 		momentum = syncPart.momentum()
 		E0L = 1.0e+9*self.getParam("E0L")
-		modePhase = self.getParam("mode")*math.pi
+		modePhase = self.axis_field_rf_gap.baserf_gap.getParam("mode")*math.pi
 		frequency = rfCavity.getFrequency()	
 		rf_ampl = rfCavity.getAmp()
 		arrival_time = syncPart.time()
@@ -270,9 +302,9 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		zm = self.part_pos
 		z0 = zm + part_length/2
 		zp = z0 + part_length/2
-		Em = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(zm)
-		E0 = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(z0)
-		Ep = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(zp)			
+		Em = self.getEzFiledInternal(zm,rfCavity,E0L,rf_ampl)
+		E0 = self.getEzFiledInternal(z0,rfCavity,E0L,rf_ampl)
+		Ep = self.getEzFiledInternal(zp,rfCavity,E0L,rf_ampl)			
 		#------- track through a quad
 		G = self.getTotalField((zm+z0)/2)
 		GP = 0.
@@ -376,7 +408,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		eKin_in = syncPart.kinEnergy()
 		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
 		E0L = 1.0e+9*self.getParam("E0L")
-		modePhase = self.getParam("mode")*math.pi
+		modePhase = self.axis_field_rf_gap.baserf_gap.getParam("mode")*math.pi
 		rfCavity = self.getRF_Cavity()
 		rf_ampl = rfCavity.getDesignAmp()
 		arrival_time = syncPart.time()
@@ -403,9 +435,9 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		zm = self.part_pos
 		z0 = zm + part_length/2
 		zp = z0 + part_length/2
-		Em = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(zm)
-		E0 = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(z0)
-		Ep = E0L*rf_ampl*self.axis_field_rf_gap.axis_field_func.getY(zp)			
+		Em = self.getEzFiledInternal(zm,rfCavity,E0L,rf_ampl)
+		E0 = self.getEzFiledInternal(z0,rfCavity,E0L,rf_ampl)
+		Ep = self.getEzFiledInternal(zp,rfCavity,E0L,rf_ampl)
 		#---- advance the particle position
 		self.tracking_module.drift(bunch,part_length/2)
 		self.part_pos += part_length/2	
@@ -471,7 +503,7 @@ class OverlappingQuadsNode(BaseLinacNode):
 		"""
 		Constructor. Creates the OverlappingQuadsNode instance.
 		"""
-		BaseLinacNode.__init__(self,name)
+		BaseLinacNode.__init__(self,name = "OVRLPQ")
 		self.setType("OVRLPQ")
 		self.setnParts(1)
 		#----quads_fields_arr is an array of [quad, fieldFunc, z_center_of_field]
@@ -484,6 +516,8 @@ class OverlappingQuadsNode(BaseLinacNode):
 		self.setLength(0.)
 		#---- If we going to use the longitudinal magnetic field component of quad
 		self.useLongField = False
+		#---- If it is true then the this tracking will be in the reversed lattice
+		self.reversed_lattice = False
 		
 	def setUseLongitudinalFieldOfQuad(self, use):
 		"""
@@ -497,12 +531,30 @@ class OverlappingQuadsNode(BaseLinacNode):
 		"""
 		return self.useLongField		
 		
+	def reverseOrderNodeSpecific(self):
+		"""
+		This method is used for a lattice reversal and a bunch backtracking
+		This is a node type specific method. The implementation of the abstract
+		method of AccNode class from the top level lattice package.  
+		"""
+		self.reversed_lattice = not self.reversed_lattice
+		#---- Here the order of quads does not matter
+		for quad_ind in range(len(self.quads_fields_arr)):
+			[quad, fieldFunc, z_center_of_field] = self.quads_fields_arr[quad_ind]
+			self.quads_fields_arr[quad_ind][2] = - z_center_of_field + self.getLength()
+			
+	def isNodeInReversedLattice(self):
+		"""
+		Returns True if this node in the reversed lattice or False if it otherwise.
+		"""
+		return self.reversed_lattice
+		
 	def addQuad(self, quad, fieldFunc, z_center_of_field):
 		"""
 		Adds the quad with the field function and the position.
 		The position of the quad is relative to the beginning of this OverlappingQuadsNode.
 		"""
-		self.quads_fields_arr.append((quad, fieldFunc, z_center_of_field))
+		self.quads_fields_arr.append([quad, fieldFunc, z_center_of_field])
 				
 	def setZ_Step(self,z_step):
 		"""

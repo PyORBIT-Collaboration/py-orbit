@@ -246,38 +246,50 @@ extern "C" {
 		return Py_BuildValue("i",cpp_Grid2D->isInside(x,y));
 	}		
 	
-	//binBunch(Bunch* bunch)
+	//binBunch(Bunch* bunch, [ind0,ind1]), by default ind0 = 0, ind1 = 2 (XY) plane
   static PyObject* Grid2D_binBunch(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
 		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
 		PyObject* pyBunch;
-		if(!PyArg_ParseTuple(args,"O:binBunch",&pyBunch)){
-			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch) - parameter are needed.");
+		int ind0 = -1;
+		int ind1 = -1;
+		if(!PyArg_ParseTuple(args,"O|ii:binBunch",&pyBunch,&ind0,&ind1)){
+			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch, [ind0,ind1]) - parameter are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch) - method needs a Bunch.");
+			ORBIT_MPI_Finalize("PyGrid2D - binBunch(Bunch* bunch, [ind0,ind1]) - method needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_Grid2D->binBunch(cpp_bunch);
+		if(ind0 < 0 || ind1 < 0 || ind0 > 5 || ind1 > 5){
+		  cpp_Grid2D->binBunch(cpp_bunch);
+		} else {
+			cpp_Grid2D->binBunch(cpp_bunch,ind0,ind1);
+		}
 		Py_INCREF(Py_None);
     return Py_None;	
 	}		
 		
-	//binBunchBilinear(Bunch* bunch)
+	//binBunchBilinear(Bunch* bunch, [ind0,ind1]), by default ind0 = 0, ind1 = 2 (XY) plane
   static PyObject* Grid2D_binBunchBilinear(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid2D = (pyORBIT_Object*) self;
 		Grid2D* cpp_Grid2D = (Grid2D*) pyGrid2D->cpp_obj;
 		PyObject* pyBunch;
-		if(!PyArg_ParseTuple(args,"O:binBunchBilinear",&pyBunch)){
-			ORBIT_MPI_Finalize("PyGrid2D - binBunchBilinear(Bunch* bunch) - parameter are needed.");
+		int ind0 = -1;
+		int ind1 = -1;
+		if(!PyArg_ParseTuple(args,"O|ii:binBunchBilinear",&pyBunch,&ind0,&ind1)){
+			ORBIT_MPI_Finalize("PyGrid2D - binBunchBilinear(Bunch* bunch, [ind0,ind1]) - parameter are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyGrid2D - binBunchBilinear(Bunch* bunch) - method needs a Bunch.");
+			ORBIT_MPI_Finalize("PyGrid2D - binBunchBilinear(Bunch* bunch, [ind0,ind1]) - method needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_Grid2D->binBunchBilinear(cpp_bunch);
+		if(ind0 < 0 || ind1 < 0 || ind0 > 5 || ind1 > 5){
+		  cpp_Grid2D->binBunchBilinear(cpp_bunch);
+		} else {
+			cpp_Grid2D->binBunchBilinear(cpp_bunch,ind0,ind1);
+		}
 		Py_INCREF(Py_None);
     return Py_None;	
 	}	
@@ -368,8 +380,8 @@ extern "C" {
 		{ "isInside",             Grid2D_isInside,             METH_VARARGS,"returns 1 or 0 if (x,y) inside grid or not"},
 		{ "binValue",             Grid2D_binValue,             METH_VARARGS,"bins the value into the 2D mesh"},
 		{ "binValueBilinear",     Grid2D_binValueBilinear,     METH_VARARGS,"bins the value into the 2D mesh bi-linearly"},
-		{ "binBunch",             Grid2D_binBunch,             METH_VARARGS,"bins the Bunch instance into the 2D mesh"},
-		{ "binBunchBilinear",     Grid2D_binBunchBilinear,     METH_VARARGS,"bins the Bunch instance into the 2D mesh bi-linearly"},
+		{ "binBunch",             Grid2D_binBunch,             METH_VARARGS,"bins the Bunch instance into the 2D mesh (XY plane by default)"},
+		{ "binBunchBilinear",     Grid2D_binBunchBilinear,     METH_VARARGS,"bins the Bunch instance into the 2D mesh bi-linearly (XY plane by default)"},
 		{ "calcGradient",         Grid2D_calcGradient,         METH_VARARGS,"returns gradient as (gx,gy) for point (x,y) calculated by 9-points weighting scheme"},
 		{ "calcGradientBilinear", Grid2D_calcGradientBilinear, METH_VARARGS,"returns gradient as (gx,gy) for point (x,y) calculated bi-linerly"},
 		{ "synchronizeMPI",       Grid2D_synchronizeMPI,       METH_VARARGS,"synchronize through the MPI communicator"},		

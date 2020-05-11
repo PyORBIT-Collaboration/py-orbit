@@ -52,16 +52,24 @@ public:
 	/** Sets the value to the one point of the 2D grid  */	
 	void setValue(double value, int ix, int iy);
 
-  	/** Bins the Bunch into the 2D grid. If bunch has a macrosize 
-	    particle attribute it will be used. 
+  /** Bins the Bunch into the 2D grid using X and Y coordinates. 
+       If bunch has a macrosize particle attribute it will be used. 
 	*/	
 	void binBunch(Bunch* bunch);	
+	
+  /** Bins the Bunch into the 2D grid using coordinate indexes ind0 and ind1. 
+    If bunch has a macrosize particle attribute it will be used. 
+  */	
+  void binBunch(Bunch* bunch, int ind0, int ind1);	
 	
 	/** Bins the value into the 2D grid */	
 	void binValue(double value, double x, double y);	
 	
-	/** Does a bilinear binning scheme on the bunch */
+	/** Does a bilinear binning scheme on the bunch using X and Y coordinates */
 	void binBunchBilinear(Bunch* bunch);
+	
+  /** Does a bilinear binning scheme on the bunch using coordinate indexes ind0 and ind1. */
+  void binBunchBilinear(Bunch* bunch, int ind0, int ind1);
 	
 	/** Bilinear bin of the value into the 2D grid */
 	void binValueBilinear(double value, double x, double y);

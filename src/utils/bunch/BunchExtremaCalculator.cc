@@ -81,6 +81,55 @@ void BunchExtremaCalculator::getExtremaXYZ(Bunch* bunch,
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
 }
+
+/** The method calculates the extrema of the particles coordinates xp, yp, dE in the bunch. */
+void BunchExtremaCalculator::getExtremaXpYpdE(Bunch* bunch, 
+	double& xpMin, double& xpMax, 
+	double& ypMin, double& ypMax, 
+	double& dE_Min, double& dE_Max)
+{
+
+	int buff_index0 = 0;
+	int buff_index1 = 0;
+	double* gridLimArr  = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index0,6);
+	double* gridLimArr_out = BufferStore::getBufferStore()->getFreeDoubleArr(buff_index1,6);
+	for (int i = 0; i < 3; i++){
+		gridLimArr[2*i] = DBL_MAX;
+		gridLimArr[2*i+1] = -DBL_MAX;
+	}
+	
+	double** partArr=bunch->coordArr();
+	double* coordArr = NULL;
+	for (int ip = 0, n = bunch->getSize(); ip < n; ip++){
+		coordArr = partArr[ip];
+		if(coordArr[1] < gridLimArr[0]) gridLimArr[0] = coordArr[1];
+		if(coordArr[1] > gridLimArr[1]) gridLimArr[1] = coordArr[1];
+		if(coordArr[3] < gridLimArr[2]) gridLimArr[2] = coordArr[3];
+		if(coordArr[3] > gridLimArr[3]) gridLimArr[3] = coordArr[3];	
+		if(coordArr[5] < gridLimArr[4]) gridLimArr[4] = coordArr[5];
+		if(coordArr[5] > gridLimArr[5]) gridLimArr[5] = coordArr[5];		
+	}
+	
+	gridLimArr[0] = - gridLimArr[0];
+	gridLimArr[2] = - gridLimArr[2];
+	gridLimArr[4] = - gridLimArr[4];
+
+	ORBIT_MPI_Allreduce(gridLimArr,gridLimArr_out,6,MPI_DOUBLE,MPI_MAX,bunch->getMPI_Comm_Local()->comm);
+
+	gridLimArr_out[0] = - gridLimArr_out[0];
+	gridLimArr_out[2] = - gridLimArr_out[2];
+	gridLimArr_out[4] = - gridLimArr_out[4];
+	
+  xpMin = gridLimArr_out[0];
+  xpMax = gridLimArr_out[1];	
+  ypMin = gridLimArr_out[2];
+  ypMax = gridLimArr_out[3];	
+  dE_Min = gridLimArr_out[4];
+  dE_Max = gridLimArr_out[5];	
+
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
+	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
+}
 	
 /** The method calculates the z extrema of the particles coordinates in the bunch. */
 void BunchExtremaCalculator::getExtremaZ(Bunch* bunch, 

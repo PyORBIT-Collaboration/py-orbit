@@ -30,7 +30,7 @@ Grid1D::Grid1D(int zSize):CppPyWrapper(NULL)
   setZero();
 }
 
-/** Constructor with grid size and lattice length */
+/** Constructor with grid size and grid physical length */
 Grid1D::Grid1D(int zSize, double length):CppPyWrapper(NULL)
 {
 	zSize_ = zSize;
@@ -125,7 +125,7 @@ double Grid1D::getStepZ()
 /** Returns the grid point for index */
 double Grid1D::getGridZ(int index)
 {
-  return zMin_ + index * dz_;
+  return zMin_ + (index+0.5)*dz_;
 }
 
 
@@ -189,14 +189,14 @@ double Grid1D::getValue(double z)
   double arrval;
 
   getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
+
   if(zSize_ > 1)
   {
     arrval = WZ0 * arr_[iZ0] + WZp * arr_[iZp];
+    return arrval;
   }
-  else if(zSize_ == 1)
-  {
-    arrval = arr_[iZ0];
-  }
+
+  arrval = arr_[0];
   return arrval;
 }
 
@@ -211,18 +211,7 @@ double Grid1D::getValueSmoothed(double z)
   getIndAndWZSmoothed(z, iZm,  iZ0,  iZp,
                          WZm,  WZ0,  WZp,
                         dWZm, dWZ0, dWZp);
-  if(zSize_ > 2)
-  {
-    arrval = WZm * arr_[iZm] + WZ0 * arr_[iZ0] + WZp * arr_[iZp];
-  }
-  else if(zSize_ == 2)
-  {
-    arrval = WZ0 * arr_[iZ0] + WZp * arr_[iZp];
-  }
-  else if(zSize_ == 1)
-  {
-    arrval = arr_[iZ0];
-  }
+  arrval = WZm * arr_[iZm] + WZ0 * arr_[iZ0] + WZp * arr_[iZp];
   return arrval;
 }
 
@@ -249,8 +238,8 @@ void Grid1D::binBunch(Bunch* bunch, int axis_ind)
 							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
 							<< std::endl << "number of bins = " << zSize_ << std::endl
 							<< "Stop." << std::endl;
+							ORBIT_MPI_Finalize();
 	}
-	ORBIT_MPI_Finalize();	
 	
   double m_size;
   bunch->compress();
@@ -298,8 +287,8 @@ void Grid1D::binBunchSmoothed(Bunch* bunch, int axis_ind)
 							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
 							<< std::endl << "number of bins = " << zSize_ << std::endl
 							<< "Stop." << std::endl;
-	}
-	ORBIT_MPI_Finalize();		
+							ORBIT_MPI_Finalize();	
+	}	
 	
   double m_size;
   bunch->compress();
@@ -343,6 +332,7 @@ void Grid1D::binBunchByParticle(Bunch* bunch, int axis_ind)
 							<< "The axis_ind = "<<axis_ind<<" should be between 0 and 5"
 							<< std::endl << "number of bins = " << zSize_ << std::endl
 							<< "Stop." << std::endl;
+							ORBIT_MPI_Finalize();	
 	}
 	
   bunch->compress();
@@ -427,7 +417,7 @@ void Grid1D::binValue(double value, double z)
 
   double WZ0, WZp;
   int iZ0, iZp;
-  getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
+  getBinIndAndWZ(z, iZ0, iZp, WZ0, WZp);
   if(zSize_ > 1)
   {
     arr_[iZ0] += WZ0 * value;
@@ -448,7 +438,7 @@ void Grid1D::binValueSmoothed(double value, double z)
   double  WZm,  WZ0,  WZp;
   double dWZm, dWZ0, dWZp;
   int iZm, iZ0, iZp;
-  getIndAndWZSmoothed(z, iZm,  iZ0,  iZp,
+  getBinIndAndWZSmoothed(z, iZm,  iZ0,  iZp,
                          WZm,  WZ0,  WZp,
                         dWZm, dWZ0, dWZp);
   if(zSize_ > 2)
@@ -476,7 +466,7 @@ void Grid1D::binMoment(double value, double z, double* Moment)
 
   double WZ0, WZp;
   int iZ0, iZp;
-  getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
+  getBinIndAndWZ(z, iZ0, iZp, WZ0, WZp);
   if(zSize_ > 1)
   {
     Moment[iZ0] += WZ0 * value;
@@ -496,7 +486,7 @@ void Grid1D::binMomentSmoothed(double value, double z, double* Moment)
   double  WZm,  WZ0,  WZp;
   double dWZm, dWZ0, dWZp;
   int iZm, iZ0, iZp;
-  getIndAndWZSmoothed(z, iZm,  iZ0,  iZp,
+  getBinIndAndWZSmoothed(z, iZm,  iZ0,  iZp,
                          WZm,  WZ0,  WZp,
                         dWZm, dWZ0, dWZp);
   if(zSize_ > 2)
@@ -522,14 +512,15 @@ void Grid1D::calcGradient(double z, double& ez)
 {
   double WZ0, WZp;
   int iZ0, iZp;
+  
+  ez = 0.;
+  
+  if(z < zMin_ || z > zMax_ ) return;  
+  
   getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
   if(zSize_ > 1)
   {
     ez = (arr_[iZp] - arr_[iZ0]) / dz_;
-  }
-  else if(zSize_ == 1)
-  {
-    ez = 0.;
   }
 }
 
@@ -543,6 +534,10 @@ void Grid1D::calcGradientSmoothed(double z, double& ez)
   getIndAndWZSmoothed(z, iZm,  iZ0,  iZp,
                          WZm,  WZ0,  WZp,
                         dWZm, dWZ0, dWZp);
+  ez = 0.;
+  
+  if(z < zMin_ || z > zMax_ ) return;
+  
   if(zSize_ > 2)
   {
     ez = dWZm * arr_[iZm] + dWZ0 * arr_[iZ0] + dWZp * arr_[iZp];
@@ -551,59 +546,12 @@ void Grid1D::calcGradientSmoothed(double z, double& ez)
   {
     ez = (arr_[iZp] - arr_[iZ0]) / dz_;
   }
-  else if(zSize_ == 1)
-  {
-    ez = 0.;
-  }
 }
 
-
-void Grid1D::getIndAndFracZ(double z, int& ind, double& frac)
-{
-  if(zSize_ > 1)
-  {
-    double zgloc = (z - zMin_) / dz_;
-    ind = int(zgloc);
-    frac = zgloc - double(ind);
-
-    // Keep indices in bounds
-    if(ind < 0) ind = zSize_ - 1;
-    if(ind > (zSize_ - 1)) ind =  0;
-  }
-  else
-  {
-    ind = 0;
-    frac = 1.0;
-  }
-}
-
-
-void Grid1D::getIndAndFracZSmoothed(double z, int& ind, double& frac)
-{
-  if(zSize_ > 2)
-  {
-    double zgloc = (z - zMin_) / dz_;
-    ind  = int(zgloc + 0.5);
-    frac = zgloc - double(ind);
-
-    // Keep indices in bounds
-    if(ind < 0) ind = zSize_ - 1;
-    if(ind > (zSize_ - 1)) ind =  0;
-  }
-  else if(zSize_ == 2)
-  {
-    ind = 0;
-    frac = (z - zMin_) / dz_;
-  }
-  else if(zSize_ == 1)
-  {
-    ind = 0;
-    frac = 1.0;
-  }
-}
-
-
-/** Returns the grid indices and interpolation coefficients for a given z.
+/** 
+    This is method for interpolation. The grid point responsibility is defined 
+    differently for binning and interpolation.
+    Returns the grid indices and interpolation coefficients for a given z.
     The indices bracket the point of interpolation:
     0 <= iZ0, iZp <= nBins - 1
     The coefficients WZ0 and WZp correspond to iZ0 and iZp */
@@ -611,16 +559,18 @@ void Grid1D::getIndAndWZ(double z,
                          int& iZ0   , int& iZp,
                          double& WZ0, double& WZp)
 {
+	double zFrac;
   if(zSize_ > 1)
   {
-    double zgloc = (z - zMin_) / dz_;
-    iZ0 = int(zgloc);
+  	iZ0 = int((z - zMin_)/dz_ - 0.5);
 
     // Keep indices in bounds
     if(iZ0 < 0) iZ0 = 0;
     if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;
+    
+    zFrac = (z - this->getGridZ(iZ0))/dz_;
 
-    WZp = zgloc - double(iZ0);
+    WZp = zFrac;
     WZ0 = 1.0 - WZp;
 
     iZp = iZ0 + 1;
@@ -635,46 +585,89 @@ void Grid1D::getIndAndWZ(double z,
 }
 
 
-/** Returns the grid index and fractional position for particular z.
+/** 
+    This is method for binning. The grid point responsibility is defined 
+    differently for binning and interpolation.
+    Returns the grid indices and binning coefficients for a given z.
+    The indices bracket the point of interpolation:
+    0 <= iZ0, iZp <= nBins - 1
+    The coefficients WZ0 and WZp correspond to iZ0 and iZp 
+  */
+void Grid1D::getBinIndAndWZ(double z,
+                         int& iZ0   , int& iZp,
+                         double& WZ0, double& WZp)
+{
+	double zFrac;
+  if(zSize_ > 1)
+  {
+  	iZ0 = int((z - zMin_)/dz_);
+
+    // Keep indices in bounds
+    if(iZ0 < 0) iZ0 = 0;
+    if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;
+    
+    zFrac = (z - this->getGridZ(iZ0))/dz_;
+
+    WZp = zFrac;
+    WZ0 = 1.0 - WZp;
+
+    iZp = iZ0 + 1;
+  }
+  else
+  {
+    iZ0 = 0;
+    iZp = 0;
+    WZ0  = 1.0;
+    WZp  = 0.0;
+  }
+}
+
+
+/** 
+    This is method for interpolation. The grid point responsibility is defined 
+    differently for binning and interpolation.
+    Returns the grid index and fractional position for particular z.
     The central index is the central point in smoothed three
     point interpolation:
     0 <= iZm, iZ0, iZp <= nBins - 1
     The coefficients WZm, WZ0, and WZp
-    correspond to iZm, iZ0, and iZp */
+    correspond to iZm, iZ0, and iZp 
+  */
 void Grid1D::getIndAndWZSmoothed(double z,
                                  int& iZm    , int& iZ0    , int& iZp    ,
                                  double& WZm , double& WZ0 ,  double& WZp,
                                  double& dWZm, double& dWZ0, double& dWZp)
 {
+	double frac;
   if(zSize_ > 2)
   {
-    double zgloc = 0.;
-    zgloc = (z - zMin_) / dz_;
-    iZ0 = int(zgloc + 0.5);
-
+  	iZ0 = int((z - zMin_)/dz_ - 0.5);
+  	
     // Keep indices in bounds
     if(iZ0 < 1) iZ0 = 1;
-    if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;
+    if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;  
+    
+    iZm = iZ0 - 1;
+    iZp = iZ0 + 1;
+    
+    frac = (z - this->getGridZ(iZ0))/dz_;
 
-    double frac = zgloc - double(iZ0);
     WZm  = 0.5 * (0.5 - frac) * (0.5 - frac);
     WZ0  = 0.75 - frac * frac;
     WZp  = 0.5 * (0.5 + frac) * (0.5 + frac);
     dWZm = (frac - 0.5) / dz_;
     dWZ0 = -2.0 * frac / dz_;
     dWZp = (frac + 0.5) / dz_;
-
-    iZm = iZ0 - 1;
-    iZp = iZ0 + 1;
   }
   else if(zSize_ == 2)
   {
+  	frac = (z - zMin_)/dz_ - 0.5;
+    iZm = 0;
     iZ0 = 0;
-    iZm = 1;
     iZp = 1;
     WZm = 0.0;
-    WZp = (z - zMin_) / dz_;
-    WZ0 = 1.0 - WZp;
+    WZ0 = 1.0 - frac;  
+    WZp = frac;
     dWZm =  0.0;
     dWZ0 = -1.0 / dz_;
     dWZp =  1.0 / dz_;
@@ -693,6 +686,73 @@ void Grid1D::getIndAndWZSmoothed(double z,
   }
 }
 
+
+
+/** 
+    This is method for binning. The grid point responsibility is defined 
+    differently for binning and interpolation.
+    Returns the grid index and fractional position for particular z.
+    The central index is the central point in smoothed three
+    point interpolation:
+    0 <= iZm, iZ0, iZp <= nBins - 1
+    The coefficients WZm, WZ0, and WZp
+    correspond to iZm, iZ0, and iZp 
+  */
+void Grid1D::getBinIndAndWZSmoothed(double z,
+                                 int& iZm    , int& iZ0    , int& iZp    ,
+                                 double& WZm , double& WZ0 ,  double& WZp,
+                                 double& dWZm, double& dWZ0, double& dWZp)
+{
+	double frac;
+  if(zSize_ > 2)
+  {
+  	iZ0 = int((z - zMin_)/dz_);
+    
+    if(iZ0 <= 0) iZ0 = 0;
+    if(iZ0 >= (zSize_ - 1)) iZ0 = zSize_ - 1;
+    
+    iZm = iZ0 - 1;
+    iZp = iZ0 + 1;
+    
+    //we assume periodic structure
+    if(iZm < 0) iZm = zSize_ - 1;
+    if(iZp >= zSize_) iZp = 0;    
+
+    frac = (z - this->getGridZ(iZ0))/dz_;
+    
+    WZm  = 0.5 * (0.5 - frac) * (0.5 - frac);
+    WZ0  = 0.75 - frac * frac;
+    WZp  = 0.5 * (0.5 + frac) * (0.5 + frac);
+    dWZm = (frac - 0.5) / dz_;
+    dWZ0 = -2.0 * frac / dz_;
+    dWZp = (frac + 0.5) / dz_;
+  }
+  else if(zSize_ == 2)
+  {
+  	frac = (z - zMin_)/dz_ - 0.5;
+    iZm = 0;
+    iZ0 = 0;
+    iZp = 1;
+    WZm = 0.0;
+    WZ0 = 1.0 - frac;  
+    WZp = frac;
+    dWZm =  0.0;
+    dWZ0 = -1.0 / dz_;
+    dWZp =  1.0 / dz_;
+  }
+  else if(zSize_ == 1)
+  {
+    iZm = 0;
+    iZ0 = 0;
+    iZp = 0;
+    WZm = 0.0;
+    WZ0 = 1.0;
+    WZp = 0.0;
+    dWZm = 0.0;
+    dWZ0 = 0.0;
+    dWZp = 0.0;
+  }
+}
 
 /** synchronizeMPI */
 void Grid1D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm)

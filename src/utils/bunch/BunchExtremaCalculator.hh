@@ -40,7 +40,13 @@ namespace OrbitUtils{
 			void getExtremaXYZ(Bunch* bunch, 
 				double& xMin, double& xMax, 
 				double& yMin, double& yMax, 
-				double& zMin, double& zMax)	;
+				double& zMin, double& zMax);
+			
+			/** The method calculates the extrema of the particles coordinates xp, yp, dE in the bunch. */
+			void getExtremaXpYpdE(Bunch* bunch, 
+			double& xpMin, double& xpMax, 
+			double& ypMin, double& ypMax, 
+			double& dE_Min, double& dE_Max);
 			
 			/** The method calculates the z extrema of the particles coordinates in the bunch. */
 			void getExtremaZ(Bunch* bunch,  

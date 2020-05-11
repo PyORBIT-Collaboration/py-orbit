@@ -231,8 +231,9 @@ def Replace_Quads_to_OverlappingQuads_Nodes(\
 			pos_end = node_pos_end
 			ovrlp_count = 0
 			for ind in range(len(zero_length_nodes)+1):
-				name = quads_arr[0].getName()+":group:"+str(ovrlp_count+1)+":OVRLPQ"
-				node = OverlappingQuadsNode(name)
+				node = OverlappingQuadsNode()
+				name = quads_arr[0].getName()+":group:"+str(ovrlp_count+1)+":"+node.getType()
+				node.setName(name)
 				if(ind == len(zero_length_nodes)):
 					pos_end = node_pos_end
 				else:

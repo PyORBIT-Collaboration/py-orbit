@@ -672,7 +672,7 @@ class Scoreboard:
 		"""
 		Adds a new best score listener.
 		"""		
-		self.bestScoreListener_arr.append(bestScoreListener)	
+		self.bestScoreListener_arr.append(bestScoreListener)
 			
 
 #====================================================================

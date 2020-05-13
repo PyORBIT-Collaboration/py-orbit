@@ -200,8 +200,9 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 			pos_end = node_pos_end
 			ovrlp_count = 0
 			for ind in range(len(zero_length_nodes)+1):
-				name = rf_gap.getName()+":Before:"+str(ovrlp_count+1)+":OVRLPQ"
-				node = OverlappingQuadsNode(name)
+				node = OverlappingQuadsNode()
+				name = rf_gap.getName()+":Before:"+str(ovrlp_count+1)+":"+node.getType()
+				node.setName(name)
 				if(ind == len(zero_length_nodes)):
 					pos_end = node_pos_end
 				else:
@@ -244,8 +245,9 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 			pos_end = node_pos_end - accSeq_z_start
 			ovrlp_count = 0
 			for ind in range(len(zero_length_nodes)+1):
-				name = rf_gap.getName()+":After:"+str(ovrlp_count+1)+":OVRLPQ"
-				node = OverlappingQuadsNode(name)
+				node = OverlappingQuadsNode()
+				name = rf_gap.getName()+":After:"+str(ovrlp_count+1)+":"+node.getType()
+				node.setName(name)
 				if(ind == len(zero_length_nodes)):
 					pos_end = node_pos_end - accSeq_z_start
 				else:
@@ -292,8 +294,8 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 			#--------------------------------------------------------
 			ovrlp_count = 0
 			for ind in range(len(zero_length_nodes)+1):
-				name = rf_gap.getName()+":GAP&Q:"+str(ovrlp_count+1)
 				axisField_and_Quad_RF_Gap = AxisField_and_Quad_RF_Gap(axisFieldRF_Gap)
+				name = rf_gap.getName()+":"+axisField_and_Quad_RF_Gap.getType()+":"+str(ovrlp_count+1)
 				new_rf_gaps_arr.append(axisField_and_Quad_RF_Gap)
 				axisField_and_Quad_RF_Gap.setName(name)
 				if(ind == len(zero_length_nodes)):
@@ -338,8 +340,9 @@ def Replace_BaseRF_Gap_and_Quads_to_Overlapping_Nodes(\
 				pos_end = node_pos_end
 				ovrlp_count = 0
 				for ind in range(len(zero_length_nodes)+1):
-					name = rf_gap0.getName()+":After:"+str(ovrlp_count+1)+":OVRLPQ"
-					node = OverlappingQuadsNode(name)
+					node = OverlappingQuadsNode()
+					name = rf_gap0.getName()+":After:"+str(ovrlp_count+1)+":"+node.getType()
+					node.setName(name)
 					if(ind == len(zero_length_nodes)):
 						pos_end = node_pos_end
 					else:

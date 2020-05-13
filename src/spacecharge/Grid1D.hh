@@ -142,35 +142,58 @@ private:
   /** Memory allocation and step calculation for dx_ and dy_ */
   void init();
 
-  /** Returns the grid index and fractional position for particular z.
-      The index is the lower point in interpolation:
-      0 <= ind <= nBins - 2
-      The fraction satisfies 0.0 <= frac <= 1.0 */
-  void getIndAndFracZ(double z, int& ind, double& frac);
-
-  /** Returns the grid index and fractional position for particular z.
-      The index is the central point in smoothed three point interpolation:
-      1 <= ind <= nBins - 2
-      The fraction satisfies -0.5 <= frac <= 0.5 */
-  void getIndAndFracZSmoothed(double z, int& ind, double& frac);
-
-  /** Returns the grid indices and interpolation coefficients for a given z.
+  /** 
+     This is method for interpolation. The grid point responsibility is defined 
+     differently for binning and interpolation.  
+      Returns the grid indices and interpolation coefficients for a given z.
       The indices bracket the point of interpolation:
       0 <= ind <= nBins - 1
-      The coefficients Wz0 and Wzp correspond to ind and indp */
+      The coefficients Wz0 and Wzp correspond to ind and indp 
+    */
   void getIndAndWZ(double z,
                    int& ind0  , int& indp,
                    double& Wz0, double& Wzp);
+  
+   /** 
+      This is method for binning. The grid point responsibility is defined 
+      differently for binning and interpolation.   
+      Returns the grid indices and interpolation coefficients for a given z.
+      The indices bracket the point of interpolation:
+      0 <= ind <= nBins - 1
+      The coefficients Wz0 and Wzp correspond to ind and indp 
+    */
+  void getBinIndAndWZ(double z,
+                   int& ind0  , int& indp,
+                   double& Wz0, double& Wzp); 
 
-  /** Returns the grid index and fractional position for particular z.
+  /** 
+      This is method for interpolation. The grid point responsibility is defined 
+      differently for binning and interpolation.   
+      Returns the grid index and fractional position for particular z.
       The central index is the central point in smoothed three
       point interpolation:
       0 <= ind <= nBins - 1
-      The fraction satisfies -0.5 <= frac <= 0.5 */
+      The fraction satisfies -0.5 <= frac <= 0.5 
+    */
   void getIndAndWZSmoothed(double z,
                            int& indm   , int& ind0   , int& indp   ,
                            double& Wzm , double& Wz0 , double& Wzp ,
                            double& dWzm, double& dWz0, double& dWzp);
+  
+  
+  /** 
+      This is method for binning. The grid point responsibility is defined 
+      differently for binning and interpolation.   
+      Returns the grid index and fractional position for particular z.
+      The central index is the central point in smoothed three
+      point interpolation:
+      0 <= ind <= nBins - 1
+      The fraction satisfies -0.5 <= frac <= 0.5 
+    */
+  void getBinIndAndWZSmoothed(double z,
+                           int& indm   , int& ind0   , int& indp   ,
+                           double& Wzm , double& Wz0 , double& Wzp ,
+                           double& dWzm, double& dWz0, double& dWzp);  
 
 protected:
 

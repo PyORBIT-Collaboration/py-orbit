@@ -85,9 +85,14 @@ class LinacAccLattice(AccLattice):
 		apply the reverse recursively to the all children nodes.
 		"""
 		AccLattice.reverseOrder(self)
+		self.getSequences().reverse()
 		seqs = self.getSequences()
 		for seq in seqs:
-			seq.getNodes().reverse()
+			seq.reverseOrder()
+		#---- reverse order of RF gaps in the RF Cavities and change the first RF gap assignment
+		for rf_cavity in self.getRF_Cavities():
+			rf_cavity.reverseOrder()
+		#---- now initialization of the lattice
 		self.initialize()
 		#------ the positions of the nodes inside sequences will be defined by their positions 
 		#------ inside their order in the AccLattice. It is necessary for the reverse order
@@ -445,12 +450,10 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 		""" Returns average phase for all RF gaps in the cavity """ 
 		avg_phase = 0.
 		phase = 0.
-		phase_arr = []
 		if(len(self.__rfGaps) > 0): 
 				phase = phaseNearTargetPhase(self.__rfGaps[0].getGapPhase(),0.)				
 		for rfGap in self.__rfGaps:
 			phase_new = phaseNearTargetPhase(rfGap.getGapPhase(),phase)
-			phase_arr.append(phase_new*180./math.pi)
 			avg_phase += phase_new
 			phase = phase_new
 		if(len(self.__rfGaps) > 0): avg_phase /= len(self.__rfGaps)
@@ -467,8 +470,28 @@ class RF_Cavity(NamedObject,ParamsDictObject):
 	def getRF_GapNodes(self):
 		""" Returns the array with rf gaps. """
 		return self.__rfGaps
+		
+	def reverseOrder(self):
+		"""
+		Reverse order of RF gaps in the cavity. 
+		The first gap should become the last and vice versa.
+		"""
+		n_gaps = len(self.__rfGaps)
+		if(n_gaps == 0): return 
+		self.__rfGaps.reverse()
+		self.__rfGaps[0].setAsFirstRFGap(True)
+		for ind in range(1,n_gaps):
+			self.__rfGaps[ind].setAsFirstRFGap(False)
+		for rfGap in self.__rfGaps:
+			gap_phase = rfGap.getGapPhase()
+			gap_phase = gap_phase + rfGap.getParam("mode")*math.pi
+			gap_phase = - gap_phase + math.pi
+			gap_phase = phaseNearTargetPhase(gap_phase,0.)
+			rfGap.setGapPhase(gap_phase)
+		self.setPhase(self.__rfGaps[0].getGapPhase())
+		self.setDesignSetUp(False)
 
-	
+
 class Sequence(NamedObject,ParamsDictObject):
 	"""
 	This is the class to keep refernces to AccNodes that constitute the accelerator sequence.
@@ -553,3 +576,11 @@ class Sequence(NamedObject,ParamsDictObject):
 		Sets the total length of the sequence [m].
 		"""		
 		return self.setParam("length",length)	
+		
+	def reverseOrder(self):
+		"""
+		Reverse order of nodes and RF cavities in sequence.
+		"""
+		self.__linacNodes.reverse()
+		self.__rfCavities.reverse()
+

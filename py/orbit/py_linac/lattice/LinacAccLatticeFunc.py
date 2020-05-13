@@ -29,8 +29,6 @@ def GetGlobalQuadGradient(accLattice,z):
 	Returns the quad field for certain position in the lattice that
 	has usual and overlapping quads.
 	"""
-	node_pos_dict = accLattice.getNodePositionsDict()
-	nodes = accLattice.getNodes()
 	G = 0.
 	(node,index,posBefore,posAfter) = accLattice.getNodeForPosition(z)
 	if(isinstance(node,Quad)):
@@ -50,8 +48,6 @@ def GetGlobalQuadGradientDerivative(accLattice,z):
 	Returns the quad field derivative for certain position in the lattice that
 	has usual and overlapping quads.
 	"""
-	node_pos_dict = accLattice.getNodePositionsDict()
-	nodes = accLattice.getNodes()
 	GP = 0.
 	(node,index,posBefore,posAfter) = accLattice.getNodeForPosition(z)
 	if(isinstance(node,Quad)):
@@ -73,8 +69,6 @@ def GetGlobalRF_AxisField(accLattice,z):
 	the BaseRF_Gap instance we will get 0, because it is 
 	an element with zero length.
 	"""	
-	node_pos_dict = accLattice.getNodePositionsDict()
-	nodes =accLattice.getNodes()
 	Ez = 0.
 	(node,index,posBefore,posAfter) = accLattice.getNodeForPosition(z)
 	if(isinstance(node,AxisField_and_Quad_RF_Gap) or isinstance(node,AxisFieldRF_Gap)):

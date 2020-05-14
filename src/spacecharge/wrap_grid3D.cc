@@ -155,7 +155,7 @@ extern "C" {
 		Grid3D* cpp_Grid3D = (Grid3D*) pyGrid3D->cpp_obj;
 		int ind = -1;
 		if(!PyArg_ParseTuple(args,"i:getGridZ",&ind) || ind < 0 || ind >= cpp_Grid3D->getSizeZ()){
-			ORBIT_MPI_Finalize("PyGrid3D - getGridZ(iy) - parameter is needed. [0 - sizeZ[");
+			ORBIT_MPI_Finalize("PyGrid3D - getGridZ(iz) - parameter is needed. [0 - sizeZ[");
 		}		
 		return Py_BuildValue("d",cpp_Grid3D->getGridZ(ind));
 	}	
@@ -241,26 +241,46 @@ extern "C" {
     pyORBIT_Object* pyGrid3D = (pyORBIT_Object*) self;
 		Grid3D* cpp_Grid3D = (Grid3D*) pyGrid3D->cpp_obj;	
 		return Py_BuildValue("d",cpp_Grid3D->getMaxZ());
-	}		
+	}
 	
+	//longWrapping([isWrapped]) set or return the longitudinal wrapping policy
+  static PyObject* Grid3D_longWrapping(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyGrid3D = (pyORBIT_Object*) self;
+		Grid3D* cpp_Grid3D = (Grid3D*) pyGrid3D->cpp_obj;	
+		PyObject* pyIsWrapped = NULL;
+		if(!PyArg_ParseTuple(args,"|O:longWrapping",&pyIsWrapped)){
+			ORBIT_MPI_Finalize("PyGrid3D - longWrapping([True/False]) - parameter may be needed.");
+		}
+		if(pyIsWrapped != NULL){
+			int isWrapped = PyObject_IsTrue(pyIsWrapped);
+			if(isWrapped != 1) isWrapped = 0;
+			cpp_Grid3D->setLongWrapping(isWrapped);
+		}
+		return Py_BuildValue("i",cpp_Grid3D->getLongWrapping());
+	}	
 	
 	//binBunch(Bunch* bunch)
   static PyObject* Grid3D_binBunch(PyObject *self, PyObject *args){
     pyORBIT_Object* pyGrid3D = (pyORBIT_Object*) self;
 		Grid3D* cpp_Grid3D = (Grid3D*) pyGrid3D->cpp_obj;
 		PyObject* pyBunch;
-		if(!PyArg_ParseTuple(args,"O:binBunch",&pyBunch)){
-			ORBIT_MPI_Finalize("PyGrid3D - binBunch(Bunch* bunch) - parameter are needed.");
+		double lambda = -1.0;
+		if(!PyArg_ParseTuple(args,"O|d:binBunch",&pyBunch,&lambda)){
+			ORBIT_MPI_Finalize("PyGrid3D - binBunch(Bunch* bunch [,lambda]) - parameters are needed.");
 		}
 		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
 		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("PyGrid3D - binBunch(Bunch* bunch) - method needs a Bunch.");
+			ORBIT_MPI_Finalize("PyGrid3D - binBunch(Bunch* bunch [,lambda]) - method needs a Bunch.");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		cpp_Grid3D->binBunch(cpp_bunch);
+		if(lambda > 0.){
+			cpp_Grid3D->binBunch(cpp_bunch,lambda);
+		} else {
+			cpp_Grid3D->binBunch(cpp_bunch);
+		}
 		Py_INCREF(Py_None);
     return Py_None;	
-	}		
+	}			
 	
 	//binValue(double value, double x, double y, double z)
   static PyObject* Grid3D_binValue(PyObject *self, PyObject *args){
@@ -287,7 +307,7 @@ extern "C" {
 		cpp_Grid3D->calcGradient(x,ex,y,ey,z,ez);
 		return Py_BuildValue("(ddd)",ex,ey,ez);
 	}
-	
+
   //-----------------------------------------------------
   //destructor for python Grid3D class (__del__ method).
   //-----------------------------------------------------
@@ -301,29 +321,30 @@ extern "C" {
 	// defenition of the methods of the python Grid3D wrapper class
 	// they will be vailable from python level
   static PyMethodDef Grid3DClassMethods[] = {
-		{ "setZero",       Grid3D_setZero,       METH_VARARGS,"sets all points on the grid to zero"},
-		{ "getValue",      Grid3D_getValue,      METH_VARARGS,"returns value for (x,y,z) point"},
-		{ "getValueOnGrid",Grid3D_getValueOnGrid,METH_VARARGS,"returns value for indeces (ix,iy,iz) "},
-		{ "setValue",      Grid3D_setValue,      METH_VARARGS,"sets value for (ix,iy,iz) point - (val,ix,iy,iz)"},
-		{ "setGridX",      Grid3D_setGridX,      METH_VARARGS,"sets the X grid with min,max"},
-		{ "setGridY",      Grid3D_setGridY,      METH_VARARGS,"sets the Y grid with min,max"},
-		{ "setGridZ",      Grid3D_setGridZ,      METH_VARARGS,"sets the Z grid with min,max"},
-		{ "getGridX",      Grid3D_getGridX,      METH_VARARGS,"returns the x-grid point with index ind"},
-		{ "getGridY",      Grid3D_getGridY,      METH_VARARGS,"returns the x-grid point with index ind"},
-		{ "getGridZ",      Grid3D_getGridZ,      METH_VARARGS,"sets the Z grid with min,max"},
-		{ "getSizeX",      Grid3D_getSizeX,      METH_VARARGS,"returns the size of grid in X dir."},
-		{ "getSizeY",      Grid3D_getSizeY,      METH_VARARGS,"returns the size of grid in Y dir."},
-		{ "getSizeZ",      Grid3D_getSizeZ,      METH_VARARGS,"returns the size of grid in Z dir."},
-		{ "getMinX",       Grid3D_getMinX,       METH_VARARGS,"returns the min grid point in X dir."},
-		{ "getMaxX",       Grid3D_getMaxX,       METH_VARARGS,"returns the max grid point in X dir."},
-		{ "getMinY",       Grid3D_getMinY,       METH_VARARGS,"returns the min grid point in Y dir."},
-		{ "getMaxY",       Grid3D_getMaxY,       METH_VARARGS,"returns the max grid point in Y dir."},
-		{ "getMinZ",       Grid3D_getMinZ,       METH_VARARGS,"returns the min grid point in Z dir."},
-		{ "getMaxZ",       Grid3D_getMaxZ,       METH_VARARGS,"returns the max grid point in Z dir."},
-		{ "binValue",      Grid3D_binValue,      METH_VARARGS,"bins the value into the 3D mesh"},
-		{ "binBunch",      Grid3D_binBunch,      METH_VARARGS,"bins the Bunch instance into the 3D mesh"},
-		{ "calcGradient",  Grid3D_calcGradient,  METH_VARARGS,"returns gradient as (gx,gy,gz) for point (x,y,z)"},
-		{ "synchronizeMPI",Grid3D_synchronizeMPI,METH_VARARGS,"synchronize through the MPI communicator"},		
+		{ "setZero",        Grid3D_setZero,        METH_VARARGS,"sets all points on the grid to zero"},
+		{ "getValue",       Grid3D_getValue,       METH_VARARGS,"returns value for (x,y,z) point"},
+		{ "getValueOnGrid", Grid3D_getValueOnGrid, METH_VARARGS,"returns value for indeces (ix,iy,iz) "},
+		{ "setValue",       Grid3D_setValue,       METH_VARARGS,"sets value for (ix,iy,iz) point - (val,ix,iy,iz)"},
+		{ "setGridX",       Grid3D_setGridX,       METH_VARARGS,"sets the X grid with min,max"},
+		{ "setGridY",       Grid3D_setGridY,       METH_VARARGS,"sets the Y grid with min,max"},
+		{ "setGridZ",       Grid3D_setGridZ,       METH_VARARGS,"sets the Z grid with min,max"},
+		{ "getGridX",       Grid3D_getGridX,       METH_VARARGS,"returns the x-grid point with index ind"},
+		{ "getGridY",       Grid3D_getGridY,       METH_VARARGS,"returns the y-grid point with index ind"},
+		{ "getGridZ",       Grid3D_getGridZ,       METH_VARARGS,"returns the z-grid point with index ind"},
+		{ "getSizeX",       Grid3D_getSizeX,       METH_VARARGS,"returns the size of grid in X dir."},
+		{ "getSizeY",       Grid3D_getSizeY,       METH_VARARGS,"returns the size of grid in Y dir."},
+		{ "getSizeZ",       Grid3D_getSizeZ,       METH_VARARGS,"returns the size of grid in Z dir."},
+		{ "getMinX",        Grid3D_getMinX,        METH_VARARGS,"returns the min grid point in X dir."},
+		{ "getMaxX",        Grid3D_getMaxX,        METH_VARARGS,"returns the max grid point in X dir."},
+		{ "getMinY",        Grid3D_getMinY,        METH_VARARGS,"returns the min grid point in Y dir."},
+		{ "getMaxY",        Grid3D_getMaxY,        METH_VARARGS,"returns the max grid point in Y dir."},
+		{ "getMinZ",        Grid3D_getMinZ,        METH_VARARGS,"returns the min grid point in Z dir."},
+		{ "getMaxZ",        Grid3D_getMaxZ,        METH_VARARGS,"returns the max grid point in Z dir."},
+		{ "binValue",       Grid3D_binValue,       METH_VARARGS,"bins the value into the 3D mesh"},
+		{ "binBunch",       Grid3D_binBunch,       METH_VARARGS,"bins the Bunch into the 3D mesh"},
+		{ "calcGradient",   Grid3D_calcGradient,   METH_VARARGS,"returns gradient as (gx,gy,gz) for point (x,y,z)"},
+		{ "longWrapping",   Grid3D_longWrapping,   METH_VARARGS,"set/get isWrapping variable defining long. wrapping policy"},
+		{ "synchronizeMPI", Grid3D_synchronizeMPI, METH_VARARGS,"synchronize through the MPI communicator"},		
     {NULL}
   };
 

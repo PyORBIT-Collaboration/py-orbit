@@ -57,6 +57,23 @@ extern "C" {
 		return Py_BuildValue("(d,d,d,d,d,d)", xMin, xMax, yMin, yMax, zMin, zMax);
   }
   
+	//Calculates xpMin,xpMax,  ypMin,ypMax, dE_Min, dE_Max,
+  static PyObject* BunchExtremaCalculator_extremaXpYpdE(PyObject *self, PyObject *args){
+		PyObject *pyIn;
+		if(!PyArg_ParseTuple(args,"O:extremaXYZ",&pyIn)){
+			error("PyBunchExtremaCalculator - extremaXYZ(Bunch) - Bunch is needed.");
+		}			
+		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
+		if((!PyObject_IsInstance(pyIn,pyBunchType))){
+			error("PyBunchExtremaCalculator - extremaXpYpdE(Bunch) - input parameter is not Bunch");
+		}		
+		Bunch* bunch = (Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj;
+		BunchExtremaCalculator* cpp_BunchExtremaCalculator = (BunchExtremaCalculator*) (((pyORBIT_Object*) self)->cpp_obj);
+		double xpMin,xpMax,ypMin,ypMax,dE_Min,dE_Max;
+		cpp_BunchExtremaCalculator->getExtremaXpYpdE(bunch, xpMin, xpMax, ypMin, ypMax, dE_Min, dE_Max);	
+		return Py_BuildValue("(d,d,d,d,d,d)", xpMin, xpMax, ypMin, ypMax, dE_Min, dE_Max);
+  }  
+  
 	//Calculates zMin,zMax
   static PyObject* BunchExtremaCalculator_extremaZ(PyObject *self, PyObject *args){
 		PyObject *pyIn;
@@ -85,8 +102,9 @@ extern "C" {
 	// defenition of the methods of the python BunchExtremaCalculator wrapper class
 	// they will be vailable from python level
   static PyMethodDef BunchExtremaCalculatorClassMethods[] = {
-    { "extremaXYZ",   BunchExtremaCalculator_extremaXYZ  ,METH_VARARGS,"Returns tuple with (xMin, xMax, yMin, yMax, zMin, zMax)"},
-    { "extremaZ",   BunchExtremaCalculator_extremaZ  ,METH_VARARGS,"Returns tuple with (zMin, zMax)"},
+    { "extremaXYZ",      BunchExtremaCalculator_extremaXYZ    ,METH_VARARGS,"Returns tuple with (xMin, xMax, yMin, yMax, zMin, zMax)"},
+    { "extremaXpYpdE",   BunchExtremaCalculator_extremaXpYpdE ,METH_VARARGS,"Returns tuple with (xpMin, xpMax, ypMin, ypMax, dE_Min, dE_Max)"},
+    { "extremaZ",        BunchExtremaCalculator_extremaZ      ,METH_VARARGS,"Returns tuple with (zMin, zMax)"},
     {NULL}
   };
 

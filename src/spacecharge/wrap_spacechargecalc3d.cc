@@ -105,7 +105,35 @@ extern "C" {
 		Py_INCREF(Py_None);
 		return Py_None;
   }
+  
+	//set/get number of neighboring bunches
+  static PyObject* SpaceChargeCalc3D_numExtBunches(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc3D = (pyORBIT_Object*) self;
+		SpaceChargeCalc3D* cpp_SpaceChargeCalc3D = (SpaceChargeCalc3D*) pySpaceChargeCalc3D->cpp_obj;
+		int nBunches = -1;
+		if(!PyArg_ParseTuple(args,"|i:numExtBunches",&nBunches)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc3D.numExtBunches([nBunches]) - method has a problem.");
+		}
+		if(nBunches > 0){
+			cpp_SpaceChargeCalc3D->setNumberOfExternalBunches(nBunches);
+		}
+		return Py_BuildValue("i",cpp_SpaceChargeCalc3D->getNumberOfExternalBunches());
+  }	  
 
+	//set/get frequency of bunches in Hz
+  static PyObject* SpaceChargeCalc3D_freqOfBunches(PyObject *self, PyObject *args){
+		pyORBIT_Object* pySpaceChargeCalc3D = (pyORBIT_Object*) self;
+		SpaceChargeCalc3D* cpp_SpaceChargeCalc3D = (SpaceChargeCalc3D*) pySpaceChargeCalc3D->cpp_obj;
+		double  freqiency = -1;
+		if(!PyArg_ParseTuple(args,"|d:freqOfBunches",&freqiency)){
+			ORBIT_MPI_Finalize("PySpaceChargeCalc3D.freqOfBunches([frequency in Hz]) - method has a problem.");
+		}
+		if(freqiency > 0.){
+			cpp_SpaceChargeCalc3D->setFrequencyOfBunches(freqiency);
+		}
+		return Py_BuildValue("d",cpp_SpaceChargeCalc3D->getFrequencyOfBunches());
+  }	  
+  
 	//setRatioLimit(double ratioLimit) sets the ratio change of x to y and x to z to recalculate Green Functions 
   static PyObject* SpaceChargeCalc3D_setRatioLimit(PyObject *self, PyObject *args){
 		pyORBIT_Object* pySpaceChargeCalc3D = (pyORBIT_Object*) self;
@@ -140,9 +168,11 @@ extern "C" {
   // defenition of the methods of the python SpaceChargeCalc3D wrapper class
   // they will be vailable from python level
   static PyMethodDef SpaceChargeCalc3DClassMethods[] = {
-		{ "trackBunch",  SpaceChargeCalc3D_trackBunch, METH_VARARGS,"track the bunch - trackBunch(pyBunch,length,pipe_radius)"},
-		{ "getRhoGrid",  SpaceChargeCalc3D_getRhoGrid, METH_VARARGS,"returns the Grid3D with a space charge density"},
-		{ "getPhiGrid",  SpaceChargeCalc3D_getPhiGrid, METH_VARARGS,"returns the Grid3D with a space charge potential"},
+		{ "trackBunch",     SpaceChargeCalc3D_trackBunch,    METH_VARARGS,"track the bunch - trackBunch(pyBunch,length,pipe_radius)"},
+ 		{ "numExtBunches",  SpaceChargeCalc3D_numExtBunches, METH_VARARGS,"set/get number of neighboring bunches"},
+ 		{ "freqOfBunches",  SpaceChargeCalc3D_freqOfBunches, METH_VARARGS,"set/get frequency of bunches in Hz"},
+		{ "getRhoGrid",     SpaceChargeCalc3D_getRhoGrid,    METH_VARARGS,"returns the Grid3D with a space charge density"},
+		{ "getPhiGrid",     SpaceChargeCalc3D_getPhiGrid,    METH_VARARGS,"returns the Grid3D with a space charge potential"},
 		{ "setRatioLimit",	SpaceChargeCalc3D_setRatioLimit, METH_VARARGS,"sets the ratio change of x to y and x to z to recalculate Green Functions."},
 		{ "getRatioLimit",	SpaceChargeCalc3D_getRatioLimit, METH_VARARGS,"returns the ratio change of x to y and x to z to recalculate Green Functions."},
 		{NULL}

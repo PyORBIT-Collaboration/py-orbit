@@ -207,6 +207,17 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 			nodes += arr[1]
 		return nodes
 		
+	def getAllChildren(self):
+		"""
+		It returns the list of all children of this node.
+		The list includes children at entance, in body, and at exit.  
+		"""
+		nodes = []
+		nodes += self.getChildNodes(AccNode.ENTRANCE)
+		nodes += self.getBodyChildren()
+		nodes += self.getChildNodes(AccNode.EXIT)
+		return nodes
+		
 	def reverseOrder(self):
 		"""
 		This method is used for a lattice reversal and a bunch backtracking.
@@ -230,6 +241,7 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 			self.__childNodesArr[AccNode.BODY][iPart][AccNode.AFTER].reverse()
 			for node in self.__childNodesArr[AccNode.BODY][iPart][AccNode.BEFORE]: node.reverseOrderNodeSpecific()
 			for node in self.__childNodesArr[AccNode.BODY][iPart][AccNode.AFTER]: node.reverseOrderNodeSpecific()
+		self.reverseOrderNodeSpecific()
 		
 	def reverseOrderNodeSpecific(self):
 		"""

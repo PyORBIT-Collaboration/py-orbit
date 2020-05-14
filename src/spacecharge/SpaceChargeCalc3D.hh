@@ -53,10 +53,25 @@ public:
 	/** Returns the ratio limit for the shape change and Green Function recalculations. */
 	double getRatioLimit();
 	
+	/** Set number of bunches from both sides for space charge calculations */
+	void setNumberOfExternalBunches(int nBunches);
+
+	/** Set frequency of the arrivals of the bunches */
+	void setFrequencyOfBunches(double frequency);
+
+	/** Get number of bunches from both sides for space charge calculations */
+	int getNumberOfExternalBunches();
+	
+	/** Get frequency of the arrivals of the bunches */
+	double getFrequencyOfBunches();
+	
 private:
 	
-	/** Analyses the bunch and does bining. */
- void bunchAnalysis(Bunch* bunch);	
+	/** Analyses the bunch and does binning. */
+	void bunchAnalysis(Bunch* bunch);
+ 
+	/** Analyses the bunch and does binning in the case of accounting for neighboring bunches */
+ 	void wrappedBunchAnalysis(Bunch* bunch);
 	
 protected:
 	PoissonSolverFFT3D* poissonSolver;
@@ -71,6 +86,14 @@ protected:
 	//If the shape (x to y and x to z ratios) of 3D region changes more than this
 	//limit then we have to change shape and recalculate Green Functions in the Poisson solver	
 	double ratio_limit;
+	
+	//Number of bunches from both sides that should be taken into account.
+	//It defines the how many components we will add to Green function.
+	//This number will be an even number.
+	int nBunches_;
+	
+	//The frequency of the bunch arrivals in Hz. It defines by the RFQ frequency.
+	double frequency_;
 };
 //end of SC_SPACECHARGE_CALC_3D_H
 #endif

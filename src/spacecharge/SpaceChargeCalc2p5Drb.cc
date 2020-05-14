@@ -163,7 +163,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 		} else {
 			long_sc_coeff = long_sc_factor_out - log(r2);
 		}
-		bunch->dE(i) += - ez*long_sc_factor*long_sc_coeff;
+		bunch->dE(i) += ez*long_sc_factor*long_sc_coeff;
 	}
 }
 
@@ -255,54 +255,58 @@ void SpaceChargeCalc2p5Drb::bunchAnalysis(Bunch* bunch, double& totalMacrosize, 
 }
 
 void SpaceChargeCalc2p5Drb::calculateLongDerivative(){
-	int nZ = zGrid->getSizeZ();
-	double z_step = zGrid->getStepZ();
-	
-	if(nZ == 1){
-		zDerivGrid->setValue(0.,0);
-		return;
-	} else if(nZ == 2){
-		double zDeriv = 0.;
-		zGrid->calcGradient((zGrid->getGridZ(0)+zGrid->getGridZ(1))*0.5,zDeriv);
-		zDerivGrid->setValue(zDeriv/z_step,0);
-		zDerivGrid->setValue(zDeriv/z_step,1);
-		return;
-	}
-	
-	//smoothing the derivative by Quadratic Curve Fitting
-	int nAvg = n_long_avg;
-	if(nZ < nAvg) nAvg = nZ;
-	int iStart, iStop;
-	double a,b,c;
-	double x,y,z, det;
-	double** S = S_arr;
-	for(int iz = 0; iz < nZ; iz++){
-		z = zGrid->getGridZ(iz);
-		
-		iStart = iz - nAvg/2;
-		if(iStart < 0) iStart = 0;
-		if((iStart + nAvg) >= nZ) iStart = nZ - nAvg;
-		iStop = iStart + nAvg;
-		for(int j = 0; j < 5; j++){
-			for(int k = 0; k < 2; k++){
-				S[j][k] = 0.;
-				for(int i = iStart; i < iStop; i++){
-					x = zGrid->getGridZ(i);
-					y = zGrid->getValueOnGrid(i);
-					S[j][k] += pow(x,j)*pow(y,k);
-				}
-			}
-		}
-		det = (S[0][0]*S[2][0]*S[4][0] - S[1][0]*S[1][0]*S[4][0] - S[0][0]*S[3][0]*S[3][0] + 2*S[1][0]*S[2][0]*S[3][0] - S[2][0]*S[2][0]*S[2][0]);
-		a = (S[0][1]*S[1][0]*S[3][0] - S[1][1]*S[0][0]*S[3][0] - S[0][1]*S[2][0]*S[2][0]
-       + S[1][1]*S[1][0]*S[2][0] + S[2][1]*S[0][0]*S[2][0] - S[2][1]*S[1][0]*S[1][0])/det;
+  int nZ = zGrid->getSizeZ();
+  double z_step = zGrid->getStepZ();
+  
+  if(nZ == 1){
+    zDerivGrid->setValue(0.,0);
+    return;
+  } else if(nZ == 2){
+    double zDeriv = 0.;
+    zGrid->calcGradient((zGrid->getGridZ(0)+zGrid->getGridZ(1))*0.5,zDeriv);
+    zDerivGrid->setValue(zDeriv/z_step,0);
+    zDerivGrid->setValue(zDeriv/z_step,1);
+    return;
+  }
+  
+  //smoothing the derivative by Quadratic Curve Fitting
+  //The quadratic representation y = a*x^2+b*x+c is built for 
+  //x = (z - zGrid->getGridZ(iStart) + z_step)/z_step
+  //At the end we transform the derivative back to dy/dz 
+  int nAvg = n_long_avg;
+  if(nZ < nAvg) nAvg = nZ;
+  int iStart, iStop;
+  double a,b,c;
+  double x,y,z, det;
+  double** S = S_arr;
+  for(int iz = 0; iz < nZ; iz++){
+    z = zGrid->getGridZ(iz);
+    iStart = iz - nAvg/2;
+    if(iStart < 0) iStart = 0;
+    if((iStart + nAvg) >= nZ) iStart = nZ - nAvg;
+    iStop = iStart + nAvg;
+    for(int j = 0; j < 5; j++){
+      for(int k = 0; k < 2; k++){
+        S[j][k] = 0.;
+        for(int i = iStart; i < iStop; i++){
+          x = 1.0*(i - iStart + 1);
+          y = zGrid->getValueOnGrid(i);
+          S[j][k] += pow(x,j)*pow(y,k);
+        }
+      }
+    }
+    det = (S[0][0]*S[2][0]*S[4][0] - S[1][0]*S[1][0]*S[4][0] - S[0][0]*S[3][0]*S[3][0] + 2*S[1][0]*S[2][0]*S[3][0] - S[2][0]*S[2][0]*S[2][0]);
+    a = (S[0][1]*S[1][0]*S[3][0] - S[1][1]*S[0][0]*S[3][0] - S[0][1]*S[2][0]*S[2][0]
+      + S[1][1]*S[1][0]*S[2][0] + S[2][1]*S[0][0]*S[2][0] - S[2][1]*S[1][0]*S[1][0])/det;
     b = (S[1][1]*S[0][0]*S[4][0] - S[0][1]*S[1][0]*S[4][0] + S[0][1]*S[2][0]*S[3][0]
-       - S[2][1]*S[0][0]*S[3][0] - S[1][1]*S[2][0]*S[2][0] + S[2][1]*S[1][0]*S[2][0])/det;
+      - S[2][1]*S[0][0]*S[3][0] - S[1][1]*S[2][0]*S[2][0] + S[2][1]*S[1][0]*S[2][0])/det;
     c = (S[0][1]*S[2][0]*S[4][0] - S[1][1]*S[1][0]*S[4][0] - S[0][1]*S[3][0]*S[3][0]
-       + S[1][1]*S[2][0]*S[3][0] + S[2][1]*S[1][0]*S[3][0] - S[2][1]*S[2][0]*S[2][0])/det;
-    y = 2*a*z + b;
-		zDerivGrid->setValue(y/z_step,iz);
-	}
+      + S[1][1]*S[2][0]*S[3][0] + S[2][1]*S[1][0]*S[3][0] - S[2][1]*S[2][0]*S[2][0])/det;
+    
+    y = 2*a*(z - zGrid->getGridZ(iStart) + z_step)/z_step + b;
+    y = y / z_step;
+    zDerivGrid->setValue(y/z_step,iz);
+  }
 }
 
 /** Sets the number of smoothing points to calculate the derivative of the longitudinal density. */

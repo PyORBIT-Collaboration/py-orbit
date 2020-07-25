@@ -627,13 +627,13 @@ int Function::normalize()
     }
   }
 
+  if(y_arr[size-1] <= 0.){
+  	return 0.;
+  }
+  
   for(int i = 0; i < size; i++){
-    y_arr[i] /=y_arr[size-1];
-		if(y_arr[size-1] != 0.){
-			err_arr[i] /=y_arr[size-1];
-		} else {
-			err_arr[i] = 0.;
-		}
+    y_arr[i] /= y_arr[size-1];
+    err_arr[i] /= y_arr[size-1];
   }
 
   y_arr[size-1] = 1.0;

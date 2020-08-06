@@ -639,6 +639,12 @@ class Scoreboard:
 		"""
 		return self.bestTrialPoint.getCopy()
 		
+	def getBestTrialPointReference(self):
+		"""
+		Returns the reference (not copy) to the best trial point.
+		"""
+		return self.bestTrialPoint		
+		
 	def getBestScore(self):
 		"""
 		Returns the best score.

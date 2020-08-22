@@ -617,7 +617,7 @@ class Scoreboard:
 		
 	def getHistoryStack(self):
 		"""
-		Returns the hystory stack with (score,trial_point) data.
+		Returns the history stack with (score,trial_point) data.
 		"""
 		return self.scoresHistoryStack
 		

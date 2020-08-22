@@ -7,6 +7,7 @@
 from orbit.utils.fitting.PolynomialFit import PolynomialFit
 
 from orbit.utils.fitting.general_minimization.SimplexSearch import SimplexSearchAlgorithm
+from orbit.utils.fitting.general_minimization.RandomSearch import RandomSearchAlgorithm
 from orbit.utils.fitting.general_minimization.GoldenSectionSearch1D import GoldenSectionSearchAlgorithm
 from orbit.utils.fitting.general_minimization.BisectionSearch1D import BisectionSearchAlgorithm
 
@@ -22,6 +23,7 @@ from orbit.utils.fitting.general_minimization.Solver import SearchAgorithm
 __all__ = []
 __all__.append("PolynomialFit")
 __all__.append("SimplexSearchAlgorithm")
+__all__.append("RandomSearchAlgorithm")
 __all__.append("GoldenSectionSearchAlgorithm")
 __all__.append("BisectionSearchAlgorithm")
 __all__.append("Solver")

@@ -66,7 +66,7 @@ namespace OrbitUtils{
 		int getCount();
 		
 		/** It will synchronize the moments through the MPI communicator */ 	
-		int synchronizeMPI(pyORBIT_MPI_Comm* pyComm);
+		void synchronizeMPI(pyORBIT_MPI_Comm* pyComm);
 		
     /** Returns the emittance */
 		double getEmittance();

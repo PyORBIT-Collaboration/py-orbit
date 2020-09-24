@@ -50,6 +50,7 @@ namespace OrbitUtils{
 			fp=fc;
 		}
 		nb=nbb;
+		return 0;
 	}
 	
 	#undef JMAX

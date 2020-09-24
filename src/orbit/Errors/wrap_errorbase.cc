@@ -348,23 +348,6 @@ extern "C"
     return Py_None;
   }
 
-  // Drift a particle
-  static PyObject* wrap_drifti(PyObject *self, PyObject *args)
-  {
-    PyObject* pyBunch;
-    int i;
-    double length;
-    if(!PyArg_ParseTuple(args, "Oid:drifti",
-                         &pyBunch, &i, &length))
-    {
-      error("errorbase - drifti - cannot parse arguments!");
-    }
-    Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-    error_base::drifti(cpp_bunch, i, length);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
   static PyMethodDef errorbaseMethods[] =
   {
     {"CoordDisplacement",   wrap_CoordDisplacement,   METH_VARARGS, "Displace the coordinates of a bunch"},
@@ -387,7 +370,6 @@ extern "C"
     {"DipoleKickerOsc",     wrap_DipoleKickerOsc,     METH_VARARGS, "Oscillating dipole kick a bunch"},
     {"QuadKicker",          wrap_QuadKicker,          METH_VARARGS, "Quadrupole kick a bunch"},
     {"QuadKickerOsc",       wrap_QuadKickerOsc,       METH_VARARGS, "Oscillating quadrupole kick a bunch"},
-    {"drifti",              wrap_drifti,              METH_VARARGS, "Drifts a macroparticle"},
     { NULL, NULL }
   };
 

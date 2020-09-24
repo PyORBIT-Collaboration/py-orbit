@@ -53,7 +53,7 @@ extern "C"
         return Py_None;
     }
 
-	//Tracking a bunch through a bunch wrapper
+    //Tracking a bunch through a bunch wrapper
     static PyObject* wrap_drift(PyObject *self, PyObject *args)
     {
         PyObject* pyBunch;
@@ -69,7 +69,23 @@ extern "C"
         return Py_None;
     }
 
-	
+    // Drift a particle
+    static PyObject* wrap_drifti(PyObject *self, PyObject *args)
+    {
+      PyObject* pyBunch;
+      int i;
+      double length;
+      if(!PyArg_ParseTuple(args, "Oid:drifti",
+                           &pyBunch, &i, &length))
+      {
+        error("teapotbase - drifti - cannot parse arguments!");
+      }
+      Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
+      teapot_base::drifti(cpp_bunch, i, length);
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
+
     //Tracking a bunch through a multipole
     static PyObject* wrap_multp(PyObject *self, PyObject *args)
     {
@@ -471,6 +487,7 @@ extern "C"
     {
 			{"rotatexy",         wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
 			{"drift",            wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
+			{"drifti",           wrap_drifti,         METH_VARARGS, "Drifts one macroparticle in the bunch"},
 			{"wrapbunch",		 wrap_wrapbunch,		  METH_VARARGS, "Tracking a bunch through a wrapbunch routine"},
 			{"multp",            wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},
 			{"multpfringeIN",    wrap_multpfringeIN,  METH_VARARGS, "Tracking a bunch through an IN edge of a multipole "},

@@ -59,7 +59,7 @@ namespace linac_tracking
 		double beta_s = syncPart->getBeta();
 		double v_s = OrbitConst::c * beta_s;
 		double beta1_s = 1.0/beta_s;
-		if(length < 0.) return;
+		if(length <= 0.) return;
 		
 		double delta_t = length / v_s;
 		double delta_tc = delta_t*OrbitConst::c;
@@ -83,6 +83,8 @@ namespace linac_tracking
 		double beta_y = 0.;
 		
 		//coordinate array [part. index][x,xp,y,yp,z,dE]
+		//sqrt(fabs(p_z2)) - fabs function is a protection for case when xp and yp are too big for dE
+		//It means the particles are nonphysical and simulations do not make sense 
 		double** arr = bunch->coordArr();
 		for(int i = 0; i < bunch->getSize(); i++)
 		{
@@ -95,7 +97,7 @@ namespace linac_tracking
 			beta_x = (xp*p_s)/Etotal;
 			beta_y = (yp*p_s)/Etotal;
 			p_z2 = p2 - (xp*xp + yp*yp)*p2_s;
-			beta_z = sqrt(p_z2)/Etotal;
+			beta_z = sqrt(fabs(p_z2))/Etotal;
 			arr[i][0] += beta_x * delta_tc;
 			arr[i][2] += beta_y * delta_tc;
 			arr[i][4] += (beta_z - beta_s) * delta_tc;

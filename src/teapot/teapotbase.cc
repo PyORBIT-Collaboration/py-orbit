@@ -326,7 +326,8 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew, int useCharge)
 //
 // PARAMETERS
 //   bunch =  reference to the macro-particle bunch
-//   pole = multipole number
+//   pole = multipole number 
+//   pole = 0 for dipole, pole = 1 for quad, pole = 2 for sextupole, pole = 3 for octupole
 //   kl = integrated strength of the kick [m^(-pole)]
 //   skew = 0 - normal, 1 - skew
 //

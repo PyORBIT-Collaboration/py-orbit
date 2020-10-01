@@ -115,6 +115,8 @@ class SimplexSearchAlgorithm(SearchAgorithm):
 		trialPoint.setStepsUsedInOptArr(self.increments)
 		if(not trialPoint.isAcceptable()):
 			return None
+		if(self.solver.getStopper().getShouldStop()):
+			return None		
 		score = self.solver.getScorer().getScore(trialPoint)
 		scoreBoard = self.solver.getScoreboard()
 		scoreBoard.addScoreTrialPoint(score,trialPoint)

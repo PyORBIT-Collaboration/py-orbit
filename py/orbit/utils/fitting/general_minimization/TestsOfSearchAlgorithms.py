@@ -1,5 +1,12 @@
 #-----------------------------------------------------------------------		
 #-----Test of the Search Algorithms
+#  1D Search:
+#      BisectionSearchAlgorithm
+#      GoldenSectionSearchAlgorithm
+#-------------------------------------------
+#  General Search (1d,2D, ...):
+#      Simplex
+#      Random search
 #-----------------------------------------------------------------------
 	
 import os
@@ -16,6 +23,7 @@ from Solver import TrialPoint
 from BisectionSearch1D import BisectionSearchAlgorithm
 from GoldenSectionSearch1D import GoldenSectionSearchAlgorithm
 from SimplexSearch import SimplexSearchAlgorithm
+from RandomSearch import RandomSearchAlgorithm
 
 #------------------------------------------------------
 #  Functions for minimization
@@ -148,17 +156,21 @@ FitTest(scorer,searchAlgorithm,[variableProxy,])
 
 scorer = SquareValueScorer1D()
 searchAlgorithm = SimplexSearchAlgorithm()
+#searchAlgorithm = RandomSearchAlgorithm()
 
 #---- for Simplex serach we set (name,initial value, initial search step)
 #---- The *math.sqrt(2.) introduced to avoid exact solutions
 variableProxy = VariableProxy("(x-2)^2+10",0.,0.5*math.sqrt(2.))
 
+#---- Number of iterations for SimplexSearchAlgorithm is 20
+#---- but for RandomSearchAlgorithm it should be 50
 FitTest(scorer,searchAlgorithm,[variableProxy,],20)
 
 #-----------------------------------
 
 scorer = SquareValueScorer3D()
 searchAlgorithm = SimplexSearchAlgorithm()
+#searchAlgorithm = RandomSearchAlgorithm()
 
 #---- for Simplex serach we set (name,initial value, initial search step)
 #---- The *math.sqrt(2.) introduced to avoid exact solutions
@@ -172,6 +184,8 @@ variableProxy_arr.append(variableProxy0)
 variableProxy_arr.append(variableProxy1)
 variableProxy_arr.append(variableProxy2)
 
+#---- Number of iterations for SimplexSearchAlgorithm is 50
+#---- but for RandomSearchAlgorithm it should be 200
 FitTest(scorer,searchAlgorithm,variableProxy_arr, 50)
 
 

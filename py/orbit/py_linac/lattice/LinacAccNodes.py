@@ -285,7 +285,7 @@ class Quad(LinacMagnetNode):
 	"""
 	def __init__(self, name = "quad"):
 		"""
-		Constructor. Creates the Quad Combined Function element .
+		Constructor. Creates the Quad Combined Function element.
 		"""
 		LinacMagnetNode.__init__(self,name)	
 		self.addParam("dB/dr",0.)
@@ -312,7 +312,7 @@ class Quad(LinacMagnetNode):
 				return
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				k = klArr[i]*kq
+				k = klArr[i]/length
 				skew = skewArr[i]
 				TPB.multpfringeIN(bunch,pole,k,skew)
 
@@ -333,7 +333,7 @@ class Quad(LinacMagnetNode):
 				return
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				k = klArr[i]*kq
+				k = klArr[i]/length
 				skew = skewArr[i]
 				TPB.multpfringeOUT(bunch,pole,k,skew)
 
@@ -429,7 +429,7 @@ class Quad(LinacMagnetNode):
 		self.tracking_module.quad2(bunch, step/4)
 		for i in xrange(len(poleArr)):
 			pole = poleArr[i]
-			kl = klArr[i]*kq*length/(nParts - 1)
+			kl = klArr[i]/(nParts - 1)
 			skew = skewArr[i]
 			TPB.multp(bunch,pole,kl,skew)
 		self.tracking_module.quad2(bunch, step/4)

@@ -105,7 +105,7 @@ extern "C" {
 		PyObject *pyM;
 		int info_x = 0, info_y = 0, info_z = 0;
 		if(!PyArg_ParseTuple(args,"OO|iii:transport_with_twiss_Mtrx",&pyIn,&pyM,&info_x,&info_y,&info_z)){
-			error("transport_with_twiss_Mtrx_FromInitCoords(Bunch in,Bunch out,Matrix, info_x, info_y, info_z) - Bunches and Matrix are needed.");
+			error("transport_with_twiss_Mtrx_FromInitCoords(Bunch in,Matrix, info_x, info_y, info_z) - Bunches and Matrix are needed.");
 		}			
 		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
 		if((!PyObject_IsInstance(pyIn,pyBunchType))){

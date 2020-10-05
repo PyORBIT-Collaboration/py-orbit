@@ -91,6 +91,23 @@ extern "C" {
 		return Py_BuildValue("(d,d)", zMin, zMax);
   }
   
+	//Calculates rMax
+  static PyObject* BunchExtremaCalculator_extremaR(PyObject *self, PyObject *args){
+		PyObject *pyIn;
+		if(!PyArg_ParseTuple(args,"O:extremaR",&pyIn)){
+			error("PyBunchExtremaCalculator - extremaR(Bunch) - Bunch is needed.");
+		}			
+		PyObject* pyBunchType = wrap_orbit_bunch::getBunchType("Bunch");
+		if((!PyObject_IsInstance(pyIn,pyBunchType))){
+			error("PyBunchExtremaCalculator - extremaR(Bunch) - input parameter is not Bunch");
+		}		
+		Bunch* bunch = (Bunch*) ((pyORBIT_Object*) pyIn)->cpp_obj;
+		BunchExtremaCalculator* cpp_BunchExtremaCalculator = (BunchExtremaCalculator*) (((pyORBIT_Object*) self)->cpp_obj);
+		double rMax;
+		cpp_BunchExtremaCalculator->getExtremaR(bunch, rMax);	
+		return Py_BuildValue("d", rMax);
+  }  
+  
   //-----------------------------------------------------
   //destructor for python BunchExtremaCalculator class (__del__ method).
   //-----------------------------------------------------
@@ -105,7 +122,8 @@ extern "C" {
     { "extremaXYZ",      BunchExtremaCalculator_extremaXYZ    ,METH_VARARGS,"Returns tuple with (xMin, xMax, yMin, yMax, zMin, zMax)"},
     { "extremaXpYpdE",   BunchExtremaCalculator_extremaXpYpdE ,METH_VARARGS,"Returns tuple with (xpMin, xpMax, ypMin, ypMax, dE_Min, dE_Max)"},
     { "extremaZ",        BunchExtremaCalculator_extremaZ      ,METH_VARARGS,"Returns tuple with (zMin, zMax)"},
-    {NULL}
+    { "extremaR",        BunchExtremaCalculator_extremaR      ,METH_VARARGS,"Returns maximal radius sqrt(x^2+y^2)"},
+     {NULL}
   };
 
 	// defenition of the memebers of the python BunchExtremaCalculator wrapper class

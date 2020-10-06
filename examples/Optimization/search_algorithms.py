@@ -14,16 +14,12 @@ import math
 import sys
 import time	
 	
-from Solver import Solver
-from Solver import Scorer
-from Solver import SolveStopperFactory
-from Solver import VariableProxy
-from Solver import TrialPoint
+from orbit.utils.fitting.general_minimization.Solver import Solver, Scorer, SolveStopperFactory, VariableProxy, TrialPoint
 
-from BisectionSearch1D import BisectionSearchAlgorithm
-from GoldenSectionSearch1D import GoldenSectionSearchAlgorithm
-from SimplexSearch import SimplexSearchAlgorithm
-from RandomSearch import RandomSearchAlgorithm
+from orbit.utils.fitting.general_minimization.BisectionSearch1D import BisectionSearchAlgorithm
+from orbit.utils.fitting.general_minimization.GoldenSectionSearch1D import GoldenSectionSearchAlgorithm
+from orbit.utils.fitting.general_minimization.SimplexSearch import SimplexSearchAlgorithm
+from orbit.utils.fitting.general_minimization.RandomSearch import RandomSearchAlgorithm
 
 #------------------------------------------------------
 #  Functions for minimization

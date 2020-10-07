@@ -54,6 +54,10 @@ class LinacAccLattice(AccLattice):
 			(pos_tmp,pos_stop) = self.getNodePositionsDict()[node_last]
 			seq.setPosition(pos_start)
 			seq.setLength(pos_stop-pos_start)
+			#---- define position parameter for nodes - position are realtive to start of the sequence
+			for node in nodes:
+				(pos_node_start,pos_node_end) = self.getNodePositionsDict()[node]
+				node.setParam("pos",(pos_node_start + pos_node_end)/2.0 - pos_start)
 		#------add RF cavities that are in referenced from the AccNodes (RF gaps)
 		self.__rfCavities = []
 		for node in self.getNodes():

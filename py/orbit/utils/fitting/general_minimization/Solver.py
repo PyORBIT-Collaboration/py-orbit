@@ -617,7 +617,7 @@ class Scoreboard:
 		
 	def getHistoryStack(self):
 		"""
-		Returns the hystory stack with (score,trial_point) data.
+		Returns the history stack with (score,trial_point) data.
 		"""
 		return self.scoresHistoryStack
 		
@@ -638,6 +638,12 @@ class Scoreboard:
 		Returns the unbound best trial point.
 		"""
 		return self.bestTrialPoint.getCopy()
+		
+	def getBestTrialPointReference(self):
+		"""
+		Returns the reference (not copy) to the best trial point.
+		"""
+		return self.bestTrialPoint		
 		
 	def getBestScore(self):
 		"""

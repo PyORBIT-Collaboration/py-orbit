@@ -125,6 +125,8 @@ extern "C" {
 			return Py_None;
 		}
 		error("pyHarmonicData.parameter(index[,val]) - parameters are needed");
+		Py_INCREF(Py_None);
+		return Py_None;		
   }
 	
  	/** It will return the y data value for given x index */

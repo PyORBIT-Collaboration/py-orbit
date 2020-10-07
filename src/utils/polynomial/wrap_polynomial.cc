@@ -83,6 +83,8 @@ extern "C" {
 			return Py_None;
 		}
 		error("pyPolynomial.coef(index[,val]) - parameters are needed");
+		Py_INCREF(Py_None);
+		return Py_None;		
   }
 	
  	/** It will return the polynomial value for x */

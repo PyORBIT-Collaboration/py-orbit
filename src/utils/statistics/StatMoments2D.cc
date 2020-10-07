@@ -167,7 +167,7 @@ int StatMoments2D::getCount()
 }
 
 /** It will synchronize the moments through the MPI communicator */ 		
-int StatMoments2D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm)
+void StatMoments2D::synchronizeMPI(pyORBIT_MPI_Comm* pyComm)
 {
 	int mpi_size = (max_order+1)*(max_order+1);
 	int buff_index0 = -1;

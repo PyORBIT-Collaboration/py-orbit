@@ -23,6 +23,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "errorbase.hh"
+#include "teapotbase.hh"
 #include "OrbitConst.hh"
 #include "SyncPart.hh"
 #include "Random.hh"
@@ -88,7 +89,7 @@ void LongDisplacement(Bunch* bunch, double ds)
 
   for(int i = 0; i < bunch->getSize(); i++)
   {
-    drifti(bunch, i, ds);
+   teapot_base::drifti(bunch, i, ds);
   }
 }
 
@@ -175,7 +176,7 @@ void StraightRotationXSI(Bunch* bunch, double anglexsi, double length)
 
     s = -(1.0 - cs) * lengtho2 - sn * xtemp;
 
-    drifti(bunch, i, s);
+    teapot_base::drifti(bunch, i, s);
   }
 }
 
@@ -225,7 +226,7 @@ void StraightRotationXSF(Bunch* bunch, double anglexsf, double length)
 
     s = (1.0 - cs) * lengtho2 + sn * xtemp;
 
-    drifti(bunch, i, s);
+    teapot_base::drifti(bunch, i, s);
   }
 }
 
@@ -275,7 +276,7 @@ void StraightRotationYSI(Bunch* bunch, double angleysi, double length)
 
     s = -(1.0 - cs) * lengtho2 + sn * ytemp;
 
-    drifti(bunch, i, s);
+    teapot_base::drifti(bunch, i, s);
   }
 }
 
@@ -325,7 +326,7 @@ void StraightRotationYSF(Bunch* bunch, double angleysf, double length)
 
     s = (1.0 - cs) * lengtho2 - sn * ytemp;
 
-    drifti(bunch, i, s);
+    teapot_base::drifti(bunch, i, s);
   }
 }
 
@@ -402,7 +403,7 @@ void BendDisplacementXI(Bunch* bunch, double anglexi, double disp)
   for(int i = 0; i < bunch->getSize(); i++)
   {
     arr[i][0] += dx;
-    drifti(bunch, i, ds);
+    teapot_base::drifti(bunch, i, ds);
   }
 }
 
@@ -431,7 +432,7 @@ void BendDisplacementXF(Bunch* bunch, double anglexf, double disp)
   for(int i = 0; i < bunch->getSize(); i++)
   {
     arr[i][0] += dx;
-    drifti(bunch, i, ds);
+    teapot_base::drifti(bunch, i, ds);
   }
 }
 
@@ -508,7 +509,7 @@ void BendDisplacementLI(Bunch* bunch, double angleli, double disp)
   for(int i = 0; i < bunch->getSize(); i++)
   {
     arr[i][0] += dx;
-    drifti(bunch, i, ds);
+    teapot_base::drifti(bunch, i, ds);
   }
 }
 
@@ -537,7 +538,7 @@ void BendDisplacementLF(Bunch* bunch, double anglelf, double disp)
   for(int i = 0; i < bunch->getSize(); i++)
   {
     arr[i][0] += dx;
-    drifti(bunch, i, ds);
+    teapot_base::drifti(bunch, i, ds);
   }
 }
 
@@ -655,7 +656,7 @@ void RotationI(Bunch* bunch, double anglei, double rhoi, double theta,
     arr[i][0] = vr1;
     arr[i][2] = vr2;
     s = -lengtho2 - vr3;
-    drifti(bunch, i, s);
+    teapot_base::drifti(bunch, i, s);
   }
 }
 
@@ -773,7 +774,7 @@ void RotationF(Bunch* bunch, double anglef, double rhoi, double theta,
     arr[i][0] = vr1;
     arr[i][2] = vr2;
     s = lengtho2 - vr3;
-    drifti(bunch, i, s);
+    teapot_base::drifti(bunch, i, s);
   }
 }
 
@@ -860,42 +861,6 @@ void QuadKickerOsc(Bunch* bunch, double k,
     arr[i][1] += kick * arr[i][0];
     arr[i][3] -= kick * arr[i][2];
   }
-}
-
-///////////////////////////////////////////////////////////////////////////
-// NAME
-//   drifti
-//
-// DESCRIPTION
-//   Drifts a single particle. Length < 0 is allowed.
-//
-// PARAMETERS
-//   bunch = reference to the macro-particle bunch
-//   i = particle index
-//   length = length of the drift
-//
-///////////////////////////////////////////////////////////////////////////
-
-void drifti(Bunch* bunch, int i, double length)
-{
-  double KNL, phifac, dp_p;
-
-  SyncPart* syncPart = bunch->getSyncPart();
-
-  double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
-  double dp_p_coeff = 1.0 / (syncPart->getMomentum() * syncPart->getBeta());
-
-  //coordinate array [part. index][x,xp,y,yp,z,dE]
-  double** arr = bunch->coordArr();
-
-  dp_p = arr[i][5] * dp_p_coeff;
-  KNL  = 1.0 / (1.0 + dp_p);
-  arr[i][0] += KNL * length * arr[i][1];
-  arr[i][2] += KNL * length * arr[i][3];
-  phifac = (arr[i][1] * arr[i][1] + arr[i][3] * arr[i][3] +
-            dp_p * dp_p * gamma2i) / 2.0;
-  phifac = (phifac * KNL - dp_p * gamma2i) * KNL;
-  arr[i][4] -= length * phifac;
 }
 
 }  //end of namespace error_base

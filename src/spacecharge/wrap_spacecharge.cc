@@ -16,6 +16,9 @@
 #include "wrap_lspacechargecalc.hh"
 #include "wrap_uniform_ellipsoid_field_calculator.hh"
 #include "wrap_spacechargecalc_uniform_ellipse.hh"
+#include "wrap_envsolver_kv.hh"
+#include "wrap_envsolver_rotating.hh"
+
 
 static PyMethodDef spacechargeMethods[] = { {NULL,NULL} };
 
@@ -41,6 +44,8 @@ extern "C" {
 		wrap_spacecharge::initSpaceChargeCalc3D(module);
 		wrap_spacecharge::initUniformEllipsoidFieldCalculator(module);
 		wrap_spacecharge::initSpaceChargeCalcUniformEllipse(module);
+        wrap_spacecharge::initEnvSolverKV(module);
+        wrap_spacecharge::initEnvSolverRotating(module);
 		wrap_lspacechargecalc::initLSpaceChargeCalc(module);
   }
 	

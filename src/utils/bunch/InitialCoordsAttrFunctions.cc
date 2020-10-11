@@ -215,7 +215,7 @@ namespace OrbitUtils{
 				}			
 			}	
 			
-			// A = (X^T * X)^-1 * (X^T *Y)  start
+			// A^T = (X^T * X)^-1 * (X^T *Y)  start
 			Matrix* XTXmtrx = new Matrix(6,6);
 			Matrix* XTYmtrx = new Matrix(6,6);
 			Matrix* Amtrx = new Matrix(6,6);
@@ -276,7 +276,7 @@ namespace OrbitUtils{
 				}
 			}		
 			
-			// A = (X^T * X)^-1 * (X^T *Y)
+			// A^T = (X^T * X)^-1 * (X^T *Y)
 			XTXmtrx->copyTo(Amtrx);
 			MatrixOperations::invert(Amtrx);
 			

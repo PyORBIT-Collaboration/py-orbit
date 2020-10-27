@@ -302,7 +302,7 @@ class TrialPoint:
 		st = st + " Name                       Value          Step       Use      Limit_Min       Limit_Max  "
 		for variableProxy in self._varProxy_arr:
 			st += os.linesep
-			st += "%10s "%variableProxy.getName()
+			st += "%25s "%variableProxy.getName()
 			st += "  %14.7g  %14.7g  "%(variableProxy.getValue(),variableProxy.getStep())
 			st += "  %1d  "%variableProxy.getUseInSolver()
 			st += "  %14.7g  %14.7g  "%(variableProxy.getLowerLimit(),variableProxy.getUpperLimit())

@@ -110,8 +110,8 @@ class ErrorCoordDisplacementNode(AccErrorNode):
 class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 	"""
 	The base class for Error Controllers. It keeps the reference to start and stop
-	lattice nodes. The transformation function is defined by  self.entranceAccNode,
-	and backward transformation is defined by  self.exitAccNode which are set up as
+	lattice nodes. The transformation function is defined by  self.entranceErrorAccNode,
+	and backward transformation is defined by  self.exitErrorAccNode which are set up as
 	children of two (or just one) entrance and exit lattice nodes.
 	"""
 	def __init__(self, name = "no_name", type_in = "Base_Error_Controller"):
@@ -120,23 +120,23 @@ class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 		ParamsDictObject.__init__(self)
 		#--------------------------------------
 		#---- entrance and exit Error AccNodes
-		self.entranceAccNode = None
-		self.exitAccNode = None
-		self.entranceAccNodeParent = None
-		self.exitAccNodeParent = None
+		self.entranceErrorAccNode = None
+		self.exitErrorAccNode = None
+		self.entranceErrorAccNodeParent = None
+		self.exitErrorAccNodeParent = None
 		self.accLattice = None
 		
 	def getEntanceNodeParameters(self):
 		"""
 		Returns tuple with parameters for entranceAccNode.
-		This method should be implemented by subclasses.
+		This method should be implemented by sub-classes.
 		"""
 		pass 
 	
 	def getExitNodeParameters(self):
 		"""
 		Returns tuple with parameters for exitAccNode.
-		This method should be implemented by subclasses.
+		This method should be implemented by sub-classes.
 		"""
 		pass 
 		
@@ -154,33 +154,35 @@ class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 		
 	def getEntanceNode(self):
 		"""
-		Returns the laatice entrance (start) node for errors application.
+		Returns the lattice entrance (start) node for errors application.
 		"""
-		return self.entranceAccNode
+		return self.entranceErrorAccNode
 		
 	def getExitNode(self):
 		"""
-		Returns the laatice exit (stop) node for errors application.
+		Returns the lattice exit (stop) node for errors application.
 		"""
-		return self.exitAccNode
+		return self.exitErrorAccNode
 		
 	def setEntanceNodeParent(self,entranceAccNodeParent):
 		"""
 		Set up the entrance (start) lattice node for error effects.
 		"""
-		self.entranceAccNodeParent = entranceAccNodeParent
-		self.entranceAccNodeParent.getChildNodes(AccNode.ENTRANCE).insert(0,self.entranceAccNode)
+		self.entranceErrorAccNodeParent = entranceAccNodeParent
+		self.entranceErrorAccNode.setName("ErrNode:CoordDisp:Entr:"+entranceAccNodeParent.getName())
+		self.entranceErrorAccNodeParent.getChildNodes(AccNode.ENTRANCE).insert(0,self.entranceErrorAccNode)
 		
 	def setExitNodeParent(self,exitAccNodeParent):
 		"""
 		Set up the exit (stop) lattice node for error effects.
 		"""
-		self.exitAccNodeParent = exitAccNodeParent
-		self.exitAccNodeParent.addChildNode(self.exitAccNode,AccNode.EXIT)
+		self.exitErrorAccNodeParent = exitAccNodeParent
+		self.exitErrorAccNode.setName("ErrNode:CoordDisp:Exit:"+exitAccNodeParent.getName())
+		self.exitErrorAccNodeParent.addChildNode(self.exitErrorAccNode,AccNode.EXIT)
 		
 	def setOneNodeParent(self,accNodeParent):
 		"""
-		If we applay error transformation only for one lattice node.		
+		If we apply error transformation only for one lattice node.		
 		"""
 		self.setEntanceNodeParent(accNodeParent)
 		self.setExitNodeParent(accNodeParent)
@@ -189,13 +191,22 @@ class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 		"""
 		Returns the entrance (start) lattice node for error effects.
 		"""
-		return self.entranceAccNodeParent
+		return self.entranceErrorAccNodeParent
 		
 	def getExitNodeParent(self):
 		"""
 		Returns the exit (stop) lattice node for error effects.
 		"""
-		return self.exitAccNodeParent		
+		return self.exitErrorAccNodeParent
+		
+	def cleanParentNodes(self):
+		"""
+		Removes children representing error nodes from the parent node or nodes.
+		"""
+		if(self.entranceErrorAccNodeParent != None and self.entranceErrorAccNode != None):
+			self.entranceErrorAccNodeParent.getChildNodes(AccNode.ENTRANCE).remove(self.entranceErrorAccNode)
+		if(self.exitErrorAccNodeParent != None and self.exitErrorAccNode != None):
+			self.exitErrorAccNodeParent.getChildNodes(AccNode.EXIT).remove(self.exitErrorAccNode)
 	
 
 class ErrorCntrlCoordDisplacement(BaseErrorController):
@@ -208,10 +219,10 @@ class ErrorCntrlCoordDisplacement(BaseErrorController):
 	"""
 	def __init__(self,name = "no_name"):
 		BaseErrorController.__init__(self,name,"ErrorCntrlCoordDisplacement")
-		self.entranceAccNode = ErrorCoordDisplacementNode()
-		self.exitAccNode = ErrorCoordDisplacementNode()
-		self.entranceAccNode.setErrorControllerParamFunc(self.getEntanceNodeParameters)
-		self.exitAccNode.setErrorControllerParamFunc(self.getExitNodeParameters)
+		self.entranceErrorAccNode = ErrorCoordDisplacementNode()
+		self.exitErrorAccNode = ErrorCoordDisplacementNode()
+		self.entranceErrorAccNode.setErrorControllerParamFunc(self.getEntanceNodeParameters)
+		self.exitErrorAccNode.setErrorControllerParamFunc(self.getExitNodeParameters)
 		self.param_dict = {"dx":0.,"dxp":0.,"dy":0.,"dyp":0.,"dz":0.,"dE":0.}
 		
 	def getEntanceNodeParameters(self):
@@ -245,4 +256,10 @@ class ErrorCntrlCoordDisplacement(BaseErrorController):
 		Sets one of the parameters for keys "dx","dxp","dy","dyp","dz","dE".
 		"""
 		self.param_dict[key] = value
+		
+	def getDisplacementParameters(self):
+		"""
+		Returns the (dx, dxp, dy, dyp, dz, dE) parameters.
+		"""
+		return self.getEntanceNodeParameters()
 		

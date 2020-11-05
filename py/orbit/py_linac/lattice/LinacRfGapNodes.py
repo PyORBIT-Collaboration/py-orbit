@@ -784,7 +784,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		#---- (this is from a thin gap approach)
 		frequency = rfCavity.getFrequency()
 		modePhase = self.baserf_gap.getParam("mode")*math.pi
-		phase_cavity = rfCavity.getPhase()
+		phase_cavity = phaseNearTargetPhase(rfCavity.getPhase(),0.)
 		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
 		E0L_local = 1.0e+9*rfCavity.getAmp()*self.getParam("E0L")		
 		#---- we have to find the phase_start 

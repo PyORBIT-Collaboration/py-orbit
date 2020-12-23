@@ -105,7 +105,11 @@ class Solver:
 			msg  = "============ Solver class: method solve(...)=============="
 			msg += os.linesep		
 			msg += "Cannot initialize the search algorithm"
-			msg += os.linesep			
+			msg += os.linesep
+			msg += "==== Trial Point ====="
+			msg += os.linesep
+			msg += initTrialPoint.textDesciption()
+			msg += os.linesep
 			msg += "Stop."
 			msg += os.linesep
 			orbitFinalize(msg)

@@ -53,6 +53,14 @@ from error_base import DipoleKickerOsc
 from error_base import QuadKicker
 from error_base import QuadKickerOsc
 
+
+#------------------------------------------------------------------------
+#     Error Nodes classes. All of them should be sub-classes
+#     of AccErrorNode class. User will not create these nodes
+#     directly, They will created by sub-classes of BaseErrorController
+#     class.
+#------------------------------------------------------------------------
+
 class AccErrorNode(AccNodeBunchTracker):
 	"""
 	This is an abstract base class for Error nodes hierarchy. The sub-classes
@@ -89,6 +97,25 @@ class AccErrorNode(AccNodeBunchTracker):
 		"""	
 		pass
 
+class ErrorLongitudinalDisplacementNode(AccErrorNode):
+	"""
+	The subclass of AccErrorNode. It can shift the bunch longitudinally by using a drift
+	TEAPOT function. This node is used to simulate longitudinal shift of lattice
+	elements. The shift length is provided by the controller's 
+	error_controller_params_func. This function return shift_length for the entrance
+	node and -shift_length for the exit one.
+	"""
+	def __init__(self, name = "no_name"):
+		AccErrorNode.__init__(self,name,"ErrorLongitudinalDisplacementNode")
+		
+	def track(self, paramsDict):
+		"""
+		Performs shift_length TEAPOT drift tracking.
+		"""
+		bunch = paramsDict["bunch"]
+		shift_length = self.error_controller_params_func()
+		LongDisplacement(bunc,shift_length)
+		
 class ErrorCoordDisplacementNode(AccErrorNode):
 	"""
 	The subclass of AccErrorNode. It can shift any of 6 coordinates by specified 
@@ -105,7 +132,105 @@ class ErrorCoordDisplacementNode(AccErrorNode):
 		"""
 		bunch = paramsDict["bunch"]
 		(dx, dxp, dy, dyp, dz, dE) = self.error_controller_params_func()
-		CoordDisplacement(bunch, dx, dxp, dy, dyp, dz, dE)
+		CoordDisplacement(bunch, dx, dxp, dy, dyp, dz, dE)		
+	
+class ErrorStraightRotationZNode(AccErrorNode):
+	"""
+	The subclass of AccErrorNode. It describes the rotation around z-axis 
+	by a certain angle. The angle parameter is provided by the controller's 
+	error_controller_params_func. This function return angle for the entrance
+	node and -angle for the exit one.
+	"""
+	def __init__(self, name = "no_name"):
+		AccErrorNode.__init__(self,name,"ErrorStraightRotationZNode")
+		
+	def track(self, paramsDict):
+		"""
+		Performs rotation by TEAPOT error_base StraightRotationZ function.
+		"""
+		bunch = paramsDict["bunch"]
+		angle = self.error_controller_params_func()	
+		StraightRotationXY(bunch, angle)
+
+class ErrorStraightRotationXNode(AccErrorNode):
+	"""
+	The subclass of AccErrorNode. It describes the rotation around x-axis 
+	by a certain angle. The angle parameter is provided by the controller's 
+	error_controller_params_func. This function return angle,length, and direction
+	of the node/nodes that are rotated for the entrance node and for the exit one.
+	The rotation is performed by StraightRotationYSI and StraightRotationYSF
+	error_base TEAPOT functions for the entrance (Init) and exit (Final) 
+	error nodes.
+	"""
+	def __init__(self, name = "no_name"):
+		AccErrorNode.__init__(self,name,"ErrorStraightRotationXNode")
+		
+	def track(self, paramsDict):
+		"""
+		Performs rotation by TEAPOT error_base StraightRotationYSI and
+		StraightRotationYSF functions.
+		"""
+		bunch = paramsDict["bunch"]
+		(angle,length,direction) = self.error_controller_params_func()
+		if(direction > 0):
+			StraightRotationYSI(bunch,angle,length)
+			return
+		if(direction < 0):
+			StraightRotationYSF(bunch,angle,length)
+			return
+		msg = "ErrorStraightRotationXNode - no direction parameter for the rotation!"
+		msg = msg + os.linesep
+		msg = msg + "direction="+str(direction)
+		msg = msg + os.linesep
+		msg = msg + "Stop."
+		msg = msg + os.linesep
+		orbitFinalize(msg)	
+
+class ErrorStraightRotationYNode(AccErrorNode):
+	"""
+	The subclass of AccErrorNode. It describes the rotation around y-axis 
+	by a certain angle. The angle parameter is provided by the controller's 
+	error_controller_params_func. This function return angle,length, and direction
+	of the node/nodes that are rotated for the entrance node and for the exit one.
+	The rotation is performed by StraightRotationXSI and StraightRotationXSF
+	error_base TEAPOT functions for the entrance (Init) and exit (Final) 
+	error nodes.
+	"""
+	def __init__(self, name = "no_name"):
+		AccErrorNode.__init__(self,name,"ErrorStraightRotationYNode")
+		
+	def track(self, paramsDict):
+		"""
+		Performs rotation by TEAPOT error_base StraightRotationXSI and
+		StraightRotationXSF functions.
+		"""
+		bunch = paramsDict["bunch"]
+		(angle,length,direction) = self.error_controller_params_func()
+		if(direction > 0):
+			StraightRotationXSI(bunch,angle,length)
+			return
+		if(direction < 0):
+			StraightRotationXSF(bunch,angle,length)
+			return
+		msg = "ErrorStraightRotationYNode - no direction parameter for the rotation!"
+		msg = msg + os.linesep
+		msg = msg + "direction="+str(direction)
+		msg = msg + os.linesep
+		msg = msg + "Stop."
+		msg = msg + os.linesep
+		orbitFinalize(msg)			
+		
+#------------------------------------------------------------------------
+#     Error Control classes. All of them should be sub-classes
+#     of BaseErrorController class. The Error Controller Classes keep 
+#     references for two error nodes: first at the entrance of error 
+#     applied part of the lattice (or node) and the second at the exit.
+#     The Error Control classes implement two functions
+#     getEntanceNodeParameters() and getExitNodeParameters() that return
+#     parameters for Error Nodes. The Error Control classes also keep
+#     the reference to the parent Node/Nodes (real lattice nodes - like 
+#     quads,bends, RF gaps etc.) of the Error nodes. 
+#------------------------------------------------------------------------
 
 class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 	"""
@@ -120,11 +245,18 @@ class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 		ParamsDictObject.__init__(self)
 		#--------------------------------------
 		#---- entrance and exit Error AccNodes
+		self.short_type_name = "None"
 		self.entranceErrorAccNode = None
 		self.exitErrorAccNode = None
 		self.entranceErrorAccNodeParent = None
 		self.exitErrorAccNodeParent = None
 		self.accLattice = None
+		
+	def getShortTypeName(self):
+		"""
+		Returns the short type name that will be included into the error node name.
+		"""
+		return self.short_type_name
 		
 	def getEntanceNodeParameters(self):
 		"""
@@ -169,7 +301,7 @@ class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 		Set up the entrance (start) lattice node for error effects.
 		"""
 		self.entranceErrorAccNodeParent = entranceAccNodeParent
-		self.entranceErrorAccNode.setName("ErrNode:CoordDisp:Entr:"+entranceAccNodeParent.getName())
+		self.entranceErrorAccNode.setName("ErrNode:"+self.short_type_name+":Entr:"+entranceAccNodeParent.getName())
 		self.entranceErrorAccNodeParent.getChildNodes(AccNode.ENTRANCE).insert(0,self.entranceErrorAccNode)
 		
 	def setExitNodeParent(self,exitAccNodeParent):
@@ -177,7 +309,7 @@ class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 		Set up the exit (stop) lattice node for error effects.
 		"""
 		self.exitErrorAccNodeParent = exitAccNodeParent
-		self.exitErrorAccNode.setName("ErrNode:CoordDisp:Exit:"+exitAccNodeParent.getName())
+		self.exitErrorAccNode.setName("ErrNode:"+self.short_type_name+":Exit:"+exitAccNodeParent.getName())
 		self.exitErrorAccNodeParent.addChildNode(self.exitErrorAccNode,AccNode.EXIT)
 		
 	def setOneNodeParent(self,accNodeParent):
@@ -207,7 +339,44 @@ class BaseErrorController(NamedObject, TypedObject, ParamsDictObject):
 			self.entranceErrorAccNodeParent.getChildNodes(AccNode.ENTRANCE).remove(self.entranceErrorAccNode)
 		if(self.exitErrorAccNodeParent != None and self.exitErrorAccNode != None):
 			self.exitErrorAccNodeParent.getChildNodes(AccNode.EXIT).remove(self.exitErrorAccNode)
-	
+
+class ErrorCntrlLongitudinalDisplacement(BaseErrorController):
+	"""
+	Subclass of BaseErrorController. It defines the error controller for 
+	longitudinal shift Error node. 
+	"""
+	def __init__(self,name = "no_name"):
+		BaseErrorController.__init__(self,name,"ErrorCntrlLongitudinalDisplacement")
+		self.short_type_name = "LongDisp"
+		self.entranceErrorAccNode = ErrorLongitudinalDisplacementNode()
+		self.exitErrorAccNode = ErrorLongitudinalDisplacementNode()
+		self.entranceErrorAccNode.setErrorControllerParamFunc(self.getEntanceNodeShiftLength)
+		self.exitErrorAccNode.setErrorControllerParamFunc(self.getExitNodeShiftLength)
+		self.shift_length = 0.
+		
+	def getEntanceNodeShiftLength(self):
+		"""
+		Returns shift-length parameter for entrance Error node
+		"""
+		return self.shift_length
+		
+	def getExitNodeShiftLength(self):
+		"""
+		Returns shift-length parameter for exit Error node
+		"""
+		return self.shift_length		
+		
+	def setShiftLength(self,shift_length):
+		"""
+		Sets the shift-length parameter.
+		"""
+		self.shift_length = shift_length
+		
+	def getShiftLength(self):
+		"""
+		Returns the shift-length parameter.
+		"""
+		return self.shift_length	
 
 class ErrorCntrlCoordDisplacement(BaseErrorController):
 	"""
@@ -219,6 +388,7 @@ class ErrorCntrlCoordDisplacement(BaseErrorController):
 	"""
 	def __init__(self,name = "no_name"):
 		BaseErrorController.__init__(self,name,"ErrorCntrlCoordDisplacement")
+		self.short_type_name = "CoordDisp"
 		self.entranceErrorAccNode = ErrorCoordDisplacementNode()
 		self.exitErrorAccNode = ErrorCoordDisplacementNode()
 		self.entranceErrorAccNode.setErrorControllerParamFunc(self.getEntanceNodeParameters)
@@ -262,4 +432,144 @@ class ErrorCntrlCoordDisplacement(BaseErrorController):
 		Returns the (dx, dxp, dy, dyp, dz, dE) parameters.
 		"""
 		return self.getEntanceNodeParameters()
+
+class ErrorCntrlStraightRotationZ(BaseErrorController):
+	"""
+	Subclass of BaseErrorController. It defines the error controller for 
+	the rotation around z-axis Error node. 
+	"""
+	def __init__(self,name = "no_name"):
+		BaseErrorController.__init__(self,name,"ErrorCntrlStraightRotationZ")
+		self.short_type_name = "RotZ"
+		self.entranceErrorAccNode = ErrorStraightRotationZNode()
+		self.exitErrorAccNode = ErrorStraightRotationZNode()
+		self.entranceErrorAccNode.setErrorControllerParamFunc(self.getEntanceNodeRotationAngle)
+		self.exitErrorAccNode.setErrorControllerParamFunc(self.getExitNodeRotationAngle)
+		self.angle = 0.
 		
+	def getEntanceNodeRotationAngle(self):
+		"""
+		Returns angle parameter for entrance Error node
+		"""
+		return self.angle
+		
+	def getExitNodeRotationAngle(self):
+		"""
+		Returns angle parameter for exit Error node
+		"""
+		return -self.angle
+
+	def setRotationAngle(self,angle):
+		"""
+		Sets the angle parameter.
+		"""
+		self.angle = angle
+		
+	def getRotationAngle(self):
+		"""
+		Returns the angle parameter.
+		"""
+		return self.angle			
+
+class ErrorCntrlStraightRotationX(BaseErrorController):
+	"""
+	Subclass of BaseErrorController. It defines the error controller for 
+	the rotation around x-axis Error node. 
+	"""
+	def __init__(self,name = "no_name"):
+		BaseErrorController.__init__(self,name,"ErrorCntrlStraightRotationX")
+		self.short_type_name = "RotX"
+		self.entranceErrorAccNode = ErrorStraightRotationXNode()
+		self.exitErrorAccNode = ErrorStraightRotationXNode()
+		self.entranceErrorAccNode.setErrorControllerParamFunc(self.getEntanceNodeRotationParams)
+		self.exitErrorAccNode.setErrorControllerParamFunc(self.getExitNodeRotationParams)
+		self.angle = 0.
+		self.base_length = 0.
+		
+	def getEntanceNodeRotationParams(self):
+		"""
+		Returns angle, base_length, and direction parameters for entrance Error node
+		"""
+		return (self.angle,self.base_length,+1)
+		
+	def getExitNodeRotationParams(self):
+		"""
+		Returns angle, base_length, and direction parameters for exit Error node
+		"""
+		return (self.angle,self.base_length,-1)
+
+	def setRotationAngle(self,angle):
+		"""
+		Sets the angle parameter.
+		"""
+		self.angle = angle
+		
+	def getRotationAngle(self):
+		"""
+		Returns the angle parameter.
+		"""
+		return self.angle	
+		
+	def setBaseLength(self,base_length):
+		"""
+		Sets the base base_length parameter.
+		"""
+		self.base_length = base_length
+		
+	def getBaseLength(self):
+		"""
+		Returns the base base_length parameter.
+		"""
+		return self.base_length		
+
+class ErrorCntrlStraightRotationY(BaseErrorController):
+	"""
+	Subclass of BaseErrorController. It defines the error controller for 
+	the rotation around y-axis Error node. 
+	"""
+	def __init__(self,name = "no_name"):
+		BaseErrorController.__init__(self,name,"ErrorCntrlStraightRotationY")
+		self.short_type_name = "RotY"
+		self.entranceErrorAccNode = ErrorStraightRotationYNode()
+		self.exitErrorAccNode = ErrorStraightRotationYNode()
+		self.entranceErrorAccNode.setErrorControllerParamFunc(self.getEntanceNodeRotationParams)
+		self.exitErrorAccNode.setErrorControllerParamFunc(self.getExitNodeRotationParams)
+		self.angle = 0.
+		self.base_length = 0.
+		
+	def getEntanceNodeRotationParams(self):
+		"""
+		Returns angle, base_length, and direction parameters for entrance Error node
+		"""
+		return (self.angle,self.base_length,+1)
+		
+	def getExitNodeRotationParams(self):
+		"""
+		Returns angle, base_length, and direction parameters for exit Error node
+		"""
+		return (self.angle,self.base_length,-1)
+
+	def setRotationAngle(self,angle):
+		"""
+		Sets the angle parameter.
+		"""
+		self.angle = angle
+		
+	def getRotationAngle(self):
+		"""
+		Returns the angle parameter.
+		"""
+		return self.angle	
+		
+	def setBaseLength(self,base_length):
+		"""
+		Sets the base base_length parameter.
+		"""
+		self.base_length = base_length
+		
+	def getBaseLength(self):
+		"""
+		Returns the base base_length parameter.
+		"""
+		return self.base_length	
+

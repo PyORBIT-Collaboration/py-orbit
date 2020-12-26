@@ -41,7 +41,7 @@ void PyBaseFieldSource::getElectricMagneticField(
 	double& fm_x, double& fm_y, double& fm_z)
 {	  
 	  PyObject* py_wrp = getPyWrapper();
-  	PyObject* ef_tuple = PyObject_CallMethod(py_wrp,"getElectricMagneticField","dddd",x,y,z,t);
+  	PyObject* ef_tuple = PyObject_CallMethod(py_wrp,const_cast<char*>("getElectricMagneticField"),const_cast<char*>("dddd"),x,y,z,t);
     if(!PyArg_ParseTuple(	ef_tuple,"dddddd:electric_magnetic_field",&fe_x,&fe_y,&fe_z,&fm_x,&fm_y,&fm_z)){
       ORBIT_MPI_Finalize("PyBaseFieldSource - getElectricMagneticField(x,y,z,t0 method does not work!");
     }	

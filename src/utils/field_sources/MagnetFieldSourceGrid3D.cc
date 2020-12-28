@@ -75,6 +75,12 @@ MagnetFieldSourceGrid3D::MagnetFieldSourceGrid3D(Grid3D* BxGrid_In, Grid3D* ByGr
 		field_sign_arr[i][1] = 1;
 		field_sign_arr[i][2] = 1;
 	}
+	
+	//used to correct Bx,By,Bz fields if we have the same 
+	//distributions for Grid3D (identical magnets) with different fields
+	//It will save the memory for us. 
+	field_coeff = 1.;	
+	
 }
 
 MagnetFieldSourceGrid3D::~MagnetFieldSourceGrid3D()
@@ -147,6 +153,18 @@ void MagnetFieldSourceGrid3D::setFieldSignsForQuadrants(int signX, int signY, in
     if(signBz < 0) { axis_sign_for_fields_arr[2] = -1; }
 }
 
+/** Sets the scaling coefficient for inner fields in Grid3D instances */
+void MagnetFieldSourceGrid3D::setFieldCoeff(double field_coeff)
+{
+	this->field_coeff = field_coeff;
+}
+
+/** Returns the scaling coefficient for inner fields in Grid3D instances */
+double MagnetFieldSourceGrid3D::getFieldCoeff()
+{
+	return field_coeff;
+}
+
 /** Returns signs for fields in different quadrants that defined by signs of  signX, signY, signZ */
 void MagnetFieldSourceGrid3D::getFieldSignsForQuadrants(int signX, int signY, int signZ, int& signBx, int& signBy, int& signBz){
 	
@@ -202,8 +220,7 @@ void MagnetFieldSourceGrid3D::getInnerElectricMagneticField(
     int quadrant_ind = ind_x + 2*ind_y + 4*ind_z;
     int* axis_sign_for_fields_arr = field_sign_arr[quadrant_ind];
     
-    E_x = axis_sign_for_fields_arr[0]*BxGrid->getValue(x_inn,y_inn,z_inn);
-    E_y = axis_sign_for_fields_arr[1]*ByGrid->getValue(x_inn,y_inn,z_inn);
-    E_z = axis_sign_for_fields_arr[2]*BzGrid->getValue(x_inn,y_inn,z_inn);
-
+    H_x = field_coeff*axis_sign_for_fields_arr[0]*BxGrid->getValue(x_inn,y_inn,z_inn);
+    H_y = field_coeff*axis_sign_for_fields_arr[1]*ByGrid->getValue(x_inn,y_inn,z_inn);
+    H_z = field_coeff*axis_sign_for_fields_arr[2]*BzGrid->getValue(x_inn,y_inn,z_inn);
 }

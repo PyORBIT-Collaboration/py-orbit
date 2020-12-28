@@ -111,8 +111,23 @@ extern "C" {
 	  Py_INCREF(Py_None);
 	  return Py_None;	  	
   }
-  
-   /** Sets or returns X,Y,Z axis symmetries */
+
+  /** Sets or Returns the scaling coefficient for inner fields in Grid3D instances */
+  static PyObject* MagnetFieldSourceGrid3D_fieldCoeff(PyObject *self, PyObject *args){
+	  MagnetFieldSourceGrid3D* cpp_fieldSource = (MagnetFieldSourceGrid3D*)((pyORBIT_Object*) self)->cpp_obj;
+	  int nArgs = PyTuple_Size(args);
+	  double field_coeff;  
+	  if(nArgs == 1){
+	  	if(!PyArg_ParseTuple(args,"d:fieldCoeff",&field_coeff)){
+	  		error("MagnetFieldSourceGrid3D.fieldCoeff(field_coeff) - param is needed.");
+	  	}
+	  	cpp_fieldSource->setFieldCoeff(field_coeff);
+	  }
+	  field_coeff = cpp_fieldSource->getFieldCoeff();
+	  return Py_BuildValue("d",field_coeff);
+  }	  
+
+   /** Returns the Ex,Ey,Ez, Bx,By,Bz fields at (x,y,z) point */
   static PyObject* MagnetFieldSourceGrid3D_getFields(PyObject *self, PyObject *args){
   	MagnetFieldSourceGrid3D* cpp_fieldSource = (MagnetFieldSourceGrid3D*)((pyORBIT_Object*) self)->cpp_obj;
   	double x,y,z;
@@ -172,7 +187,8 @@ extern "C" {
     { "symmetry",              MagnetFieldSourceGrid3D_symmetry              ,METH_VARARGS,"Sets or returns X,Y,Z axis symmetries as 0 or 1 numbers - eg. (0,0,0)"},
     { "getFields",             MagnetFieldSourceGrid3D_getFields             ,METH_VARARGS,"Returns E and B fields (Ex,Ey,Ez,Bx,By,Bz) for (x,y,z) point"},
     { "fieldSignsForQuadrants",MagnetFieldSourceGrid3D_fieldSignsForQuadrants,METH_VARARGS, "Sets or returns field signs for quadrants x-y-z"},
-    { "transormfMatrix", MagnetFieldSourceGrid3D_transormfMatrix,METH_VARARGS, "Sets or returns the coordinates transformation matrix 4x4 from external to inner system"},    
+    { "transormfMatrix",       MagnetFieldSourceGrid3D_transormfMatrix,       METH_VARARGS, "Sets or returns the coordinates transformation matrix 4x4 from external to inner system"},
+    { "fieldCoeff",            MagnetFieldSourceGrid3D_fieldCoeff,            METH_VARARGS, "Sets or Returns the scaling coefficient for inner fields in Grid3D instances"},
      {NULL}
   };
 

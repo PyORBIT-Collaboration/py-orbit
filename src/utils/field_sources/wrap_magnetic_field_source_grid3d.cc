@@ -54,7 +54,8 @@ extern "C" {
 		self->cpp_obj = new MagnetFieldSourceGrid3D(BxGrid3D,ByGrid3D,BzGrid3D);
 		Py_INCREF(pyBxGrid3D);
 		Py_INCREF(pyByGrid3D);
-		Py_INCREF(pyBzGrid3D);		
+		Py_INCREF(pyBzGrid3D);	
+		((MagnetFieldSourceGrid3D*) self->cpp_obj)->setPyWrapper((PyObject*) self);
     return 0;
   }
 

@@ -77,5 +77,5 @@ void QuadFieldSource::getInnerElectricMagneticField(
 		if(z < -length/2 || z > length/2) { return; }
 		
 		H_x = gradient*y;
-		H_y = -gradient*x;
+		H_y = gradient*x;
 }

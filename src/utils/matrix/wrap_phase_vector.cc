@@ -233,8 +233,38 @@ extern "C" {
 		error("PyPhaseVector - mult(number or vector or matrix) - input parameter is wrong.");	
 		Py_INCREF(Py_None);
     return Py_None;		
+  }
+
+ 	/**  vct_mult() - vector multiplication of two vectors of 3D. It will return the new vector */
+  static PyObject* PhaseVector_vct_mult(PyObject *self, PyObject *args){
+    pyORBIT_Object* pyPhaseVector = (pyORBIT_Object*) self;
+		PhaseVector* cpp_PhaseVector = (PhaseVector*) pyPhaseVector->cpp_obj;
+		PyObject *pyIn;
+		if(!PyArg_ParseTuple(args,"O:mult",&pyIn)){
+			error("PyPhaseVector - vct_mult(vector) - input parameter is needed.");
+		}	
+		PyObject* pyORBIT_PhaseVector_Type = getOrbitUtilsType("PhaseVector");
+		if(PyObject_IsInstance(pyIn,pyORBIT_PhaseVector_Type)){
+			PhaseVector* cpp_PhaseVector_In = (PhaseVector*) ((pyORBIT_Object*) pyIn)->cpp_obj;
+			if(cpp_PhaseVector->size() != cpp_PhaseVector_In->size() || cpp_PhaseVector_In->size() != 3){
+				error("PyPhaseVector - vct_mult(vector) - vector sizes should be 3.");
+			}
+			PyObject* mod = PyImport_ImportModule("orbit_utils");
+			PyObject* pyVctr = PyObject_CallMethod(mod,const_cast<char*>("PhaseVector"),const_cast<char*>("i"),3);
+			double* v1 = cpp_PhaseVector->getArray();
+			double* v2 = cpp_PhaseVector_In->getArray();
+			double* v3 = ((PhaseVector*) ((pyORBIT_Object*)pyVctr)->cpp_obj)->getArray();
+			v3[0] =  v1[1]*v2[2] - v2[1]*v1[2];
+			v3[1] = -(v1[0]*v2[2] - v2[0]*v1[2]);
+			v3[2] =  v1[0]*v2[1] - v2[0]*v1[1];
+			Py_DECREF(mod);
+			return pyVctr;
+		}	
+		error("PyPhaseVector - vct_mult(vector) - input parameter is not a PhaseVector.");	
+		Py_INCREF(Py_None);
+    return Py_None;		
   }		
-		
+
 	// defenition of the methods of the python PhaseVector wrapper class
 	// they will be vailable from python level
   static PyMethodDef PhaseVectorClassMethods[] = {
@@ -247,6 +277,7 @@ extern "C" {
 		{ "norm",       PhaseVector_norm      ,METH_VARARGS,"Returns the length of the vector"},
 		{ "add",        PhaseVector_add       ,METH_VARARGS,"Adds a vector or number to the vector"},
 		{ "mult",       PhaseVector_mult      ,METH_VARARGS,"Multiples a vector by a number, vector or matrix"},
+		{ "vct_mult",   PhaseVector_vct_mult  ,METH_VARARGS,"Vector multiplication of two 3D vectors"},
     {NULL}
   };
 

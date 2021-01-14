@@ -42,6 +42,15 @@ namespace OrbitUtils{
 			/** Destructor */
 			~MagnetFieldSourceGrid3D();
 
+			/** Returns pointer to Grid3D object with Bx field map */
+			Grid3D* getBxGrid();
+
+			/** Returns pointer to Grid3D object with By field map */
+			Grid3D* getByGrid();
+
+			/** Returns pointer to Grid3D object with Bz field map */
+			Grid3D* getBzGrid();			
+			
 			/** Sets symmetry properties in Grid3D fields along x,y,z axises  */
 			void setSymmetry(int symmetry_x, int symmetry_y, int symmetry_z);
 

@@ -114,6 +114,23 @@ MagnetFieldSourceGrid3D::~MagnetFieldSourceGrid3D()
 	
 }
 
+/** Returns pointer to Grid3D object with Bx field map */
+Grid3D* MagnetFieldSourceGrid3D::getBxGrid()
+{
+	return BxGrid;
+}
+
+/** Returns pointer to Grid3D object with By field map */
+Grid3D* MagnetFieldSourceGrid3D::getByGrid()
+{
+	return ByGrid;
+}
+
+/** Returns pointer to Grid3D object with Bz field map */
+Grid3D* MagnetFieldSourceGrid3D::getBzGrid()
+{
+	return BzGrid;
+}
 
 /** Sets symmetry properties in Grid3D fields along x,y,z axises  */
 void MagnetFieldSourceGrid3D::setSymmetry(int symmetry_x, int symmetry_y, int symmetry_z)

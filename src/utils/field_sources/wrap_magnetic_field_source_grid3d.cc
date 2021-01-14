@@ -59,6 +59,18 @@ extern "C" {
     return 0;
   }
 
+  /** Returns 3 Grid3D objects with Bx,By,Bz fields that were used in the constructor */
+  static PyObject* MagnetFieldSourceGrid3D_getGrid3Ds(PyObject *self, PyObject *args){
+  	MagnetFieldSourceGrid3D* cpp_fieldSource = (MagnetFieldSourceGrid3D*)((pyORBIT_Object*) self)->cpp_obj;
+  	Grid3D* BxGrid3D = cpp_fieldSource->getBxGrid();
+  	Grid3D* ByGrid3D = cpp_fieldSource->getByGrid();
+  	Grid3D* BzGrid3D = cpp_fieldSource->getBzGrid();
+ 		PyObject* pyBxGrid3D = (PyObject*) BxGrid3D->getPyWrapper();
+ 		PyObject* pyByGrid3D = (PyObject*) ByGrid3D->getPyWrapper();
+ 		PyObject* pyBzGrid3D = (PyObject*) BzGrid3D->getPyWrapper(); 
+ 		return Py_BuildValue("(OOO)",pyBxGrid3D,pyByGrid3D,pyBzGrid3D);
+  }
+  
   /** Sets or returns X,Y,Z axis symmetries */
   static PyObject* MagnetFieldSourceGrid3D_symmetry(PyObject *self, PyObject *args){
 	  MagnetFieldSourceGrid3D* cpp_fieldSource = (MagnetFieldSourceGrid3D*)((pyORBIT_Object*) self)->cpp_obj;
@@ -186,10 +198,11 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef MagnetFieldSourceGrid3DClassMethods[] = {
     { "symmetry",              MagnetFieldSourceGrid3D_symmetry              ,METH_VARARGS,"Sets or returns X,Y,Z axis symmetries as 0 or 1 numbers - eg. (0,0,0)"},
+    { "getGrid3Ds",            MagnetFieldSourceGrid3D_getGrid3Ds            ,METH_VARARGS,"Returns 3 Grid3D objects with Bx,By,Bz fields that were used in the constructor."},
     { "getFields",             MagnetFieldSourceGrid3D_getFields             ,METH_VARARGS,"Returns E and B fields (Ex,Ey,Ez,Bx,By,Bz) for (x,y,z) point"},
-    { "fieldSignsForQuadrants",MagnetFieldSourceGrid3D_fieldSignsForQuadrants,METH_VARARGS, "Sets or returns field signs for quadrants x-y-z"},
-    { "transormfMatrix",       MagnetFieldSourceGrid3D_transormfMatrix,       METH_VARARGS, "Sets or returns the coordinates transformation matrix 4x4 from external to inner system"},
-    { "fieldCoeff",            MagnetFieldSourceGrid3D_fieldCoeff,            METH_VARARGS, "Sets or Returns the scaling coefficient for inner fields in Grid3D instances"},
+    { "fieldSignsForQuadrants",MagnetFieldSourceGrid3D_fieldSignsForQuadrants,METH_VARARGS,"Sets or returns field signs for quadrants x-y-z"},
+    { "transormfMatrix",       MagnetFieldSourceGrid3D_transormfMatrix,       METH_VARARGS,"Sets or returns the coordinates transformation matrix 4x4 from external to inner system"},
+    { "fieldCoeff",            MagnetFieldSourceGrid3D_fieldCoeff,            METH_VARARGS,"Sets or Returns the scaling coefficient for inner fields in Grid3D instances"},
      {NULL}
   };
 

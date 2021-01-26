@@ -266,7 +266,7 @@ class GaussDist1D:
 		x_norm = random.gauss(0.,1.0)
 		xp_norm = random.gauss(0.,1.0)
 		if(self.cut_off > 0.):
-			while((x_norm**2+xp_norm**2) > self.cut_off2):
+			while((x_norm**2+xp_norm**2) < self.cut_off2):
 				x_norm = random.gauss(0.,1.0)
 				xp_norm = random.gauss(0.,1.0)
 		return self.twiss.getU_UP(x_norm,xp_norm)

@@ -364,6 +364,12 @@ int Collimator::driftParticle(int coll_flag, double& zrl, double length, double*
 		zrl -= stepsize;
 		coll_flag = Collimator::checkCollFlag(coords[0], coords[2]);
 		
+		double gamma2i=1.0/(syncpart->getGamma()*syncpart->getGamma());
+		double phifac = (coords[1] * coords[1] + coords[3] * coords[3] +
+			  (pfac-1.0)* (pfac-1.0)* gamma2i) / 2.0;
+		phifac = (phifac * 1.0/pfac - (pfac-1.0) * gamma2i) * 1.0/pfac;
+		coords[4] -= stepsize * phifac;		
+		
 		nHits++;
 		if(coll_flag == 1) return 1;
 

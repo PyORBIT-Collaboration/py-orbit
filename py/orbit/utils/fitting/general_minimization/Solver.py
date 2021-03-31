@@ -158,7 +158,7 @@ class TrialPoint:
 			msg += self.textDesciption()
 			msg += "============ WARNING  STOP=============="
 			msg += os.linesep	
-			print "msg"
+			print msg
 		self._varProxy_arr.append(variableProxy)
 		self._varProxy_dict[variableProxy.getName()] = variableProxy
 		

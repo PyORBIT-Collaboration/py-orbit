@@ -162,3 +162,48 @@ void BunchExtremaCalculator::getExtremaZ(Bunch* bunch,
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index0);
 	OrbitUtils::BufferStore::getBufferStore()->setUnusedDoubleArr(buff_index1);	
 }
+
+/** The method calculates the sqrt(x**2+y**2) extrema of the particles coordinates in the bunch. */
+void BunchExtremaCalculator::getExtremaR(Bunch* bunch, double& rMax)
+{
+	double** partArr=bunch->coordArr();
+	double* coordArr = NULL;	
+	
+	double x_avg = 0.;
+	double y_avg = 0.;
+	int nParts = bunch->getSizeGlobal();
+	
+	for (int ip = 0, n = bunch->getSize(); ip < n; ip++){
+		coordArr = partArr[ip];
+		x_avg += coordArr[0];
+		y_avg += coordArr[2];
+	}
+	
+	double x_avg_global = 0.;
+	double y_avg_global = 0.;
+	
+	ORBIT_MPI_Allreduce(&x_avg,&x_avg_global,1,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
+	ORBIT_MPI_Allreduce(&y_avg,&y_avg_global,1,MPI_DOUBLE,MPI_SUM,bunch->getMPI_Comm_Local()->comm);
+	
+	if(nParts > 0){
+		x_avg = x_avg_global/nParts;
+		y_avg = y_avg_global/nParts;
+	} else {
+		x_avg = x_avg_global;
+		y_avg = y_avg_global;		
+	}
+		
+	double rMax_local =  0.;
+	double rMax_global = 0.;
+	rMax = 0.;
+	
+	for (int ip = 0, n = bunch->getSize(); ip < n; ip++){
+		coordArr = partArr[ip];
+		rMax = sqrt(pow(coordArr[0] - x_avg,2.0) + pow(coordArr[2] - y_avg,2.0));
+		if(rMax > rMax_local) rMax_local = rMax;		
+	}
+
+	ORBIT_MPI_Allreduce(&rMax_local,&rMax_global,1,MPI_DOUBLE,MPI_MAX,bunch->getMPI_Comm_Local()->comm);
+  
+	rMax = rMax_global;
+}

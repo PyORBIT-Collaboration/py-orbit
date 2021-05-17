@@ -122,7 +122,7 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		if(n_body_children != 0):
 			msg = "The Class AccNode: method _setPartsLengthEvenly will remove the exiting child nodes!"
 			msg = msg + os.linesep
-			msg = "You will empty self.__childNodesArr[AccNode.BODY] array which is not empty!"
+			msg = msg + "You will empty self.__childNodesArr[AccNode.BODY] array which is not empty!"
 			msg = msg + os.linesep			
 			msg = msg + "Name of element=" + self.getName()
 			msg = msg + os.linesep
@@ -176,9 +176,22 @@ class AccNode(NamedObject, TypedObject, ParamsDictObject):
 		The action of the child occurs after the action of the
 		parent at the entrance and before at the exit.
 		"""
+		nodes = None
 		if(place == AccNode.ENTRANCE or place == AccNode.EXIT):
 			nodes = self.__childNodesArr[place]
 		else:
+			if(place != AccNode.BODY):
+				msg = "The Class AccNode: error in method addChildNode(node,place,part_index,place_in_part)!"
+				msg = msg + os.linesep
+				msg = msg + "place parameter should be AccNode.ENTRANCE, AccNode.BODY, or AccNode.EXIT!"
+				msg = msg + os.linesep
+				msg = msg + "You specified place=" + place
+				msg = msg + os.linesep
+				msg = msg + "(part_index,place_in_part) =" + (part_index,place_in_part)
+				msg = msg + os.linesep
+				msg = msg + "Fix it!"
+				msg = msg + os.linesep
+				orbitFinalize(msg)
 			nodes = self.__childNodesArr[place][part_index][place_in_part]
 		nodes.append(node)
 

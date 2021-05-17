@@ -84,13 +84,7 @@ void CoordDisplacement(Bunch* bunch,
 
 void LongDisplacement(Bunch* bunch, double ds)
 {
-  //coordinate array [part. index][x,xp,y,yp,z,dE]
-  double** arr = bunch->coordArr();
-
-  for(int i = 0; i < bunch->getSize(); i++)
-  {
-   teapot_base::drifti(bunch, i, ds);
-  }
+  teapot_base::drift(bunch, ds);
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -39,7 +39,7 @@ extern "C" {
   	int xSize,ySize,zSize;
   	double xy_ratio = -1.0;
 		if(!PyArg_ParseTuple(args,"iii|d:__init__",&xSize,&ySize,&zSize,&xy_ratio)){
-			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5Drb - SpaceChargeCalc2p5Drb(xSize,ySize,xzSize[,xy_ratio = 1.0]) - constructor needs parameters.");
+			ORBIT_MPI_Finalize("PySpaceChargeCalc2p5Drb - SpaceChargeCalc2p5Drb(xSize,ySize,zSize[,xy_ratio = 1.0]) - constructor needs parameters.");
 		}
 		if(xy_ratio > 0.){
 			self->cpp_obj = new SpaceChargeCalc2p5Drb(xSize,ySize,zSize,xy_ratio);

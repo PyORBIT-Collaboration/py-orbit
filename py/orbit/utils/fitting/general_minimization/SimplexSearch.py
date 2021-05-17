@@ -105,7 +105,7 @@ class SimplexSearchAlgorithm(SearchAgorithm):
 					self.simplex[vertex][x] = self.guess[x] + self.increments[x]
 			self.errors.append(0)
 		res = self._calculate_errors_at_vertices()
-		if(not res): 
+		if(not res and (not self.solver.getStopper().getShouldStop())): 
 			return False
 		return True
 		

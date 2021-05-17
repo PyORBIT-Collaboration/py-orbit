@@ -105,7 +105,11 @@ class Solver:
 			msg  = "============ Solver class: method solve(...)=============="
 			msg += os.linesep		
 			msg += "Cannot initialize the search algorithm"
-			msg += os.linesep			
+			msg += os.linesep
+			msg += "==== Trial Point ====="
+			msg += os.linesep
+			msg += initTrialPoint.textDesciption()
+			msg += os.linesep
 			msg += "Stop."
 			msg += os.linesep
 			orbitFinalize(msg)
@@ -154,7 +158,7 @@ class TrialPoint:
 			msg += self.textDesciption()
 			msg += "============ WARNING  STOP=============="
 			msg += os.linesep	
-			print "msg"
+			print msg
 		self._varProxy_arr.append(variableProxy)
 		self._varProxy_dict[variableProxy.getName()] = variableProxy
 		
@@ -302,7 +306,7 @@ class TrialPoint:
 		st = st + " Name                       Value          Step       Use      Limit_Min       Limit_Max  "
 		for variableProxy in self._varProxy_arr:
 			st += os.linesep
-			st += "%10s "%variableProxy.getName()
+			st += "%25s "%variableProxy.getName()
 			st += "  %14.7g  %14.7g  "%(variableProxy.getValue(),variableProxy.getStep())
 			st += "  %1d  "%variableProxy.getUseInSolver()
 			st += "  %14.7g  %14.7g  "%(variableProxy.getLowerLimit(),variableProxy.getUpperLimit())

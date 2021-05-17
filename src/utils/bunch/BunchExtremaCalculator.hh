@@ -50,7 +50,11 @@ namespace OrbitUtils{
 			
 			/** The method calculates the z extrema of the particles coordinates in the bunch. */
 			void getExtremaZ(Bunch* bunch,  
-				double& zMin, double& zMax)	;	
+				double& zMin, double& zMax);
+			
+			/** The method calculates the sqrt(x**2+y**2) extrema of the particles coordinates in the bunch. */
+			void getExtremaR(Bunch* bunch, double& rMax);		
+			
 	};
 };
 ///////////////////////////////////////////////////////////////////////////

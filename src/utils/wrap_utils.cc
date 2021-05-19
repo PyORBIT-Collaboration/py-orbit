@@ -14,6 +14,7 @@
 #include "wrap_numrecipes.hh"
 #include "wrap_bunch_utils_functions.hh"
 #include "wrap_harmonic_data.hh"
+#include "wrap_field_sources_module.hh"
 
 namespace wrap_orbit_utils{
 
@@ -27,7 +28,7 @@ extern "C" {
 
   void initutils(){
     //create new module
-    PyObject* module = Py_InitModule("orbit_utils",UtilsModuleMethods);		
+    PyObject* module = Py_InitModule(const_cast<char*>("orbit_utils"),UtilsModuleMethods);		
 		//add the other classes init
 		wrap_utils_martix::initMatrix(module);
 		wrap_utils_phase_vector::initPhaseVector(module);
@@ -40,13 +41,14 @@ extern "C" {
 		wrap_gl_integrator::initGLIntegrator(module);
 		wrap_polynomial::initPolynomial(module);		
 		//this call creates the module orbit_utils.numrecipes with functions
-		wrap_numrecipes::initNumrecipes(module,"num_recipes");
-		wrap_utils_bunch_functions::initBunchUtilsFunctions(module,"bunch_utils_functions");	
+		wrap_numrecipes::initNumrecipes(module,const_cast<char*>("num_recipes"));
+		wrap_utils_bunch_functions::initBunchUtilsFunctions(module,const_cast<char*>("bunch_utils_functions"));	
 		wrap_harmonicdata::initHarmonicData(module);
+		wrap_field_sources_module::initFieldSourcesModule(module,const_cast<char*>("field_sources"));
   }
 
 	PyObject* getOrbitUtilsType(const char* name){
-		PyObject* mod = PyImport_ImportModule("orbit_utils");
+		PyObject* mod = PyImport_ImportModule(const_cast<char*>("orbit_utils"));
 		PyObject* pyType = PyObject_GetAttrString(mod,name);
 		Py_DECREF(mod);
 		Py_DECREF(pyType);

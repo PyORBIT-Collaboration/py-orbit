@@ -42,7 +42,6 @@ FieldSourceContainer::~FieldSourceContainer(){
 
 /** Adds the instance of the  ExternalEffects class to the container. */
 void FieldSourceContainer::AddFieldSource(BaseFieldSource* fs)	{
-
 	if(fs->getPyWrapper() != NULL){
 		Py_INCREF(fs->getPyWrapper());
 	}

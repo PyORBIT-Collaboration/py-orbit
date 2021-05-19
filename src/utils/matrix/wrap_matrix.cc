@@ -51,6 +51,7 @@ extern "C" {
 			Matrix* mtrx = (Matrix*)(((pyORBIT_Object*) pyIn)->cpp_obj);
 			self->cpp_obj = new Matrix(mtrx->rows(),mtrx->columns());
 			mtrx->copyTo((Matrix*) self->cpp_obj);
+			((Matrix*) self->cpp_obj)->setPyWrapper((PyObject*) self);
 			return 0;
     }
 		if(nArgs == 2){
@@ -59,6 +60,7 @@ extern "C" {
 				error("PyMatrix - Matrix(n,m) - a maririx size is needed.");
 			}		
 			self->cpp_obj = new Matrix(n,m);
+			((Matrix*) self->cpp_obj)->setPyWrapper((PyObject*) self);
 		}
     return 0;
   }

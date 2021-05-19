@@ -89,10 +89,9 @@ class PolynomialFit:
 					sigma = self.x_y_err_arr[k][2]
 					a += aMatr.get(k,i)*sigma*aMatr.get(k,j)
 				aTCa.set(i,j,a)
-		#now the resuting coefficients and errors		
+		#now the resuting coefficients and errors	
 		aTCaI = aTCa.invert()
-		e = aTCaI.mult(aTCa)		
-		if(aTCa == None):
+		if(aTCaI == None):
 			print "python PolynomialFit: Problem with data."
 			for i in range(nPoints):
 				x = self.x_y_err_arr[i][0]
@@ -100,7 +99,8 @@ class PolynomialFit:
 				err = self.x_y_err_arr[i][2]
 				print " x,y,err = %12.5g %12.5g %12.5g "%(x,y,err)
 			print "Stop."
-			sys.exit(1)
+			sys.exit(1)		
+		e = aTCaI.mult(aTCa)
 		coef_arr = [0.]*(self.order+1)			
 		err_arr = [0.]*(self.order+1)
 		for i in range(self.order+1):

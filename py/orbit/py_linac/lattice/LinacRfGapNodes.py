@@ -245,6 +245,7 @@ class BaseRF_Gap(AbstractRF_Gap):
 		#---- rf gap input phase -----
 		self.setGapPhase(phase)
 		#call rf gap model to track the bunch	
+		if(rf_ampl == 0.): return
 		if(isinstance(self.cppGapModel,MatrixRfGap) or isinstance(self.cppGapModel,BaseRfGap) or isinstance(self.cppGapModel,BaseRfGap_slow)):
 			self.cppGapModel.trackBunch(bunch,frequency,E0TL*rf_ampl,phase)
 		else:
@@ -280,11 +281,12 @@ class BaseRF_Gap(AbstractRF_Gap):
 		self.setGapPhase(phase)		
 		#call rf gap model to track the bunch
 		rf_ampl = rfCavity.getDesignAmp()	
+		if(rf_ampl == 0.): return
 		if(isinstance(self.cppGapModel,MatrixRfGap) or isinstance(self.cppGapModel,BaseRfGap) or isinstance(self.cppGapModel,BaseRfGap_slow)):
 			self.cppGapModel.trackBunch(bunch,frequency,E0TL*rf_ampl,phase)
 		else:
 			self.ttf_track_bunch__(bunch,frequency,E0L*rf_ampl,phase)
-		eKin_out = bunch.getSyncParticle().kinEnergy()
+		#eKin_out = bunch.getSyncParticle().kinEnergy()
 		#print "debug name=",self.getName()," phase=",(phase*180./math.pi-180.)," Ein=",eKin_in*1000.,"  Eout=",eKin_out*1000.," dE=",(eKin_out-eKin_in)*1000.
 
 	def ttf_track_bunch__(self,bunch,frequency,E0L,phase):
@@ -784,7 +786,7 @@ class AxisFieldRF_Gap(AbstractRF_Gap):
 		#---- (this is from a thin gap approach)
 		frequency = rfCavity.getFrequency()
 		modePhase = self.baserf_gap.getParam("mode")*math.pi
-		phase_cavity = rfCavity.getPhase()
+		phase_cavity = phaseNearTargetPhase(rfCavity.getPhase(),0.)
 		#---- parameter E0L is in GeV, but cppGapModel = RfGapThreePointTTF() uses fields in V/m
 		E0L_local = 1.0e+9*rfCavity.getAmp()*self.getParam("E0L")		
 		#---- we have to find the phase_start 

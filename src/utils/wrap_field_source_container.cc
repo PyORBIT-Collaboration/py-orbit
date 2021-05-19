@@ -78,6 +78,7 @@ extern "C" {
 	// they will be vailable from python level
   static PyMethodDef FieldSourceContainerClassMethods[] = {
 		{ "AddFieldSource",				 FieldSourceContainer_AddFieldSource,    	METH_VARARGS,"Adds the field source to the container."},
+		{ "addFieldSource",				 FieldSourceContainer_AddFieldSource,    	METH_VARARGS,"Adds the field source to the container."},
 		{ "getFields",				 		FieldSourceContainer_getFields,    		METH_VARARGS,"Gets superposition of fields in the container."},
     {NULL}
   };

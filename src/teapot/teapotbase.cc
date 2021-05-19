@@ -162,10 +162,7 @@ void drift(Bunch* bunch, double length)
     SyncPart* syncPart = bunch->getSyncPart();
     
     double v = OrbitConst::c * syncPart->getBeta();
-    if(length > 0.)
-    {
-	   syncPart->setTime(syncPart->getTime() + length / v);
-    }
+    syncPart->setTime(syncPart->getTime() + length / v);
 
     double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
     double dp_p_coeff = 1.0 / (syncPart->getMomentum() * syncPart->getBeta());

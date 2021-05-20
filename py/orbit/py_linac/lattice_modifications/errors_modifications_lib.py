@@ -32,7 +32,10 @@ from orbit.utils   import NamedObject
 from orbit.utils   import TypedObject
 
 # import general accelerator elements and lattice
-from orbit.lattice import AccNode,
+from orbit.lattice import AccNode
+from orbit.py_linac.lattice import Quad
+from orbit.py_linac.lattice import DCorrectorH, DCorrectorV
+from orbit.py_linac.lattice import Bend
 
 # import error controllers from orbit.py_linac.errors package
 from orbit.py_linac.errors import ErrorCntrlCoordDisplacement
@@ -42,7 +45,10 @@ class ErrorForNodesModification(NamedObject,TypedObject):
 	"""
 	The base abstract class for set of separate nodes modification 
 	with two error nodes: one at the entrance and one at the exit 
-	of the latiice node.
+	of the lattice node. The lattice is specified for possible
+	needs in the future when we will introduce errors for some
+	section of the lattice as a whole. Right now we are working 
+	only with nodes.
 	"""
 	def __init__(self, name = "no_name", type_in = "ErrorForNodesModification"):
 		NamedObject.__init__(self, name)
@@ -50,6 +56,7 @@ class ErrorForNodesModification(NamedObject,TypedObject):
 		self.nodes = []
 		self.error_controllers = []
 		self.node_to_cntrl_dict = {}
+		self.lattice = None
 		
 	def _getInstanceOfErrorController(self):
 		"""
@@ -82,6 +89,7 @@ class ErrorForNodesModification(NamedObject,TypedObject):
 		"""
 		Adds the error controllers to the nodes
 		"""
+		self.lattice = lattice
 		self.nodes += nodes
 		for node in self.nodes:
 			errCntrl = _getInstanceOfErrorController()
@@ -91,7 +99,7 @@ class ErrorForNodesModification(NamedObject,TypedObject):
 			self.error_controllers.append(errCntrl)
 			self.node_to_cntrl_dict[node] = errCntrl
 		self.updateErrorParameters()
-
+		
 class CoordinateDisplacementNodesModification(ErrorForNodesModification):
 	"""
 	This class applies the coordinate displacement errors to the set of nodes.
@@ -413,7 +421,7 @@ class StraightRotationY_NodesModification(ErrorForNodesModification):
 		self.angle = angle
 		self.updateErrorParameters()
 
-	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0,comm = mpi_comm.MPI_COMM_WORLD):
 		"""
 		Sets the random generated error angle for all nodes.
 		"""
@@ -423,4 +431,51 @@ class StraightRotationY_NodesModification(ErrorForNodesModification):
 				angle_tmp = random.gauss(0.,angle)
 			main_rank = 0
 			angle_tmp = orbit_mpi.MPI_Bcast(angle,mpi_datatype.MPI_DOUBLE,main_rank,comm)
-			errCntrl.setRotationAngle(angle_tmp)				
+			errCntrl.setRotationAngle(angle_tmp)
+			
+#------------------------------------------------------------------
+# The magnet field errors application classes
+#------------------------------------------------------------------
+
+class QuadFieldsErrorsDeployment(NamedObject,TypedObject):
+	"""
+	Class will apply the errors to the fields of the quads
+	"""
+	def __init__(self, name = "no_name", type_in = "QuadFieldsErrorsDeployment"):
+		NamedObject.__init__(self, name)
+		TypedObject.__init__(self, type_in)
+		#---- self.quad_and_field_arr[ind] = [[quad,field_init],...]
+		self.quad_and_field_arr = []
+		
+	def addQuads(self,quads):
+		"""
+		Add quads to the inner array of quads.
+		"""
+		for quad in quads:
+			if(isinstance(quad,Quad)):
+				self.quad_and_field_arr.append([quad,quad.getParam("dB/dr")])
+			
+	def addQuad(self,quad):
+		"""
+		Add one quad to the inner array of quads.
+		"""	
+		if(isinstance(quad,Quad)):
+			self.quad_and_field_arr.append([quad,quad.getParam("dB/dr")])
+		
+	def restoreFields(self):
+		for [quad,field_init] in self.quad_and_field_arr:
+			quad.setParam("dB/dr",field_init)
+	
+	def setGaussDistributedRealtiveErrors(self,relative_error,cut_off_level = 3.0,comm = mpi_comm.MPI_COMM_WORLD):
+		"""
+		Sets the random generated error field for all quads.
+		"""
+		for [quad,field_init] in self.quad_and_field_arr:
+			rel_err = random.gauss(0.,relative_error)
+			while(abs(rel_err) > abs(relative_error)*cut_off_level):
+				rel_err = random.gauss(0.,relative_error)
+			main_rank = 0
+			rel_err = orbit_mpi.MPI_Bcast(rel_err,mpi_datatype.MPI_DOUBLE,main_rank,comm)
+			field = field_init*(1.0 + rel_err)
+			quad.setParam("dB/dr",field)
+			

@@ -3,6 +3,9 @@
 import math
 import sys
 
+# import general accelerator elements and lattice
+from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
+
 from orbit.py_linac.lattice import Quad
 from orbit.py_linac.lattice import DCorrectorH, DCorrectorV
 from orbit.py_linac.lattice import MarkerLinacNode
@@ -103,6 +106,29 @@ class TrajectoryCorrection:
 			if(node.getName().find("BPM") >= 0):
 				bpm_nodes.append(node)
 		self.bpm_node_arr = self._returnFilteredNodes(bpm_nodes)
+		
+	def setTransverseBPMs(self, nodes = None, place == AccNode.ENTRANCE):
+		"""
+		Adds the TransverseBPM instances to the lattice nodes.
+		If no nodes specified the Linac Markers that are BPM
+		will be used.
+		The TransverseBPM instances will be added as child nodes
+		to the entrance or exit of nodes (markers).
+		nodes should be level 0 AccNode in the lattice
+		"""
+		self.transverse_bpm_arr = []
+		if(nodes == None):
+			self._updateBPM_Nodes()
+			nodes = self.bpm_node_arr
+		#---------------------------------
+		lattice_nodes = self.lattice.getNodes()
+		for node in nodes:
+			if(node in lattice_nodes):
+				trBPM = TransverseBPM(node)
+				node.addChildNode(trBPM,place)
+				self.transverse_bpm_arr.append(trBPM)
+			
+			
 
 			
 		

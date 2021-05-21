@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/PyORBIT-Collaboration/py-orbit.svg?branch=master)](https://travis-ci.org/PyORBIT-Collaboration/py-orbit)
+![Build](../../actions/workflows/compilation.yml/badge.svg)
 
 # Py-ORBIT  Installation
 

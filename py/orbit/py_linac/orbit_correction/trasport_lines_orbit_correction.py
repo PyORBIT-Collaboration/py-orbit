@@ -15,8 +15,8 @@ class TransverseBPM(BaseLinacNode):
 	"""
 	BPM node for transverse position report
 	"""
-	def __init__(self,bpm_marker_node):
-		name = bpm_marker_node.getName()+"_diag"
+	def __init__(self,bpm_marker_node, sfx = ""):
+		name = bpm_marker_node.getName()+"_diag" + sfx
 		BaseLinacNode.__init__(self,name)
 		self.bpm_marker_node = bpm_marker_node
 		self.x = 0.
@@ -63,6 +63,25 @@ class TrajectoryCorrection:
 		self.start_node = start_node
 		self.stop_node = stop_node
 		self.bpm_node_arr = []
+		self.transvBPM_arr = []
+		self.dch_node_arr = []
+		self.dcv_node_arr = []
+		#-------------------------
+		self.quad_node_arr = []
+		self.quad_transvBPM_arr = []
+		#-------------------------
+		self._updateBPM_Nodes()
+		self._updateDC_Nodes(None,DCorrectorH)
+		self._updateDC_Nodes(None,DCorrectorV)
+		self._updateQuad_Nodes()
+		
+	def setStartStopNodes(self,start_node = None, stop_node = None):
+		self.start_node = start_node
+		self.stop_node = stop_node
+		self._updateBPM_Nodes()
+		self._updateDC_Nodes(None,DCorrectorH)
+		self._updateDC_Nodes(None,DCorrectorV)
+		self._updateQuad_Nodes()
 		
 	def _getStartStopIndexes(self):
 		"""
@@ -95,40 +114,174 @@ class TrajectoryCorrection:
 				nodes_tmp.append(node)
 		return nodes_tmp
 		
-	def _updateBPM_Nodes(self):
+	def _updateBPM_Nodes(self, bpms = None):
 		"""
-		Updates BPM nodes between start_node and stop_node
+		Updates BPM nodes between start_node and stop_node.
+		Returns array of bpm nodes.
 		"""
+		self.cleanBPM_Nodes()
 		self.bpm_node_arr = []
-		markers = self.lattice.getNodesOfClass(MarkerLinacNode)
 		bpm_nodes = []
-		for node in markers:
-			if(node.getName().find("BPM") >= 0):
-				bpm_nodes.append(node)
+		if(bpms == None):
+			markers = self.lattice.getNodesOfClass(MarkerLinacNode)
+			for node in markers:
+				if(node.getName().find("BPM") >= 0):
+					bpm_nodes.append(node)
+		else:
+			bpm_nodes = bpms
 		self.bpm_node_arr = self._returnFilteredNodes(bpm_nodes)
-		
-	def setTransverseBPMs(self, nodes = None, place == AccNode.ENTRANCE):
+		for bpm in self.bpm_node_arr:
+			transvBPM = TransverseBPM(bpm)
+			bpm.addChildNode(transvBPM,AccNode.ENTRANCE)
+			self.transvBPM_arr.append(transvBPM)
+		return self.bpm_node_arr
+
+	def _updateDC_Nodes(self, nodes = None, class_type = None):
 		"""
-		Adds the TransverseBPM instances to the lattice nodes.
-		If no nodes specified the Linac Markers that are BPM
-		will be used.
-		The TransverseBPM instances will be added as child nodes
-		to the entrance or exit of nodes (markers).
-		nodes should be level 0 AccNode in the lattice
+		Updates DCorrector nodes that we use for orbit correction
 		"""
-		self.transverse_bpm_arr = []
+		if(class_type == None): return
+		dc_node_arr = None
+		if(class_type == DCorrectorH):
+			dc_node_arr = self.dch_node_arr
+		if(class_type == DCorrectorV):
+			dc_node_arr = self.dcv_node_arr
+		if(dc_node_arr == None): return
+		del dc_node_arr[:]
 		if(nodes == None):
-			self._updateBPM_Nodes()
-			nodes = self.bpm_node_arr
-		#---------------------------------
-		lattice_nodes = self.lattice.getNodes()
-		for node in nodes:
-			if(node in lattice_nodes):
-				trBPM = TransverseBPM(node)
-				node.addChildNode(trBPM,place)
-				self.transverse_bpm_arr.append(trBPM)
+			dc_node_arr += self.lattice.getNodesOfClass(class_type)
+		else:
+			for node in nodes:
+				if(isinstance(node,class_type)):
+					dc_node_arr.append(node)
+		node_arr = self._returnFilteredNodes(dc_node_arr)
+		del dc_node_arr[:]
+		dc_node_arr += node_arr
+		return dc_node_arr
+		
+	def _updateQuad_Nodes(self, nodes = None):
+		"""
+		Updates Quad nodes with TransverseBPM instances
+		"""
+		self.cleanQuad_Nodes()
+		self.quad_node_arr = []
+		quad_arr = []
+		if(nodes == None):
+			quad_arr = self.lattice.getNodesOfClass(Quad)
+		else:
+			quad_arr = nodes
+		quad_arr = self._returnFilteredNodes(quad_arr)
+		for quad in quad_arr:
+			transvBPM = TransverseBPM(quad,"_entrance")
+			quad.addChildNode(transvBPM,AccNode.ENTRANCE)
+			self.quad_transvBPM_arr.append(transvBPM)
+			transvBPM = TransverseBPM(quad,"_exit")
+			quad.addChildNode(transvBPM,AccNode.EXIT)
+			self.quad_transvBPM_arr.append(transvBPM)
+		self.quad_node_arr = quad_arr
+		return self.quad_node_arr		
 			
-			
+	def setBPMs(self,bpms):
+		"""
+		Sets custom bpm array for analysis.
+		In reality they can be any nodes.
+		Returns array of bpm nodes.
+		"""
+		return self._updateBPM_Nodes(bpms)
+		
+	def getBPMs(self):
+		"""
+		Returns array of bpm nodes.
+		"""
+		return self.bpm_node_arr
+		
+	def setDCHs(self, dchs):
+		"""
+		Sets the DCorrectorHs 
+		"""
+		self._updateDC_Nodes(dchs,DCorrectorH)
+		return self.dch_node_arr
+		
+	def getDCHs(self):
+		"""
+		Returns DCorrectorHs array
+		"""
+		return self.dch_node_arr
+		
+	def setDCHVs(self, dchs):
+		"""
+		Sets the DCorrectorVs 
+		"""
+		self._updateDC_Nodes(dchs,DCorrectorV)
+		return self.dcv_node_arr
+		
+	def getDCVs(self):
+		"""
+		Returns DCorrectorVs array
+		"""
+		return self.dcv_node_arr	
+		
+	def setQuads(self, quads):
+		"""
+		Sets Quads
+		"""
+		self._updateQuad_Nodes(quads)
+		return self.quad_node_arr
+		
+	def getQuads(self):
+		"""
+		Returns Quads array
+		"""
+		return self.quad_node_arr			
+		
+	def getTransverseBPMs(self):
+		return self.transvBPM_arr
+		
+	def getQuadTransverseBPMs(self):
+		return self.quad_transvBPM_arr
+		
+	def getTransverseBPMforBPM(self,bpm):
+		"""
+		Retuns the TransverseBPM instance for particular BPM.
+		"""
+		for child in bpm.getChildNodes(AccNode.ENTRANCE):
+			if(isinstance(child,TransverseBPM)):
+				return child
+		return None
+	
+	def cleanBPM_Nodes(self):
+		"""
+		Removes TransverseBPM child nodes from BPM nodes
+		"""
+		for bpm in self.bpm_node_arr:
+			child_arr = bpm.getChildNodes(AccNode.ENTRANCE)
+			transvBPM = None
+			for child in child_arr:
+				if(isinstance(child,TransverseBPM)):
+					transvBPM = child
+					break
+			if(transvBPM != None):
+				child_arr.remove(transvBPM)
+		self.transvBPM_arr = []
+		
+	def cleanQuad_Nodes(self):
+		"""
+		Removes TransverseBPM child nodes from Quad nodes
+		"""
+		for node in self.quad_node_arr:
+			for place in [AccNode.ENTRANCE,AccNode.EXIT]:
+				child_arr = node.getChildNodes(place)
+				transvBPM = None
+				for child in child_arr:
+					if(isinstance(child,TransverseBPM)):
+						transvBPM = child
+						break
+				if(transvBPM != None):
+					child_arr.remove(transvBPM)
+		self.quad_transvBPM_arr = []
+		
+	
+		
 
 			
 		

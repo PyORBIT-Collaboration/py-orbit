@@ -6,10 +6,22 @@ import sys
 # import general accelerator elements and lattice
 from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
 
+from bunch import Bunch
+
 from orbit.py_linac.lattice import Quad
 from orbit.py_linac.lattice import DCorrectorH, DCorrectorV
 from orbit.py_linac.lattice import MarkerLinacNode
 from orbit.py_linac.lattice import BaseLinacNode
+
+from orbit_utils import Matrix
+
+def printM(m):
+	print "----matrix--- size=",m.size()
+	for i in xrange(m.size()[0]):
+		for j in xrange(m.size()[1]):
+			print ("m(" + str(i) + "," + str(j)+")= %10.3g "%m.get(i,j) + " "),
+		print ""
+
 
 class TransverseBPM(BaseLinacNode):
 	"""
@@ -23,6 +35,12 @@ class TransverseBPM(BaseLinacNode):
 		self.y = 0.
 		self.xp = 0.
 		self.yp = 0.		
+
+	def trackDesign(self, paramsDict):
+		"""
+		Nothing should happen here
+		"""
+		pass
 
 	def track(self, paramsDict):
 		"""
@@ -59,6 +77,9 @@ class TrajectoryCorrection:
 	dipole correctors will be used.
 	"""
 	def __init__(self, lattice, start_node = None, stop_node = None):
+		#---- change in the corrector field
+		self.deltaB = 0.001 
+		#----------------------------------
 		self.lattice = lattice
 		self.start_node = start_node
 		self.stop_node = stop_node
@@ -279,6 +300,70 @@ class TrajectoryCorrection:
 				if(transvBPM != None):
 					child_arr.remove(transvBPM)
 		self.quad_transvBPM_arr = []
+		
+	def correctTrajectory(self,bunch_in):
+		"""
+		This method will calculate and applyes fields to dipole correctors
+		to achive minimal beam deviation from the center at all BPMs.
+		LSQM method is used.
+		"""
+		#--------------------------
+		bunch_init = Bunch()
+		bunch_in.copyEmptyBunchTo(bunch_init)
+		#---- add one particle to the bunch_init
+		x0  = 0.
+		xp0 = 0.
+		y0  = 0.
+		yp0 = 0.
+		z0  = 0.
+		dE  = 0.
+		bunch_init.addParticle(x0,xp0,y0,yp0,z0,dE)
+		#----------------------------------
+		n_bpms = len(self.bpm_node_arr)
+		n_corrs_hor = len(self.dch_node_arr)
+		n_corrs_ver = len(self.dcv_node_arr)
+		horResponceMtrx = Matrix(n_bpms,n_corrs_hor)
+		verResponceMtrx = Matrix(n_bpms,n_corrs_ver)
+		self._calculatBPM_Matrix(bunch_init,horResponceMtrx,self.dch_node_arr,axis = 0)
+		self._calculatBPM_Matrix(bunch_init,verResponceMtrx,self.dcv_node_arr,axis = 1)
+		printM(horResponceMtrx)
+		
+		
+	def _calculatBPM_Matrix(self,bunch_init,responceMtrx,dc_node_arr,axis = None):
+		corr_field_arr = []
+		for dc_node in dc_node_arr:
+			corr_field_arr.append(dc_node.getParam("B"))
+		#---------------------------------------------
+		bunch = Bunch()
+		bunch_init.copyBunchTo(bunch)
+		(start_ind,stop_ind) = self._getStartStopIndexes()		
+		self.lattice.trackDesignBunch(bunch,None,None,start_ind,stop_ind)
+		self.lattice.trackBunch(bunch,None,None,start_ind,stop_ind)			
+		bpm_value_init_arr = []
+		for transvBPM in self.transvBPM_arr:
+			val = transvBPM .getGeCoordinates()[axis*2]
+			bpm_value_init_arr.append(val)
+		for dc_node_ind in range(len(dc_node_arr)):
+			dc_node = dc_node_arr[dc_node_ind]
+			field = corr_field_arr[dc_node_ind] + self.deltaB
+			dc_node.setParam("B",field)
+			bunch = Bunch()
+			bunch_init.copyBunchTo(bunch)
+			self.lattice.trackDesignBunch(bunch,None,None,start_ind,stop_ind)
+			self.lattice.trackBunch(bunch,None,None,start_ind,stop_ind)
+			for transvBPM_ind in range(len(self.transvBPM_arr)):
+				transvBPM = self.transvBPM_arr[transvBPM_ind]
+				val = transvBPM .getGeCoordinates()[axis*2]
+				deltaVal = val - 	bpm_value_init_arr[transvBPM_ind]
+				derivative = deltaVal/self.deltaB
+				responceMtrx.set(transvBPM_ind,dc_node_ind,derivative)
+		#---- Let's restore the initial Dipole Correctors (DC) fields
+		for dc_node_ind in range(len(dc_node_arr)):
+			dc_node = dc_node_arr[dc_node_ind]
+			dc_node.setParam("B",corr_field_arr[dc_node_ind])
+		
+			
+		
 		
 	
 		

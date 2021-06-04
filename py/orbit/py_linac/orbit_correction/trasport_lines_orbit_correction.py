@@ -13,7 +13,7 @@ from orbit.py_linac.lattice import DCorrectorH, DCorrectorV
 from orbit.py_linac.lattice import MarkerLinacNode
 from orbit.py_linac.lattice import BaseLinacNode
 
-from orbit_utils import Matrix
+from orbit_utils import Matrix, PhaseVector
 
 def printM(m):
 	print "----matrix--- size=",m.size()
@@ -58,7 +58,7 @@ class TransverseBPM(BaseLinacNode):
 		self.xp = bunch.xp(0)
 		self.yp = bunch.yp(0)
 		
-	def getGeCoordinates(self):
+	def getCoordinates(self):
 		"""
 		returns coordinates of the particle
 		"""
@@ -326,7 +326,32 @@ class TrajectoryCorrection:
 		verResponceMtrx = Matrix(n_bpms,n_corrs_ver)
 		self._calculatBPM_Matrix(bunch_init,horResponceMtrx,self.dch_node_arr,axis = 0)
 		self._calculatBPM_Matrix(bunch_init,verResponceMtrx,self.dcv_node_arr,axis = 1)
-		printM(horResponceMtrx)
+		#printM(horResponceMtrx)
+		horResponceMtrxTr = horResponceMtrx.copy()
+		horResponceMtrxTr.transpose()
+		verResponceMtrxTr = verResponceMtrx.copy()
+		verResponceMtrxTr.transpose()
+		horAmtrx = (horResponceMtrxTr.mult(horResponceMtrx)).invert()
+		verAmtrx = (verResponceMtrxTr.mult(verResponceMtrx)).invert()
+		printM(horAmtrx)
+		print "det(horAmtrx) = ",horAmtrx.det()
+		horATmtrx = horAmtrx.mult(horResponceMtrxTr)
+		verATmtrx = verAmtrx.mult(verResponceMtrxTr)
+		(bpm_value_hor_arr,bpm_value_ver_arr) = self._calculateTrajectory(bunch_init)
+		print "debug bpm_value_hor_arr=",bpm_value_hor_arr
+		print "debug bpm_value_ver_arr=",bpm_value_ver_arr
+		horBPM_V = PhaseVector(len(bpm_value_hor_arr))
+		for ind in range(len(bpm_value_hor_arr)):
+			horBPM_V.set(ind,bpm_value_hor_arr[ind])
+		verBPM_V = PhaseVector(len(bpm_value_ver_arr))
+		for ind in range(len(bpm_value_ver_arr)):
+			verBPM_V.set(ind,bpm_value_ver_arr[ind])
+		dch_val_V = horATmtrx.mult(horBPM_V)
+		dcv_val_V = verATmtrx.mult(verBPM_V)
+		print "debug dch_val_V=",dch_val_V
+		print "debug dcv_val_V=",dcv_val_V
+		
+		
 		
 		
 	def _calculatBPM_Matrix(self,bunch_init,responceMtrx,dc_node_arr,axis = None):
@@ -334,33 +359,42 @@ class TrajectoryCorrection:
 		for dc_node in dc_node_arr:
 			corr_field_arr.append(dc_node.getParam("B"))
 		#---------------------------------------------
-		bunch = Bunch()
-		bunch_init.copyBunchTo(bunch)
-		(start_ind,stop_ind) = self._getStartStopIndexes()		
-		self.lattice.trackDesignBunch(bunch,None,None,start_ind,stop_ind)
-		self.lattice.trackBunch(bunch,None,None,start_ind,stop_ind)			
-		bpm_value_init_arr = []
-		for transvBPM in self.transvBPM_arr:
-			val = transvBPM .getGeCoordinates()[axis*2]
-			bpm_value_init_arr.append(val)
+		bpm_value_init_arr = self._calculateTrajectory(bunch_init)[axis]
 		for dc_node_ind in range(len(dc_node_arr)):
 			dc_node = dc_node_arr[dc_node_ind]
 			field = corr_field_arr[dc_node_ind] + self.deltaB
 			dc_node.setParam("B",field)
-			bunch = Bunch()
-			bunch_init.copyBunchTo(bunch)
-			self.lattice.trackDesignBunch(bunch,None,None,start_ind,stop_ind)
-			self.lattice.trackBunch(bunch,None,None,start_ind,stop_ind)
-			for transvBPM_ind in range(len(self.transvBPM_arr)):
-				transvBPM = self.transvBPM_arr[transvBPM_ind]
-				val = transvBPM .getGeCoordinates()[axis*2]
-				deltaVal = val - 	bpm_value_init_arr[transvBPM_ind]
+			bpm_value_arr = self._calculateTrajectory(bunch_init)[axis]
+			for bpm_ind in range(len(self.transvBPM_arr)):
+				deltaVal = bpm_value_arr[bpm_ind] - bpm_value_init_arr[bpm_ind]
 				derivative = deltaVal/self.deltaB
-				responceMtrx.set(transvBPM_ind,dc_node_ind,derivative)
+				responceMtrx.set(bpm_ind,dc_node_ind,derivative)
 		#---- Let's restore the initial Dipole Correctors (DC) fields
 		for dc_node_ind in range(len(dc_node_arr)):
 			dc_node = dc_node_arr[dc_node_ind]
 			dc_node.setParam("B",corr_field_arr[dc_node_ind])
+			
+	def _calculateTrajectory(self,bunch_init):
+		"""
+		It tracks bunch with one particle through the lattice and 
+		fills out the BPM data in self.transvBPM_arr
+		Returns arrays of x,y corrdinates of the bunch in 
+		(pm_value_hor_arr,bpm_value_ver_arr) tuple.
+		"""
+		bunch = Bunch()
+		bunch_init.copyBunchTo(bunch)
+		(start_ind,stop_ind) = self._getStartStopIndexes()		
+		self.lattice.trackDesignBunch(bunch,None,None,start_ind,stop_ind)
+		self.lattice.trackBunch(bunch,None,None,start_ind,stop_ind)
+		bpm_value_hor_arr = []
+		bpm_value_ver_arr = []
+		for transvBPM in self.transvBPM_arr:
+			val_hor = transvBPM .getCoordinates()[0]
+			val_ver = transvBPM .getCoordinates()[2]
+			bpm_value_hor_arr.append(val_hor)
+			bpm_value_ver_arr.append(val_ver)
+		return (bpm_value_hor_arr,bpm_value_ver_arr)
+		
 		
 			
 		

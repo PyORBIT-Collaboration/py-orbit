@@ -337,6 +337,8 @@ class TrajectoryCorrection:
 		print "det(horAmtrx) = ",horAmtrx.det()
 		horATmtrx = horAmtrx.mult(horResponceMtrxTr)
 		verATmtrx = verAmtrx.mult(verResponceMtrxTr)
+		bunch_init = Bunch()
+		bunch_in.copyBunchTo(bunch_init)
 		(bpm_value_hor_arr,bpm_value_ver_arr) = self._calculateTrajectory(bunch_init)
 		print "debug bpm_value_hor_arr=",bpm_value_hor_arr
 		print "debug bpm_value_ver_arr=",bpm_value_ver_arr
@@ -348,11 +350,24 @@ class TrajectoryCorrection:
 			verBPM_V.set(ind,bpm_value_ver_arr[ind])
 		dch_val_V = horATmtrx.mult(horBPM_V)
 		dcv_val_V = verATmtrx.mult(verBPM_V)
-		print "debug dch_val_V=",dch_val_V
-		print "debug dcv_val_V=",dcv_val_V
+		print "debug =========== final DCH fields ================" 
+		for ind in range(dch_val_V.size()):
+			dc = self.dch_node_arr[ind]
+			delta_field = dch_val_V.get(ind)
+			print "debug corr =",dc.getName()," init field [T] =",dc.getParam("B")," delta [T] =",delta_field
+			dc.setParam("B",dc.getParam("B") - delta_field)
+		print "debug =========== final DCV fields ================"
+		for ind in range(dcv_val_V.size()):
+			dc = self.dcv_node_arr[ind]
+			delta_field = dcv_val_V.get(ind)
+			print "debug corr =",dc.getName()," init field [T] =",dc.getParam("B")," delta [T] =",delta_field
+			dc.setParam("B",dc.getParam("B") - delta_field)
 		
-		
-		
+		bunch_init = Bunch()
+		bunch_in.copyBunchTo(bunch_init)
+		(bpm_value_hor_arr,bpm_value_ver_arr) = self._calculateTrajectory(bunch_init)
+		print "debug bpm_value_hor_arr=",bpm_value_hor_arr
+		print "debug bpm_value_ver_arr=",bpm_value_ver_arr		
 		
 	def _calculatBPM_Matrix(self,bunch_init,responceMtrx,dc_node_arr,axis = None):
 		corr_field_arr = []

@@ -7,6 +7,7 @@ import sys
 from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
 
 from bunch import Bunch
+from bunch import BunchTwissAnalysis
 
 from orbit.py_linac.lattice import Quad
 from orbit.py_linac.lattice import DCorrectorH, DCorrectorV
@@ -34,7 +35,7 @@ class TransverseBPM(BaseLinacNode):
 		self.x = 0.
 		self.y = 0.
 		self.xp = 0.
-		self.yp = 0.		
+		self.yp = 0.
 
 	def trackDesign(self, paramsDict):
 		"""
@@ -57,7 +58,7 @@ class TransverseBPM(BaseLinacNode):
 		self.y = bunch.y(0)
 		self.xp = bunch.xp(0)
 		self.yp = bunch.yp(0)
-		
+
 	def getCoordinates(self):
 		"""
 		returns coordinates of the particle
@@ -67,18 +68,18 @@ class TransverseBPM(BaseLinacNode):
 class TrajectoryCorrection:
 	"""
 	Class to perform correction of the trajectory in the linac type lattice
-	or in the part of it. To correct trajectories the Linac DCorrectorH and 
+	or in the part of it. To correct trajectories the Linac DCorrectorH and
 	DCorrectorV objects will be used. The trajectory is defined by BPMs nodes
 	that specifically defined for this trajectory correction. The correction
 	algorithm will build response matrix for correctors (assuming no tilt) and
 	apply the correctors field to provide the best correction to the target
-	values for each BPM. By default the goal for all BPMs is 0., but user can 
-	redefine these values and set of BPMs. User also can redefine what 
+	values for each BPM. By default the goal for all BPMs is 0., but user can
+	redefine these values and set of BPMs. User also can redefine what
 	dipole correctors will be used.
 	"""
 	def __init__(self, lattice, start_node = None, stop_node = None):
 		#---- change in the corrector field
-		self.deltaB = 0.001 
+		self.deltaB = 0.001
 		#----------------------------------
 		self.lattice = lattice
 		self.start_node = start_node
@@ -95,7 +96,9 @@ class TrajectoryCorrection:
 		self._updateDC_Nodes(None,DCorrectorH)
 		self._updateDC_Nodes(None,DCorrectorV)
 		self._updateQuad_Nodes()
-		
+		#-------------------------
+		self.twiss_analysis = BunchTwissAnalysis()
+
 	def setStartStopNodes(self,start_node = None, stop_node = None):
 		self.start_node = start_node
 		self.stop_node = stop_node
@@ -103,7 +106,7 @@ class TrajectoryCorrection:
 		self._updateDC_Nodes(None,DCorrectorH)
 		self._updateDC_Nodes(None,DCorrectorV)
 		self._updateQuad_Nodes()
-		
+
 	def _getStartStopIndexes(self):
 		"""
 		Returns the start and stop indexes of the start and stop nodes
@@ -115,7 +118,7 @@ class TrajectoryCorrection:
 		if(self.stop_node != None):
 			stop_ind = self.lattice.getNodeIndex(self.stop_node)
 		return (start_ind,stop_ind)
-		
+
 	def _returnFilteredNodes(self,nodes):
 		"""
 		Returns list of nodes between start and stop nodes.
@@ -134,7 +137,7 @@ class TrajectoryCorrection:
 			if(res):
 				nodes_tmp.append(node)
 		return nodes_tmp
-		
+
 	def _updateBPM_Nodes(self, bpms = None):
 		"""
 		Updates BPM nodes between start_node and stop_node.
@@ -179,7 +182,7 @@ class TrajectoryCorrection:
 		del dc_node_arr[:]
 		dc_node_arr += node_arr
 		return dc_node_arr
-		
+
 	def _updateQuad_Nodes(self, nodes = None):
 		"""
 		Updates Quad nodes with TransverseBPM instances
@@ -200,8 +203,8 @@ class TrajectoryCorrection:
 			quad.addChildNode(transvBPM,AccNode.EXIT)
 			self.quad_transvBPM_arr.append(transvBPM)
 		self.quad_node_arr = quad_arr
-		return self.quad_node_arr		
-			
+		return self.quad_node_arr
+
 	def setBPMs(self,bpms):
 		"""
 		Sets custom bpm array for analysis.
@@ -209,58 +212,58 @@ class TrajectoryCorrection:
 		Returns array of bpm nodes.
 		"""
 		return self._updateBPM_Nodes(bpms)
-		
+
 	def getBPMs(self):
 		"""
 		Returns array of bpm nodes.
 		"""
 		return self.bpm_node_arr
-		
+
 	def setDCHs(self, dchs):
 		"""
-		Sets the DCorrectorHs 
+		Sets the DCorrectorHs
 		"""
 		self._updateDC_Nodes(dchs,DCorrectorH)
 		return self.dch_node_arr
-		
+
 	def getDCHs(self):
 		"""
 		Returns DCorrectorHs array
 		"""
 		return self.dch_node_arr
-		
+
 	def setDCHVs(self, dchs):
 		"""
-		Sets the DCorrectorVs 
+		Sets the DCorrectorVs
 		"""
 		self._updateDC_Nodes(dchs,DCorrectorV)
 		return self.dcv_node_arr
-		
+
 	def getDCVs(self):
 		"""
 		Returns DCorrectorVs array
 		"""
-		return self.dcv_node_arr	
-		
+		return self.dcv_node_arr
+
 	def setQuads(self, quads):
 		"""
 		Sets Quads
 		"""
 		self._updateQuad_Nodes(quads)
 		return self.quad_node_arr
-		
+
 	def getQuads(self):
 		"""
 		Returns Quads array
 		"""
-		return self.quad_node_arr			
-		
+		return self.quad_node_arr
+
 	def getTransverseBPMs(self):
 		return self.transvBPM_arr
-		
+
 	def getQuadTransverseBPMs(self):
 		return self.quad_transvBPM_arr
-		
+
 	def getTransverseBPMforBPM(self,bpm):
 		"""
 		Retuns the TransverseBPM instance for particular BPM.
@@ -269,7 +272,7 @@ class TrajectoryCorrection:
 			if(isinstance(child,TransverseBPM)):
 				return child
 		return None
-	
+
 	def cleanBPM_Nodes(self):
 		"""
 		Removes TransverseBPM child nodes from BPM nodes
@@ -284,7 +287,7 @@ class TrajectoryCorrection:
 			if(transvBPM != None):
 				child_arr.remove(transvBPM)
 		self.transvBPM_arr = []
-		
+
 	def cleanQuad_Nodes(self):
 		"""
 		Removes TransverseBPM child nodes from Quad nodes
@@ -300,13 +303,14 @@ class TrajectoryCorrection:
 				if(transvBPM != None):
 					child_arr.remove(transvBPM)
 		self.quad_transvBPM_arr = []
-		
-	def correctTrajectory(self,bunch_in):
+
+	def correctTrajectory(self,bunch_initial):
 		"""
 		This method will calculate and applyes fields to dipole correctors
 		to achive minimal beam deviation from the center at all BPMs.
 		LSQM method is used.
 		"""
+		bunch_in = self.makeOneParticleBunch(bunch_initial)
 		#--------------------------
 		bunch_init = Bunch()
 		bunch_in.copyEmptyBunchTo(bunch_init)
@@ -337,11 +341,11 @@ class TrajectoryCorrection:
 		print "det(horAmtrx) = ",horAmtrx.det()
 		horATmtrx = horAmtrx.mult(horResponceMtrxTr)
 		verATmtrx = verAmtrx.mult(verResponceMtrxTr)
+		#---- matrices for LSQM are ready - now use initial bunch to get
+		#---- the trajectory that should be flattened
 		bunch_init = Bunch()
 		bunch_in.copyBunchTo(bunch_init)
 		(bpm_value_hor_arr,bpm_value_ver_arr) = self._calculateTrajectory(bunch_init)
-		print "debug bpm_value_hor_arr=",bpm_value_hor_arr
-		print "debug bpm_value_ver_arr=",bpm_value_ver_arr
 		horBPM_V = PhaseVector(len(bpm_value_hor_arr))
 		for ind in range(len(bpm_value_hor_arr)):
 			horBPM_V.set(ind,bpm_value_hor_arr[ind])
@@ -350,7 +354,7 @@ class TrajectoryCorrection:
 			verBPM_V.set(ind,bpm_value_ver_arr[ind])
 		dch_val_V = horATmtrx.mult(horBPM_V)
 		dcv_val_V = verATmtrx.mult(verBPM_V)
-		print "debug =========== final DCH fields ================" 
+		print "debug =========== final DCH fields ================"
 		for ind in range(dch_val_V.size()):
 			dc = self.dch_node_arr[ind]
 			delta_field = dch_val_V.get(ind)
@@ -362,13 +366,23 @@ class TrajectoryCorrection:
 			delta_field = dcv_val_V.get(ind)
 			print "debug corr =",dc.getName()," init field [T] =",dc.getParam("B")," delta [T] =",delta_field
 			dc.setParam("B",dc.getParam("B") - delta_field)
-		
+		#---- at this point the correctors fields are changed
+		#---- the part below is just for test
+		"""
+		(bpm_value_hor_old_arr,bpm_value_ver_old_arr) = (bpm_value_hor_arr,bpm_value_ver_arr)
 		bunch_init = Bunch()
 		bunch_in.copyBunchTo(bunch_init)
 		(bpm_value_hor_arr,bpm_value_ver_arr) = self._calculateTrajectory(bunch_init)
-		print "debug bpm_value_hor_arr=",bpm_value_hor_arr
-		print "debug bpm_value_ver_arr=",bpm_value_ver_arr		
-		
+		print " index  x[mm] y[mm]   x_new[mm]  y_new[mm] "
+		for ind in range(len(bpm_value_hor_arr)):
+			hor_old_val = bpm_value_hor_old_arr[ind]*1000.
+			ver_old_val = bpm_value_ver_old_arr[ind]*1000.
+			hor_val = bpm_value_hor_arr[ind]*1000.
+			ver_val = bpm_value_ver_arr[ind]*1000.
+			bpm_node = self.bpm_node_arr[ind]
+			print " %2d %20s   %+6.2f %+6.2f    %+6.2f %+6.2f "%(ind,bpm_node.getName(),hor_old_val,ver_old_val,hor_val,ver_val)
+		"""
+
 	def _calculatBPM_Matrix(self,bunch_init,responceMtrx,dc_node_arr,axis = None):
 		corr_field_arr = []
 		for dc_node in dc_node_arr:
@@ -384,21 +398,18 @@ class TrajectoryCorrection:
 				deltaVal = bpm_value_arr[bpm_ind] - bpm_value_init_arr[bpm_ind]
 				derivative = deltaVal/self.deltaB
 				responceMtrx.set(bpm_ind,dc_node_ind,derivative)
-		#---- Let's restore the initial Dipole Correctors (DC) fields
-		for dc_node_ind in range(len(dc_node_arr)):
-			dc_node = dc_node_arr[dc_node_ind]
 			dc_node.setParam("B",corr_field_arr[dc_node_ind])
-			
+
 	def _calculateTrajectory(self,bunch_init):
 		"""
-		It tracks bunch with one particle through the lattice and 
+		It tracks bunch with one particle through the lattice and
 		fills out the BPM data in self.transvBPM_arr
-		Returns arrays of x,y corrdinates of the bunch in 
+		Returns arrays of x,y corrdinates of the bunch in
 		(pm_value_hor_arr,bpm_value_ver_arr) tuple.
 		"""
 		bunch = Bunch()
 		bunch_init.copyBunchTo(bunch)
-		(start_ind,stop_ind) = self._getStartStopIndexes()		
+		(start_ind,stop_ind) = self._getStartStopIndexes()
 		self.lattice.trackDesignBunch(bunch,None,None,start_ind,stop_ind)
 		self.lattice.trackBunch(bunch,None,None,start_ind,stop_ind)
 		bpm_value_hor_arr = []
@@ -409,17 +420,45 @@ class TrajectoryCorrection:
 			bpm_value_hor_arr.append(val_hor)
 			bpm_value_ver_arr.append(val_ver)
 		return (bpm_value_hor_arr,bpm_value_ver_arr)
-		
-		
-			
-		
-		
-	
-		
 
-			
-		
-				
-		
+	def makeOneParticleBunch(self,bunch_init):
+		"""
+		Returns the bunch with one particle which coordinates
+		are equal to the average coordinates in the initial
+		bunch.
+		"""
+		bunch_out = Bunch()
+		bunch_init.copyEmptyBunchTo(bunch_out)
+		x_avg  = 0.
+		xp_avg = 0.
+		y_avg  = 0.
+		yp_avg = 0.
+		z_avg  = 0.
+		dE_avg = 0.
+		nParts = bunch_init.getSizeGlobal()
+		if(nParts > 0):
+			self.twiss_analysis.analyzeBunch(bunch_init)
+			x_avg  = self.twiss_analysis.getAverage(0)
+			xp_avg = self.twiss_analysis.getAverage(1)
+			y_avg  = self.twiss_analysis.getAverage(2)
+			yp_avg = self.twiss_analysis.getAverage(3)
+			z_avg  = self.twiss_analysis.getAverage(4)
+			dE_avg = self.twiss_analysis.getAverage(5)
+		#----------------------------------------
+		#---- add one particle to the bunch_out
+		bunch_out.addParticle(x_avg,xp_avg,y_avg,yp_avg,z_avg,dE_avg)
+		return bunch_out
 
-		
+
+
+
+
+
+
+
+
+
+
+
+
+

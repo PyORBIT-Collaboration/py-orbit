@@ -3,6 +3,9 @@
 import math
 import sys
 
+# import the utilities
+from orbit.utils import orbitFinalize
+
 # import general accelerator elements and lattice
 from orbit.lattice import AccNode, AccActionsContainer, AccNodeBunchTracker
 
@@ -50,10 +53,17 @@ class TransverseBPM(BaseLinacNode):
 		bunch = paramsDict["bunch"]
 		nParts = bunch.getSize()
 		if(nParts != 1):
-			print "debug TransverseBPM class nParts=",nParts
-			print "debug It should be 1"
-			print "debug Stop"
-			sys.exit(1)
+			msg = "TransverseBPM class:"
+			msg = msg + os.linesep
+			msg = msg + "Node name="+self.getName()
+			msg = msg + os.linesep
+			msg = msg + "Number of macro-particles in bunch nParts=" + str(nParts)
+			msg = msg + os.linesep
+			msg = msg + "It should be 1"
+			msg = msg + os.linesep
+			msg = msg + "Stop."
+			msg = msg + os.linesep
+			orbitFinalize(msg)
 		self.x = bunch.x(0)
 		self.y = bunch.y(0)
 		self.xp = bunch.xp(0)
@@ -143,6 +153,7 @@ class TrajectoryCorrection:
 		Updates BPM nodes between start_node and stop_node.
 		Returns array of bpm nodes.
 		"""
+		node_pos_dict = self.lattice.getNodePositionsDict()
 		self.cleanBPM_Nodes()
 		self.bpm_node_arr = []
 		bpm_nodes = []
@@ -155,7 +166,9 @@ class TrajectoryCorrection:
 			bpm_nodes = bpms
 		self.bpm_node_arr = self._returnFilteredNodes(bpm_nodes)
 		for bpm in self.bpm_node_arr:
+			(start_pos,end_pos) = node_pos_dict[bpm]
 			transvBPM = TransverseBPM(bpm)
+			transvBPM.setPosition(start_pos)
 			bpm.addChildNode(transvBPM,AccNode.ENTRANCE)
 			self.transvBPM_arr.append(transvBPM)
 		return self.bpm_node_arr
@@ -187,6 +200,7 @@ class TrajectoryCorrection:
 		"""
 		Updates Quad nodes with TransverseBPM instances
 		"""
+		node_pos_dict = self.lattice.getNodePositionsDict()
 		self.cleanQuad_Nodes()
 		self.quad_node_arr = []
 		quad_arr = []
@@ -196,10 +210,13 @@ class TrajectoryCorrection:
 			quad_arr = nodes
 		quad_arr = self._returnFilteredNodes(quad_arr)
 		for quad in quad_arr:
+			(start_pos,end_pos) = node_pos_dict[quad]
 			transvBPM = TransverseBPM(quad,"_entrance")
+			transvBPM.setPosition(start_pos)
 			quad.addChildNode(transvBPM,AccNode.ENTRANCE)
 			self.quad_transvBPM_arr.append(transvBPM)
 			transvBPM = TransverseBPM(quad,"_exit")
+			transvBPM.setPosition(end_pos)
 			quad.addChildNode(transvBPM,AccNode.EXIT)
 			self.quad_transvBPM_arr.append(transvBPM)
 		self.quad_node_arr = quad_arr
@@ -337,15 +354,15 @@ class TrajectoryCorrection:
 		verResponceMtrxTr.transpose()
 		horAmtrx = (horResponceMtrxTr.mult(horResponceMtrx)).invert()
 		verAmtrx = (verResponceMtrxTr.mult(verResponceMtrx)).invert()
-		printM(horAmtrx)
-		print "det(horAmtrx) = ",horAmtrx.det()
+		#printM(horAmtrx)
+		#print "det(horAmtrx) = ",horAmtrx.det()
 		horATmtrx = horAmtrx.mult(horResponceMtrxTr)
 		verATmtrx = verAmtrx.mult(verResponceMtrxTr)
 		#---- matrices for LSQM are ready - now use initial bunch to get
 		#---- the trajectory that should be flattened
 		bunch_init = Bunch()
 		bunch_in.copyBunchTo(bunch_init)
-		(bpm_value_hor_arr,bpm_value_ver_arr) = self._calculateTrajectory(bunch_init)
+		(bpm_value_hor_arr,bpm_value_ver_arr) = self.calculateTrajectory(bunch_init)
 		horBPM_V = PhaseVector(len(bpm_value_hor_arr))
 		for ind in range(len(bpm_value_hor_arr)):
 			horBPM_V.set(ind,bpm_value_hor_arr[ind])
@@ -354,53 +371,37 @@ class TrajectoryCorrection:
 			verBPM_V.set(ind,bpm_value_ver_arr[ind])
 		dch_val_V = horATmtrx.mult(horBPM_V)
 		dcv_val_V = verATmtrx.mult(verBPM_V)
-		print "debug =========== final DCH fields ================"
+		#print "debug =========== final DCH fields ================"
 		for ind in range(dch_val_V.size()):
 			dc = self.dch_node_arr[ind]
 			delta_field = dch_val_V.get(ind)
-			print "debug corr =",dc.getName()," init field [T] =",dc.getParam("B")," delta [T] =",delta_field
+			#print "debug corr =",dc.getName()," init field [T] =",dc.getParam("B")," delta [T] =",delta_field
 			dc.setParam("B",dc.getParam("B") - delta_field)
-		print "debug =========== final DCV fields ================"
+		#print "debug =========== final DCV fields ================"
 		for ind in range(dcv_val_V.size()):
 			dc = self.dcv_node_arr[ind]
 			delta_field = dcv_val_V.get(ind)
-			print "debug corr =",dc.getName()," init field [T] =",dc.getParam("B")," delta [T] =",delta_field
-			dc.setParam("B",dc.getParam("B") - delta_field)
-		#---- at this point the correctors fields are changed
-		#---- the part below is just for test
-		"""
-		(bpm_value_hor_old_arr,bpm_value_ver_old_arr) = (bpm_value_hor_arr,bpm_value_ver_arr)
-		bunch_init = Bunch()
-		bunch_in.copyBunchTo(bunch_init)
-		(bpm_value_hor_arr,bpm_value_ver_arr) = self._calculateTrajectory(bunch_init)
-		print " index  x[mm] y[mm]   x_new[mm]  y_new[mm] "
-		for ind in range(len(bpm_value_hor_arr)):
-			hor_old_val = bpm_value_hor_old_arr[ind]*1000.
-			ver_old_val = bpm_value_ver_old_arr[ind]*1000.
-			hor_val = bpm_value_hor_arr[ind]*1000.
-			ver_val = bpm_value_ver_arr[ind]*1000.
-			bpm_node = self.bpm_node_arr[ind]
-			print " %2d %20s   %+6.2f %+6.2f    %+6.2f %+6.2f "%(ind,bpm_node.getName(),hor_old_val,ver_old_val,hor_val,ver_val)
-		"""
+			#print "debug corr =",dc.getName()," init field [T] =",dc.getParam("B")," delta [T] =",delta_field
+			dc.setParam("B",dc.getParam("B") - delta_field)		
 
 	def _calculatBPM_Matrix(self,bunch_init,responceMtrx,dc_node_arr,axis = None):
 		corr_field_arr = []
 		for dc_node in dc_node_arr:
 			corr_field_arr.append(dc_node.getParam("B"))
 		#---------------------------------------------
-		bpm_value_init_arr = self._calculateTrajectory(bunch_init)[axis]
+		bpm_value_init_arr = self.calculateTrajectory(bunch_init)[axis]
 		for dc_node_ind in range(len(dc_node_arr)):
 			dc_node = dc_node_arr[dc_node_ind]
 			field = corr_field_arr[dc_node_ind] + self.deltaB
 			dc_node.setParam("B",field)
-			bpm_value_arr = self._calculateTrajectory(bunch_init)[axis]
+			bpm_value_arr = self.calculateTrajectory(bunch_init)[axis]
 			for bpm_ind in range(len(self.transvBPM_arr)):
 				deltaVal = bpm_value_arr[bpm_ind] - bpm_value_init_arr[bpm_ind]
 				derivative = deltaVal/self.deltaB
 				responceMtrx.set(bpm_ind,dc_node_ind,derivative)
 			dc_node.setParam("B",corr_field_arr[dc_node_ind])
 
-	def _calculateTrajectory(self,bunch_init):
+	def calculateTrajectory(self,bunch_init, print_info = False):
 		"""
 		It tracks bunch with one particle through the lattice and
 		fills out the BPM data in self.transvBPM_arr
@@ -419,6 +420,17 @@ class TrajectoryCorrection:
 			val_ver = transvBPM .getCoordinates()[2]
 			bpm_value_hor_arr.append(val_hor)
 			bpm_value_ver_arr.append(val_ver)
+		#---- Start trajectory printing
+		if(print_info):
+			print " index name position[m]  x[mm] y[mm] "
+			for ind in range(len(bpm_value_hor_arr)):
+				hor_val = bpm_value_hor_arr[ind]*1000.
+				ver_val = bpm_value_ver_arr[ind]*1000.
+				bpm_node = self.bpm_node_arr[ind]
+				transvBPM = self.transvBPM_arr[ind]
+				pos = transvBPM.getPosition()
+				print " %2d %20s  %8.3f   %+6.2f %+6.2f "%(ind,bpm_node.getName(),pos,hor_val,ver_val)
+		#---- Stop trajectory printing
 		return (bpm_value_hor_arr,bpm_value_ver_arr)
 
 	def makeOneParticleBunch(self,bunch_init):

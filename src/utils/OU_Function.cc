@@ -502,6 +502,9 @@ int Function::setInverse(Function* f_inv)
 		f_inv->clean();
 		for(int i = 0; i < size; i++){
 			double xx = getMinY() + i*(getMaxY() - getMinY())/(size - 1);
+			if (i==size-1) {
+				xx=getMaxY();
+			}			
 			f_inv->add(xx,0.);
 		}
 		f_inv->setConstStep(1);

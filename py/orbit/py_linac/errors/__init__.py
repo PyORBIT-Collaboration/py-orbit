@@ -4,9 +4,16 @@
 
 from ErrorNodesAndControllersLib import AccErrorNode
 from ErrorNodesAndControllersLib import ErrorCoordDisplacementNode
+from ErrorNodesAndControllersLib import ErrorCntrlStraightRotationX
+from ErrorNodesAndControllersLib import ErrorCntrlStraightRotationY
+from ErrorNodesAndControllersLib import ErrorCntrlStraightRotationZ
 
 from ErrorNodesAndControllersLib import BaseErrorController
 from ErrorNodesAndControllersLib import ErrorCntrlCoordDisplacement
+from ErrorNodesAndControllersLib import ErrorCntrlLongitudinalDisplacement
+from ErrorNodesAndControllersLib import ErrorStraightRotationXNode
+from ErrorNodesAndControllersLib import ErrorStraightRotationYNode
+from ErrorNodesAndControllersLib import ErrorStraightRotationZNode
 
 __all__ = []
 

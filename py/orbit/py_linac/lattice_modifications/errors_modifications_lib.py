@@ -18,6 +18,7 @@ import math
 import sys
 import os
 import time
+import random
 
 #---- we need MPI for Gaussian distribution errors to be sure the lattices 
 #---- are the same across all relevant node (the same communicator)
@@ -39,6 +40,10 @@ from orbit.py_linac.lattice import Bend
 
 # import error controllers from orbit.py_linac.errors package
 from orbit.py_linac.errors import ErrorCntrlCoordDisplacement
+from orbit.py_linac.errors import ErrorCntrlLongitudinalDisplacement
+from orbit.py_linac.errors import ErrorCntrlStraightRotationX
+from orbit.py_linac.errors import ErrorCntrlStraightRotationY
+from orbit.py_linac.errors import ErrorCntrlStraightRotationZ
 
 
 class ErrorForNodesModification(NamedObject,TypedObject):
@@ -92,7 +97,7 @@ class ErrorForNodesModification(NamedObject,TypedObject):
 		self.lattice = lattice
 		self.nodes += nodes
 		for node in self.nodes:
-			errCntrl = _getInstanceOfErrorController()
+			errCntrl = self._getInstanceOfErrorController()
 			errCntrl.setName("ErrCntrl:" + errCntrl.getShortTypeName() + ":" + node.getName())
 			errCntrl.setLattice(lattice)
 			errCntrl.setOneNodeParent(node)
@@ -108,7 +113,7 @@ class CoordinateDisplacementNodesModification(ErrorForNodesModification):
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
 	def __init__(self, name = "no_name"):
-		ErrorForNodesModification.__init_(self,name,"CoordinateDisplacementNodesModification")
+		ErrorForNodesModification.__init__(self,name,"CoordinateDisplacementNodesModification")
 		#---- these parameters can be interpreted as just values or sigmas for 
 		#---- for Gaussian distributions
 		self.param_dict = {"dx":0.,"dxp":0.,"dy":0.,"dyp":0.,"dz":0.,"dE":0.}
@@ -196,8 +201,8 @@ class LongitudinalDisplacementNodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same displacement) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"LongitudinalDisplacementNodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"LongitudinalDisplacementNodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
 		self.shift_length = shift_length
@@ -249,8 +254,8 @@ class StraightRotationZ_NodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same angle) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"StraightRotationZ_NodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"StraightRotationZ_NodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
 		self.angle = 0.
@@ -283,7 +288,7 @@ class StraightRotationZ_NodesModification(ErrorForNodesModification):
 		self.angle = angle
 		self.updateErrorParameters()
 
-	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+	def setGaussDistributedAngle(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
 		"""
 		Sets the random generated error angle for all nodes.
 		"""
@@ -302,11 +307,11 @@ class StraightRotationX_NodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same angle) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"StraightRotationX_NodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"StraightRotationX_NodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
-		self.angle = angle
+		self.angle = 0.
 		
 	def _getInstanceOfErrorController(self):
 		"""
@@ -352,7 +357,7 @@ class StraightRotationX_NodesModification(ErrorForNodesModification):
 		self.angle = angle
 		self.updateErrorParameters()
 
-	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+	def setGaussDistributedAngle(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
 		"""
 		Sets the random generated error angle for all nodes.
 		"""
@@ -371,11 +376,11 @@ class StraightRotationY_NodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same angle) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"StraightRotationY_NodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"StraightRotationY_NodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
-		self.angle = angle
+		self.angle = 0.
 		
 	def _getInstanceOfErrorController(self):
 		"""
@@ -421,7 +426,7 @@ class StraightRotationY_NodesModification(ErrorForNodesModification):
 		self.angle = angle
 		self.updateErrorParameters()
 
-	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0,comm = mpi_comm.MPI_COMM_WORLD):
+	def setGaussDistributedAngle(self,angle,cut_off_level = 3.0,comm = mpi_comm.MPI_COMM_WORLD):
 		"""
 		Sets the random generated error angle for all nodes.
 		"""

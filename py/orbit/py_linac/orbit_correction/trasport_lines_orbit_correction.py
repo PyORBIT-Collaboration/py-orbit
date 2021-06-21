@@ -2,6 +2,7 @@
 
 import math
 import sys
+import os
 
 # import the utilities
 from orbit.utils import orbitFinalize
@@ -31,9 +32,11 @@ class TransverseBPM(BaseLinacNode):
 	"""
 	BPM node for transverse position report
 	"""
-	def __init__(self,bpm_marker_node, sfx = ""):
+	def __init__(self,trajCorrection,bpm_marker_node, sfx = ""):
 		name = bpm_marker_node.getName()+"_diag" + sfx
 		BaseLinacNode.__init__(self,name)
+		#---- the trajectory correction instance that created this node
+		self.trajCorrection = trajCorrection
 		self.bpm_marker_node = bpm_marker_node
 		self.x = 0.
 		self.y = 0.
@@ -52,18 +55,20 @@ class TransverseBPM(BaseLinacNode):
 		"""
 		bunch = paramsDict["bunch"]
 		nParts = bunch.getSize()
-		if(nParts != 1):
+		if(nParts < 1):
 			msg = "TransverseBPM class:"
 			msg = msg + os.linesep
 			msg = msg + "Node name="+self.getName()
 			msg = msg + os.linesep
 			msg = msg + "Number of macro-particles in bunch nParts=" + str(nParts)
 			msg = msg + os.linesep
-			msg = msg + "It should be 1"
+			msg = msg + "It should be more than 0"
 			msg = msg + os.linesep
 			msg = msg + "Stop."
 			msg = msg + os.linesep
 			orbitFinalize(msg)
+		elif(nParts > 1):
+			bunch = self.trajCorrection.makeOneParticleBunch(bunch)
 		self.x = bunch.x(0)
 		self.y = bunch.y(0)
 		self.xp = bunch.xp(0)
@@ -167,7 +172,7 @@ class TrajectoryCorrection:
 		self.bpm_node_arr = self._returnFilteredNodes(bpm_nodes)
 		for bpm in self.bpm_node_arr:
 			(start_pos,end_pos) = node_pos_dict[bpm]
-			transvBPM = TransverseBPM(bpm)
+			transvBPM = TransverseBPM(self,bpm)
 			transvBPM.setPosition(start_pos)
 			bpm.addChildNode(transvBPM,AccNode.ENTRANCE)
 			self.transvBPM_arr.append(transvBPM)
@@ -211,11 +216,11 @@ class TrajectoryCorrection:
 		quad_arr = self._returnFilteredNodes(quad_arr)
 		for quad in quad_arr:
 			(start_pos,end_pos) = node_pos_dict[quad]
-			transvBPM = TransverseBPM(quad,"_entrance")
+			transvBPM = TransverseBPM(self,quad,"_entrance")
 			transvBPM.setPosition(start_pos)
 			quad.addChildNode(transvBPM,AccNode.ENTRANCE)
 			self.quad_transvBPM_arr.append(transvBPM)
-			transvBPM = TransverseBPM(quad,"_exit")
+			transvBPM = TransverseBPM(self,quad,"_exit")
 			transvBPM.setPosition(end_pos)
 			quad.addChildNode(transvBPM,AccNode.EXIT)
 			self.quad_transvBPM_arr.append(transvBPM)

@@ -3,6 +3,7 @@
 ##
 
 from ErrorNodesAndControllersLib import AccErrorNode
+from ErrorNodesAndControllersLib import ErrorLongitudinalDisplacementNode
 from ErrorNodesAndControllersLib import ErrorCoordDisplacementNode
 from ErrorNodesAndControllersLib import ErrorCntrlStraightRotationX
 from ErrorNodesAndControllersLib import ErrorCntrlStraightRotationY

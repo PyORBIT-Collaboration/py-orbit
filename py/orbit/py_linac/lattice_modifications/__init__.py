@@ -16,6 +16,7 @@ from quad_overlap_modifications_lib import Replace_Quads_to_OverlappingQuads_Nod
 #---- modification with errors
 from errors_modifications_lib import ErrorForNodesModification
 from errors_modifications_lib import CoordinateDisplacementNodesModification
+from errors_modifications_lib import BendFieldNodesModification
 from errors_modifications_lib import LongitudinalDisplacementNodesModification
 from errors_modifications_lib import StraightRotationZ_NodesModification
 from errors_modifications_lib import StraightRotationX_NodesModification
@@ -36,6 +37,7 @@ __all__.append("Replace_Quads_to_OverlappingQuads_Nodes")
 
 __all__.append("ErrorForNodesModification")
 __all__.append("CoordinateDisplacementNodesModification")
+__all__.append("BendFieldNodesModification")
 __all__.append("LongitudinalDisplacementNodesModification")
 __all__.append("StraightRotationZ_NodesModification")
 __all__.append("StraightRotationX_NodesModification")

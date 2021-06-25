@@ -18,6 +18,7 @@ implemented in C++.
 
 import os
 import math
+import sys
 
 # import the finalization function 
 from orbit.utils import orbitFinalize
@@ -133,7 +134,28 @@ class ErrorCoordDisplacementNode(AccErrorNode):
 		bunch = paramsDict["bunch"]
 		(dx, dxp, dy, dyp, dz, dE) = self.error_controller_params_func()
 		CoordDisplacement(bunch, dx, dxp, dy, dyp, dz, dE)		
-	
+
+class ErrorBendFieldNode(AccErrorNode):
+	"""
+	The subclass of AccErrorNode. It changes of the energy of each particle 
+	in the bunch to emulate the relative change of the magnetic field of the
+	bend. deltaB/B = deltaP/P = (1/beta)^2*deltaE/E
+	"""
+	def __init__(self, name = "no_name"):
+		AccErrorNode.__init__(self,name,"ErrorBendFieldNode")
+		
+	def track(self, paramsDict):
+		"""
+		Performs deltaE energy shift with CoordDisplacement function.
+		"""
+		bunch = paramsDict["bunch"]
+		syncPart = bunch.getSyncParticle()
+		e_total = (syncPart.kinEnergy() + syncPart.mass())
+		beta = syncPart.beta()
+		relative_field_change = self.error_controller_params_func()
+		deltaE = relative_field_change*beta**2*e_total
+		CoordDisplacement(bunch, 0., 0., 0., 0., 0., deltaE)
+
 class ErrorStraightRotationZNode(AccErrorNode):
 	"""
 	The subclass of AccErrorNode. It describes the rotation around z-axis 
@@ -430,6 +452,45 @@ class ErrorCntrlCoordDisplacement(BaseErrorController):
 	def getDisplacementParameters(self):
 		"""
 		Returns the (dx, dxp, dy, dyp, dz, dE) parameters.
+		"""
+		return self.getEntanceNodeParameters()
+
+class ErrorCntrlBendField(BaseErrorController):
+	"""
+	Subclass of BaseErrorController. It defines the error controller for 
+	bend field. User specifies the relative change in the bend magnetic
+	field.
+	"""
+	def __init__(self,name = "no_name"):
+		BaseErrorController.__init__(self,name,"ErrorCntrlBendField")
+		self.short_type_name = "BendFieldNoise"
+		self.entranceErrorAccNode = ErrorBendFieldNode()
+		self.exitErrorAccNode = ErrorBendFieldNode()
+		self.entranceErrorAccNode.setErrorControllerParamFunc(self.getEntanceNodeParameters)
+		self.exitErrorAccNode.setErrorControllerParamFunc(self.getExitNodeParameters)
+		self.relative_field_change = 0.
+		
+	def getEntanceNodeParameters(self):
+		"""
+		Returns the realtive change in the bend field at the entrance node.
+		"""
+		return self.relative_field_change
+	
+	def getExitNodeParameters(self):
+		"""
+		Returns the realtive change in the bend field at the entrance node.
+		"""
+		return -self.relative_field_change
+		
+	def setRelativeFieldChange(self,relative_field_change):
+		"""
+		Sets the realtive change in the bend field.
+		"""
+		self.relative_field_change = relative_field_change
+		
+	def getRelativeFieldChange(self):
+		"""
+		Returns the realtive change in the bend field.
 		"""
 		return self.getEntanceNodeParameters()
 

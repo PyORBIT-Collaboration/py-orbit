@@ -40,6 +40,7 @@ from orbit.py_linac.lattice import Bend
 
 # import error controllers from orbit.py_linac.errors package
 from orbit.py_linac.errors import ErrorCntrlCoordDisplacement
+from orbit.py_linac.errors import ErrorCntrlBendField
 from orbit.py_linac.errors import ErrorCntrlLongitudinalDisplacement
 from orbit.py_linac.errors import ErrorCntrlStraightRotationX
 from orbit.py_linac.errors import ErrorCntrlStraightRotationY
@@ -484,3 +485,63 @@ class QuadFieldsErrorsDeployment(NamedObject,TypedObject):
 			field = field_init*(1.0 + rel_err)
 			quad.setParam("dB/dr",field)
 			
+class BendFieldNodesModification(ErrorForNodesModification):
+	"""
+	This class will apply the errors to the fields of the bends using energy shift
+	"""
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"BendFieldNodesModification")
+		#---- defines a relative change in the bend field
+		self.relative_field_change = 0.
+		
+	def _getInstanceOfErrorController(self):
+		"""
+		Returns the instance of ErrorCntrlCoordDisplacement error controller.
+		"""
+		return ErrorCntrlBendField()
+		
+	def updateErrorParameters(self):
+		"""
+		This is an implementation of parent class abstract method. 
+		It updates the realtive field change parameter for all registered 
+		error controllers.
+		"""
+		for errCntrl in self.error_controllers:
+			errCntrl.setRelativeFieldChange(self.relative_field_change)
+			
+	def addBends(self,bends):
+		"""
+		Adds up bend nodes array.
+		"""
+		self.addLatticeNodes(bends)
+		
+	def addBend(self,bend):
+		"""
+		Adds up bend node.
+		"""
+		self.addLatticeNodes([bend,])		
+		
+	def setRelativeFieldChange(self,relative_field_change):
+		"""
+		Sets the realtive change in the bend field.
+		"""
+		self.relative_field_change = relative_field_change
+		self.updateErrorParameters()
+		
+	def getRelativeFieldChange(self):
+		"""
+		Returns the realtive change in the bend field.
+		"""
+		return self.relative_field_change
+
+	def setGaussDistributedRelativeFieldError(self,relative_error,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+		"""
+		Sets the random generated field error for all bends. The same value for all registered bends.
+		"""
+		rel_err = random.gauss(0.,relative_error)
+		while(abs(rel_err) > abs(relative_error)*cut_off_level):
+			rel_err = random.gauss(0.,relative_error)
+		main_rank = 0
+		rel_err = orbit_mpi.MPI_Bcast(rel_err,mpi_datatype.MPI_DOUBLE,main_rank,comm)
+		self.relative_field_change = rel_err
+		self.updateErrorParameters()

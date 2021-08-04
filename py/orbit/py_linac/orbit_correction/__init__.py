@@ -2,8 +2,8 @@
 ## \Classes and packages of ORBIT Linac.
 ##
 
-from trasport_lines_orbit_correction import TrajectoryCorrection
-from trasport_lines_orbit_correction import TransverseBPM
+from transport_lines_orbit_correction import TrajectoryCorrection
+from transport_lines_orbit_correction import TransverseBPM
 
 __all__ = []
 

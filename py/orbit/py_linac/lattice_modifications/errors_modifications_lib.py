@@ -18,6 +18,7 @@ import math
 import sys
 import os
 import time
+import random
 
 #---- we need MPI for Gaussian distribution errors to be sure the lattices 
 #---- are the same across all relevant node (the same communicator)
@@ -32,17 +33,28 @@ from orbit.utils   import NamedObject
 from orbit.utils   import TypedObject
 
 # import general accelerator elements and lattice
-from orbit.lattice import AccNode,
+from orbit.lattice import AccNode
+from orbit.py_linac.lattice import Quad
+from orbit.py_linac.lattice import DCorrectorH, DCorrectorV
+from orbit.py_linac.lattice import Bend
 
 # import error controllers from orbit.py_linac.errors package
 from orbit.py_linac.errors import ErrorCntrlCoordDisplacement
+from orbit.py_linac.errors import ErrorCntrlBendField
+from orbit.py_linac.errors import ErrorCntrlLongitudinalDisplacement
+from orbit.py_linac.errors import ErrorCntrlStraightRotationX
+from orbit.py_linac.errors import ErrorCntrlStraightRotationY
+from orbit.py_linac.errors import ErrorCntrlStraightRotationZ
 
 
 class ErrorForNodesModification(NamedObject,TypedObject):
 	"""
 	The base abstract class for set of separate nodes modification 
 	with two error nodes: one at the entrance and one at the exit 
-	of the latiice node.
+	of the lattice node. The lattice is specified for possible
+	needs in the future when we will introduce errors for some
+	section of the lattice as a whole. Right now we are working 
+	only with nodes.
 	"""
 	def __init__(self, name = "no_name", type_in = "ErrorForNodesModification"):
 		NamedObject.__init__(self, name)
@@ -50,6 +62,7 @@ class ErrorForNodesModification(NamedObject,TypedObject):
 		self.nodes = []
 		self.error_controllers = []
 		self.node_to_cntrl_dict = {}
+		self.lattice = None
 		
 	def _getInstanceOfErrorController(self):
 		"""
@@ -82,16 +95,17 @@ class ErrorForNodesModification(NamedObject,TypedObject):
 		"""
 		Adds the error controllers to the nodes
 		"""
+		self.lattice = lattice
 		self.nodes += nodes
 		for node in self.nodes:
-			errCntrl = _getInstanceOfErrorController()
+			errCntrl = self._getInstanceOfErrorController()
 			errCntrl.setName("ErrCntrl:" + errCntrl.getShortTypeName() + ":" + node.getName())
 			errCntrl.setLattice(lattice)
 			errCntrl.setOneNodeParent(node)
 			self.error_controllers.append(errCntrl)
 			self.node_to_cntrl_dict[node] = errCntrl
 		self.updateErrorParameters()
-
+		
 class CoordinateDisplacementNodesModification(ErrorForNodesModification):
 	"""
 	This class applies the coordinate displacement errors to the set of nodes.
@@ -100,7 +114,7 @@ class CoordinateDisplacementNodesModification(ErrorForNodesModification):
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
 	def __init__(self, name = "no_name"):
-		ErrorForNodesModification.__init_(self,name,"CoordinateDisplacementNodesModification")
+		ErrorForNodesModification.__init__(self,name,"CoordinateDisplacementNodesModification")
 		#---- these parameters can be interpreted as just values or sigmas for 
 		#---- for Gaussian distributions
 		self.param_dict = {"dx":0.,"dxp":0.,"dy":0.,"dyp":0.,"dz":0.,"dE":0.}
@@ -188,8 +202,8 @@ class LongitudinalDisplacementNodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same displacement) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"LongitudinalDisplacementNodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"LongitudinalDisplacementNodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
 		self.shift_length = shift_length
@@ -241,8 +255,8 @@ class StraightRotationZ_NodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same angle) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"StraightRotationZ_NodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"StraightRotationZ_NodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
 		self.angle = 0.
@@ -275,7 +289,7 @@ class StraightRotationZ_NodesModification(ErrorForNodesModification):
 		self.angle = angle
 		self.updateErrorParameters()
 
-	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+	def setGaussDistributedAngle(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
 		"""
 		Sets the random generated error angle for all nodes.
 		"""
@@ -294,11 +308,11 @@ class StraightRotationX_NodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same angle) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"StraightRotationX_NodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"StraightRotationX_NodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
-		self.angle = angle
+		self.angle = 0.
 		
 	def _getInstanceOfErrorController(self):
 		"""
@@ -344,7 +358,7 @@ class StraightRotationX_NodesModification(ErrorForNodesModification):
 		self.angle = angle
 		self.updateErrorParameters()
 
-	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+	def setGaussDistributedAngle(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
 		"""
 		Sets the random generated error angle for all nodes.
 		"""
@@ -363,11 +377,11 @@ class StraightRotationY_NodesModification(ErrorForNodesModification):
 	It could be fixed (all nodes will have the same angle) or 
 	random values distributed around 0. by Gaussian with one sigma.
 	"""
-	def __init__(self):
-		ErrorForNodesModification.__init_(self,name,"StraightRotationY_NodesModification")
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"StraightRotationY_NodesModification")
 		#---- this parameter can be interpreted as just a value or a sigma for 
 		#---- for Gaussian distributions
-		self.angle = angle
+		self.angle = 0.
 		
 	def _getInstanceOfErrorController(self):
 		"""
@@ -413,7 +427,7 @@ class StraightRotationY_NodesModification(ErrorForNodesModification):
 		self.angle = angle
 		self.updateErrorParameters()
 
-	def setGaussDistributedShiftLength(self,angle,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+	def setGaussDistributedAngle(self,angle,cut_off_level = 3.0,comm = mpi_comm.MPI_COMM_WORLD):
 		"""
 		Sets the random generated error angle for all nodes.
 		"""
@@ -423,4 +437,111 @@ class StraightRotationY_NodesModification(ErrorForNodesModification):
 				angle_tmp = random.gauss(0.,angle)
 			main_rank = 0
 			angle_tmp = orbit_mpi.MPI_Bcast(angle,mpi_datatype.MPI_DOUBLE,main_rank,comm)
-			errCntrl.setRotationAngle(angle_tmp)				
+			errCntrl.setRotationAngle(angle_tmp)
+			
+#------------------------------------------------------------------
+# The magnet field errors application classes
+#------------------------------------------------------------------
+
+class QuadFieldsErrorsDeployment(NamedObject,TypedObject):
+	"""
+	Class will apply the errors to the fields of the quads
+	"""
+	def __init__(self, name = "no_name", type_in = "QuadFieldsErrorsDeployment"):
+		NamedObject.__init__(self, name)
+		TypedObject.__init__(self, type_in)
+		#---- self.quad_and_field_arr[ind] = [[quad,field_init],...]
+		self.quad_and_field_arr = []
+		
+	def addQuads(self,quads):
+		"""
+		Add quads to the inner array of quads.
+		"""
+		for quad in quads:
+			if(isinstance(quad,Quad)):
+				self.quad_and_field_arr.append([quad,quad.getParam("dB/dr")])
+			
+	def addQuad(self,quad):
+		"""
+		Add one quad to the inner array of quads.
+		"""	
+		if(isinstance(quad,Quad)):
+			self.quad_and_field_arr.append([quad,quad.getParam("dB/dr")])
+		
+	def restoreFields(self):
+		for [quad,field_init] in self.quad_and_field_arr:
+			quad.setParam("dB/dr",field_init)
+	
+	def setGaussDistributedRealtiveErrors(self,relative_error,cut_off_level = 3.0,comm = mpi_comm.MPI_COMM_WORLD):
+		"""
+		Sets the random generated error field for all quads.
+		"""
+		for [quad,field_init] in self.quad_and_field_arr:
+			rel_err = random.gauss(0.,relative_error)
+			while(abs(rel_err) > abs(relative_error)*cut_off_level):
+				rel_err = random.gauss(0.,relative_error)
+			main_rank = 0
+			rel_err = orbit_mpi.MPI_Bcast(rel_err,mpi_datatype.MPI_DOUBLE,main_rank,comm)
+			field = field_init*(1.0 + rel_err)
+			quad.setParam("dB/dr",field)
+			
+class BendFieldNodesModification(ErrorForNodesModification):
+	"""
+	This class will apply the errors to the fields of the bends using energy shift
+	"""
+	def __init__(self, name = "no_name"):
+		ErrorForNodesModification.__init__(self,name,"BendFieldNodesModification")
+		#---- defines a relative change in the bend field
+		self.relative_field_change = 0.
+		
+	def _getInstanceOfErrorController(self):
+		"""
+		Returns the instance of ErrorCntrlCoordDisplacement error controller.
+		"""
+		return ErrorCntrlBendField()
+		
+	def updateErrorParameters(self):
+		"""
+		This is an implementation of parent class abstract method. 
+		It updates the realtive field change parameter for all registered 
+		error controllers.
+		"""
+		for errCntrl in self.error_controllers:
+			errCntrl.setRelativeFieldChange(self.relative_field_change)
+			
+	def addBends(self,bends):
+		"""
+		Adds up bend nodes array.
+		"""
+		self.addLatticeNodes(bends)
+		
+	def addBend(self,bend):
+		"""
+		Adds up bend node.
+		"""
+		self.addLatticeNodes([bend,])		
+		
+	def setRelativeFieldChange(self,relative_field_change):
+		"""
+		Sets the realtive change in the bend field.
+		"""
+		self.relative_field_change = relative_field_change
+		self.updateErrorParameters()
+		
+	def getRelativeFieldChange(self):
+		"""
+		Returns the realtive change in the bend field.
+		"""
+		return self.relative_field_change
+
+	def setGaussDistributedRelativeFieldError(self,relative_error,cut_off_level = 3.0, comm = mpi_comm.MPI_COMM_WORLD):
+		"""
+		Sets the random generated field error for all bends. The same value for all registered bends.
+		"""
+		rel_err = random.gauss(0.,relative_error)
+		while(abs(rel_err) > abs(relative_error)*cut_off_level):
+			rel_err = random.gauss(0.,relative_error)
+		main_rank = 0
+		rel_err = orbit_mpi.MPI_Bcast(rel_err,mpi_datatype.MPI_DOUBLE,main_rank,comm)
+		self.relative_field_change = rel_err
+		self.updateErrorParameters()

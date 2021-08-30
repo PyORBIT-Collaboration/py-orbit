@@ -285,7 +285,7 @@ void Foil::traverseFoilFullScatter(Bunch* bunch, Bunch* lostbunch){
 							double angley = atan(ypfac) + thy;
 							
 							part_coord_arr[ip][1] = tan(anglex) * pfac;
-							part_coord_arr[ip][1] = tan(angley) * pfac;
+							part_coord_arr[ip][3] = tan(angley) * pfac;
 						}
 						
 						// Nuclear Inelastic absorption

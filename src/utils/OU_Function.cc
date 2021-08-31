@@ -500,10 +500,11 @@ int Function::setInverse(Function* f_inv)
 	//create x-arr if it is not ready
 	if(f_inv->getSize() < 2){
 		f_inv->clean();
-		for(int i = 0; i < size; i++){
-			double xx = getMinY() + i*(getMaxY() - getMinY())/(size - 1);
+		for(int i = 0; i < size-1; i++){
+			double xx = getMinY() + i*(getMaxY() - getMinY())/(size - 1);		
 			f_inv->add(xx,0.);
 		}
+		f_inv->add(getMaxY(),0.);
 		f_inv->setConstStep(1);
 	}
 	

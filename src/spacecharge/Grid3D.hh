@@ -16,9 +16,6 @@
 #ifndef SC_GRID3D_HH
 #define SC_GRID3D_HH
 
-#include <iostream> 
-#include <cstdlib>
-
 //MPI Function Wrappers
 #include "orbit_mpi.hh"
 #include "wrap_mpi_comm.hh"
@@ -30,6 +27,9 @@
 #include "CppPyWrapper.hh"
 
 #include "Grid2D.hh"
+
+#include <iostream> 
+#include <cstdlib>
 
 class Grid3D: public OrbitUtils::CppPyWrapper
 {

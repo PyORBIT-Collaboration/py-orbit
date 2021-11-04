@@ -15,14 +15,14 @@
 //  The space charge kick is transformed later into the lab system.   
 //
 /////////////////////////////////////////////////////////////////////////////
-#include <iostream>
-#include <cmath>
-#include <cfloat>
-
 #include "SpaceChargeCalcUnifEllipse.hh"
 #include "BufferStore.hh"
 
 #include "ParticleMacroSize.hh"
+
+#include <iostream>
+#include <cmath>
+#include <cfloat>
 
 using namespace OrbitUtils;
 

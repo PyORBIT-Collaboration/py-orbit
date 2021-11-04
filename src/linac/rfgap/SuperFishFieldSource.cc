@@ -5,12 +5,11 @@
 	 The class can represent several RF gaps.
 */
 
+#include "OrbitConst.hh"
+#include "SuperFishFieldSource.hh"
 
 #include <iostream>
 #include <cmath>
-
-#include "OrbitConst.hh"
-#include "SuperFishFieldSource.hh"
 
 using namespace OrbitUtils;
 

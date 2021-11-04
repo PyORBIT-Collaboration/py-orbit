@@ -62,7 +62,7 @@ extern "C" {
 		}
 		//It will create a pyGrid2D object
 		PyObject* mod = PyImport_ImportModule("spacecharge");
-		PyObject* pyGrid2D = PyObject_CallMethod(mod,"Grid2D","ii",cpp_grid2d->getSizeX(),cpp_grid2d->getSizeY());		
+		PyObject* pyGrid2D = PyObject_CallMethod(mod,const_cast<char*>("Grid2D"),const_cast<char*>("ii"),cpp_grid2d->getSizeX(),cpp_grid2d->getSizeY());		
 		//delete the c++ reference to the internal Grid2D inside pyGrid2D and assign the new one
 		delete ((Grid2D*)((pyORBIT_Object*) pyGrid2D)->cpp_obj);
 		((pyORBIT_Object*) pyGrid2D)->cpp_obj = cpp_grid2d;
@@ -83,7 +83,7 @@ extern "C" {
 		}
 		//It will create a pyGrid2D object
 		PyObject* mod = PyImport_ImportModule("spacecharge");
-		PyObject* pyGrid2D = PyObject_CallMethod(mod,"Grid2D","ii",cpp_grid2d->getSizeX(),cpp_grid2d->getSizeY());		
+		PyObject* pyGrid2D = PyObject_CallMethod(mod,const_cast<char*>("Grid2D"),const_cast<char*>("ii"),cpp_grid2d->getSizeX(),cpp_grid2d->getSizeY());		
 		//delete the c++ reference to the internal Grid2D inside pyGrid2D and assign the new one
 		delete ((Grid2D*)((pyORBIT_Object*) pyGrid2D)->cpp_obj);
 		((pyORBIT_Object*) pyGrid2D)->cpp_obj = cpp_grid2d;
@@ -104,7 +104,7 @@ extern "C" {
 		}
 		//It will create a pyGrid2D object
 		PyObject* mod = PyImport_ImportModule("spacecharge");
-		PyObject* pyGrid1D = PyObject_CallMethod(mod,"Grid1D","i",cpp_grid1d->getSizeZ());		
+		PyObject* pyGrid1D = PyObject_CallMethod(mod,const_cast<char*>("Grid1D"),const_cast<char*>("i"),cpp_grid1d->getSizeZ());		
 		//delete the c++ reference to the internal Grid1D inside pyGrid1D and assign the new one
 		delete ((Grid1D*)((pyORBIT_Object*) pyGrid1D)->cpp_obj);
 		((pyORBIT_Object*) pyGrid1D)->cpp_obj = cpp_grid1d;

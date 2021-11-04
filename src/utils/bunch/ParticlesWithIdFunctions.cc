@@ -23,10 +23,7 @@
 //    wx = exp(-(x^2+(alphax*x+betax*x')^2)/(2*(betax*emittancex)) etc.
 //
 ///////////////////////////////////////////////////////////////////////////
-
-#include <algorithm>    // std::sort
-#include <vector>       // std::vector
-
+#include "orbit_mpi.hh"
 #include "ParticlesWithIdFunctions.hh"
 #include "ParticleIdNumber.hh"
 #include "ParticleMacroSize.hh"
@@ -35,7 +32,8 @@
 #include "MatrixOperations.hh"
 #include "BunchTwissAnalysis.hh"
 
-#include "orbit_mpi.hh"
+#include <algorithm>    // std::sort
+#include <vector>       // std::vector
 
 namespace OrbitUtils{
 	

@@ -17,12 +17,12 @@
 #ifndef PARTICLES_INIT_COORDS_FUNCTIONS_H
 #define PARTICLES_INIT_COORDS_FUNCTIONS_H
 
-#include <cmath>
-
 //ORBIT bunch
 #include "Bunch.hh"
 
 #include "Matrix.hh"
+
+#include <cmath>
 
 namespace OrbitUtils{
 	

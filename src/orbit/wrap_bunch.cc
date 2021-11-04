@@ -47,7 +47,7 @@ namespace wrap_orbit_bunch{
 		//see Python/C API documentation
 		//It will create a SyncParticle object and set the reference to it from pyBunch
 		PyObject* mod = PyImport_ImportModule("bunch");
-		PyObject* pySyncPart = PyObject_CallMethod(mod,"SyncParticle","O",self);
+		PyObject* pySyncPart = PyObject_CallMethod(mod,const_cast<char*>("SyncParticle"),const_cast<char*>("O"),self);
 
 		//the references should be decreased because they were created as "new reference"
 		Py_DECREF(pySyncPart);

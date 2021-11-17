@@ -1,5 +1,5 @@
 #ifndef WRAP_ORBIT_APERTURE_MODULE_HH_
-#define WRAP_ORBIT_APERTURE_MODULE__HH_
+#define WRAP_ORBIT_APERTURE_MODULE_HH_
 
 #include "Python.h"
 
@@ -15,4 +15,4 @@ extern "C" {
 }
 #endif
 
-#endif /*WRAP_ORBIT_APERTURE_MODULE__HH_*/
+#endif /*WRAP_ORBIT_APERTURE_MODULE_HH_*/

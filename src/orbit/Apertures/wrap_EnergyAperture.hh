@@ -1,5 +1,5 @@
 #ifndef WRAP_ORBIT_ENERGY_APERTURE_HH_
-#define WRAP_ORBIT_PHASE__APERTURE_HH_
+#define WRAP_ORBIT_ENERGY_APERTURE_HH_
 
 #include "Python.h"
 

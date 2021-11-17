@@ -1,7 +1,7 @@
 //Calculate the space charge effect of the bunch in the 2.5D 
 
 #ifndef SC_SPACEFORCECHARGE_CALC_2P5D_H
-#define SC_SPACECFORCEHARGE_CALC_2P5D_H
+#define SC_SPACEFORCECHARGE_CALC_2P5D_H
 
 //MPI Function Wrappers
 #include "orbit_mpi.hh"
@@ -65,5 +65,5 @@ protected:
 	OrbitUtils::BunchExtremaCalculator* bunchExtremaCalc;
 	
 };
-//end of SC_SPACECHARGE_CALC_2P5D_H
+//end of SC_SPACEFORCECHARGE_CALC_2P5D_H
 #endif

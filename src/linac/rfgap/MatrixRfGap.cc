@@ -12,12 +12,12 @@ ORNL Tech. Note ORNL/TM-2015/247, June 2015
 #include "MatrixRfGap.hh"
 #include "ParticleMacroSize.hh"
 
-#include <iostream>
-#include <cmath>
-
 #include "Bunch.hh"
 #include "bessel.hh"
 #include "OrbitConst.hh"
+
+#include <iostream>
+#include <cmath>
 
 using namespace OrbitUtils;
 

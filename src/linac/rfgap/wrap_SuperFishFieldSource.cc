@@ -4,11 +4,11 @@
 #include "wrap_SuperFishFieldSource.hh"
 #include "wrap_linacmodule.hh"
 
-#include <iostream>
-
 #include "wrap_utils.hh"
 #include "wrap_spacecharge.hh"
 #include "SuperFishFieldSource.hh"
+
+#include <iostream>
 
 using namespace OrbitUtils;
 

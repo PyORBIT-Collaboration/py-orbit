@@ -1,14 +1,14 @@
 #ifndef UNIFORM_SC_ELLIPSOID_HH
 #define UNIFORM_SC_ELLIPSOID_HH
 
-#include <cstdlib>
-#include <cmath>
-
 //pyORBIT utils
 #include "CppPyWrapper.hh"
 
 //Function from OrbitUtils
 #include "OU_Function.hh"
+
+#include <cstdlib>
+#include <cmath>
 
 using namespace std;
 

@@ -13,12 +13,13 @@
 //    Source code for the class "Grid3D" that is used to operate with 3D arrays
 //
 ///////////////////////////////////////////////////////////////////////////
-#include <iostream>
 
 #include "ParticleMacroSize.hh"
 #include "BufferStore.hh"
 
 #include "Grid3D.hh"
+
+#include <iostream>
 
 using namespace OrbitUtils;
 

@@ -3,14 +3,14 @@
 	the symmetric elliptic integral and Carlson formulas for these integrals.
 	*/
 
-#include <iostream>
-
 //MPI Function Wrappers
 #include "orbit_mpi.hh"
 #include "wrap_mpi_comm.hh"
 
 #include "UniformEllipsoidFieldCalculator.hh"
 #include "gauss_legendre_points.hh"
+
+#include <iostream>
 
 using namespace OrbitUtils;
 

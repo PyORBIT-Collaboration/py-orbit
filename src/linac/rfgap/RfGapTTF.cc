@@ -10,13 +10,13 @@
    ORNL Tech. Note ORNL/TM-2015/247, June 2015	 	 
 */
 
-#include <iostream>
-#include <cmath>
-
 #include "Bunch.hh"
 #include "bessel.hh"
 #include "OrbitConst.hh"
 #include "RfGapTTF.hh"
+
+#include <iostream>
+#include <cmath>
 
 using namespace OrbitUtils;
 

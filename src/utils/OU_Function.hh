@@ -18,12 +18,12 @@
 #ifndef ORBIT_UTILS_FUNCTION_H
 #define ORBIT_UTILS_FUNCTION_H
 
+#include "CppPyWrapper.hh"
+
 #include <iostream> 
 #include <fstream>
 #include <cstdlib>
 #include <cmath>
-
-#include "CppPyWrapper.hh"
 
 using namespace std;
 

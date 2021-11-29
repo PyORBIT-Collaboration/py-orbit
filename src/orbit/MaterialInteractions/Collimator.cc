@@ -11,6 +11,7 @@
 #include <cfloat>
 #include <cstdlib>
 
+#include "ParticleInitialCoordinates.hh"
 
 // Constructor
 ///////////////////////////////////////////////////////////////////////////
@@ -746,7 +747,9 @@ void Collimator::takeStep(Bunch* bunch, Bunch* lostbunch, double* coords, SyncPa
 //   Collimator::loseParticle
 //
 // DESCRIPTION
-//   Lose the particle from the alive bunch and add it to the lost bunch
+//   Lose the particle from the alive bunch and add it to the lost bunch.
+//   If the alive bunch has particle atributes Particle Ids or Initial
+//   Coordinates, the lost particle atributes will be copied to the lost bunch.
 //
 // PARAMETERS
 //	 coords: particle coordinates
@@ -764,12 +767,34 @@ void Collimator::takeStep(Bunch* bunch, Bunch* lostbunch, double* coords, SyncPa
 void Collimator::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost, int& coll_flag, double& zrl){
 	double** coords = bunch->coordArr();
 	lostbunch->addParticle(coords[ip][0], coords[ip][1], coords[ip][2], coords[ip][3], coords[ip][4], coords[ip][5]);
-	if (lostbunch->hasParticleAttributes("LostParticleAttributes") > 0) {
-		lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_ + (length_ - zrl); //absolute position in lattice where particle is lost
+	
+	if (lostbunch->hasParticleAttributes("LostParticleAttributes") <= 0) {
+		std::map<std::string,double> part_attr_dict;
+		lostbunch->addParticleAttributes("LostParticleAttributes",part_attr_dict);
 	}
-	if (lostbunch->hasParticleAttributes("ParticleIdNumber") > 0) {
+	lostbunch->getParticleAttributes("LostParticleAttributes")->attValue(lostbunch->getSize() - 1, 0) = pos_ + (length_ - zrl); //absolute position in lattice where particle is lost
+	
+	if (bunch->hasParticleAttributes("ParticleIdNumber") > 0) {
+		if (lostbunch->hasParticleAttributes("ParticleIdNumber") <= 0) {
+			std::map<std::string,double> part_attr_dict;
+			lostbunch->addParticleAttributes("ParticleIdNumber",part_attr_dict);
+		}	
 		lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lostbunch->getSize() - 1, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(ip,0);
 	}
+	
+	if (bunch->hasParticleAttributes("ParticleInitialCoordinates") > 0) {
+		if (lostbunch->hasParticleAttributes("ParticleInitialCoordinates") <= 0) {
+			std::map<std::string,double> part_attr_dict;
+			lostbunch->addParticleAttributes("ParticleInitialCoordinates",part_attr_dict);
+		}
+		ParticleInitialCoordinates* partAttr = (ParticleInitialCoordinates*) bunch->getParticleAttributes("ParticleInitialCoordinates");
+		ParticleInitialCoordinates* partAttr_lost = (ParticleInitialCoordinates*) lostbunch->getParticleAttributes("ParticleInitialCoordinates");
+		int ip_lost = lostbunch->getSize() - 1;
+		for(int j=0; j < 6; ++j){
+			partAttr_lost->attValue(ip_lost,j) = partAttr->attValue(ip,j);
+		}		
+	}
+	
 	bunch->deleteParticleFast(ip);
 	nLost++;
 	coll_flag = 0;

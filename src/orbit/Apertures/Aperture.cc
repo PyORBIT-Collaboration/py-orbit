@@ -64,6 +64,9 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	ParticleAttributes* partIdNumbAttr = NULL;
 	ParticleAttributes* partIdNumbInitAttr = NULL;
 	
+	ParticleAttributes* partInitCoordsAttr = NULL;
+	ParticleAttributes* partInitCoordsInitAttr = NULL;
+	
 	ParticleAttributes* partMacroAttr = NULL;
 	ParticleAttributes* partMacroInitAttr = NULL;	
 	
@@ -74,23 +77,31 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 		}
 		lostPartAttr = lostbunch->getParticleAttributes("LostParticleAttributes");
 		
-		
 		if(bunch->hasParticleAttributes("ParticleIdNumber") > 0){
 			partIdNumbInitAttr = bunch->getParticleAttributes("ParticleIdNumber");
 			if(lostbunch->hasParticleAttributes("ParticleIdNumber") <= 0){
 				std::map<std::string,double> params_dict;
 				lostbunch->addParticleAttributes("ParticleIdNumber",params_dict);
-				partIdNumbAttr = lostbunch->getParticleAttributes("ParticleIdNumber");
 			}	
+			partIdNumbAttr = lostbunch->getParticleAttributes("ParticleIdNumber");
 		}
+		
+		if(bunch->hasParticleAttributes("ParticleInitialCoordinates") > 0){
+			partInitCoordsInitAttr = bunch->getParticleAttributes("ParticleInitialCoordinates");
+			if(lostbunch->hasParticleAttributes("ParticleInitialCoordinates") <= 0){
+				std::map<std::string,double> params_dict;
+				lostbunch->addParticleAttributes("ParticleInitialCoordinates",params_dict);
+			}
+			partInitCoordsAttr = lostbunch->getParticleAttributes("ParticleInitialCoordinates");			
+		}		
 		
 		if(bunch->hasParticleAttributes("macrosize") > 0){
 			partMacroInitAttr = bunch->getParticleAttributes("macrosize");
 			if(lostbunch->hasParticleAttributes("macrosize") <= 0){
 				std::map<std::string,double> params_dict;
 				lostbunch->addParticleAttributes("macrosize",params_dict);
-				partMacroAttr = lostbunch->getParticleAttributes("macrosize");
-			}	
+			}
+			partMacroAttr = lostbunch->getParticleAttributes("macrosize");
 		}	
 		
 		lostbunch->setMacroSize(bunch->getMacroSize());
@@ -106,6 +117,11 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	  			lostPartAttr->attValue(lostbunch->getSize() - 1, 0) = pos_;
 	  			if(partIdNumbAttr != NULL){
 	  				partIdNumbAttr->attValue(lostbunch->getSize() - 1, 0) = partIdNumbInitAttr->attValue(count,0);
+	  			}
+	  			if(partInitCoordsAttr != NULL){
+	  				for(int j=0; j < 6; ++j){
+	  					partInitCoordsAttr->attValue(lostbunch->getSize() - 1, j) = partInitCoordsInitAttr->attValue(count,j);
+	  				}
 	  			}
 	  			if(partMacroAttr != NULL){
 	  				partMacroAttr->attValue(lostbunch->getSize() - 1, 0) = partMacroInitAttr->attValue(count,0);
@@ -127,6 +143,11 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	  			if(partIdNumbAttr != NULL){
 	  				partIdNumbAttr->attValue(lostbunch->getSize() - 1, 0) = partIdNumbInitAttr->attValue(count,0);
 	  			}
+	  			if(partInitCoordsAttr != NULL){
+	  				for(int j=0; j < 6; ++j){
+	  					partInitCoordsAttr->attValue(lostbunch->getSize() - 1, j) = partInitCoordsInitAttr->attValue(count,j);
+	  				}
+	  			}
 	  			if(partMacroAttr != NULL){
 	  				partMacroAttr->attValue(lostbunch->getSize() - 1, 0) = partMacroInitAttr->attValue(count,0);
 	  			}
@@ -146,6 +167,11 @@ void Aperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 	  			lostPartAttr->attValue(lostbunch->getSize() - 1, 0) = pos_;
 	  			if(partIdNumbAttr != NULL){
 	  				partIdNumbAttr->attValue(lostbunch->getSize() - 1, 0) = partIdNumbInitAttr->attValue(count,0);
+	  			}
+	  			if(partInitCoordsAttr != NULL){
+	  				for(int j=0; j < 6; ++j){
+	  					partInitCoordsAttr->attValue(lostbunch->getSize() - 1, j) = partInitCoordsInitAttr->attValue(count,j);
+	  				}
 	  			}
 	  			if(partMacroAttr != NULL){
 	  				partMacroAttr->attValue(lostbunch->getSize() - 1, 0) = partMacroInitAttr->attValue(count,0);

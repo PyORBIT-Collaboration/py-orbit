@@ -129,8 +129,8 @@ void PhaseAperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 			if(lostbunch->hasParticleAttributes("ParticleIdNumber") <= 0){
 				std::map<std::string,double> params_dict;
 				lostbunch->addParticleAttributes("ParticleIdNumber",params_dict);
-				partIdNumbAttr = lostbunch->getParticleAttributes("ParticleIdNumber");
-			}	
+			}
+			partIdNumbAttr = lostbunch->getParticleAttributes("ParticleIdNumber");			
 		}
 		
 		if(bunch->hasParticleAttributes("macrosize") > 0){
@@ -138,8 +138,8 @@ void PhaseAperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 			if(lostbunch->hasParticleAttributes("macrosize") <= 0){
 				std::map<std::string,double> params_dict;
 				lostbunch->addParticleAttributes("macrosize",params_dict);
-				partMacroAttr = lostbunch->getParticleAttributes("macrosize");
-			}	
+			}
+			partMacroAttr = lostbunch->getParticleAttributes("macrosize");
 		}	
 		
 		if(bunch->hasParticleAttributes("ParticleInitialCoordinates") > 0){
@@ -147,8 +147,8 @@ void PhaseAperture::checkBunch(Bunch* bunch, Bunch* lostbunch){
 			if(lostbunch->hasParticleAttributes("ParticleInitialCoordinates") <= 0){
 				std::map<std::string,double> params_dict;
 				lostbunch->addParticleAttributes("ParticleInitialCoordinates",params_dict);
-				partInitCoordsAttr = lostbunch->getParticleAttributes("ParticleInitialCoordinates");
 			}	
+			partInitCoordsAttr = lostbunch->getParticleAttributes("ParticleInitialCoordinates");
 		}			
 		
 		lostbunch->setMacroSize(bunch->getMacroSize());

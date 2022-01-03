@@ -286,6 +286,7 @@ class Quad(LinacMagnetNode):
 	def __init__(self, name = "quad"):
 		"""
 		Constructor. Creates the Quad Combined Function element.
+		Example: poleArr = [2,3] - for sextupoles and octupoles
 		"""
 		LinacMagnetNode.__init__(self,name)	
 		self.addParam("dB/dr",0.)
@@ -421,7 +422,7 @@ class Quad(LinacMagnetNode):
 		self.tracking_module.quad2(bunch, step/4)
 		for i in xrange(len(poleArr)):
 			pole = poleArr[i]
-			kl = klArr[i]/(nParts - 1)
+			kl = klArr[i]/(2*nParts)
 			skew = skewArr[i]
 			TPB.multp(bunch,pole,kl,skew)
 		self.tracking_module.quad2(bunch, step/4)
@@ -429,7 +430,7 @@ class Quad(LinacMagnetNode):
 		self.tracking_module.quad2(bunch, step/4)
 		for i in xrange(len(poleArr)):
 			pole = poleArr[i]
-			kl = klArr[i]/(nParts - 1)
+			kl = klArr[i]/(2*nParts)
 			skew = skewArr[i]
 			TPB.multp(bunch,pole,kl,skew)
 		self.tracking_module.quad2(bunch, step/4)
@@ -506,7 +507,7 @@ class Bend(LinacMagnetNode):
 			e = node.getParam("ea1")
 			rho = node.getParam("rho")
 			poleArr = node.getParam("poles")
-                        klArr =  [-x*bunch.charge()*length for x in self.getParam("kls")]
+			klArr =  [-x*bunch.charge()*length for x in self.getParam("kls")]
 			skewArr = node.getParam("skews")
 			nParts = paramsDict["parentNode"].getnParts()
 			if(e != 0.):
@@ -542,9 +543,9 @@ class Bend(LinacMagnetNode):
 			e = node.getParam("ea2")
 			rho = node.getParam("rho")
 			poleArr = node.getParam("poles")
-                        klArr =  [-x*bunch.charge()*length for x in self.getParam("kls")]
+			klArr =  [-x*bunch.charge()*length for x in self.getParam("kls")]
 			skewArr = node.getParam("skews")
-                        nParts = paramsDict["parentNode"].getnParts()
+			nParts = paramsDict["parentNode"].getnParts()
 			if(e != 0.):
 				inout = 1
 				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1)

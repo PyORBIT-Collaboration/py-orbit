@@ -39,6 +39,7 @@ RingRF
 monitor
 """
 
+
 class TEAPOT_Lattice(AccLattice):
 	"""
 	The subclass of the AccLattice class. Shell class for the TEAPOT nodes collection.
@@ -138,6 +139,7 @@ class TEAPOT_Lattice(AccLattice):
 	def getUseRealCharge(self):
 		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
 		return self.useCharge
+
 
 class TEAPOT_Ring(AccLattice):
 	"""
@@ -263,7 +265,7 @@ class TEAPOT_Ring(AccLattice):
 	
 	def getUseRealCharge(self):
 		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
-		return self.useCharge		
+		return self.useCharge
 
 
 class _teapotFactory:
@@ -396,24 +398,24 @@ class _teapotFactory:
 				hkick = params["hkick"]
 			vkick = 0.
 			if(params.has_key("vkick")):
-				hkick = params["vkick"]
+				vkick = params["vkick"]
 			elem.addParam("kx",hkick)
 			elem.addParam("ky",vkick)
 		# ===========HKicker element ======================
-		if(madElem.getType().lower()  == "hkicker" or \
-			 madElem.getType() .lower() == "hkick"):
+		if(madElem.getType().lower() == "hkicker" or \
+                   madElem.getType().lower() == "hkick"):
 			elem = KickTEAPOT(madElem.getName())
 			hkick = 0.
 			if(params.has_key("hkick")):
 				hkick = params["hkick"]
 			elem.addParam("kx",hkick)
 		# ===========VKicker element ======================
-		if(madElem.getType().lower()  == "vkicker" or \
-			 madElem.getType().lower()  == "vkick"):
+		if(madElem.getType().lower() == "vkicker" or \
+                   madElem.getType().lower() == "vkick"):
 			elem = KickTEAPOT(madElem.getName())
 			vkick = 0.
 			if(params.has_key("vkick")):
-				hkick = params["vkick"]
+				vkick = params["vkick"]
 			elem.addParam("ky",vkick)
 		# ===========RF Cavity element ======================
 		if(madElem.getType().lower() == "rfcavity"):
@@ -451,7 +453,7 @@ class _teapotFactory:
 			elem.addParam("xAvg",xAvg)
 			elem.addParam("yAvg",yAvg)
 			if length > 0:
-				return [drft_1,elem,drft_2]
+				return [drft_1, elem, drft_2]
 		# ------------------------------------------------
 		# ready to finish
 		# ------------------------------------------------
@@ -502,7 +504,7 @@ class BaseTEAPOT(AccNodeBunchTracker):
 		"""
 		AccNodeBunchTracker.__init__(self,name)
 		self.setType("base teapot")
-		
+
 class NodeTEAPOT(BaseTEAPOT):
 	def __init__(self, name = "no name"):
 		"""
@@ -690,14 +692,14 @@ class MonitorTEAPOT(NodeTEAPOT):
 		"""
 		The bunchtuneanalysis-teapot class implementation of the AccNodeBunchTracker class track(probe) method.
 		"""
+		length = self.getLength(self.getActivePartIndex())
 		bunch = paramsDict["bunch"]
 		self.twiss.analyzeBunch(bunch)
-		length = self.getLength(self.getActivePartIndex())
 		self.addParam("xAvg",self.twiss.getAverage(0))
 		self.addParam("xpAvg",self.twiss.getAverage(1))
 		self.addParam("yAvg",self.twiss.getAverage(2))
 		self.addParam("ypAvg",self.twiss.getAverage(3))
-		
+
 
 class BunchWrapTEAPOT(NodeTEAPOT):
 	"""
@@ -720,29 +722,43 @@ class BunchWrapTEAPOT(NodeTEAPOT):
 		length = self.getParam("ring_length")
 		TPB.wrapbunch(bunch, length)
 
+
 class SolenoidTEAPOT(NodeTEAPOT):
 	"""
 	Solenoid TEAPOT element.
 	"""
 	def __init__(self, name = "solenoid no name"):
 		"""
-		Constructor. Creates the Solenoid TEAPOT element .
+		Constructor. Creates the Solenoid TEAPOT element.
 		"""
-		NodeTEAPOT.__init__(self,name)
+		NodeTEAPOT.__init__(self, name)
 		self.setType("solenoid teapot")
-		self.addParam("B",0.)
+		self.addParam("B", 0.)
+		self.waveform = None
 
 	def track(self, paramsDict):
 		"""
-		The Solenoid TEAPOT  class implementation of the AccNodeBunchTracker class track(probe) method.
+		The Solenoid TEAPOT class implementation of the
+                AccNodeBunchTracker class track(probe) method.
 		"""
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
+		strength = 1.0
+		if(self.waveform):
+			strength = self.waveform.getStrength()
+		B = strength * self.getParam("B")
 		bunch = paramsDict["bunch"]
 		useCharge = 1
-		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
-		B = self.getParam("B")
-		TPB.soln(bunch,length,B,useCharge)
+		if(paramsDict.has_key("useCharge")): \
+                  useCharge = paramsDict["useCharge"]
+		TPB.soln(bunch, length, B, useCharge)
+
+	def setWaveform(self, waveform):
+		"""
+		Sets the time dependent waveform function
+		"""
+		self.waveform = waveform
+
 
 class MultipoleTEAPOT(NodeTEAPOT):
 	"""
@@ -750,33 +766,39 @@ class MultipoleTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "multipole no name"):
 		"""
-		Constructor. Creates the Multipole Combined Function TEAPOT element.
+		Constructor. Creates the Multipole
+                Combined Function TEAPOT element.
 		"""
 		NodeTEAPOT.__init__(self,name)
-		self.addParam("poles",[])
-		self.addParam("kls",[])
-		self.addParam("skews",[])
-		
+		self.addParam("poles", [])
+		self.addParam("kls", [])
+		self.addParam("skews", [])
 		self.setnParts(2)
-		
-		def fringeIN(node,paramsDict):
+		self.waveform = None
+
+                def fringeIN(node, paramsDict):
 			usageIN = node.getUsage()
 			if(not usageIN):
 				return
 			length = paramsDict["parentNode"].getLength()
 			if(length == 0.):
 				return
+                        strength = 1.0
+                        if(self.waveform):
+                                strength = self.waveform.getStrength()
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
+			if(paramsDict.has_key("useCharge")): \
+                          useCharge = paramsDict["useCharge"]
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]
+				kl = strength * klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeIN(bunch,pole,kl/length,skew,useCharge)
+				TPB.multpfringeIN(bunch, pole, kl/length, \
+                                                  skew, useCharge)
 
 		def fringeOUT(node,paramsDict):
 			usageOUT = node.getUsage()
@@ -785,17 +807,22 @@ class MultipoleTEAPOT(NodeTEAPOT):
 			length = paramsDict["parentNode"].getLength()
 			if(length == 0.):
 				return
+                        strength = 1.0
+                        if(self.waveform):
+                                strength = self.waveform.getStrength()
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
+			if(paramsDict.has_key("useCharge")): \
+                          useCharge = paramsDict["useCharge"]
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]
+				kl = strength * klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeOUT(bunch,pole,kl/length,skew,useCharge)
+				TPB.multpfringeOUT(bunch, pole, kl/length, \
+                                                   skew, useCharge)
 
 		self.setFringeFieldFunctionIN(fringeIN)
 		self.setFringeFieldFunctionOUT(fringeOUT)
@@ -819,47 +846,58 @@ class MultipoleTEAPOT(NodeTEAPOT):
 			msg = msg + os.linesep
 			msg = msg + "nParts =" + str(self.getnParts())
 			orbitFinalize(msg)
-		lengthIN = (self.getLength()/(nParts - 1))/2.0
-		lengthOUT = (self.getLength()/(nParts - 1))/2.0
+		lengthIN = (self.getLength() / (nParts - 1)) / 2.0
+		lengthOUT = (self.getLength() / (nParts - 1)) / 2.0
 		lengthStep = lengthIN + lengthOUT
-		self.setLength(lengthIN,0)
-		self.setLength(lengthOUT,nParts - 1)
-		for i in xrange(nParts-2):
-			self.setLength(lengthStep,i+1)
+		self.setLength(lengthIN, 0)
+		self.setLength(lengthOUT, nParts - 1)
+		for i in xrange(nParts - 2):
+			self.setLength(lengthStep, i + 1)
 
 	def track(self, paramsDict):
 		"""
 		The Multipole Combined Function TEAPOT  class
-		implementation of the AccNodeBunchTracker class track(probe) method.
+		implementation of the AccNodeBunchTracker class
+                track(probe) method.
 		"""
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
-		bunch = paramsDict["bunch"]
-		useCharge = 1
-		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]			
+		strength = 1.0
+		if(self.waveform):
+			strength = self.waveform.getStrength()
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
+		bunch = paramsDict["bunch"]
+		useCharge = 1
+		if(paramsDict.has_key("useCharge")): \
+                  useCharge = paramsDict["useCharge"]
 		if(index == 0):
 			TPB.drift(bunch, length)
 			return
-		if(index > 0 and index < (nParts-1)):
+		if(index > 0 and index < (nParts - 1)):
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]/(nParts - 1)
+				kl = strength * klArr[i] / (nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew,useCharge)
+				TPB.multp(bunch, pole, kl, skew, useCharge)
 			TPB.drift(bunch, length)
 			return
 		if(index == (nParts-1)):
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]/(nParts - 1)
+				kl = strength * klArr[i] / (nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew,useCharge)
+				TPB.multp(bunch, pole, kl, skew, useCharge)
 			TPB.drift(bunch, length)
 		return
+
+	def setWaveform(self, waveform):
+		"""
+		Sets the time dependent waveform function
+		"""
+		self.waveform = waveform
 
 
 class QuadTEAPOT(NodeTEAPOT):
@@ -868,57 +906,69 @@ class QuadTEAPOT(NodeTEAPOT):
 	"""
 	def __init__(self, name = "quad no name"):
 		"""
-		Constructor. Creates the Quad Combined Function TEAPOT element .
+		Constructor. Creates the Quad
+                Combined Function TEAPOT element.
 		"""
 		NodeTEAPOT.__init__(self,name)
 
-		self.addParam("kq",0.)
-		self.addParam("poles",[])
-		self.addParam("kls",[])
-		self.addParam("skews",[])
+		self.addParam("kq", 0.)
+		self.addParam("poles", [])
+		self.addParam("kls", [])
+		self.addParam("skews", [])
 		self.setnParts(2)
+		self.waveform = None
 
 		def fringeIN(node,paramsDict):
-			usageIN = node.getUsage()		
+			usageIN = node.getUsage()
 			if(not usageIN):
 				return
-			kq = node.getParam("kq")
+                        strength = 1.0
+                        if(self.waveform):
+                                strength = self.waveform.getStrength()
+			kq = strength * node.getParam("kq")
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
-			TPB.quadfringeIN(bunch,kq,useCharge)
+			if(paramsDict.has_key("useCharge")): \
+                          useCharge = paramsDict["useCharge"]
+			TPB.quadfringeIN(bunch, kq, useCharge)
 			if(length == 0.):
 				return
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]
+				kl = strength * klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeIN(bunch,pole,kl/length,skew,useCharge)
+				TPB.multpfringeIN(bunch, pole, kl/length, \
+                                                  skew, useCharge)
 
 		def fringeOUT(node,paramsDict):
 			usageOUT = node.getUsage()
 			if(not usageOUT):
 				return
-			kq = node.getParam("kq")
+                        strength = 1.0
+                        if(self.waveform):
+                                strength = self.waveform.getStrength()
+			kq = strength * node.getParam("kq")
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
 			length = paramsDict["parentNode"].getLength()
 			bunch = paramsDict["bunch"]
 			useCharge = 1
-			if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
-			TPB.quadfringeOUT(bunch,kq,useCharge)
+			if(paramsDict.has_key("useCharge")): \
+                          useCharge = paramsDict["useCharge"]
+			TPB.quadfringeOUT(bunch, kq, useCharge)
 			if(length == 0.):
 				return
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]
+				kl = strength * klArr[i]
 				skew = skewArr[i]
-				TPB.multpfringeOUT(bunch,pole,kl/length,skew,useCharge)
+				TPB.multpfringeOUT(bunch, pole, kl/length, \
+                                                   skew,useCharge)
 
 		self.setFringeFieldFunctionIN(fringeIN)
 		self.setFringeFieldFunctionOUT(fringeOUT)
@@ -946,13 +996,13 @@ class QuadTEAPOT(NodeTEAPOT):
 			msg = msg + os.linesep
 			msg = msg + "nParts =" + str(nParts)
 			orbitFinalize(msg)
-		lengthIN = (self.getLength()/(nParts - 1))/2.0
-		lengthOUT = (self.getLength()/(nParts - 1))/2.0
+		lengthIN = (self.getLength() / (nParts - 1)) / 2.0
+		lengthOUT = (self.getLength() / (nParts - 1)) / 2.0
 		lengthStep = lengthIN + lengthOUT
-		self.setLength(lengthIN,0)
-		self.setLength(lengthOUT,nParts - 1)
-		for i in xrange(nParts-2):
-			self.setLength(lengthStep,i+1)
+		self.setLength(lengthIN, 0)
+		self.setLength(lengthOUT, nParts - 1)
+		for i in xrange(nParts - 2):
+			self.setLength(lengthStep, i + 1)
 
 	def track(self, paramsDict):
 		"""
@@ -962,36 +1012,46 @@ class QuadTEAPOT(NodeTEAPOT):
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
-		kq = self.getParam("kq")
+                strength = 1.0
+                if(self.waveform):
+                        strength = self.waveform.getStrength()
+		kq = strength * self.getParam("kq")
 		poleArr = self.getParam("poles")
 		klArr = self.getParam("kls")
 		skewArr = self.getParam("skews")
-		bunch = paramsDict["bunch"] 
+		bunch = paramsDict["bunch"]
 		useCharge = 1
-		if(paramsDict.has_key("useCharge")): useCharge = paramsDict["useCharge"]
+		if(paramsDict.has_key("useCharge")): \
+                  useCharge = paramsDict["useCharge"]
 		if(index == 0):
-			TPB.quad1(bunch,length,kq,useCharge)
+			TPB.quad1(bunch, length, kq, useCharge)
 			return
-		if(index > 0 and index < (nParts-1)):
+		if(index > 0 and index < (nParts - 1)):
 			TPB.quad2(bunch, length/2.0)
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]/(nParts - 1)
+				kl = strength * klArr[i] / (nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew,useCharge)
-			TPB.quad2(bunch,length/2.0)
-			TPB.quad1(bunch,length,kq,useCharge)
+				TPB.multp(bunch, pole, kl, skew, useCharge)
+			TPB.quad2(bunch, length / 2.0)
+			TPB.quad1(bunch, length, kq, useCharge)
 			return
-		if(index == (nParts-1)):
+		if(index == (nParts - 1)):
 			TPB.quad2(bunch, length)
 			for i in xrange(len(poleArr)):
 				pole = poleArr[i]
-				kl = klArr[i]/(nParts - 1)
+				kl = strength * klArr[i] / (nParts - 1)
 				skew = skewArr[i]
-				TPB.multp(bunch,pole,kl,skew,useCharge)
-			TPB.quad2(bunch,length)
-			TPB.quad1(bunch,length,kq,useCharge)
+				TPB.multp(bunch, pole, kl, skew, useCharge)
+			TPB.quad2(bunch, length)
+			TPB.quad1(bunch, length, kq, useCharge)
 		return
+
+	def setWaveform(self, waveform):
+		"""
+		Sets the time dependent waveform function
+		"""
+		self.waveform = waveform
 
 class BendTEAPOT(NodeTEAPOT):
 	"""
@@ -1279,7 +1339,7 @@ class KickTEAPOT(NodeTEAPOT):
 
 	def track(self, paramsDict):
 		"""
-		The Kick TEAPOT  class implementation of
+		The Kick TEAPOT class implementation of
 		the AccNodeBunchTracker class track(probe) method.
 		"""
 		nParts = self.getnParts()
@@ -1287,7 +1347,7 @@ class KickTEAPOT(NodeTEAPOT):
 		length = self.getLength(index)
 		strength = 1.0
 		if(self.waveform):
-			strength = self.waveform.getKickFactor()
+			strength = self.waveform.getStrength()
 		kx = strength * self.getParam("kx")/(nParts-1)
 		ky = strength * self.getParam("ky")/(nParts-1)
 		dE = self.getParam("dE")/(nParts-1)

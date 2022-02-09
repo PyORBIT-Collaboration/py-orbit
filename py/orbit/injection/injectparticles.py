@@ -151,3 +151,7 @@ class InjectParts:
 		
 		self.bunch.compress()
 		self.lostbunch.compress()
+
+	def setnparts(self, nparts):
+		self.nparts = nparts
+		self.npartsfloat = float(nparts)

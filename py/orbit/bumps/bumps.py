@@ -20,7 +20,6 @@ class simpleBump:
 	"""
 	
 	def __init__(self, bunch, xbump, xpbump, ybump, ypbump):
-		
 		self.bunch = bunch
 		self.xbump = xbump
 		self.ybump = ybump
@@ -203,3 +202,34 @@ class close_orbit_bumps:
 			print "Stop."
 			sys.exit(0)
 	#======================optimzation function===============
+
+
+class TDsimpleBump:
+	"""
+	This routine adds a transverse particle coordinate bump.
+	"""
+
+	def __init__(self, bunch, xbump, xpbump, ybump, ypbump, waveform):
+		self.bunch = bunch
+		self.xbump = xbump
+		self.ybump = ybump
+		self.xpbump = xpbump
+		self.ypbump = ypbump
+                self.waveform = waveform
+
+	def bump(self):
+		nparts = self.bunch.getSize();
+                strength = self.waveform.getStrength()
+
+		for i in range(nparts):
+			newx = self.bunch.x(i) + self.xbump * strength
+			self.bunch.x(i, newx)
+			newxp = self.bunch.xp(i) + self.xpbump * strength
+			self.bunch.xp(i, newxp)
+			newy = self.bunch.y(i) + self.ybump * strength
+			self.bunch.y(i, newy)
+			newyp = self.bunch.yp(i) + self.ypbump * strength
+			self.bunch.yp(i, newyp)
+
+	def getLength(self):
+		return 0

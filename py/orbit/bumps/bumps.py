@@ -8,9 +8,9 @@ import random
 import sys
 from bunch import Bunch
 
-import numpy as np
-from numpy import linalg as LA
-from scipy.optimize import minimize, leastsq
+# import numpy as np
+# from numpy import linalg as LA
+# from scipy.optimize import minimize, leastsq
 from orbit.teapot import TEAPOT_MATRIX_Lattice
 
 

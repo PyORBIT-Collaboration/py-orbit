@@ -4,7 +4,7 @@ jobs:
  centos-8:
     runs-on: ubuntu-latest
     container:
-      image: centos:centos8
+      image: centos:latest
     steps:
          - uses: actions/checkout@v2
          - name: Install packages

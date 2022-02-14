@@ -21,7 +21,7 @@ class TeapotCollimatorNode(DriftTEAPOT):
 	""" 
 	The collimator node class for TEAPOT lattice
 	"""
-	def __init__(self, length, ma, density_fac, shape, a, b, c, d, angle, pos = 0, name = "collimator no name"):
+	def __init__(self, length, ma, density_fac, shape, a, b, c, d, angle, pos = 0., name = "collimator no name"):
 		"""
 		Constructor. Creates the Collimator TEAPOT element.
 		"""

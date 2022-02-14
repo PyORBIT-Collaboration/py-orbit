@@ -11,6 +11,7 @@
 #include <cfloat>
 #include <cstdlib>
 
+#include "ParticleInitialCoordinates.hh"
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -579,6 +580,28 @@ void Foil::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost, int&
 
 	double** coords = bunch->coordArr();
 	lostbunch->addParticle(coords[ip][0], coords[ip][1], coords[ip][2], coords[ip][3], coords[ip][4], coords[ip][5]);
+	int lost_part_ind = lostbunch->getSize() - 1;
+	
+	if (bunch->hasParticleAttributes("ParticleIdNumber") > 0) {
+		if (lostbunch->hasParticleAttributes("ParticleIdNumber") <= 0) {
+			std::map<std::string,double> part_attr_dict;
+			lostbunch->addParticleAttributes("ParticleIdNumber",part_attr_dict);
+		}	
+		lostbunch->getParticleAttributes("ParticleIdNumber")->attValue(lost_part_ind, 0) = bunch->getParticleAttributes("ParticleIdNumber")->attValue(ip,0);
+	}
+	
+	if (bunch->hasParticleAttributes("ParticleInitialCoordinates") > 0) {
+		if (lostbunch->hasParticleAttributes("ParticleInitialCoordinates") <= 0) {
+			std::map<std::string,double> part_attr_dict;
+			lostbunch->addParticleAttributes("ParticleInitialCoordinates",part_attr_dict);
+		}
+		ParticleInitialCoordinates* partAttr = (ParticleInitialCoordinates*) bunch->getParticleAttributes("ParticleInitialCoordinates");
+		ParticleInitialCoordinates* partAttr_lost = (ParticleInitialCoordinates*) lostbunch->getParticleAttributes("ParticleInitialCoordinates");
+		for(int j=0; j < 6; ++j){
+			partAttr_lost->attValue(lost_part_ind,j) = partAttr->attValue(ip,j);
+		}		
+	}
+	
 	bunch->deleteParticleFast(ip);
 	nLost++;
 	foil_flag = 0;

@@ -130,7 +130,7 @@ class InjectParts:
 		nPartsTotalGlobal = nPartsGlobal + nPartsLostGlobal
 
 		for i in range(n_remainder):
-			i_cpu = random.randint(0,rank)
+			i_cpu = random.randint(0,numprocs-1)
 			orbit_mpi.MPI_Bcast(i_cpu, mpi_datatype.MPI_INT, 0,comm)
 			if(rank == i_cpu):
 				particleId = nPartsTotalGlobal + i

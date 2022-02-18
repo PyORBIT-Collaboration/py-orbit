@@ -72,6 +72,7 @@ class TEAPOT_Lattice(AccLattice):
 			elems = _teapotFactory.getElements(madElem)
 			for elem in elems:
 				self.addNode(elem)
+		self._addChildren()
 		self.initialize()
 
 	def readMADX(self, madx_file_name, seqName):
@@ -97,7 +98,14 @@ class TEAPOT_Lattice(AccLattice):
 			elems = _teapotFactory.getElements(madElem)
 			for elem in elems:
 				self.addNode(elem)
+		self._addChildren()
 		self.initialize()
+
+	def _addChildren(self):
+		"""
+		It does nothing here. It is a place holder for TEAPOT_Ring class.
+		"""
+		pass
 
 	def initialize(self):
 		AccLattice.initialize(self)
@@ -116,9 +124,9 @@ class TEAPOT_Lattice(AccLattice):
 		new_teapot_lattice.setUseRealCharge(self.getUseRealCharge())
 		return new_teapot_lattice
 
-	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
+	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None, index_start = -1, index_stop = -1):
 		"""
-		It tracks the bunch through the lattice.
+		It tracks the bunch through the lattice. Indexes index_start and index_stop are inclusive.
 		"""
 		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
 		paramsDict["bunch"] = bunch
@@ -129,7 +137,7 @@ class TEAPOT_Lattice(AccLattice):
 			node.track(paramsDict)
 			
 		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
+		self.trackActions(actionContainer,paramsDict,index_start,index_stop)
 		actionContainer.removeAction(track, AccActionsContainer.BODY)
 
 	def setUseRealCharge(self, useCharge = 1):
@@ -141,131 +149,25 @@ class TEAPOT_Lattice(AccLattice):
 		return self.useCharge
 
 
-class TEAPOT_Ring(AccLattice):
+class TEAPOT_Ring(TEAPOT_Lattice):
 	"""
-		The subclass of the AccLattice class. Shell class for the TEAPOT nodes collection for rings.
-		TEAPOT has the ability to read MAD files.
+		The subclass of the TEAPOT_Lattice class. Shell class for the TEAPOT nodes 
+		collection for rings. TEAPOT has the ability to read MAD files.
 		"""
 	def __init__(self, name = "no name"):
-		AccLattice.__init__(self,name)
-		self.useCharge = 1		
-	
-	def readMAD(self, mad_file_name, lineName):
-		"""
-			It creates the teapot lattice from MAD file.
-			"""
-		parser = MAD_Parser()
-		parser.parse(mad_file_name)
-		accLines = parser.getMAD_LinesDict()
-		if(not accLines.has_key(lineName)):
-			print "==============================="
-			print "MAD file: ", mad_file_name
-			print "Can not find accelerator line: ", lineName
-			print "STOP."
-			sys.exit(1)
-		# accelerator lines and elements from mad_parser package
-		accMAD_Line = accLines[lineName]
-		self.setName(lineName)
-		accMADElements = accMAD_Line.getElements()
-		# make TEAPOT lattice elements by using TEAPOT
-		# element factory
-		for madElem in accMADElements:
-			elems = _teapotFactory.getElements(madElem)
-			for elem in elems:
-				self.addNode(elem)
-		self.addChildren()
-		self.initialize()
+		TEAPOT_Lattice.__init__(self,name)	
 
-	def readMADX(self, madx_file_name, seqName):
+	def _addChildren(self):
 		"""
-			It creates the teapot lattice from MAD file.
-			"""
-		parser = MADX_Parser()
-		parser.parse(madx_file_name)
-		if(not seqName == parser.getSequenceName()):
-			print "==============================="
-			print "MADX file: ", madx_file_name
-			print "Can not find accelerator sequence: ", seqName
-			print "STOP."
-			sys.exit(1)
-		
-		self.setName(parser.getSequenceName())
-		accMADElements = parser.getSequenceList()
-		# make TEAPOT lattice elements by using TEAPOT
-		# element factory
-		for madElem in accMADElements:
-			elems = _teapotFactory.getElements(madElem)
-			for elem in elems:
-				self.addNode(elem)
-		self.addChildren()
-		self.initialize()
-
-	def addChildren(self):
-		AccLattice.initialize(self)
+		Adds Bunch wrapping nodes to all lattice nodes of 1st level.
+		These wrapping nodes will move particles from head ( tail ) to tail ( head)
+		if the longitudinal positions too big / small(negative). 
+		"""
+		TEAPOT_Lattice.initialize(self)
 		for node in self.getNodes():
 			bunchwrapper = BunchWrapTEAPOT("Bunch Wrap")
 			bunchwrapper.getParamsDict()["ring_length"] = self.getLength()
-			node.addChildNode(bunchwrapper, AccNode.BODY)
-			
-	def initialize(self):
-		AccLattice.initialize(self)
-		#set up ring length for RF nodes
-		ringRF_Node = RingRFTEAPOT()
-		bunchwrap_Node = BunchWrapTEAPOT()
-		for node in self.getNodes():
-			if(node.getType() == ringRF_Node.getType()):
-				node.getParamsDict()["ring_length"] = self.getLength()
-			
-		paramsDict = {}
-		actions = AccActionsContainer()
-
-		def accSetWrapLengthAction(paramsDict):
-			"""
-			Nonbound function. Sets lattice length for wrapper nodes
-			"""
-			node = paramsDict["node"]
-			bunchwrap_node = BunchWrapTEAPOT()
-			if(node.getType() == bunchwrap_Node.getType()):
-				node.getParamsDict()["ring_length"] = self.getLength()
-
-		actions.addAction(accSetWrapLengthAction, AccNode.EXIT)
-		self.trackActions(actions, paramsDict)
-		actions.removeAction(accSetWrapLengthAction, AccNode.EXIT)
-
-
-	def getSubLattice(self, index_start = -1, index_stop = -1,):
-		"""
-		It returns the new TEAPOT_Lattice with children with indexes 
-		between index_start and index_stop inclusive
-		"""
-		new_teapot_lattice = self._getSubLattice(TEAPOT_Lattice(),index_start,index_stop)
-		new_teapot_lattice.setUseRealCharge(self.getUseRealCharge())
-		return new_teapot_lattice		
-		
-	
-	def trackBunch(self, bunch, paramsDict = {}, actionContainer = None):
-		"""
-			It tracks the bunch through the lattice.
-			"""
-		if(actionContainer == None): actionContainer = AccActionsContainer("Bunch Tracking")
-		paramsDict["bunch"] = bunch
-		paramsDict["useCharge"] = self.useCharge		
-		
-		def track(paramsDict):
-			node = paramsDict["node"]
-			node.track(paramsDict)
-		
-		actionContainer.addAction(track, AccActionsContainer.BODY)
-		self.trackActions(actionContainer,paramsDict)
-		actionContainer.removeAction(track, AccActionsContainer.BODY)
-		
-	def setUseRealCharge(self, useCharge = 1):
-		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
-		self.useCharge = useCharge
-	
-	def getUseRealCharge(self):
-		""" If useCharge != 1 the trackBunch(...) method will assume the charge = +1 """ 
-		return self.useCharge
+			node.addChildNode(bunchwrapper, AccNode.BODY)			
 
 
 class _teapotFactory:

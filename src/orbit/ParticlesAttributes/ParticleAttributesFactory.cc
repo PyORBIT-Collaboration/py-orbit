@@ -27,6 +27,7 @@
 #include "ParticlePhaseAttributes.hh"
 #include "ParticleIdNumber.hh"
 #include "ParticleInitialCoordinates.hh"
+#include "TurnNumberAttributes.hh"
 
 ParticleAttributesFactory::ParticleAttributesFactory()
 {
@@ -180,6 +181,10 @@ ParticleAttributes* ParticleAttributesFactory::getParticleAttributesInstance(
 		part_atrs = new ParticleInitialCoordinates(bunch);
 	}	
 	
+	if(name == "TurnNumber"){
+		part_atrs = new TurnNumberAttributes(bunch);
+	}
+	
 	if(part_atrs == NULL) {
 		if(rank_MPI == 0){
 			std::cerr << "ParticleAttributesFactory::getParticleAttributesInstance(const string name, Bunch* bunch)"<< std::endl;
@@ -212,7 +217,6 @@ void ParticleAttributesFactory::getParticleAttributesNames(std::vector<string>& 
 	names.push_back("LostParticleAttributes");
 	names.push_back("ParticlePhaseAttributes");
 	names.push_back("ParticleInitialCoordinates");
+	names.push_back("TurnNumber");
 }
-
-
 

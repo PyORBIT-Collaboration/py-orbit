@@ -795,6 +795,16 @@ void Collimator::loseParticle(Bunch* bunch, Bunch* lostbunch, int ip, int& nLost
 			partAttr_lost->attValue(lost_part_ind,j) = partAttr->attValue(ip,j);
 		}		
 	}
+
+	if (bunch->hasParticleAttributes("TurnNumberAttributes") > 0) {
+		if (lostbunch->hasParticleAttributes("TurnNumberAttributes") <= 0) {
+			std::map<std::string,double> part_attr_dict;
+			lostbunch->addParticleAttributes("TurnNumberAttributes",part_attr_dict);
+		}
+		std::string attr_name_str("TurnNumber");
+		double turn = 1.0*bunch->getBunchAttributeInt(attr_name_str);
+		lostbunch->getParticleAttributes("TurnNumberAttributes")->attValue(lostbunch->getSize() - 1, 0) = turn;
+	}
 	
 	bunch->deleteParticleFast(ip);
 	nLost++;

@@ -168,7 +168,9 @@ class TEAPOT_Ring(TEAPOT_Lattice):
 			bunchwrapper = BunchWrapTEAPOT("Bunch Wrap")
 			bunchwrapper.getParamsDict()["ring_length"] = self.getLength()
 			node.addChildNode(bunchwrapper, AccNode.BODY)			
-
+		#---- adding turn counter node at the end of lattice
+		turn_counter = TurnCounterTEAPOT()
+		self.getNodes().append(turn_counter)
 
 class _teapotFactory:
 	"""
@@ -397,7 +399,6 @@ class _teapotFactory:
 
 	getElements = classmethod(getElements)
 
-
 class BaseTEAPOT(AccNodeBunchTracker):
 	""" The base abstract class of the TEAPOT accelerator elements hierarchy. """
 	def __init__(self, name = "no name"):
@@ -406,6 +407,23 @@ class BaseTEAPOT(AccNodeBunchTracker):
 		"""
 		AccNodeBunchTracker.__init__(self,name)
 		self.setType("base teapot")
+
+class TurnCounterTEAPOT(BaseTEAPOT):
+	def __init__(self, name = "TurnCounter"):
+		"""
+		Constructor. Creates the TEAPOT for turn count in the Ring lattice.
+		"""
+		BaseTEAPOT.__init__(self,name)
+		self.setType("turn counter")
+		
+	def track(self, paramsDict):
+		"""
+		The Turn Counter class implementation of the AccNodeBunchTracker class track(probe) method.
+		"""
+		bunch = paramsDict["bunch"]
+		if(bunch.hasBunchAttrInt("TurnNumber") != 0):
+			turn = bunch.bunchAttrInt("TurnNumber")
+			bunch.bunchAttrInt("TurnNumber",turn + 1)
 
 class NodeTEAPOT(BaseTEAPOT):
 	def __init__(self, name = "no name"):

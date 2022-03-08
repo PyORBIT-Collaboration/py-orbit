@@ -170,6 +170,11 @@ class InjectParts:
 			bunch.partAttrValue("ParticleInitialCoordinates",particle_index, 3,py)
 			bunch.partAttrValue("ParticleInitialCoordinates",particle_index, 4,z)
 			bunch.partAttrValue("ParticleInitialCoordinates",particle_index, 5,dE)
+		if(bunch.hasPartAttr("TurnNumberAttributes") != 0 and 
+			bunch.hasBunchAttrInt("TurnNumber") != 0):
+			particle_index = bunch.getSize() - 1
+			turn = 1.0*bunch.bunchAttrInt("TurnNumber")
+			bunch.partAttrValue("TurnNumberAttributes", particle_index, 0, turn)		
 	
 	def addLostParticle(self,bunch,lostbunch,x,px,y,py,z,dE):
 		"""
@@ -185,7 +190,10 @@ class InjectParts:
 			lostbunch.addPartAttr("ParticleIdNumber")
 		if(bunch.hasPartAttr("ParticleInitialCoordinates") != 0 and 
 			lostbunch.hasPartAttr("ParticleInitialCoordinates") == 0):
-			lostbunch.addPartAttr("ParticleInitialCoordinates")	
+			lostbunch.addPartAttr("ParticleInitialCoordinates")
+		if(bunch.hasPartAttr("TurnNumberAttributes") != 0 and 
+			lostbunch.hasPartAttr("TurnNumberAttributes") == 0):
+			lostbunch.addPartAttr("TurnNumberAttributes")
 		#----------------------------------------------------
 		
 		lostbunch.addParticle(x,px,y,py,z,dE)
@@ -202,5 +210,11 @@ class InjectParts:
 			lostbunch.partAttrValue("ParticleInitialCoordinates",particle_index, 2,y)
 			lostbunch.partAttrValue("ParticleInitialCoordinates",particle_index, 3,py)
 			lostbunch.partAttrValue("ParticleInitialCoordinates",particle_index, 4,z)
-			lostbunch.partAttrValue("ParticleInitialCoordinates",particle_index, 5,dE)	
+			lostbunch.partAttrValue("ParticleInitialCoordinates",particle_index, 5,dE)
+			
+		if(lostbunch.hasPartAttr("TurnNumberAttributes") != 0 and
+			bunch.hasBunchAttrInt("TurnNumber") != 0):
+			particle_index = lostbunch.getSize() - 1
+			turn = 1.0*bunch.bunchAttrInt("TurnNumber")
+			lostbunch.partAttrValue("TurnNumberAttributes", particle_index, 0, turn)
 

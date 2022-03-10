@@ -5,13 +5,13 @@ import sys
 import os
 import math
 
-from orbit.teapot import TEAPOT_Lattice
+from orbit.teapot import TEAPOT_Ring
 from orbit.parsers.mad_parser import MAD_Parser, MAD_LattLine
 from orbit.lattice import AccNode, AccActionsContainer
 from orbit.time_dep import waveform
 
 
-class TIME_DEP_Lattice(TEAPOT_Lattice):
+class TIME_DEP_Lattice(TEAPOT_Ring):
 	"""
 	The subclass of the TEAPOT_Lattice.
 	TIME_DEP_Lattice has the ability to set time-dependent
@@ -20,7 +20,7 @@ class TIME_DEP_Lattice(TEAPOT_Lattice):
 	"""
 
 	def __init__(self, name = "no name"):
-		TEAPOT_Lattice.__init__(self, name)
+		TEAPOT_Ring.__init__(self, name)
 		self.__latticeDict = {}
 		self.__TDNodeDict = {}
 		self.__turns = 1

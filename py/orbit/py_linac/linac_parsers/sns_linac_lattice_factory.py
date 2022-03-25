@@ -22,6 +22,8 @@ from orbit.py_linac.lattice import DCorrectorH, DCorrectorV, ThickKick
 from orbit.py_linac.lattice import RF_Cavity, Sequence
 from orbit.py_linac.lattice import BaseRF_Gap
 
+from orbit.py_linac.materials import VacuumWindowNode
+
 # import general accelerator elements
 from orbit.lattice import AccNode
 
@@ -260,7 +262,12 @@ class SNS_LinacLatticeFactory():
 					accNode.setParam("By",params_da.doubleValue("By"))
 					accNode.setLength(node_length)
 					accNode.setParam("pos",node_pos)
-					accSeq.addNode(accNode)					
+					accSeq.addNode(accNode)
+				elif(node_type == "VACWIN"):
+					material_index = params_da.doubleValue("material_index")
+					density_factor = params_da.doubleValue("density_factor")
+					accNode = VacuumWindowNode(node_length,material_index,density_factor,node_da.stringValue("name"),node_pos)
+					accSeq.addNode(accNode)				
 				else:
 					if(node_length != 0.):
 						msg = "The LinacLatticeFactory method getLinacAccLattice(names): there is a strange element!"

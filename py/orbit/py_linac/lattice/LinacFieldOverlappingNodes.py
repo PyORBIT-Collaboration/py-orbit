@@ -197,9 +197,10 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		
 	def setZ_Step(self,z_step):
 		if(self.axis_field_rf_gap.axis_field_func == None):
-			msg = "Class AxisFieldRF_Gap: You have to get the axis field from a file first!"
-			msg = msg + os.linesep
-			msg = "Call readAxisFieldFile(dir_location,file_name) method first!"
+			msg  = "Class AxisFieldRF_Gap: You have to get the axis field from a file first!"
+			msg += os.linesep
+			msg += "Call readAxisFieldFile(dir_location,file_name) method first!"
+			msg += "Stop."
 			orbitFinalize(msg)				
 		length = self.getLength()
 		nParts = int(length*1.0000001/z_step)

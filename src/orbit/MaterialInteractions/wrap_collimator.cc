@@ -47,16 +47,33 @@ extern "C" {
 	  Collimator* cpp_Collimator = (Collimator*)((pyORBIT_Object*) self)->cpp_obj;
 		PyObject* pyBunch;
 		PyObject* pyLostBunch;
-		if(!PyArg_ParseTuple(args,"OO:collimateBunch",&pyBunch, &pyLostBunch)){
-			ORBIT_MPI_Finalize("Collimator - collimateBunch(Bunch* bunch, Bunch* bunch) - parameter are needed.");
+    //if nVars == 1 use only bunch, there will be no pyLostBunch
+    //if nVars == 2 pyBunch and pyLostBunch should be there
+    int nVars = PyTuple_Size(args);
+    Bunch* cpp_lostbunch = NULL;
+    PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
+    
+    if(nVars != 2 && nVars != 1){
+    	ORBIT_MPI_Finalize("Collimator - collimateBunch(Bunch* bunch [, Bunch* bunch]) - parameters are needed.");
+    }
+    
+    if(nVars == 2){
+			if(!PyArg_ParseTuple(args,"OO:collimateBunch",&pyBunch, &pyLostBunch)){
+				ORBIT_MPI_Finalize("Collimator - collimateBunch(Bunch* bunch, Bunch* bunch) - parameter are needed.");
+			}
+			if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type) || !PyObject_IsInstance(pyLostBunch,pyORBIT_Bunch_Type)){
+				ORBIT_MPI_Finalize("Collimator - collimateBunch(Bunch* bunch, Bunch* bunch) - method needs a Bunch.");
+			}
+			cpp_lostbunch = (Bunch*) ((pyORBIT_Object*)pyLostBunch)->cpp_obj;
+		} else {
+			if(!PyArg_ParseTuple(args,"O:collimateBunch",&pyBunch)){
+				ORBIT_MPI_Finalize("Collimator - collimateBunch(Bunch* bunch) - parameter are needed.");
+			}
+			if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type)){
+				ORBIT_MPI_Finalize("Collimator - collimateBunch(Bunch* bunch) - method needs a Bunch.");
+			}			
 		}
-		PyObject* pyORBIT_Bunch_Type = wrap_orbit_bunch::getBunchType("Bunch");
-		if(!PyObject_IsInstance(pyBunch,pyORBIT_Bunch_Type) || !PyObject_IsInstance(pyLostBunch,pyORBIT_Bunch_Type)){
-			ORBIT_MPI_Finalize("Collimator - collimateBunch(Bunch* bunch, Bunch* bunch) - method needs a Bunch.");
-		}
-	  
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object*)pyBunch)->cpp_obj;
-		Bunch* cpp_lostbunch = (Bunch*) ((pyORBIT_Object*)pyLostBunch)->cpp_obj;
 		cpp_Collimator->collimateBunch(cpp_bunch, cpp_lostbunch);
 		Py_INCREF(Py_None);
 		return Py_None;

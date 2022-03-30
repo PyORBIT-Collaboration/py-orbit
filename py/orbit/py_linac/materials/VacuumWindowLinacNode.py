@@ -59,7 +59,7 @@ class VacuumWindowNode(BaseLinacNode):
 		#---- by default the shape is circle
 		shape = 1
 		#---- by default the radius is 0 m 
-		#---- It means no particles will escape the collimator!
+		#---- It means no particles will escape the collimator! See Collimator.cc
 		radius = 0.
 		a = radius
 		b = a
@@ -98,18 +98,14 @@ class VacuumWindowNode(BaseLinacNode):
 		"""
 		The vacuum window class implementation of the AccNodeBunchTracker class track(paramsDict) method.
 		"""
-		if(not paramsDict.has_key("lostbunch")):
-			msg  = "Class VacuumWindowNode:"
-			msg += os.linesep
-			msg += "Method: track(self, paramsDict). We need lostbunch key in paramsDict!)"
-			msg += os.linesep
-			msg += "Stop."
-			msg += os.linesep
-			orbitFinalize(msg)			
 		length = self.getLength(self.getActivePartIndex())
+		if(length <= 0.): return
 		bunch = paramsDict["bunch"]
-		lostbunch = paramsDict["lostbunch"]
-		self.collimator.collimateBunch(bunch, lostbunch)
+		if(paramsDict.has_key("lostbunch")):
+			lostbunch = paramsDict["lostbunch"]
+			self.collimator.collimateBunch(bunch, lostbunch)
+		else:
+			self.collimator.collimateBunch(bunch)
 			
 	def setPosition(self, pos):
 		"""

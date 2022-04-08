@@ -50,7 +50,7 @@ namespace OrbitUtils{
 			/** Returns the gradient of the quad in [T/m] */
 			double getGradient();
 			
-			/** Returns inner components of the electric and magnetic filds. */
+			/** Returns inner components of the electric and magnetic fields. */
 			virtual void getInnerElectricMagneticField(
 			     double x, double y, double z, double t, 
 				   double& E_x, double& E_y, double& E_z,

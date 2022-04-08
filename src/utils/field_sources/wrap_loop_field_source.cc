@@ -1,0 +1,232 @@
+#include "orbit_mpi.hh"
+#include "pyORBIT_Object.hh"
+#include "wrap_spacecharge.hh"
+
+#include "wrap_utils.hh"
+#include "LoopFieldSource.hh"
+
+#include <iostream>
+
+using namespace OrbitUtils;
+using namespace wrap_orbit_utils;
+
+namespace wrap_loop_field_source{
+
+  void error(const char* msg){ ORBIT_MPI_Finalize(msg); }
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+	//---------------------------------------------------------
+	//Python LoopFieldSource class definition
+	//---------------------------------------------------------
+
+	//constructor for python class wrapping LoopFieldSource instance
+	//It never will be called directly
+	static PyObject* LoopFieldSource_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+	{
+		pyORBIT_Object* self;
+		self = (pyORBIT_Object *) type->tp_alloc(type, 0);
+		self->cpp_obj = NULL;
+		return (PyObject *) self;
+	}
+
+  //initializator for python  LoopFieldSource class
+  //this is implementation of the __init__ method
+  static int LoopFieldSource_init(pyORBIT_Object *self, PyObject *args, PyObject *kwds){
+		self->cpp_obj = new LoopFieldSource();
+		((LoopFieldSource*) self->cpp_obj)->setPyWrapper((PyObject*) self);
+    return 0;
+  }
+
+  /** Sets / Returns the radius of the current loop in [m] */
+  static PyObject* LoopFieldSource_radius(PyObject *self, PyObject *args){
+	  LoopFieldSource* cpp_fieldSource = (LoopFieldSource*)((pyORBIT_Object*) self)->cpp_obj;
+	  int nArgs = PyTuple_Size(args);
+	  double radius;  
+	  if(nArgs == 1){
+	  	if(!PyArg_ParseTuple(args,"d:radius",&radius)){
+	  		error("LoopFieldSource.radius(radius) - parameters are needed.");
+	  	}
+	  	cpp_fieldSource->setRadius(radius);
+	  }
+	  radius = cpp_fieldSource->getRadius();
+	  return Py_BuildValue("d",radius);
+  }	 
+  
+  /** Sets / Returns the current of the loop in [A] */
+  static PyObject* LoopFieldSource_current(PyObject *self, PyObject *args){
+	  LoopFieldSource* cpp_fieldSource = (LoopFieldSource*)((pyORBIT_Object*) self)->cpp_obj;
+	  int nArgs = PyTuple_Size(args);
+	  double current;  
+	  if(nArgs == 1){
+	  	if(!PyArg_ParseTuple(args,"d:current",&current)){
+	  		error("LoopFieldSource.current(current) - parameters are needed.");
+	  	}
+	  	cpp_fieldSource->setCurrent(current);
+	  }
+	  current = cpp_fieldSource->getCurrent();
+	  return Py_BuildValue("d",current);
+  }	   
+
+  /** Sets / Returns the maximal size in Z direction */
+  static PyObject* LoopFieldSource_maxZ(PyObject *self, PyObject *args){
+	  LoopFieldSource* cpp_fieldSource = (LoopFieldSource*)((pyORBIT_Object*) self)->cpp_obj;
+	  int nArgs = PyTuple_Size(args);
+	  double maxZ;  
+	  if(nArgs == 1){
+	  	if(!PyArg_ParseTuple(args,"d:maxZ",&maxZ)){
+	  		error("LoopFieldSource.maxZ(maxZ) - parameters are needed.");
+	  	}
+	  	cpp_fieldSource->setMaxZ(maxZ);
+	  }
+	  maxZ = cpp_fieldSource->getMaxZ();
+	  return Py_BuildValue("d",maxZ);
+  }
+  
+  /** Sets / Returns the maximal size in x-y plane */
+  static PyObject* LoopFieldSource_maxR(PyObject *self, PyObject *args){
+	  LoopFieldSource* cpp_fieldSource = (LoopFieldSource*)((pyORBIT_Object*) self)->cpp_obj;
+	  int nArgs = PyTuple_Size(args);
+	  double maxR;  
+	  if(nArgs == 1){
+	  	if(!PyArg_ParseTuple(args,"d:maxR",&maxR)){
+	  		error("LoopFieldSource.maxR(maxR) - parameters are needed.");
+	  	}
+	  	cpp_fieldSource->setMaxR(maxR);
+	  }
+	  maxR = cpp_fieldSource->getMaxR();
+	  return Py_BuildValue("d",maxR);
+  }	
+
+  /** Returns X,Y,Z electric and magnetic fields as a function of x,y,z */
+  static PyObject* LoopFieldSource_getFields(PyObject *self, PyObject *args){
+  	LoopFieldSource* cpp_fieldSource = (LoopFieldSource*)((pyORBIT_Object*) self)->cpp_obj;
+  	double x,y,z;
+  	if(!PyArg_ParseTuple(args,"ddd:getFields",&x,&y,&z)){
+  		ORBIT_MPI_Finalize("LoopFieldSource.getFields(x,y,z) - params needed.");
+  	}
+  	double fe_x; double fe_y; double fe_z;
+  	double fm_x; double fm_y; double fm_z;
+  	double t = 0.;
+  	cpp_fieldSource->getElectricMagneticField(x,y,z,t,fe_x,fe_y,fe_z,fm_x,fm_y,fm_z);
+  	return Py_BuildValue("(dddddd)",fe_x,fe_y,fe_z,fm_x,fm_y,fm_z);
+  }
+  
+  /** Sets / Returns the coordinates transformation matrix 4x4 from external to inner system */
+  static PyObject* LoopFieldSource_transormfMatrix(PyObject *self, PyObject *args){
+	  LoopFieldSource* cpp_fieldSource = (LoopFieldSource*)((pyORBIT_Object*) self)->cpp_obj;
+	  int nArgs = PyTuple_Size(args);
+	  PyObject* pyMatrix;
+	  Matrix* cpp_matrix;
+	  if(nArgs == 1){
+	  	if(!PyArg_ParseTuple(args,"O:transormfMatrix",&pyMatrix)){
+	  		error("LoopFieldSource.transormfMatrix(Matrix) - parameter is needed.");
+	  	}
+	  	PyObject* pyORBIT_Matrix_Type = getOrbitUtilsType("Matrix");
+	  	if(!PyObject_IsInstance(pyMatrix,pyORBIT_Matrix_Type)){
+	  		error("LoopFieldSource.transormfMatrix(Matrix) - parameter is not Matrix.");
+	  	}
+	  	cpp_matrix = (Matrix*) ((pyORBIT_Object*) pyMatrix)->cpp_obj;
+	  	if(cpp_matrix->rows() != 4 || cpp_matrix->columns() != 4){
+	  		error("LoopFieldSource.transormfMatrix(Matrix) - Matrix is not 4x4.");
+	  	}
+	  	// the Py_INCREF(pyMatrix) call will be performed inside setCoordsTransformMatrix(...) method 	  	
+	  	cpp_fieldSource->setCoordsTransformMatrix(cpp_matrix);
+	  	Py_INCREF(Py_None);
+	  	return Py_None;			  	
+	  }
+	  cpp_matrix = cpp_fieldSource->getCoordsTransformMatrix();
+	  pyMatrix = (PyObject*) ((pyORBIT_Object*) cpp_matrix->getPyWrapper());
+	  if(pyMatrix == NULL){
+	  	error("LoopFieldSource.transormfMatrix() - cannot return Matrix 4x4. You have to assign it first.");
+	  }
+	  Py_INCREF(pyMatrix);
+	  return pyMatrix;
+  }  
+
+  //-----------------------------------------------------
+  //destructor for python LoopFieldSource class (__del__ method).
+  //-----------------------------------------------------
+  static void LoopFieldSource_del(pyORBIT_Object* self){
+		delete ((LoopFieldSource*)self->cpp_obj);
+		self->ob_type->tp_free((PyObject*)self);
+  }
+	
+	// defenition of the methods of the python LoopFieldSource wrapper class
+	// they will be vailable from python level
+  static PyMethodDef LoopFieldSourceClassMethods[] = {
+    { "radius",  LoopFieldSource_radius ,METH_VARARGS, "Sets or returns loop radius [m]"},
+    { "current", LoopFieldSource_current ,METH_VARARGS, "Sets or returns current in loop [A]"},
+    { "maxZ", LoopFieldSource_maxZ ,METH_VARARGS, "Sets or returns maximal Z-value [m]"},
+    { "maxR", LoopFieldSource_maxR ,METH_VARARGS, "Sets or returns maximal R-value in xy-plane [m]"},
+    { "getFields", LoopFieldSource_getFields ,METH_VARARGS, "Returns E and B fields (Ex,Ey,Ez,Bx,By,Bz) for (x,y,z) point"},
+    { "transormfMatrix", LoopFieldSource_transormfMatrix,METH_VARARGS, "Sets or returns the coordinates transformation matrix 4x4 from external to inner system"},
+    {NULL}
+  };
+
+	// defenition of the memebers of the python LoopFieldSource wrapper class
+	// they will be vailable from python level
+	static PyMemberDef LoopFieldSourceClassMembers [] = {
+		{NULL}
+	};
+
+	//new python LoopFieldSource wrapper type definition
+	static PyTypeObject pyORBIT_LoopFieldSource_Type = {
+		PyObject_HEAD_INIT(NULL)
+		0, /*ob_size*/
+		"LoopFieldSource", /*tp_name*/
+		sizeof(pyORBIT_Object), /*tp_basicsize*/
+		0, /*tp_itemsize*/
+		(destructor) LoopFieldSource_del , /*tp_dealloc*/
+		0, /*tp_print*/
+		0, /*tp_getattr*/
+		0, /*tp_setattr*/
+		0, /*tp_compare*/
+		0, /*tp_repr*/
+		0, /*tp_as_number*/
+		0, /*tp_as_sequence*/
+		0, /*tp_as_mapping*/
+		0, /*tp_hash */
+		0, /*tp_call*/
+		0, /*tp_str*/
+		0, /*tp_getattro*/
+		0, /*tp_setattro*/
+		0, /*tp_as_buffer*/
+		Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
+		"The LoopFieldSource python wrapper", /* tp_doc */
+		0, /* tp_traverse */
+		0, /* tp_clear */
+		0, /* tp_richcompare */
+		0, /* tp_weaklistoffset */
+		0, /* tp_iter */
+		0, /* tp_iternext */
+		LoopFieldSourceClassMethods, /* tp_methods */
+		LoopFieldSourceClassMembers, /* tp_members */
+		0, /* tp_getset */
+		0, /* tp_base */
+		0, /* tp_dict */
+		0, /* tp_descr_get */
+		0, /* tp_descr_set */
+		0, /* tp_dictoffset */
+		(initproc) LoopFieldSource_init, /* tp_init */
+		0, /* tp_alloc */
+		LoopFieldSource_new, /* tp_new */
+	};
+
+	//--------------------------------------------------
+	//Initialization function of the pyLoopFieldSource class
+	//It will be called from wrap_field_sources_module
+	//--------------------------------------------------
+  void initLoopFieldSource(PyObject* module){
+		if (PyType_Ready(&pyORBIT_LoopFieldSource_Type) < 0) return;
+		Py_INCREF(&pyORBIT_LoopFieldSource_Type);
+		PyModule_AddObject(module, const_cast<char*>("LoopFieldSource"), (PyObject *)&pyORBIT_LoopFieldSource_Type);
+	}
+
+#ifdef __cplusplus
+}
+#endif
+
+//end of namespace wrap_loop_field_source
+}

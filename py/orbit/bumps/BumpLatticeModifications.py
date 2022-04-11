@@ -9,7 +9,7 @@ from orbit.lattice import AccLattice, AccNode, AccActionsContainer, AccNodeBunch
 
 # import Teapot bump node
 import orbit.bumps
-from TeapotBumpNode import TeapotSimpleBumpNode
+from TeapotBumpNode import TeapotSimpleBumpNode, TDTeapotSimpleBumpNode
 
 # import teapot drift class
 from orbit.teapot import DriftTEAPOT

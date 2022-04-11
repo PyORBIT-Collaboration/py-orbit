@@ -5,6 +5,7 @@
 
 from diagnostics import StatLats, StatLatsSetMember
 from diagnostics import Moments, MomentsSetMember
+from orbit.diagnostics.profiles import profiles
 from diagnosticsLatticeModifications import addTeapotDiagnosticsNode
 from diagnosticsLatticeModifications import addTeapotDiagnosticsNodeAsChild
 from diagnosticsLatticeModifications import addTeapotStatLatsNodeSet
@@ -28,6 +29,4 @@ __all__.append("addTeapotDiagnosticsNodeAsChild")
 __all__.append("addTeapotStatLatsNodeSet")
 __all__.append("addTeapotMomentsNodeSet")
 __all__.append("TeapotTuneAnalysisNode")
-
-
-
+__all__.append("profiles")

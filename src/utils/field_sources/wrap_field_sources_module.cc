@@ -9,6 +9,7 @@
 #include "wrap_magnetic_field_source_grid3d.hh"
 #include "wrap_quad_field_source.hh"
 #include "wrap_dipole_field_source.hh"
+#include "wrap_loop_field_source.hh"
 
 namespace wrap_field_sources_module{
 
@@ -39,6 +40,7 @@ extern "C" {
 		wrap_field_source_grid3d::initMagnetFieldSourceGrid3D(module_local);
 		wrap_quad_field_source::initQuadFieldSource(module_local);
 		wrap_dipole_field_source::initDipoleFieldSource(module_local);
+		wrap_loop_field_source::initLoopFieldSource(module_local);
 	}
 
 #ifdef __cplusplus

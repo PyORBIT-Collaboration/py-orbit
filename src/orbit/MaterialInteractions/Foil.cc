@@ -55,7 +55,6 @@ Foil::Foil(double xmin, double xmax, double ymin, double ymax, double thick): Cp
 //
 // PARAMETERS
 //	Bunch - The particle bunch
-//  LostBunch 
 //
 // RETURNS
 //   int.
@@ -176,7 +175,7 @@ void Foil::traverseFoilFullScatter(Bunch* bunch, Bunch* lostbunch){
 	double nAvogadro = 6.022045e23;
 	double random, choice, length, dlength, meanfreepath;
 	double rl, zrl, stepsize, radlengthfac, directionfac;
-	double t, dp_x=0.0, dp_y=0.0, thetax = 0.0, thetay = 0.0, thx = 0.0, thy = 0.0;
+	double t, dp_x=0.0, dp_y=0.0, thx = 0.0, thy = 0.0;
 	long idum = (unsigned)time(0);
 	idum = -idum;
 	
@@ -216,15 +215,8 @@ void Foil::traverseFoilFullScatter(Bunch* bunch, Bunch* lostbunch){
 				double pfac = Foil::getPFactor(part_coord_arr[ip], syncPart);
 				double ecross = OrbitUtils::get_elastic_crosssection((syncPart->getEnergy() + part_coord_arr[ip][5]), ma_);
 				double icross = OrbitUtils::get_inelastic_crosssection((syncPart->getEnergy() + part_coord_arr[ip][5]), ma_);
-				
-				if(step == 0){ //If first step, do an iteration with ecross and icross to get first stepsize and first rcross 
-					step++;
-					double totcross = icross + ecross;
-					meanfreepath = (OrbitUtils::get_a(ma_) / (nAvogadro * 1e3) / density / (totcross * 1.0e-28));
-					stepsize = -meanfreepath * log(Random::ran1(idum));
-				}
-				
-				double rcross = MaterialInteractions::ruthScattJackson(stepsize, z, a, density, idum, beta, 0, pfac, thetax, thetay);
+
+				double rcross = MaterialInteractions::ruthScattJackson(stepsize, z, a, density, idum, beta, 0, pfac, thx, thy);
 				double totcross = ecross + icross + rcross;
 				meanfreepath = OrbitUtils::get_a(ma_) / ((nAvogadro * 1e3) * density  * (totcross * 1.0e-28));
 				stepsize = -meanfreepath * log(Random::ran1(idum));

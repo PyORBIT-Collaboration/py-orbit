@@ -133,7 +133,6 @@ void MaterialInteractions::mcsJackson(double stepsize, double z, double a, doubl
 	y /= 1000.0;
 	px /= 1000.0;
 	py /= 1000.0;
-	
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -165,14 +164,10 @@ void MaterialInteractions::mcsJackson(double stepsize, double z, double a, doubl
 //
 ///////////////////////////////////////////////////////////////////////////
 
-double MaterialInteractions::ruthScattJackson(double stepsize, double z, double a, double rho, long& idum, double beta, int trackit, double pfac, double& thetax, double& thetay){	
+double MaterialInteractions::ruthScattJackson(double stepsize, double z, double a, double rho, long& idum, double beta, int trackit, double pfac, double& thx, double& thy){	
 
 	stepsize *= 1000.0; //Convert to mm
 	rho /= 1000.0;		//Convert to g/cm3
-	
-	double theta[2];
-	theta[0] = 0.0;
-	theta[1] = 0.0;
 	
 	double pi = OrbitConst::PI;
 	double cvel = OrbitConst::c * 100.0;
@@ -221,8 +216,8 @@ double MaterialInteractions::ruthScattJackson(double stepsize, double z, double 
 	
 	if(trackit != 0)
 	{
-		double thx = 0.0;
-		double thy = 0.0;
+		thx = 0.0;
+		thy = 0.0;
 		
 		if(thMin < thMax)
 		{
@@ -235,10 +230,7 @@ double MaterialInteractions::ruthScattJackson(double stepsize, double z, double 
 			thx = th * cos(probxy);
 			thy = th * sin(probxy);
 		}
-		theta[0] = thx;
-		theta[1] = thy;
 	}
-	
 	return rcross;
 }  
 

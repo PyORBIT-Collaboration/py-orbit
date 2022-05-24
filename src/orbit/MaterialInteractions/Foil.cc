@@ -64,12 +64,11 @@ Foil::Foil(double xmin, double xmax, double ymin, double ymax, double thick): Cp
 void Foil::traverseFoilSimpleScatter(Bunch* bunch){
 
 	double BohrRadius=0.52917706e-8;  // hydrogenic Bohr radius in cm
-	double hBar = 1.0545887e-27;      // Planck's constant in erg-sec
-	double echarge = 4.803242e-10;    // in esu or statcoulombs
-	double nAvogadro = 6.022045e23;
-	double deg2Rad = 1.74532925e-2;
-	double rhofoil = 2.265;
+	double hBar = 1.054571817e-27;    // Planck's constant in erg-sec
+	double echarge = 4.80320425e-10;  // in esu or statcoulombs
+	double nAvogadro = 6.0221408e23;
 	double muScatter = 1.35;
+	double emass = 9.1093837e-28;
 	double pInj0;
 	long idum = (unsigned)time(0);
 	idum = -idum;
@@ -81,12 +80,12 @@ void Foil::traverseFoilSimpleScatter(Bunch* bunch){
 	
     // Momentum in g*cm/sec
 	SyncPart* syncPart = bunch->getSyncPart();
-    pInj0 = 1.6726e-22 * syncPart->getMass()/OrbitConst::mass_proton * syncPart->getBeta() *
-	syncPart->getGamma() * OrbitConst::c;
+	pInj0 = 1.6726e-22 * syncPart->getMass() / OrbitConst::mass_proton *
+            syncPart->getBeta() * syncPart->getGamma() * OrbitConst::c;
 	
     // Thomas-Fermi atom radius (cm):
 	
-    double TFRadius = muScatter *  BohrRadius *pow(OrbitUtils::get_z(ma_), -0.33333);
+    double TFRadius = muScatter *  BohrRadius * pow(OrbitUtils::get_z(ma_), -0.33333);
 	
     // Minimum scattering angle:
 	
@@ -94,7 +93,7 @@ void Foil::traverseFoilSimpleScatter(Bunch* bunch){
 	
     // Theta max as per Jackson (13.102)
 	
-    double thetaScatMax = 274.e5 * OrbitConst::mass_electron * OrbitConst::c /
+    double thetaScatMax = 274.0 * emass * 100.0 * OrbitConst::c /
 	(pInj0 * pow(OrbitUtils::get_a(ma_), 0.33333));
 	
     double pv = 1.e2 * pInj0 * syncPart->getBeta() * OrbitConst::c;
@@ -139,6 +138,7 @@ void Foil::traverseFoilSimpleScatter(Bunch* bunch){
 				double phi = 2*OrbitConst::PI * random1;
 				random1 = Random::ran1(idum);
 				double theta = thetaScatMin * sqrt(random1 / (1. - random1));
+				if(theta > 2.0 * thetaScatMax) theta = 2.0 * thetaScatMax;
 				thetaX += theta * cos(phi);
 				thetaY += theta * sin(phi);
 				//cout << thetaX <<"\n";

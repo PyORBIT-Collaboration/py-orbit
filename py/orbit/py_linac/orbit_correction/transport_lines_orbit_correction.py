@@ -254,11 +254,11 @@ class TrajectoryCorrection:
 		"""
 		return self.dch_node_arr
 
-	def setDCHVs(self, dchs):
+	def setDCVs(self, dcvs):
 		"""
 		Sets the DCorrectorVs
 		"""
-		self._updateDC_Nodes(dchs,DCorrectorV)
+		self._updateDC_Nodes(dcvs,DCorrectorV)
 		return self.dcv_node_arr
 
 	def getDCVs(self):

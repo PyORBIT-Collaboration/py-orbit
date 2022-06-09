@@ -43,7 +43,6 @@ class InjectParts:
 		"""
 		#---- User can skip injection if self.nparts is zero
 		if(self.nparts == 0): return
-		random.seed(100)
 		
 		(xmin,xmax,ymin,ymax) = self.injectregion
 	

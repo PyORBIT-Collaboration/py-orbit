@@ -8,12 +8,18 @@ import math
 import sys
 import os
 
+# import the auxiliary classes
+from orbit.utils import orbitFinalize
+
 from orbit.py_linac.lattice import BaseLinacNode, Quad
 
-# import aperture C++ classes
-from aperture import Aperture
+# import BaseAperture and Phase and Eneregy Apertures C++ classes
+from aperture import BaseAperture
 from aperture import PhaseAperture
 from aperture import EnergyAperture
+
+#---- here we use only primitive aperture shapes - circle, ellipse, and rectangular
+from aperture import PrimitiveApertureShape
 
 
 class LinacApertureNode(BaseLinacNode):
@@ -33,19 +39,43 @@ class LinacApertureNode(BaseLinacNode):
 		self.b = b
 		self.c = c
 		self.d = d
-		self.aperture = Aperture(self.shape, self.a, self.b, self.c, self.d, pos)	
+		self.aperture = BaseAperture()
+		#---- aperture shape definition
+		apertureShape = None
+		if(shape == 1):
+			radius = self.a
+			apertureShape = PrimitiveApertureShape("circle",radius)
+		if(shape == 2):
+			x_half_size = self.a
+			y_half_size = self.b
+			apertureShape = PrimitiveApertureShape("ellipse",x_half_size,y_half_size)	
+		if(shape == 3):
+			x_half_size = self.a
+			y_half_size = self.b
+			apertureShape = PrimitiveApertureShape("rectangular",x_half_size,y_half_size)
+		if(apertureShape == None):
+			orbitFinalize("LinacApertureNode constructor. shape parameter should be 1,2,3 only.Stop")
+		#------------------------------
+		self.aperture.setApertureShape(apertureShape)
+		self.aperture.name(name)
 		self.setPosition(pos)
-		self.lost_particles_n = 0		
+		self.lost_particles_n = 0
+
+	def setName(self, name = "no name"):
+		"""
+		Method. Sets the name.
+		"""
+		BaseLinacNode.setName(self,name)
+		self.aperture.name(name)
 
 	def track(self, paramsDict):
 		bunch = paramsDict["bunch"]
-		n_parts = bunch.getSize()
 		if(paramsDict.has_key("lostbunch")):
 			lostbunch = paramsDict["lostbunch"]
 			self.aperture.checkBunch(bunch, lostbunch)
 		else:
 			self.aperture.checkBunch(bunch)
-		self.lost_particles_n = n_parts - bunch.getSize()
+		self.lost_particles_n = self.aperture.getNumberOfLost()
 
 	def trackDesign(self, paramsDict):
 		"""
@@ -55,10 +85,17 @@ class LinacApertureNode(BaseLinacNode):
 
 	def setPosition(self, pos):
 		BaseLinacNode.setPosition(self,pos)
-		self.aperture.setPosition(self.getPosition())
+		self.aperture.position(self.getPosition())
 		
 	def getNumberOfLostParticles(self):
 		return self.lost_particles_n
+		
+	def getBaseAperture(self):
+		"""
+		Retirns BaseAperture that allow accsess to aperture shape through getApertureShape,
+		or replacing the shape with setApertureShape(newApertureShape)	
+		"""
+		return self.aperture
 
 class CircleLinacApertureNode(LinacApertureNode):
 	"""

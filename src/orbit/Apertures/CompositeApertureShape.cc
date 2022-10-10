@@ -45,12 +45,14 @@ int CompositeApertureShape::inside(Bunch* bunch, int count){
 	if(n_shapes == 0){
 		return 0;
 	}
+	int sum = 0;
 	for(int ind = 0; ind < n_shapes; ind++){
-		if(apertureShapes[ind]->inside(bunch,count) != 1){;
-			return 0;
+		sum += apertureShapes[ind]->inside(bunch,count);
+		if(sum > 0){;
+			return 1;
 		}
 	}
-	return 1;
+	return 0;
 }
 
 /** Adds the new aperture shape to the collection */ 

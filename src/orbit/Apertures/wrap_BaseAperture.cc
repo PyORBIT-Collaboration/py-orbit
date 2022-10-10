@@ -52,7 +52,7 @@ extern "C" {
 	  	Py_INCREF(Py_None);
 	  	return Py_None;
 	  }
-	  PyObject* pyBaseApertureShape = cpp_BaseAperture->getPyWrapper();
+	  PyObject* pyBaseApertureShape = baseApertureShape->getPyWrapper();
 		Py_INCREF(pyBaseApertureShape);
 		return pyBaseApertureShape;	  
 	}	

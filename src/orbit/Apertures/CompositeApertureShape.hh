@@ -18,14 +18,13 @@ using namespace std;
 // AUTHOR: 
 //   Andrei Shishlo October 2022
 //
+//   CompositeApertureShape is an implementation of BaseApertureShape class
+//   to represent a logical union of several shapes dtored in collection. 
+//   To get "isinside" method result 1 (Yes) this class will go through 
+//   all BaseApertureShape class instances in the collection and 
+//   should get 1 from at least one shape.  
+//
 ///////////////////////////////////////////////////////////////////////////
-
-/** 
- CompositeApertureShape is an implementation of BaseApertureShape class
- and a collection of aperture shapes. To get "isinside" method result
- 1 (Yes) this class will go through all BaseApertureShape class instances
- in the collection and should get 1 from each shape from the collectio	
-*/
     
 class CompositeApertureShape: public BaseApertureShape
 {

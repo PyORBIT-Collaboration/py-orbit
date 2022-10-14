@@ -15,9 +15,10 @@
 //   Andrei Shishlo October 2022
 //
 //   CompositeApertureShape is an implementation of BaseApertureShape class
-//   and a collection of aperture shapes. To get "isinside" method result
-//   1 (Yes) this class will go through all BaseApertureShape class instances
-//   in the collection and should get 1 from each shape from the collection. 
+//   to represent a logical union of several shapes dtored in collection. 
+//   To get "isinside" method result 1 (Yes) this class will go through 
+//   all BaseApertureShape class instances in the collection and 
+//   should get 1 from at least one shape.  
 //
 ///////////////////////////////////////////////////////////////////////////
 
@@ -44,11 +45,10 @@ int CompositeApertureShape::inside(Bunch* bunch, int count){
 	int n_shapes = apertureShapes.size();
 	if(n_shapes == 0){
 		return 0;
-	}
-	int sum = 0;
+	}	
 	for(int ind = 0; ind < n_shapes; ind++){
-		sum += apertureShapes[ind]->inside(bunch,count);
-		if(sum > 0){;
+		int isIn = apertureShapes[ind]->inside(bunch,count);
+		if(isIn > 0){;
 			return 1;
 		}
 	}

@@ -166,7 +166,6 @@ extern "C" {
 		BaseApertureShape* cpp_BaseApertureShape = (BaseApertureShape*) pyPrimitiveApertureShape->cpp_obj;	  	
   	std::string typeName = cpp_BaseApertureShape->getTypeName();
   	int settings_done = 0;
-  	std::cout << "debug PrimitiveApertureShape_setParams 1 "<<std::endl;
   	if(typeName == "circle"){
   		((CircleApertureShape*) cpp_BaseApertureShape)->setRadius(param1);
   		settings_done = 1;

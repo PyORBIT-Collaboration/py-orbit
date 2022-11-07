@@ -1291,7 +1291,7 @@ void bendfringeIN(Bunch* bunch, double rho)
 
         arr[i][0] += KNL * arr[i][2] * arr[i][2] / (2. * rho);
         arr[i][3] -= KNL * arr[i][1] * arr[i][2] / rho;
-        arr[i][4] -= KNL * KNL * arr[i][1] * arr[i][2] * arr[i][2] / (2. * rho);
+        arr[i][4] += KNL * KNL * arr[i][1] * arr[i][2] * arr[i][2] / (2. * rho);
     }
 }
 
@@ -1328,7 +1328,7 @@ void bendfringeOUT(Bunch* bunch, double rho)
 
         arr[i][0] -= KNL * arr[i][2] * arr[i][2] / (2. * rho);
         arr[i][3] += KNL * arr[i][1] * arr[i][2] / rho;
-        arr[i][4] += KNL * KNL * arr[i][1] * arr[i][2] * arr[i][2] / (2. * rho);
+        arr[i][4] -= KNL * KNL * arr[i][1] * arr[i][2] * arr[i][2] / (2. * rho);
     }
 }
 

@@ -92,10 +92,23 @@ void Harmonic_Cav::trackBunch(Bunch* bunch)
   SyncPart* syncPart = bunch->getSyncPart();
   double** arr = bunch->coordArr();
 
+  double mass     = bunch->getMass();
+  double enew     = mass + syncPart->getEnergy();
+  double gammanew = enew / mass;
+  double betanew2 = 1.0 - 1.0 / (gammanew * gammanew);
+  double betanew  = pow(betanew2, 0.5);
+  double eold     = enew - dESync;
+  double gammaold = eold / mass;
+  double betaold2 = 1.0 - 1.0 / (gammaold * gammaold);
+  double betaold  = pow(betaold2, 0.5);
+  double adiabat  = gammaold * betaold / (gammanew * betanew);
+
   for(int i = 0; i < bunch->getSize(); i++)
   {
     phase = -ZtoPhi * arr[i][4];
     dERF  = bunch->getCharge()* RFVoltage * sin(RFHNum * phase + RFPhase);
     arr[i][5] += dERF - dESync;
+    arr[i][1] *= adiabat;
+    arr[i][3] *= adiabat;
   }
 }

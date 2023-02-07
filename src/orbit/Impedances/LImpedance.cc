@@ -40,7 +40,12 @@ LImpedance::LImpedance(double length,
   _fftphase      = new double[_nBins / 2];
   _z             = new double[_nBins / 2];
   _chi           = new double[_nBins / 2];
-  _zImped_n      = new std::complex<double>[_nBins / 2];
+  //---------------------------
+  // _zImped_n size was increased by 1 to avoid crash due to 
+  // assignment in LImpedance::assignImpedanceValue(...)
+  // to _zImped_n[n + 1] element. This should be resolved later.
+  //----------------------------  
+  _zImped_n      = new std::complex<double>[_nBins / 2 + 1];
 
   for(int n = 0; n < _nBins / 2; n++)
   {

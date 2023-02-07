@@ -40,7 +40,12 @@ LSpaceChargeCalc::LSpaceChargeCalc(double b_a_in, double length_in, int nMacrosM
   _fftphase      = new double[nBins / 2];
   _z             = new double[nBins / 2];
   _chi           = new double[nBins / 2];
-  _zImped_n      = new std::complex<double>[nBins / 2];
+  //---------------------------
+  // _zImped_n size was increased by 1 to avoid crash due to 
+  // assignment in LSpaceChargeCalc::assignImpedanceValue(...)
+  // to _zImped_n[n + 1] element. This should be resolved later.
+  //----------------------------
+  _zImped_n      = new std::complex<double>[nBins / 2 + 1];
 
   for(int n = 0; n < nBins / 2; n++)
   {

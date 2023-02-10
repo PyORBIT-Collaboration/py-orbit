@@ -1,151 +1,92 @@
+import os
 import math
 
-from bunch import Bunch
+from spacecharge import Grid1D
+from orbit_utils import BunchExtremaCalculator
 
 #pyORBIT MPI module import
 import orbit_mpi
 from orbit_mpi import mpi_datatype
 from orbit_mpi import mpi_op
 
-def profiles(Bunch, coord, histogram, steps = 100, Min = 1.0, Max = -1.0):
+def profiles(bunch, coord, histogram, steps = 100, Min = 1.0, Max = -1.0):
 	"""
-        Returns a profile for one of the following Bunch coordinates:
+	Returns a profile as Grid1D object for one of the following bunch coordinates:
 	x[m] xp[rad] y[m] yp[rad] z[m] dE[GeV]
 	"""
-
-	b = Bunch
-
-	# Take the MPI Communicator from bunch: It could be
-        # different from MPI_COMM_WORLD
-
-	comm = Bunch.getMPIComm()
+	
+	grid1D = Grid1D(steps)
+	
+	# Take the MPI Communicator from bunch: It could be different from MPI_COMM_WORLD
+	comm = bunch.getMPIComm()
 	rank = orbit_mpi.MPI_Comm_rank(comm)
 	size = orbit_mpi.MPI_Comm_size(comm)
 	main_rank = 0
+	
+	nParts = bunch.getSizeGlobal()
+	if(nParts < 2):
+		if(rank == main_rank):
+			file_out = open(histogram, "w")
+			file_out.write("bunch has only number of particles =" +str(nParts)+os.linesep)
+			file_out.close()
+			return grid1D
 
-	# n_parts_arr - array of size of the number of CPUs,
-	# contains the number of macroparticles on each CPU
+	coord_index = -1
+	if coord == "x" : coord_index = 0
+	if coord == "px": coord_index = 1
+	if coord == "y" : coord_index = 2
+	if coord == "py": coord_index = 3
+	if coord == "z" : coord_index = 4
+	if coord == "dE": coord_index = 5
+	if(coord_index < 0):
+		st  = "Error: profiles(bunch,coord,...)" + os.linesep
+		st += "coord is not x,xp,y,yp,z, or dE." + os.linesep
+		st += "Stop." + os.linesep
+		orbit_mpi.finalize(st)
+		return None
+	
+	#---- calculations Min Max values
+	bunch_extrema_cal = BunchExtremaCalculator()
 
-	n_parts_arr = [0]*size
-	n_parts_arr[rank] = b.getSize()
-	n_parts_arr = orbit_mpi.MPI_Allreduce(n_parts_arr, \
-                mpi_datatype.MPI_INT,mpi_op.MPI_SUM,comm)
-
-        partdat = []
-
-	if(rank == main_rank):
-		for i in range(n_parts_arr[rank]):
-                        if coord == "x":
-                                partdat.append(b.x(i))
-                        if coord == "px":
-                                partdat.append(b.px(i))
-                        if coord == "y":
-                                partdat.append(b.y(i))
-                        if coord == "py":
-                                partdat.append(b.py(i))
-                        if coord == "z":
-                                partdat.append(b.z(i))
-                        if coord == "dE":
-                                partdat.append(b.dE(i))
-
-	# That is just for case.
-        # Actually, MPI_Barrier command is not necessary.
-
-	orbit_mpi.MPI_Barrier(comm)
-
-	val_arr = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-
-	for i_cpu in range(1,size):
-
-		# Again, that is just for case.
-                # Actually, MPI_Barrier command is not necessary.
-		orbit_mpi.MPI_Barrier(comm)
-
-		for i in range(n_parts_arr[i_cpu]):
-			if(rank == main_rank):
-
-				#get the coordinate array
-				(x, px, y, py, z, dE) = \
-                                orbit_mpi.MPI_Recv(mpi_datatype.MPI_DOUBLE, \
-                                i_cpu, 222, comm)
-                                if coord == "x":
-                                        partdat.append(x)
-                                if coord == "px":
-                                        partdat.append(px)
-                                if coord == "y":
-                                        partdat.append(y)
-                                if coord == "py":
-                                        partdat.append(py)
-                                if coord == "z":
-                                        partdat.append(z)
-                                if coord == "dE":
-                                        partdat.append(dE)
-
-			elif(rank == i_cpu):
-				#send the coordinate array
-				x  = b.x(i)
-				px = b.px(i)
-				y  = b.y(i)
-				py = b.py(i)
-				z  = b.z(i)
-				dE = b.dE(i)
-				val_arr = (x, px, y, py, z, dE)
-				orbit_mpi.MPI_Send(val_arr, \
-                                mpi_datatype.MPI_DOUBLE, main_rank, 222, comm)
-
-        l = len(partdat)
-        m = min(partdat)
-        M = max(partdat)
-
-        c = (M + m) / 2.0
-        d = (M - m) * 1.1 / 2.0
-        M = c + d
-        m = c - d
-
-        if Max > M:
-                M = Max
-        if Min < m:
-                m = Min
-
-        dx = (M - m) / steps
-
-        grid = [m]
-        prof = [0]
-        for i in range(1, steps + 1):
-                x = m + i * dx
-                grid.append(x)
-                prof.append(0)
-        grid.append(M)
-        prof.append(0)
-
-        for n in range(l):
-                i = (partdat[n] - m) / dx
-                i = int(i)
-                if i < 0:
-                        pass
-                elif i > range(steps):
-                        pass
-                else:
-                        frac = (partdat[n] - m) / dx % 1
-                        prof[i] = prof[i] + (1.0 - frac)
-                        prof[i + 1] = prof[i + 1] + frac
-
-        sum = 0.0
-        for i in range(steps + 1):
-                sum = sum + prof[i]
-
-	file_out = histogram
+	if(Min >= Max):
+		#---- We are not going to use 
+		bunch_extrema_cal = BunchExtremaCalculator()
+		(xMin,xMax,yMin,yMax,zMin,zMax) = bunch_extrema_cal.extremaXYZ(bunch)
+		(xpMin,xpMax,ypMin,ypMax,dE_Min,dE_Max) = bunch_extrema_cal.extremaXpYpdE(bunch)
+		valMinMax_arr = []
+		valMinMax_arr.append([xMin,xMax])
+		valMinMax_arr.append([xpMin,xpMax])
+		valMinMax_arr.append([yMin,yMax])
+		valMinMax_arr.append([ypMin,ypMax])
+		valMinMax_arr.append([zMin,zMax])
+		valMinMax_arr.append([dE_Min,dE_Max])
+		[Min,Max] = valMinMax_arr[coord_index]
+		
+	if(Min == Max):
+		if(rank == main_rank):
+			file_out = open(histogram, "w")
+			file_out.write("No histogram min=" + str(Min) + " max=" + str(Max) + os.linesep)
+			file_out.close()
+			return grid1D
+	
+	#---- perform bunch binning
+	grid1D.setGridZ(Min,Max)
+	grid1D.binBunch(bunch,coord_index)
+	grid1D.synchronizeMPI(comm)
+	sum_value = grid1D.getSum()
+	
+	#--- dump the histogram to the file
 	if(rank == main_rank):
 		file_out = open(histogram, "w")
-                
-                file_out.write("Min = " + str(m) + "  Max = " + \
-                               str(M) + " steps = " + str(steps) + "\n")
-                file_out.write("nParts = " + str(l) + " HistSum = " + \
-                               str(sum) + "\n\n")
-
-                for i in range(steps + 1):
-                        file_out.write(str(grid[i]) + "   " + \
-                                       str(prof[i]) + "\n")
-
-	if(rank == main_rank):
+		st  = "% "+" Min, Max = %15.8g , %15.8g "%(Min,Max)
+		st += " nSteps = %5d "%steps
+		st += " hist_sum = %15.8g"%sum_value
+		file_out.write(st + os.linesep)
+		for ind in range(steps):
+			val = grid1D.getGridZ(ind)
+			rho = grid1D.getValueOnGrid(ind)
+			st = " %15.8g  %15.8g "%(val,rho)
+			file_out.write(st + os.linesep)
 		file_out.close()
+
+	return grid1D

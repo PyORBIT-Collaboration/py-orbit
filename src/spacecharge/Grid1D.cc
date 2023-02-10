@@ -7,8 +7,14 @@
 //
 // DESCRIPTION
 //   Provides a 1D grid and binning routines on that grid
+//   The grid is considered as periodic. The 1st bin is also the next to the last.
+//   If you do need the periodic grid you have to extend Min Max limits for your 
+//   distribution.
+//
+//   Correction done by A. Shishlo 2023.02.10
 //
 /////////////////////////////////////////////////////////////////////////////
+#include "orbit_mpi.hh"
 
 #include "Grid1D.hh"
 #include "Bunch.hh"
@@ -184,6 +190,8 @@ double Grid1D::getValueOnGrid(int iZ)
 /** Returns interpolated value of arr_ */
 double Grid1D::getValue(double z)
 {
+	if(z < zMin_ || z > zMax_ ) return 0.;
+	
   int iZ0, iZp;
   double WZ0, WZp;
   double arrval;
@@ -417,7 +425,8 @@ void Grid1D::binValue(double value, double z)
 
   double WZ0, WZp;
   int iZ0, iZp;
-  getBinIndAndWZ(z, iZ0, iZp, WZ0, WZp);
+  getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
+
   if(zSize_ > 1)
   {
     arr_[iZ0] += WZ0 * value;
@@ -466,7 +475,7 @@ void Grid1D::binMoment(double value, double z, double* Moment)
 
   double WZ0, WZp;
   int iZ0, iZp;
-  getBinIndAndWZ(z, iZ0, iZp, WZ0, WZp);
+  getIndAndWZ(z, iZ0, iZp, WZ0, WZp);
   if(zSize_ > 1)
   {
     Moment[iZ0] += WZ0 * value;
@@ -548,70 +557,64 @@ void Grid1D::calcGradientSmoothed(double z, double& ez)
   }
 }
 
-/** 
-    This is method for interpolation. The grid point responsibility is defined 
-    differently for binning and interpolation.
-    Returns the grid indices and interpolation coefficients for a given z.
-    The indices bracket the point of interpolation:
-    0 <= iZ0, iZp <= nBins - 1
-    The coefficients WZ0 and WZp correspond to iZ0 and iZp */
-void Grid1D::getIndAndWZ(double z,
-                         int& iZ0   , int& iZp,
-                         double& WZ0, double& WZp)
-{
-	double zFrac;
-  if(zSize_ > 1)
-  {
-  	iZ0 = int((z - zMin_)/dz_ - 0.5);
-
-    // Keep indices in bounds
-    if(iZ0 < 0) iZ0 = 0;
-    if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;
-    
-    zFrac = (z - this->getGridZ(iZ0))/dz_;
-
-    WZp = zFrac;
-    WZ0 = 1.0 - WZp;
-
-    iZp = iZ0 + 1;
-  }
-  else
-  {
-    iZ0 = 0;
-    iZp = 0;
-    WZ0  = 1.0;
-    WZp  = 0.0;
-  }
-}
-
 
 /** 
-    This is method for binning. The grid point responsibility is defined 
-    differently for binning and interpolation.
-    Returns the grid indices and binning coefficients for a given z.
+    The grid is considered periodic. The 1st bin is also the next to the last.
+    Returns the grid indices and binning/interpolating coefficients for a given z.
     The indices bracket the point of interpolation:
     0 <= iZ0, iZp <= nBins - 1
     The coefficients WZ0 and WZp correspond to iZ0 and iZp 
   */
-void Grid1D::getBinIndAndWZ(double z,
+void Grid1D::getIndAndWZ(double z,
                          int& iZ0   , int& iZp,
                          double& WZ0, double& WZp)
 {
-	double zFrac;
   if(zSize_ > 1)
   {
-  	iZ0 = int((z - zMin_)/dz_);
+  	double ind_dbl = ((z - zMin_)/dz_) - 0.5;
+  	iZ0 = int(ind_dbl);
+  	double zFrac = (z - this->getGridZ(iZ0))/dz_;
+  	
+  	if(iZ0 < 0 || iZ0 > (zSize_ - 1)){
+  		ORBIT_MPI_Finalize("Grid1D::getIndAndWZ Wrong z value. It should not happen. Stop.");
+  	}
+  	
+  	//std::cout<<"debug getIndAndWZ z="<<z<<" iZ0="<<iZ0<<" zFrac="<<zFrac<<" getGridZ(iZ0)="<<this->getGridZ(iZ0)<<std::endl;
 
-    // Keep indices in bounds
-    if(iZ0 < 0) iZ0 = 0;
-    if(iZ0 > (zSize_ - 2)) iZ0 = zSize_ - 2;
-    
-    zFrac = (z - this->getGridZ(iZ0))/dz_;
-
+  	//the z-point is close to the beginning of interval [zMin_,zMax_]
+  	//the 2nd point will be (zSize_ - 1) index grid point
+  	if(iZ0 == 0 &&  zFrac < 0.){
+  		iZ0 = zSize_ - 1;
+  		iZp = 0;
+  		WZ0 = -zFrac;
+  		WZp = 1.0 + zFrac;
+  		return;
+  	}
+  	
+  	//the z-point is close to the end of interval [zMin_,zMax_]
+  	if(iZ0 == (zSize_ - 1)){
+  		//the 2nd point will be 0 index grid point 
+  		if(zFrac > 0.){
+  			iZp = 0;
+  			WZ0 = 1.0 - zFrac;
+  			WZp = zFrac;
+  			return;
+  		} else {
+   	    //but z < getGridZ(iZ0), so iZ0 will be zSize_ - 2,
+   	    //and zFrac = -zFrac
+  	    //the 2nd point (iZp) will be zSize_ - 1  			
+  			iZp = iZ0;
+  			iZ0 = zSize_ - 2;
+  			WZ0 = -zFrac;
+  			WZp = 1.0 + zFrac;
+  			return;
+  		}
+  	}	
+  	
+  	iZp = iZ0 + 1;
+  	WZ0 = 1.0 - zFrac;
     WZp = zFrac;
-    WZ0 = 1.0 - WZp;
-
-    iZp = iZ0 + 1;
+    return;
   }
   else
   {
@@ -619,6 +622,7 @@ void Grid1D::getBinIndAndWZ(double z,
     iZp = 0;
     WZ0  = 1.0;
     WZp  = 0.0;
+    return;
   }
 }
 

@@ -142,29 +142,16 @@ private:
   /** Memory allocation and step calculation for dx_ and dy_ */
   void init();
 
-  /** 
-     This is method for interpolation. The grid point responsibility is defined 
-     differently for binning and interpolation.  
-      Returns the grid indices and interpolation coefficients for a given z.
-      The indices bracket the point of interpolation:
-      0 <= ind <= nBins - 1
-      The coefficients Wz0 and Wzp correspond to ind and indp 
-    */
+	/** 
+			The grid is considered as periodic. The 1st bin is also the next to the last.
+			Returns the grid indices and binning/interpolating coefficients for a given z.
+			The indices bracket the point of interpolation:
+			0 <= iZ0, iZp <= nBins - 1
+			The coefficients WZ0 and WZp correspond to iZ0 and iZp 
+		*/
   void getIndAndWZ(double z,
                    int& ind0  , int& indp,
                    double& Wz0, double& Wzp);
-  
-   /** 
-      This is method for binning. The grid point responsibility is defined 
-      differently for binning and interpolation.   
-      Returns the grid indices and interpolation coefficients for a given z.
-      The indices bracket the point of interpolation:
-      0 <= ind <= nBins - 1
-      The coefficients Wz0 and Wzp correspond to ind and indp 
-    */
-  void getBinIndAndWZ(double z,
-                   int& ind0  , int& indp,
-                   double& Wz0, double& Wzp); 
 
   /** 
       This is method for interpolation. The grid point responsibility is defined 

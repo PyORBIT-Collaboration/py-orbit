@@ -191,14 +191,29 @@ class TrajectoryCorrection:
 		if(dc_node_arr == None): return
 		del dc_node_arr[:]
 		if(nodes == None):
-			dc_node_arr += self.lattice.getNodesOfClass(class_type)
+			nodes_tmp = self.lattice.getNodes()
+			if(len(nodes_tmp) == 0): return
+			(start_ind,stop_ind) = self._getStartStopIndexes()
+			if(start_ind < 0): start_ind = 0
+			if(stop_ind < 0): stop_ind = len(nodes_tmp)
+			nodes_tmp = nodes_tmp[start_ind:stop_ind]
+			for node in nodes_tmp:
+				if(isinstance(node,class_type)):
+					dc_node_arr.append(node)
+				else:
+					child_nodes = node.getAllChildren()
+					for child_node in child_nodes:
+						if(isinstance(child_node,class_type)):
+							dc_node_arr.append(child_node)						
 		else:
 			for node in nodes:
 				if(isinstance(node,class_type)):
 					dc_node_arr.append(node)
-		node_arr = self._returnFilteredNodes(dc_node_arr)
-		del dc_node_arr[:]
-		dc_node_arr += node_arr
+				else:
+					child_nodes = node.getAllChildren()
+					for child_node in child_nodes:
+						if(isinstance(child_node,class_type)):
+							dc_node_arr.append(child_node)
 		return dc_node_arr
 
 	def _updateQuad_Nodes(self, nodes = None):

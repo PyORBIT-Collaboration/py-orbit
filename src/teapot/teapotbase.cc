@@ -1364,6 +1364,11 @@ void soln(Bunch* bunch, double length, double B, int useCharge)
     {
 	   syncPart->setTime( syncPart->getTime() + length/v);
     }
+    
+    //if solenoid field is zero we have just a drift
+    if(B == 0.){
+    	return;
+    }
 
     double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
     double dp_p_coeff = 1.0 / (syncPart->getMomentum() * syncPart->getBeta());

@@ -1366,7 +1366,7 @@ void soln(Bunch* bunch, double length, double B, int useCharge)
     }
     
     //if solenoid field is zero we have just a drift
-    if(B == 0.){
+    if(fabs(B) < 1E-300){
     	return;
     }
 

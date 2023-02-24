@@ -1351,6 +1351,12 @@ void bendfringeOUT(Bunch* bunch, double rho)
 
 void soln(Bunch* bunch, double length, double B, int useCharge)
 {
+    //if solenoid field in [T] is zero we have just a drift
+    if(abs(B) < 1.0e-100){
+    	drift(bunch,length);
+    	return;
+    }
+    
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
     double Bc = B * charge;
@@ -1364,7 +1370,7 @@ void soln(Bunch* bunch, double length, double B, int useCharge)
     {
 	   syncPart->setTime( syncPart->getTime() + length/v);
     }
-
+    
     double gamma2i = 1.0 / (syncPart->getGamma() * syncPart->getGamma());
     double dp_p_coeff = 1.0 / (syncPart->getMomentum() * syncPart->getBeta());
     double dp_p;

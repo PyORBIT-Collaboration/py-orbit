@@ -654,6 +654,7 @@ class MAD_Parser:
 		for var in self.__accValues:
 			accVarDict[var.getName()] = var
 		localValDict = {}
+		IgnoredElementDict = {}
 		doNotStop = True
 		while(doNotStop):
 			doNotStop = False
@@ -664,6 +665,14 @@ class MAD_Parser:
 				res,val = StringFunctions.calculateString(str_in.lower(),localValDict)
 				if(res):
 					localValDict[name.lower()] = val
+					
+					# In _init_string(), the line would be divided into 5 types by _findLineType().
+					# However, lines like "Q01:QUADRUPOLE,L=1.0,K1:=kQD1;"(kQD1=0.2) would be recognised as "variables" type.
+					# In fact, these lines should be "elements" type, as a result, they are ignored by self.__accElements.
+					# So here, the IgnoredElementDict is recorded, whose format is {'Q01:QUADRUPOLE,L=1.0,K1' : 0.2, ...}
+					if re.search(r':[^=]', name.replace(" ", "")): # lines of "variables" type would have ':=' but not single ':'
+						IgnoredElementDict[name] = val
+					
 					var.setValue(val)
 					del accVarDict[name]
 				else:
@@ -675,6 +684,14 @@ class MAD_Parser:
 				print "=========== MAD File Problem ==============="
 				print "=================STOP======================="
 				sys.exit(1)
+
+		# As mentioned before, these ignored lines should be appended into self.__accElements.
+		for i in range(len(IgnoredElementDict)):
+			str0 = '%s=%.10f'%(IgnoredElementDict.keys()[i],IgnoredElementDict.values()[i]) # {'Q01:QUADRUPOLE,L=1.0,K1' : 0.2} will become 'Q01:QUADRUPOLE,L=1.0,K1=0.2000000000'.
+			elem = _element()
+			elem.parseLine(str0)
+			self.__accElements.append(elem)
+		
 		#-------------------------------------------
 		# Now calculate all parameters in key,string_value
 		# for accelerator elements
@@ -794,6 +811,8 @@ class MAD_Parser:
 		# 4 - call another nested MAD file
 		#Delete spaces
 		str0=re.sub(r'[ ]',"",str0)
+		# Someone would use tab'\t' for alignments in writing.
+		str0 = str0.replace('\t','')
 		tp = self._findLineType(str0)
 		if tp == 0:
 			#print "StrType =0 :",str0

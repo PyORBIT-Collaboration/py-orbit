@@ -229,13 +229,13 @@ class LinacTrMatricesContrioller:
 		self.init()
 		return self.trMatrxNodes
 			
-	def addTrMatrxGenNodesAtEntrance(self, accLattice, node_or_node):
+	def addTrMatrxGenNodesAtEntrance(self, accLattice, node_or_nodes):
 		"""
 		Adds the LinacTrMatrixGenNode to the nodes as child nodes at the entrance.
 		"""
 		self.addTrMatrxGenNodes(accLattice, node_or_nodes, MarkerLinacNode.ENTRANCE)
 		
-	def addTrMatrxGenNodesAtExit(self, accLattice, node_or_node):
+	def addTrMatrxGenNodesAtExit(self, accLattice, node_or_nodes):
 		"""
 		Adds the LinacTrMatrixGenNode to the nodes as child nodes at the exit.
 		"""		

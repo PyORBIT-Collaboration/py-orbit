@@ -166,7 +166,7 @@ class LinacTrMatrixGenNode(MarkerLinacNode):
 		m = self.trMtrx
 		for i in xrange(m.size()[0]):
 			for j in xrange(m.size()[1]):
-				print ("m(" + str(i) + "," + str(j)+")="+"%12.5g"%m.get(i,j) + " ", end = " ")
+				print ("m(" + str(i) + "," + str(j)+")="+"%12.5g"%m.get(i,j) + " "),
 			print " "		
 	
 

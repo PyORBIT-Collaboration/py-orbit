@@ -167,7 +167,7 @@ class LinacTrMatrixGenNode(MarkerLinacNode):
 		for i in xrange(m.size()[0]):
 			for j in xrange(m.size()[1]):
 				print ("m(" + str(i) + "," + str(j)+")="+"%12.5g"%m.get(i,j) + " "),
-			print ""		
+			print " "		
 	
 
 class LinacTrMatricesContrioller:
@@ -229,15 +229,15 @@ class LinacTrMatricesContrioller:
 		self.init()
 		return self.trMatrxNodes
 			
-	def addTrMatrxGenNodesAtEntrance(self, accLattice, node_or_node):
+	def addTrMatrxGenNodesAtEntrance(self, accLattice, node_or_nodes):
 		"""
 		Adds the LinacTrMatrixGenNode to the nodes as child nodes at the entrance.
 		"""
-		self.addTrMatrxGenNodes(accLattice, node_or_nodes, MarkerLinacNode.ENTRANCE)
+		return self.addTrMatrxGenNodes(accLattice, node_or_nodes, MarkerLinacNode.ENTRANCE)
 		
-	def addTrMatrxGenNodesAtExit(self, accLattice, node_or_node):
+	def addTrMatrxGenNodesAtExit(self, accLattice, node_or_nodes):
 		"""
 		Adds the LinacTrMatrixGenNode to the nodes as child nodes at the exit.
 		"""		
-		self.addTrMatrxGenNodes(accLattice, node_or_nodes, MarkerLinacNode.EXIT)	
+		return self.addTrMatrxGenNodes(accLattice, node_or_nodes, MarkerLinacNode.EXIT)	
 			

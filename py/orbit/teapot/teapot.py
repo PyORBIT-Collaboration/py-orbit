@@ -167,9 +167,6 @@ class TEAPOT_Ring(TEAPOT_Lattice):
 		for node in self.getNodes():
 			length = node.getLength()
 			if(length > 0.):
-				bunchwrapper = BunchWrapTEAPOT(node.getName()+":Bunch_Wrap:Entrance")
-				bunchwrapper.getParamsDict()["ring_length"] = self.getLength()
-				node.addChildNode(bunchwrapper, AccNode.ENTRANCE)
 				bunchwrapper = BunchWrapTEAPOT(node.getName()+":Bunch_Wrap:Exit")
 				bunchwrapper.getParamsDict()["ring_length"] = self.getLength()
 				node.addChildNode(bunchwrapper, AccNode.EXIT)				

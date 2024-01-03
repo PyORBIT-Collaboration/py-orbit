@@ -165,9 +165,11 @@ class TEAPOT_Ring(TEAPOT_Lattice):
 		"""
 		TEAPOT_Lattice.initialize(self)
 		for node in self.getNodes():
-			bunchwrapper = BunchWrapTEAPOT("Bunch Wrap")
-			bunchwrapper.getParamsDict()["ring_length"] = self.getLength()
-			node.addChildNode(bunchwrapper, AccNode.BODY)			
+			length = node.getLength()
+			if(length > 0.):
+				bunchwrapper = BunchWrapTEAPOT(node.getName()+":Bunch_Wrap:Exit")
+				bunchwrapper.getParamsDict()["ring_length"] = self.getLength()
+				node.addChildNode(bunchwrapper, AccNode.EXIT)				
 		#---- adding turn counter node at the end of lattice
 		turn_counter = TurnCounterTEAPOT()
 		self.getNodes().append(turn_counter)

@@ -498,39 +498,11 @@ namespace wrap_orbit_bunch{
     return Py_None;		
   }
 
-  //Sets or returns classicalRadius of the macro-particle in MeV
-  //  the action is depended on the number of arguments
-  //  classicalRadius() - returns classicalR
-  //  classicalRadius(value) - sets the new value
-  //this is implementation of the getClassicalRadius() and
-  //setClassicalRadius() methods of the Bunch class
+  //Returns classicalRadius of the particle in meters
   static PyObject* Bunch_classicalRadius(PyObject *self, PyObject *args){	
-		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;		
-    //if nVars == 0 this is get classicalRadius
-    //if nVars == 1 this is set classicalRadius
-    int nVars = PyTuple_Size(args);
-
-    double val = 0.;
-
-    if(nVars == 0 ||  nVars == 1){
-      if(nVars == 0){
-        val = cpp_bunch->getClassicalRadius();
-      }
-      else{
-        //NO NEW OBJECT CREATED BY PyArg_ParseTuple! NO NEED OF Py_DECREF()
-        if(!PyArg_ParseTuple(	args,"d:classicalRadius",&val)){
-          error("PyBunch - classicalRadius(value) - value is needed");
-        }
-        cpp_bunch->setClassicalRadius(val);
-      }
-			return Py_BuildValue("d",val);
-    }
-    else{
-      error("PyBunch. You should call classicalRadius() or classicalRadius(value)");
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;		
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+		double val = cpp_bunch->getClassicalRadius();
+		return Py_BuildValue("d",val);
   }
 
   //Sets or returns charge of the macro-particle in e-charge
@@ -1216,7 +1188,7 @@ namespace wrap_orbit_bunch{
     { "flag",                           Bunch_flag                          ,METH_VARARGS,"Returns flag(index) for particle with index"},
     { "ringwrap",                       Bunch_ringwrap                      ,METH_VARARGS,"Perform the ring wrap. Usage: ringwrap(ring_length)"},
     { "mass",                           Bunch_mass                          ,METH_VARARGS,"Set mass(value) or get mass() the mass of particle in MeV"},
-    { "classicalRadius",                Bunch_classicalRadius               ,METH_VARARGS,"Set and get a classical radius of particle in [m]"},
+    { "classicalRadius",                Bunch_classicalRadius               ,METH_VARARGS,"Returns a classical radius of particle in [m]"},
     { "charge",                         Bunch_charge                        ,METH_VARARGS,"Set charge(value) or get charge() the charge of particle in e-charge"},
     { "macroSize",                      Bunch_macroSize                     ,METH_VARARGS,"Set macroSize(value) or get macroSize() the charge of particle in e-charge"},
     { "initBunchAttr",                  Bunch_initBunchAttr                 ,METH_VARARGS,"Reads and initilizes bunch attributes from a bunch file"},

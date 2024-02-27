@@ -1,0 +1,17 @@
+==== Changes were made to the folowing files:
+src/orbit/Bunch.cc
+src/orbit/Bunch.hh
+src/orbit/wrap_bunch.cc
+src/spacecharge/BaseBoundary2D.cc
+src/spacecharge/ForceSolver2D.hh
+src/spacecharge/ForceSolverFFT2D.hh
+src/spacecharge/PoissonSolver2D.hh
+src/spacecharge/PoissonSolver3D.hh
+src/spacecharge/PoissonSolverFFT2D.hh
+src/spacecharge/PoissonSolverFFT3D.hh
+src/spacecharge/SpaceChargeCalc2p5D.cc
+src/spacecharge/SpaceChargeCalc2p5Drb.cc
+src/spacecharge/SpaceChargeCalc3D.cc
+src/spacecharge/SpaceChargeCalcSliceBySlice2D.cc
+src/spacecharge/SpaceChargeCalcUnifEllipse.cc
+src/spacecharge/SpaceChargeForceCalc2p5D.cc    

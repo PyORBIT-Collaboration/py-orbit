@@ -76,8 +76,8 @@ void SpaceChargeCalcUnifEllipse::trackBunch(Bunch* bunch, double length){
 	//if there is nothing we give up
 	if(total_macrosize == 0.) return;
 	
-	double trans_factor =  length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(beta,2)*pow(gamma,2));	
-	double long_factor =  length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)*bunch->getMass();
+	double trans_factor =  length*bunch->getClassicalRadius()/(pow(beta,2)*pow(gamma,2));	
+	double long_factor =  length*bunch->getClassicalRadius()*bunch->getMass();
 	
 	double x,y,z,ex,ey,ez;
 	for (int i = 0, n = bunch->getSize(); i < n; i++){

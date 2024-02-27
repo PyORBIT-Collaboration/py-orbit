@@ -97,7 +97,7 @@ void SpaceChargeCalcSliceBySlice2D::trackBunch(Bunch* bunch, double length, Base
 	phiGrid3D->synchronizeMPI(bunch->getMPI_Comm_Local());
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
-	double factor = 2*length/rhoGrid3D->getStepZ()*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
+	double factor = 2*length/rhoGrid3D->getStepZ()*bunch->getClassicalRadius()/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
 	
 	double x,y,z,ex,ey,ez;	
 		

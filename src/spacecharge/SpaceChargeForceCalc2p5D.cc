@@ -89,7 +89,7 @@ void SpaceChargeForceCalc2p5D::trackBunch(Bunch* bunch, double length){
 	forceSolver->findForce(rhoGrid, forceGridX, forceGridY);
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
-	double factor = 2*length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
+	double factor = 2*length*bunch->getClassicalRadius()/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
 		
 	factor = factor/(z_step*totalMacrosize);	
 	double Lfactor = 0.;

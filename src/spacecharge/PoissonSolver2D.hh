@@ -19,9 +19,8 @@
 using namespace std;
 
 /** 
-  The PoissonSolver2D class is used to define a boundary geometry
-  and to calculate the potential created by charges on the boundary 
-	surface.
+  The PoissonSolver2D class calculates electrostatic
+  potential of a 2D charge distribution.
 */
     
 class PoissonSolver2D: public OrbitUtils::CppPyWrapper

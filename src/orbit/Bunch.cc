@@ -157,6 +157,9 @@ void Bunch::setBunchAttribute(const std::string att_name, double att_val){
   if(att_name == "macro_size"){
     macroSizeForAll = att_val;
   }
+  
+  //update classical radius of the particle
+  this->updateClassicalRadius();
 }
 
 void Bunch::setBunchAttribute(const std::string att_name, int att_val){
@@ -185,6 +188,9 @@ void Bunch::initBunchAttributes(const char* fileName){
   bunchAttr->doubleVal("charge",charge);
   bunchAttr->doubleVal("classical_radius",classicalRadius);
   bunchAttr->doubleVal("macro_size",macroSizeForAll);
+
+  //update classical radius of the particle
+  this->updateClassicalRadius();  
 	
 	//read and set new ones
   std::vector<std::string> attr_names;
@@ -276,7 +282,10 @@ void Bunch::initBunchAttributes(const char* fileName){
   if(rank_MPI == 0){
     is.close();
   }
-
+  
+  //update bunch attributes
+  this->updateClassicalRadius();
+  
 	//set synchronous particle parameters from file
 	syncPart->readSyncPart(fileName);
 
@@ -767,19 +776,25 @@ double  Bunch::getMacroSize(){ return macroSizeForAll;}
 double Bunch::setMass(double val){
   mass = val;
   bunchAttr->doubleVal("mass",val);
+  this->updateClassicalRadius();
   return mass;
 }
 
 double Bunch::setCharge(double val){
   charge = val;
   bunchAttr->doubleVal("charge",val);
+  this->updateClassicalRadius();
   return charge;
 }
 
-double Bunch::setClassicalRadius(double val){
-  classicalRadius = val;
-  bunchAttr->doubleVal("classical_radius",val);
-  return classicalRadius;
+//Updates the classical radius of the particle according to mass and charge
+void Bunch::updateClassicalRadius(){
+	// charge in abs(electron charges)
+	//mass in GeV
+	double val = OrbitConst::classicalRadius_proton;
+	val *= OrbitConst::mass_proton/mass;
+	val *= charge*charge;
+	bunchAttr->doubleVal("classical_radius",val);
 }
 
 double  Bunch::setMacroSize(double val){

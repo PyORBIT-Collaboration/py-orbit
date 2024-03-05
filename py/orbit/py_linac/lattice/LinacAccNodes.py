@@ -301,9 +301,11 @@ class Quad(LinacMagnetNode):
 			usageIN = node.getUsage()	
 			if(not usageIN):
 				return
-			bunch = paramsDict["bunch"]	
+			bunch = paramsDict["bunch"]
+			charge = bunch.charge()
 			momentum = bunch.getSyncParticle().momentum()
-			kq = node.getParam("dB/dr")/(3.335640952*momentum)
+			#---- The charge sign will be accounted for inside tracking module functions.			
+			kq = node.getParam("dB/dr")/(3.335640952*momentum/abs(charge))
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
@@ -322,8 +324,10 @@ class Quad(LinacMagnetNode):
 			if(not usageOUT):
 				return
 			bunch = paramsDict["bunch"]
+			charge = bunch.charge()
 			momentum = bunch.getSyncParticle().momentum()
-			kq = node.getParam("dB/dr")/(3.335640952*momentum)	
+			#---- The charge sign will be accounted for inside tracking module functions
+			kq = node.getParam("dB/dr")/(3.335640952*momentum/abs(charge))	
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
@@ -400,9 +404,14 @@ class Quad(LinacMagnetNode):
 		The Quad Combined Function TEAPOT  class implementation
 		of the AccNode class track(probe) method.
 		"""
-		bunch = paramsDict["bunch"]		
+		bunch = paramsDict["bunch"]
+		charge = bunch.charge()
 		momentum = bunch.getSyncParticle().momentum()
-		kq = self.getParam("dB/dr")/(3.335640952*momentum)	
+		#---- The sign of dB/dr will be delivered to tracking module
+		#---- functions without charge sign transformation as kq.
+		#---- The charge sign will be accounted for inside tracking module
+		#---- functions.
+		kq = self.getParam("dB/dr")/(3.335640952*momentum/abs(charge))	
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		length = self.getLength(index)
@@ -646,8 +655,7 @@ class Bend(LinacMagnetNode):
 			TPB.bend2(bunch, length)
 			TPB.bend1(bunch, length, theta/2.0)
 		return
-                
-                
+
 class DCorrectorH(LinacMagnetNode):
 	"""
 	The Horizontal Dipole Corrector.
@@ -684,11 +692,11 @@ class DCorrectorH(LinacMagnetNode):
 		length = self.getParam("effLength")/nParts
 		field = self.getParam("B")
 		bunch = paramsDict["bunch"]
+		charge = bunch.charge()
 		syncPart = bunch.getSyncParticle()
 		momentum = syncPart.momentum()
 		# dp/p = Q*c*B*L/p p in GeV/c c = 2.99792*10^8/10^9
-		# Q is used inside kick-method
-		kick = field*length*0.299792/momentum
+		kick = -field*charge*length*0.299792/momentum
 		self.tracking_module.kick(bunch,kick,0.,0.)
 
 class DCorrectorV(LinacMagnetNode):
@@ -727,11 +735,11 @@ class DCorrectorV(LinacMagnetNode):
 		length = self.getParam("effLength")/nParts
 		field = self.getParam("B")
 		bunch = paramsDict["bunch"]
+		charge = bunch.charge()
 		syncPart = bunch.getSyncParticle()
 		momentum = syncPart.momentum()
 		# dp/p = Q*c*B*L/p p in GeV/c, c = 2.99792*10^8/10^9
-		# Q is used inside kick-method
-		kick = field*length*0.299792/momentum
+		kick = field*charge*length*0.299792/momentum
 		self.tracking_module.kick(bunch,0,kick,0.)
 
 class ThickKick(LinacMagnetNode):
@@ -785,7 +793,8 @@ class ThickKick(LinacMagnetNode):
 		"""
 		The Thick Kick  class implementation of the AccNode class track(probe) method.
 		"""
-		bunch = paramsDict["bunch"]		
+		bunch = paramsDict["bunch"]
+		charge = bunch.charge()
 		momentum = bunch.getSyncParticle().momentum()
 		Bx = self.getParam("Bx")
 		By = self.getParam("By")	
@@ -795,9 +804,8 @@ class ThickKick(LinacMagnetNode):
 		#print "debug name =",self.getName()," Bx=",Bx," By=",By,"  L=",self.getLength(index)," index=",index
 		#==========================================
 		# dp/p = Q*c*B*L/p p in GeV/c, c = 2.99792*10^8/10^9
-		# Q is used inside kick-method
-		kickY = Bx*length*0.299792/momentum
-		kickX = By*length*0.299792/momentum
+		kickY = +Bx*charge*length*0.299792/momentum
+		kickX = -By*charge*length*0.299792/momentum
 		self.tracking_module.drift(bunch, length/2.0)
 		self.tracking_module.kick(bunch,kickX,kickY,0.)
 		self.tracking_module.drift(bunch, length/2.0)

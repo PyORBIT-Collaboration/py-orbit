@@ -231,32 +231,28 @@ void wrapbunch(Bunch* bunch, double length)
 
 void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-    double kxc = kx * charge;
-    double kyc = ky * charge;
-    double kEc = kE * charge;
+    
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
-    if(kxc != 0.)
+    if(kx != 0.)
     {
         for(int i = 0; i < bunch->getSize(); i++)
         {
-            arr[i][1] += kxc;
+            arr[i][1] += kx;
         }
     }
-    if(kyc != 0.)
+    if(ky != 0.)
     {
         for(int i = 0; i < bunch->getSize(); i++)
         {
-            arr[i][3] += kyc;
+            arr[i][3] += ky;
         }
     }
-    if(kEc != 0.)
+    if(kE != 0.)
     {
         for(int i = 0; i < bunch->getSize(); i++)
         {
-            arr[i][5] += kEc;
+            arr[i][5] += kE;
         }
     }
 }
@@ -284,6 +280,13 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew, int useCharge)
 {
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
+    
+    if(charge == 0.){
+    	return;
+    }
+    
+    charge = fabs(charge)/charge;
+    
     double klc = kl * charge;
     std::complex<double> z, zn;
     double kl1;
@@ -337,6 +340,13 @@ void multp(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
+    
+    if(charge == 0.){
+    	return;
+    }
+    
+    charge = fabs(charge)/charge;    
+    
     double klc = kl * charge;
     std::complex<double> z, zn;
     double kl1;
@@ -393,6 +403,13 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
+        
+    if(charge == 0.){
+    	return;
+    }
+    
+    charge = fabs(charge)/charge;   
+    
     double klc = kl * charge;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
@@ -503,6 +520,13 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
+    
+    if(charge == 0.){
+    	return;
+    }
+    
+    charge = fabs(charge)/charge;    
+    
     double klc = kl * charge;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
@@ -612,12 +636,15 @@ void quad1(Bunch* bunch, double length, double kq, int useCharge)
 {
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
-    double kqc = kq * charge;
-    if(kqc == 0.)
+
+    if(kq == 0. || charge == 0.)
     {
         drift(bunch,length);
         return;
     }
+    
+    double kqc = kq * charge/fabs(charge);
+    
     double x_init, xp_init, y_init, yp_init;
     double sqrt_kq, kqlength;
     double cx, sx, cy, sy;
@@ -775,6 +802,13 @@ void quadfringeIN(Bunch* bunch, double kq, int useCharge)
 {
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
+    
+    if(charge == 0.){
+    	return;
+    }
+    
+    charge = fabs(charge)/charge;    
+    
     double kqc = kq * charge;
     double KNL, x_init, xp_init, y_init, yp_init, detM;
 
@@ -842,6 +876,13 @@ void quadfringeOUT(Bunch* bunch, double kq, int useCharge)
 {
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
+    
+    if(charge == 0.){
+    	return;
+    }
+    
+    charge = fabs(charge)/charge;    
+    
     double kqc = kq * charge;
     double KNL, x_init, xp_init, y_init, yp_init, detM;
 
@@ -1359,6 +1400,7 @@ void soln(Bunch* bunch, double length, double B, int useCharge)
     
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
+
     double Bc = B * charge;
     double KNL, phase, cs, sn;
     double cu, cpu, u_init, pu_init, u, pu, phifac;
@@ -1526,6 +1568,8 @@ void RingRF(Bunch* bunch, double ring_length, int harmonic_numb,
     }
 
     SyncPart* syncPart = bunch->getSyncPart();
+    
+    double p_synch_in = syncPart->getMomentum();
 
     if(phase_s != 0.)
     {
@@ -1533,6 +1577,10 @@ void RingRF(Bunch* bunch, double ring_length, int harmonic_numb,
         kin_e += coeff * voltage * sin(phase_s);
         syncPart->setMomentum(syncPart->energyToMomentum(kin_e));
     }
+    
+    double p_synch_out = syncPart->getMomentum();
+    
+    double xp_yp_coeff = p_synch_in/p_synch_out;
 
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
@@ -1541,6 +1589,9 @@ void RingRF(Bunch* bunch, double ring_length, int harmonic_numb,
     {
         deltaV = voltage * ( sin(harmonic_numb*Factor*arr[i][4] + phase_s));
         arr[i][5] += coeff * deltaV;
+        
+        arr[i][1] *= xp_yp_coeff;
+        arr[i][3] *= xp_yp_coeff;
     }
 }
 

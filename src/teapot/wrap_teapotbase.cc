@@ -488,7 +488,7 @@ extern "C"
 			{"rotatexy",         wrap_rotatexy,       METH_VARARGS, "Rotates bunch around z axis "},
 			{"drift",            wrap_drift,          METH_VARARGS, "Tracking a bunch through a drift "},
 			{"drifti",           wrap_drifti,         METH_VARARGS, "Drifts one macroparticle in the bunch"},
-			{"wrapbunch",		 wrap_wrapbunch,		  METH_VARARGS, "Tracking a bunch through a wrapbunch routine"},
+			{"wrapbunch",        wrap_wrapbunch,      METH_VARARGS, "Tracking a bunch through a wrapbunch routine"},
 			{"multp",            wrap_multp,          METH_VARARGS, "Tracking a bunch through a multipole "},
 			{"multpfringeIN",    wrap_multpfringeIN,  METH_VARARGS, "Tracking a bunch through an IN edge of a multipole "},
 			{"multpfringeOUT",   wrap_multpfringeOUT, METH_VARARGS, "Tracking a bunch through an OUT edge of a multipole"},

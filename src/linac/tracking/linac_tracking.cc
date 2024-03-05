@@ -115,7 +115,7 @@ namespace linac_tracking
 	//   bunch  = reference to the macro-particle bunch
 	//   length = length of transport
 	//   kq = quadrupole field strength [m^(-2)]
-	//   kq = G/(B*rho) B*rho = 3.33564*P0 [T*m] where P0 in GeV/c
+	//   kq = G/(B*rho) B*rho = 3.33564*P0/charge [T*m] where P0 in GeV/c
 	//   G = dB/dr [T/m] quad gradient
 	//
 	// RETURNS
@@ -127,9 +127,8 @@ namespace linac_tracking
 	{
     double charge = +1.0;
     if(useCharge == 1) charge = bunch->getCharge();
-    
-    double kqc = kq * charge;
-    if(kqc == 0.)
+
+    if(kq == 0. || charge == 0.)
     {
     	linac_drift(bunch,length);
     	return;
@@ -154,8 +153,8 @@ namespace linac_tracking
     	syncPart->setTime(syncPart->getTime() + delta_t);
     }
     
- 		// ==== B*rho = 3.335640952*momentum [T*m] if momentum in GeV/c ===
- 		double dB_dr = kqc*3.335640952*syncPart->getMomentum();
+ 		// ==== B*rho = 3.335640952*momentum/charge [T*m] if momentum in GeV/c ===
+ 		double dB_dr = kq*3.335640952*syncPart->getMomentum()/charge;
  		
  		double mass = syncPart->getMass();
 		double Ekin_s = syncPart->getEnergy();
@@ -175,6 +174,8 @@ namespace linac_tracking
     double** arr = bunch->coordArr();
     int nParts = bunch->getSize();
     
+    double kqc = 0.;
+    
     for(int i = 0; i < nParts; i++)
     {
     	
@@ -183,7 +184,7 @@ namespace linac_tracking
 			Etotal = Ekin + mass;
 			p2 = Ekin*(Ekin+2.0*mass); 
 			p = sqrt(p2);
-    	kqc = dB_dr/(3.335640952*p);
+    	kqc = dB_dr/(3.335640952*p/fabs(charge));
 			beta_z = p/Etotal;
 			
     	sqrt_kq  = sqrt(fabs(kqc));
@@ -263,34 +264,34 @@ namespace linac_tracking
 	//
 	// DESCRIPTION
 	//   Quadrupole element 3: longitudinal field component of the quad field
-	//   Bz(z) = x*y*dG(z)/dz
+	//   Bz(x,y,z) = x*y*dG(z)/dz
 	//   This function performs the transverse kicks correction, so the length
 	//   is just a parameter.
 	//
 	// PARAMETERS
 	//   bunch  = reference to the macro-particle bunch
 	//   length = length of transport
-	//   kq = quadrupole field strength derivative [m^(-2)]
-	//   kq = (dG/dz)/(B*rho) B*rho = 3.33564*P0 [T*m] where P0 in GeV/c
 	//   G = dB/dr [T/m] quad gradient
+	//   0.299792458 = (1/v_light) * 10^9
 	//
 	// RETURNS
 	//   Nothing
 	//
 	///////////////////////////////////////////////////////////////////////////
 	
-	void linac_quad3(Bunch* bunch, double length, double kq, int useCharge)
+	void linac_quad3(Bunch* bunch, double length, double dB_dz)
 	{
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-    
-    double kqc = kq * charge;
-    if(kqc == 0.)
+    double charge = charge = bunch->getCharge();
+
+    if(dB_dz == 0. || charge == 0.)
     {
     	return;
     }
-
-    double kick_coeff = kqc*length;
+    
+    SyncPart* syncPart = bunch->getSyncPart();
+    //momentum in GeV/c
+    double momentum = syncPart->getMomentum();
+    double kick_coeff = 0.299792458*charge*dB_dz*length/momentum;
      
     //coordinate array [part. index][x,xp,y,yp,z,dE]
     double** arr = bunch->coordArr();
@@ -325,12 +326,6 @@ namespace linac_tracking
 
 	void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge)
 	{
-		double charge = +1.0;
-		if(useCharge == 1) charge = bunch->getCharge();
-		
-		double kxc = kx * charge;
-		double kyc = ky * charge;
-		
 		SyncPart* syncPart = bunch->getSyncPart();
 		
 		double mass = syncPart->getMass();
@@ -345,7 +340,7 @@ namespace linac_tracking
 		
 		//coordinate array [part. index][x,xp,y,yp,z,dE]
 		double** arr = bunch->coordArr();
-		if(kxc != 0.)
+		if(kx != 0.)
 		{
 			for(int i = 0; i < bunch->getSize(); i++)
 			{
@@ -354,10 +349,10 @@ namespace linac_tracking
 				p2 = Ekin*(Ekin+2.0*mass);
 				p_z = sqrt(p2 - (arr[i][1]*arr[i][1] + arr[i][3]*arr[i][3])*p2_s);
 				coeff = p_s/p_z;
-				arr[i][1] += kxc*coeff;
+				arr[i][1] += kx*coeff;
 			}
 		}
-		if(kyc != 0.)
+		if(ky != 0.)
 		{
 			for(int i = 0; i < bunch->getSize(); i++)
 			{
@@ -366,7 +361,7 @@ namespace linac_tracking
 				p2 = Ekin*(Ekin+2.0*mass);
 				p_z = sqrt(p2 - (arr[i][1]*arr[i][1] + arr[i][3]*arr[i][3])*p2_s);
 				coeff = p_s/p_z;        	
-				arr[i][3] += kyc*coeff;
+				arr[i][3] += ky*coeff;
 			}
 		}
 		if(kE != 0.)

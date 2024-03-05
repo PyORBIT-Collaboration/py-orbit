@@ -1,4 +1,5 @@
 #include "BaseBoundary2D.hh"
+#include "OrbitConst.hh"
 
 #include <iostream>
 #include <cfloat>
@@ -9,8 +10,13 @@ const int BaseBoundary2D::IS_INSIDE    =  1;
 const int BaseBoundary2D::IS_OUTSIDE   = -1;
 const int BaseBoundary2D::TO_BE_KILLED =  0;
 
-const double BaseBoundary2D::PI = 3.14159265358979324;
+const double BaseBoundary2D::PI = OrbitConst::PI;
 
+/** 
+The BaseBoundary2D class defines a boundary geometry
+and calculates the potential created by charges on the boundary 
+surface.
+*/
 
 // Constructor
 BaseBoundary2D::BaseBoundary2D(int nPoints, int nModes): CppPyWrapper(NULL)

@@ -122,8 +122,8 @@ void SpaceChargeCalc3D::trackBunch(Bunch* bunch, double length){
 	//distance between bunches in the center of mass of the bunch
 	double lambda_cm = OrbitConst::c*beta*gamma/frequency_;
 	
-	double trans_factor =  length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(beta,2)*pow(gamma,2));	
-	double long_factor =  length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)*bunch->getMass();
+	double trans_factor =  length*bunch->getClassicalRadius()/(pow(beta,2)*pow(gamma,2));	
+	double long_factor =  length*bunch->getClassicalRadius()*bunch->getMass();
 	
 	double x,y,z,ex,ey,ez;
 

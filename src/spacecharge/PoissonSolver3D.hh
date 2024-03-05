@@ -19,9 +19,8 @@
 using namespace std;
 
 /** 
-  The PoissonSolver3D class is used to define a boundary geometry
-  and to calculate the potential created by charges on the boundary 
-	surface.
+  The PoissonSolver3D class calculates 3D voltage distribution
+  created by 3D charge distribution.
 */
     
 class PoissonSolver3D: public OrbitUtils::CppPyWrapper

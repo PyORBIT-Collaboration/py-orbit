@@ -23,7 +23,8 @@
 using namespace std;
 
 /** 
-  The ForceSolverFFT2D class is used to calculate the force*/
+  The ForceSolverFFT2D class is used to calculate the force
+ */
     
 class ForceSolverFFT2D: public ForceSolver2D
 {

@@ -22,9 +22,8 @@
 using namespace std;
 
 /** 
-  The PoissonSolverFFT2D class is used to define a boundary geometry
-  and to calculate the potential created by charges on the boundary 
-	surface.
+  The PoissonSolverFFT2D class calculates electrostatic
+  potential of a 2D charge distribution using 2D FFT approach.
 */
     
 class PoissonSolverFFT2D: public PoissonSolver2D

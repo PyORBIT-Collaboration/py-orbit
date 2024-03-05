@@ -19,9 +19,8 @@
 using namespace std;
 
 /** 
-  The ForceSolver2D class is used to define a boundary geometry
-  and to calculate the force created by charges on the boundary 
-	surface.
+  The ForceSolver2D class calculates 2D forces along X and Y axes
+  created by a 2D charge distribution.
 */
     
 class ForceSolver2D: public OrbitUtils::CppPyWrapper

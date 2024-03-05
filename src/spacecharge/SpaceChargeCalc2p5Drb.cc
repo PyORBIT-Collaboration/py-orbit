@@ -125,7 +125,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 	poissonSolver->findPotential(rhoGrid,phiGrid);
 	
 	SyncPart* syncPart = bunch->getSyncPart();	
-	double factor =  2*length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2)/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
+	double factor =  2*length*bunch->getClassicalRadius()/(pow(syncPart->getBeta(),2)*pow(syncPart->getGamma(),3));	
 	//std::cout<<" debug totalMacrosize="<<totalMacrosize<<" factor="<<factor<<" z_step="<< z_step <<std::endl;	
 	
 
@@ -138,7 +138,7 @@ void SpaceChargeCalc2p5Drb::trackBunch(Bunch* bunch, double length, double pipe_
 	double long_sc_factor_in = 1.0+2*log(pipe_radius/a_bunch);
 	double long_sc_factor_out = 2*log(pipe_radius);
 	double a_bunch_2 = a_bunch*a_bunch;
-	double long_sc_factor = - length*bunch->getClassicalRadius()*pow(bunch->getCharge(),2) * bunch->getMass()/(pow(syncPart->getGamma(),2));
+	double long_sc_factor = - length*bunch->getClassicalRadius()* bunch->getMass()/(pow(syncPart->getGamma(),2));
 	//std::cout<<" debug pipe_radius="<<pipe_radius<<" a_bunch="<<a_bunch<<std::endl;	
 	//std::cout<<" debug long_sc_factor_in="<<long_sc_factor_in<<" long_sc_factor_out="<<long_sc_factor_out<<std::endl;	
 	//std::cout<<" debug long_sc_factor="<<long_sc_factor<<std::endl;

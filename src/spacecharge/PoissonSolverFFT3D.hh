@@ -23,9 +23,8 @@
 using namespace std;
 
 /** 
-  The PoissonSolverFFT3D class is used to define a boundary geometry
-  and to calculate the potential created by charges on the boundary 
-	surface.
+  The PoissonSolverFFT3D class calculates electrostatic
+  potential of a 3D charge distribution using 3D FFT approach.
 */
     
 class PoissonSolverFFT3D: public PoissonSolver3D

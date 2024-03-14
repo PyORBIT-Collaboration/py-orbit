@@ -125,10 +125,7 @@ namespace linac_tracking
 	
 	void linac_quad1(Bunch* bunch, double length, double kq, int useCharge)
 	{
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-
-    if(kq == 0. || charge == 0.)
+    if(kq == 0. || bunch->getCharge() == 0.)
     {
     	linac_drift(bunch,length);
     	return;
@@ -154,7 +151,7 @@ namespace linac_tracking
     }
     
  		// ==== B*rho = 3.335640952*momentum/charge [T*m] if momentum in GeV/c ===
- 		double dB_dr = kq*3.335640952*syncPart->getMomentum()/charge;
+ 		double dB_dr = kq*bunch->getB_Rho();
  		
  		double mass = syncPart->getMass();
 		double Ekin_s = syncPart->getEnergy();
@@ -184,7 +181,7 @@ namespace linac_tracking
 			Etotal = Ekin + mass;
 			p2 = Ekin*(Ekin+2.0*mass); 
 			p = sqrt(p2);
-    	kqc = dB_dr/(3.335640952*p/fabs(charge));
+    	kqc = dB_dr/(3.335640952*p/bunch->getCharge());
 			beta_z = p/Etotal;
 			
     	sqrt_kq  = sqrt(fabs(kqc));
@@ -281,7 +278,7 @@ namespace linac_tracking
 	
 	void linac_quad3(Bunch* bunch, double length, double dB_dz)
 	{
-    double charge = charge = bunch->getCharge();
+    double charge = bunch->getCharge();
 
     if(dB_dz == 0. || charge == 0.)
     {

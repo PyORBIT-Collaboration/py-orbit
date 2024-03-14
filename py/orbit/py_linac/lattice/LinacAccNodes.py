@@ -297,7 +297,7 @@ class Quad(LinacMagnetNode):
 		self.setType("linacQuad")
 
 		def fringeIN(node,paramsDict):
-			# B*rho = 3.335640952*momentum [T*m] if momentum in GeV/c
+			# B*rho = 3.335640952*momentum/charge [T*m] if momentum in GeV/c
 			usageIN = node.getUsage()	
 			if(not usageIN):
 				return
@@ -305,7 +305,7 @@ class Quad(LinacMagnetNode):
 			charge = bunch.charge()
 			momentum = bunch.getSyncParticle().momentum()
 			#---- The charge sign will be accounted for inside tracking module functions.			
-			kq = node.getParam("dB/dr")/(3.335640952*momentum/abs(charge))
+			kq = node.getParam("dB/dr")/bunch.B_Rho()
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
@@ -320,6 +320,7 @@ class Quad(LinacMagnetNode):
 				TPB.multpfringeIN(bunch,pole,k,skew)
 
 		def fringeOUT(node,paramsDict):
+			# B*rho = 3.335640952*momentum/charge [T*m] if momentum in GeV/c
 			usageOUT = node.getUsage()
 			if(not usageOUT):
 				return
@@ -327,7 +328,7 @@ class Quad(LinacMagnetNode):
 			charge = bunch.charge()
 			momentum = bunch.getSyncParticle().momentum()
 			#---- The charge sign will be accounted for inside tracking module functions
-			kq = node.getParam("dB/dr")/(3.335640952*momentum/abs(charge))	
+			kq = node.getParam("dB/dr")/bunch.B_Rho()	
 			poleArr = node.getParam("poles")
 			klArr = node.getParam("kls")
 			skewArr = node.getParam("skews")
@@ -408,10 +409,10 @@ class Quad(LinacMagnetNode):
 		charge = bunch.charge()
 		momentum = bunch.getSyncParticle().momentum()
 		#---- The sign of dB/dr will be delivered to tracking module
-		#---- functions without charge sign transformation as kq.
+		#---- functions as kq.
 		#---- The charge sign will be accounted for inside tracking module
 		#---- functions.
-		kq = self.getParam("dB/dr")/(3.335640952*momentum/abs(charge))	
+		kq = self.getParam("dB/dr")/bunch.B_Rho()
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		length = self.getLength(index)

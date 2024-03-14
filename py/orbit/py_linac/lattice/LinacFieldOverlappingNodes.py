@@ -312,7 +312,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		dB_dz = 0.
 		if(self.useLongField == True): dB_dz = self.getTotalFieldDerivative((zm+z0)/2)
 		if(abs(G) != 0.):
-			kq = G/(3.335640952*momentum/abs(charge))
+			kq = G/bunch.B_Rho()
 			#------- track through a quad
 			step = part_length/2
 			self.tracking_module.quad1(bunch,step/4.0, kq)
@@ -343,7 +343,7 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		dB_dz = 0.
 		if(self.useLongField == True): dB_dz = self.getTotalFieldDerivative((z0+zp)/2)		
 		if(abs(G) != 0.):
-			kq = G/(3.335640952*momentum/abs(charge))
+			kq = G/bunch.B_Rho()
 			step = part_length/2
 			self.tracking_module.quad1(bunch,step/4.0, kq)
 			self.tracking_module.quad2(bunch,step/2.0)
@@ -623,7 +623,7 @@ class OverlappingQuadsNode(BaseLinacNode):
 			G = self.getTotalField(z)
 			dB_dz = 0.
 			if(self.useLongField == True): dB_dz = self.getTotalFieldDerivative(z)			
-			kq = G/(3.335640952*momentum/abs(charge))
+			kq = G/bunch.B_Rho()
 			if(abs(kq) == 0.):
 				self.tracking_module.drift(bunch,z_step)
 				continue

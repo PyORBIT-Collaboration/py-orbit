@@ -269,6 +269,7 @@ void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge)
 //   i = particle index
 //   pole = multipole number
 //   kl = integrated strength of the kick [m^(-pole)]
+//        kl already has information about the charge of particle.
 //   skew = 0 - normal, 1 - skew
 //
 // RETURNS
@@ -278,16 +279,11 @@ void kick(Bunch* bunch, double kx, double ky, double kE, int useCharge)
 
 void multpi(Bunch* bunch, int i, int pole, double kl, int skew, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-    
-    if(charge == 0.){
+    if(bunch->getCharge() == 0.){
     	return;
     }
     
-    charge = fabs(charge)/charge;
-    
-    double klc = kl * charge;
+    double klc = kl;
     std::complex<double> z, zn;
     double kl1;
 
@@ -329,6 +325,7 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew, int useCharge)
 //   pole = multipole number 
 //   pole = 0 for dipole, pole = 1 for quad, pole = 2 for sextupole, pole = 3 for octupole
 //   kl = integrated strength of the kick [m^(-pole)]
+//        kl already has information about the charge of particle.
 //   skew = 0 - normal, 1 - skew
 //
 // RETURNS
@@ -338,16 +335,11 @@ void multpi(Bunch* bunch, int i, int pole, double kl, int skew, int useCharge)
 
 void multp(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-    
-    if(charge == 0.){
+    if(bunch->getCharge() == 0.){
     	return;
-    }
+    } 
     
-    charge = fabs(charge)/charge;    
-    
-    double klc = kl * charge;
+    double klc = kl;
     std::complex<double> z, zn;
     double kl1;
 
@@ -392,6 +384,7 @@ void multp(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 //   bunch  = reference to the macro-particle bunch
 //   pole = multipole number
 //   kl = multipole strength
+//        kl already has information about the charge of particle.
 //   skew = multipole skew
 //
 // RETURNS
@@ -401,16 +394,11 @@ void multp(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 
 void multpfringeIN(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-        
-    if(charge == 0.){
+    if(bunch->getCharge() == 0.){
     	return;
-    }
+    }  
     
-    charge = fabs(charge)/charge;   
-    
-    double klc = kl * charge;
+    double klc = kl;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -509,6 +497,7 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 //   bunch  = reference to the macro-particle bunch
 //   pole = multipole number
 //   kl = multipole strength
+//        kl already has information about the charge of particle.
 //   skew = multipole skew
 //
 // RETURNS
@@ -518,16 +507,11 @@ void multpfringeIN(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 
 void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-    
-    if(charge == 0.){
+    if(bunch->getCharge() == 0.){
     	return;
-    }
+    }   
     
-    charge = fabs(charge)/charge;    
-    
-    double klc = kl * charge;
+    double klc = kl;
     std::complex<double> rootm1 = std::complex<double>(0.0, 1.0);
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -626,6 +610,7 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 //   bunch  = reference to the macro-particle bunch
 //   length = length of transport
 //   kq = quadrupole field strength [m^(-2)]
+//        kq already has information about the charge of particle.
 //
 // RETURNS
 //   Nothing
@@ -634,16 +619,13 @@ void multpfringeOUT(Bunch* bunch, int pole, double kl, int skew, int useCharge)
 
 void quad1(Bunch* bunch, double length, double kq, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-
-    if(kq == 0. || charge == 0.)
+    if(kq == 0. || bunch->getCharge() == 0.)
     {
         drift(bunch,length);
         return;
     }
     
-    double kqc = kq * charge/fabs(charge);
+    double kqc = kq;
     
     double x_init, xp_init, y_init, yp_init;
     double sqrt_kq, kqlength;
@@ -792,6 +774,7 @@ void quad3(Bunch* bunch, double length, double kq, int useCharge)
 // PARAMETERS
 //   bunch =  reference to the macro-particle bunch
 //   kq  = strength of quad
+//         kq already has information about the charge of particle.
 //
 // RETURNS
 //   Nothing
@@ -800,16 +783,11 @@ void quad3(Bunch* bunch, double length, double kq, int useCharge)
 
 void quadfringeIN(Bunch* bunch, double kq, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-    
-    if(charge == 0.){
+    if(bunch->getCharge() == 0.){
     	return;
-    }
+    }   
     
-    charge = fabs(charge)/charge;    
-    
-    double kqc = kq * charge;
+    double kqc = kq;
     double KNL, x_init, xp_init, y_init, yp_init, detM;
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -866,6 +844,7 @@ void quadfringeIN(Bunch* bunch, double kq, int useCharge)
 // PARAMETERS
 //   bunch  = reference to the macro-particle bunch
 //   kq  = strength of quad
+//         kq already has information about the charge of particle.
 //
 // RETURNS
 //   Nothing
@@ -874,16 +853,11 @@ void quadfringeIN(Bunch* bunch, double kq, int useCharge)
 
 void quadfringeOUT(Bunch* bunch, double kq, int useCharge)
 {
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
-    
-    if(charge == 0.){
+    if(bunch->getCharge() == 0.){
     	return;
-    }
+    }    
     
-    charge = fabs(charge)/charge;    
-    
-    double kqc = kq * charge;
+    double kqc = kq;
     double KNL, x_init, xp_init, y_init, yp_init, detM;
 
     SyncPart* syncPart = bunch->getSyncPart();
@@ -1393,15 +1367,12 @@ void bendfringeOUT(Bunch* bunch, double rho)
 void soln(Bunch* bunch, double length, double B, int useCharge)
 {
     //if solenoid field in [T] is zero we have just a drift
-    if(abs(B) < 1.0e-100){
+    if(abs(B) < 1.0e-100 || bunch->getCharge() == 0){
     	drift(bunch,length);
     	return;
     }
-    
-    double charge = +1.0;
-    if(useCharge == 1) charge = bunch->getCharge();
 
-    double Bc = B * charge;
+    double Bc = B * bunch->getCharge();
     double KNL, phase, cs, sn;
     double cu, cpu, u_init, pu_init, u, pu, phifac;
 

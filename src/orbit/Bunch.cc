@@ -771,7 +771,20 @@ void Bunch::compress()
 double Bunch::getMass(){   return mass;}
 double Bunch::getCharge(){ return charge;}
 double Bunch::getClassicalRadius(){ return classicalRadius;}
-double  Bunch::getMacroSize(){ return macroSizeForAll;}
+double Bunch::getMacroSize(){ return macroSizeForAll;}
+
+/**
+  Return the B*Rho parameter of the particle 
+  B*Rho = momentum/charge - [T*m]
+  or B*Rho = 3.335640952*momentum[GeV/c]/charge[electron charges]
+*/
+double Bunch::getB_Rho(){
+	double B_Rho = 1.0e+36;
+	if(charge != 0. && syncPart != NULL){
+		B_Rho = 3.335640952*syncPart->getMomentum()/charge;
+	}
+	return B_Rho;
+}
 
 double Bunch::setMass(double val){
   mass = val;

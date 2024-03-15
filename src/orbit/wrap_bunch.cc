@@ -504,6 +504,13 @@ namespace wrap_orbit_bunch{
 		double val = cpp_bunch->getClassicalRadius();
 		return Py_BuildValue("d",val);
   }
+  
+  //Returns B_Rho of the particle in [Tesla*meter]. Parameter is used in TEAPOT
+  static PyObject* Bunch_B_Rho(PyObject *self, PyObject *args){	
+		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) self)->cpp_obj;
+		double val = cpp_bunch->getB_Rho();
+		return Py_BuildValue("d",val);
+  }  
 
   //Sets or returns charge of the macro-particle in e-charge
   //  the action is depended on the number of arguments
@@ -1189,6 +1196,7 @@ namespace wrap_orbit_bunch{
     { "ringwrap",                       Bunch_ringwrap                      ,METH_VARARGS,"Perform the ring wrap. Usage: ringwrap(ring_length)"},
     { "mass",                           Bunch_mass                          ,METH_VARARGS,"Set mass(value) or get mass() the mass of particle in MeV"},
     { "classicalRadius",                Bunch_classicalRadius               ,METH_VARARGS,"Returns a classical radius of particle in [m]"},
+    { "B_Rho",                          Bunch_B_Rho                         ,METH_VARARGS,"Returns B*Rho parameter of particle in [T*m]"},
     { "charge",                         Bunch_charge                        ,METH_VARARGS,"Set charge(value) or get charge() the charge of particle in e-charge"},
     { "macroSize",                      Bunch_macroSize                     ,METH_VARARGS,"Set macroSize(value) or get macroSize() the charge of particle in e-charge"},
     { "initBunchAttr",                  Bunch_initBunchAttr                 ,METH_VARARGS,"Reads and initilizes bunch attributes from a bunch file"},

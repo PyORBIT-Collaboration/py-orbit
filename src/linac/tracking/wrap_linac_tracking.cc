@@ -75,15 +75,15 @@ extern "C"
 	{
 		PyObject* pyBunch;
 		double length;
-		double kq;
+		double dB_dz = 0.;
 		int useCharge = 1;
 		if(!PyArg_ParseTuple(	args, "Odd:linac_quad3",
-			&pyBunch, &length,&kq))
+			&pyBunch, &length,&dB_dz))
 		{
-			error("linac tracking - linac_quad3(pyBunch,length,kq) - cannot parse arguments!");
+			error("linac tracking - linac_quad3(pyBunch,length,dB_dz) - cannot parse arguments!");
 		}
 		Bunch* cpp_bunch = (Bunch*) ((pyORBIT_Object *) pyBunch)->cpp_obj;
-		linac_tracking::linac_quad3(cpp_bunch, length, kq, useCharge);
+		linac_tracking::linac_quad3(cpp_bunch, length, dB_dz);
 		Py_INCREF(Py_None);
 		return Py_None;
 	} 	

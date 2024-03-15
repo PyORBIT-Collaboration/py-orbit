@@ -283,7 +283,8 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		nParts = self.getnParts()
 		index = self.getActivePartIndex()
 		part_length = self.getLength(index)		
-		bunch = paramsDict["bunch"]		
+		bunch = paramsDict["bunch"]
+		charge = bunch.charge()
 		syncPart = bunch.getSyncParticle()	
 		eKin_in = syncPart.kinEnergy()
 		momentum = syncPart.momentum()
@@ -308,10 +309,10 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		Ep = self.getEzFiledInternal(zp,rfCavity,E0L,rf_ampl)			
 		#------- track through a quad
 		G = self.getTotalField((zm+z0)/2)
-		GP = 0.
-		if(self.useLongField == True): GP = self.getTotalFieldDerivative((zm+z0)/2)
+		dB_dz = 0.
+		if(self.useLongField == True): dB_dz = self.getTotalFieldDerivative((zm+z0)/2)
 		if(abs(G) != 0.):
-			kq = G/(3.335640952*momentum)
+			kq = G/bunch.B_Rho()
 			#------- track through a quad
 			step = part_length/2
 			self.tracking_module.quad1(bunch,step/4.0, kq)
@@ -319,9 +320,8 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 			self.tracking_module.quad1(bunch,step/2.0, kq)
 			self.tracking_module.quad2(bunch,step/2.0)
 			self.tracking_module.quad1(bunch,step/4.0, kq)
-			if(abs(GP) != 0.):
-				kqP = GP/(3.335640952*momentum)
-				self.tracking_module.quad3(bunch,step, kqP)
+			if(abs(dB_dz) != 0.):
+				self.tracking_module.quad3(bunch,step,dB_dz)
 		else:
 			self.tracking_module.drift(bunch,part_length/2)
 		self.part_pos += part_length/2
@@ -340,19 +340,18 @@ class AxisField_and_Quad_RF_Gap(AbstractRF_Gap):
 		self.cppGapModel.trackBunch(bunch,part_length/2,Em,E0,Ep,frequency,phase+delta_phase+modePhase)
 		#------- track through a quad		
 		G = self.getTotalField((z0+zp)/2)
-		GP = 0.
-		if(self.useLongField == True): GP = self.getTotalFieldDerivative((z0+zp)/2)		
+		dB_dz = 0.
+		if(self.useLongField == True): dB_dz = self.getTotalFieldDerivative((z0+zp)/2)		
 		if(abs(G) != 0.):
-			kq = G/(3.335640952*momentum)
+			kq = G/bunch.B_Rho()
 			step = part_length/2
 			self.tracking_module.quad1(bunch,step/4.0, kq)
 			self.tracking_module.quad2(bunch,step/2.0)
 			self.tracking_module.quad1(bunch,step/2.0, kq)
 			self.tracking_module.quad2(bunch,step/2.0)
 			self.tracking_module.quad1(bunch,step/4.0, kq)
-			if(abs(GP) != 0.):
-				kqP = GP/(3.335640952*momentum)
-				self.tracking_module.quad3(bunch,step, kqP)
+			if(abs(dB_dz) != 0.):
+				self.tracking_module.quad3(bunch,step,dB_dz)
 		else:
 			self.tracking_module.drift(bunch,part_length/2)
 		#---- advance the particle position
@@ -615,15 +614,16 @@ class OverlappingQuadsNode(BaseLinacNode):
 		length = self.getLength(index)
 		if(index == 0): self.z_value = - self.getLength()/2
 		bunch = paramsDict["bunch"]
+		charge = bunch.charge()
 		momentum = bunch.getSyncParticle().momentum()		
 		n_steps = int(length/self.z_step)+1
 		z_step = length/n_steps
 		for z_ind in range(n_steps):
 			z = self.z_value + z_step*(z_ind+0.5)
 			G = self.getTotalField(z)
-			GP = 0.
-			if(self.useLongField == True): GP = self.getTotalFieldDerivative(z)			
-			kq = G/(3.335640952*momentum)
+			dB_dz = 0.
+			if(self.useLongField == True): dB_dz = self.getTotalFieldDerivative(z)			
+			kq = G/bunch.B_Rho()
 			if(abs(kq) == 0.):
 				self.tracking_module.drift(bunch,z_step)
 				continue
@@ -633,9 +633,8 @@ class OverlappingQuadsNode(BaseLinacNode):
 			self.tracking_module.quad1(bunch,z_step/2.0, kq)
 			self.tracking_module.quad2(bunch,z_step/2.0)
 			self.tracking_module.quad1(bunch,z_step/4.0, kq)
-			if(abs(GP) != 0.):
-				kqP = GP/(3.335640952*momentum)
-				self.tracking_module.quad3(bunch,z_step, kqP)			
+			if(abs(dB_dz) != 0.):
+				self.tracking_module.quad3(bunch,z_step, dB_dz)			
 		self.z_value += length
 		
 	def getTotalField(self,z_from_center):

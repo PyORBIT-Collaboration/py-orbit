@@ -46,7 +46,7 @@ namespace linac_tracking
 	     This function performs the transverse kicks correction, so the length
 	     is just a parameter.
 	*/		
-	void linac_quad3(Bunch* bunch, double length, double kq, int useCharge);	
+	void linac_quad3(Bunch* bunch, double length, double dB_dz);	
 	
 	
 	/**

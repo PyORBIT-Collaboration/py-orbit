@@ -111,6 +111,13 @@ public:
   double getClassicalRadius();     // m
   double getCharge();              // sign and value in abs(e-charge) only
   double getMacroSize();
+  
+  /**
+   Return the B*Rho parameter of the particle 
+   B*Rho = momentum/charge - [T*m]
+   or B*Rho = 3.335640952*momentum[GeV/c]/charge[electron charges]
+  */
+  double getB_Rho();
 
   double setMass(double mass);                // GeV
   double setCharge(double chrg);              // sign and value in abs(e-charge) only

@@ -235,6 +235,20 @@ class _teapotFactory:
 				ea1 = ea1 + theta/2.0
 				ea2 = ea2 + theta/2.0
 
+			# fint and hgap are used to describe the difference between the horizontal fringe field, e_x, and the vertical one, e_y
+			# More details could be found in the userguide of Madx
+			fint = 0.
+			if(params.has_key("fint")):
+				fint = params["fint"]
+			hgap = 0.
+			if(params.has_key("hgap")):
+				hgap = params["hgap"]
+			ea1_y = (ea1 - 2*hgap*fint*theta/length*(1+math.sin(ea1)**2))
+			ea2_y = (ea2 - 2*hgap*fint*theta/length*(1+math.sin(ea2)**2))
+			elem.addParam("ea1_y",ea1_y)
+			elem.addParam("ea2_y",ea2_y)
+			# end
+
 			elem.addParam("theta",theta)
 			elem.addParam("ea1",ea1)
 			elem.addParam("ea2",ea2)
@@ -1012,7 +1026,12 @@ class BendTEAPOT(NodeTEAPOT):
 				TPB.wedgedrift(bunch,e,inout)
 				if(usageIN):
 					frinout = 0
-					TPB.wedgerotate(bunch, e, frinout)
+					# TPB.wedgerotate(bunch, e, frinout)
+					# In fact, I do not know what TPB.wedgerotate() does
+					# I am not sure if this code reall works, even though I have got correct TWISS.
+					e_y = node.getParam("ea1_y")
+					TPB.wedgerotate(bunch, e_y, frinout)
+					
 					TPB.bendfringeIN(bunch, rho)
 					if(length != 0.):
 						for i in xrange(len(poleArr)):
@@ -1021,7 +1040,8 @@ class BendTEAPOT(NodeTEAPOT):
 							skew = skewArr[i]
 							TPB.multpfringeIN(bunch,pole,kl,skew,useCharge)
 					frinout = 1
-					TPB.wedgerotate(bunch, e, frinout)
+					# TPB.wedgerotate(bunch, e, frinout)
+					TPB.wedgerotate(bunch, e_y, frinout)
 				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1, useCharge)
 			else:
 				if(usageIN):
@@ -1050,7 +1070,9 @@ class BendTEAPOT(NodeTEAPOT):
 				TPB.wedgebendCF(bunch, e, inout, rho, len(poleArr), poleArr, klArr, skewArr, nParts - 1, useCharge)
 				if(usageOUT):
 					frinout = 0
-					TPB.wedgerotate(bunch, -e, frinout)
+					# TPB.wedgerotate(bunch, -e, frinout)
+					e_y = node.getParam("ea2_y")
+					TPB.wedgerotate(bunch, -e_y, frinout)
 					TPB.bendfringeOUT(bunch, rho)
 					if(length != 0.):
 						for i in xrange(len(poleArr)):
@@ -1059,7 +1081,8 @@ class BendTEAPOT(NodeTEAPOT):
 							skew = skewArr[i]
 							TPB.multpfringeOUT(bunch,pole,kl,skew,useCharge)
 					frinout = 1
-					TPB.wedgerotate(bunch, -e, frinout)
+					# TPB.wedgerotate(bunch, -e, frinout)
+					TPB.wedgerotate(bunch, -e_y, frinout)
 				TPB.wedgedrift(bunch,e,inout)
 			else:
 				if(usageOUT):

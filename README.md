@@ -1,3 +1,4 @@
+# Py-ORBIT  code moved to python 3. See [PyORBIT3](https://github.com/PyORBIT-Collaboration/PyORBIT3).
 ![Build](../../actions/workflows/compilation.yml/badge.svg)
 
 # Py-ORBIT  Installation

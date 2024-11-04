@@ -485,6 +485,16 @@ class QuadFieldsErrorsDeployment(NamedObject,TypedObject):
 			field = field_init*(1.0 + rel_err)
 			quad.setParam("dB/dr",field)
 			
+	def setGaussDistributedRealtiveErrorToGroup(self,relative_error,cut_off_level = 3.0,comm = mpi_comm.MPI_COMM_WORLD):
+		rel_err = random.gauss(0.,relative_error)
+		while(abs(rel_err) > abs(relative_error)*cut_off_level):
+			rel_err = random.gauss(0.,relative_error)
+		main_rank = 0
+		rel_err = orbit_mpi.MPI_Bcast(rel_err,mpi_datatype.MPI_DOUBLE,main_rank,comm)
+		for [quad,field_init] in self.quad_and_field_arr:
+			field = field_init*(1.0 + rel_err)
+			quad.setParam("dB/dr",field)
+			
 class BendFieldNodesModification(ErrorForNodesModification):
 	"""
 	This class will apply the errors to the fields of the bends using energy shift
